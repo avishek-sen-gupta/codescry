@@ -32,7 +32,7 @@ class RepoSurveyor:
         if not self.repo_path.is_dir():
             raise ValueError(f"Path is not a directory: {self.repo_path}")
 
-    def survey(self) -> SurveyReport:
+    def tech_stacks(self) -> SurveyReport:
         """Analyze the repository and return a survey report.
 
         Returns:
@@ -97,7 +97,7 @@ class RepoSurveyor:
             directory_markers=directory_markers,
         )
 
-    def run_ctags(
+    def coarse_structure(
         self,
         languages: list[str] | None = None,
         exclude_patterns: list[str] | None = None,

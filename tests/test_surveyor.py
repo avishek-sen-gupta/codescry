@@ -25,7 +25,7 @@ class TestMojoLspDetection:
     def test_detects_languages(self, mojo_lsp_path: Path) -> None:
         """Should detect TypeScript and JavaScript."""
         surveyor = RepoSurveyor(str(mojo_lsp_path))
-        report = surveyor.survey()
+        report = surveyor.tech_stacks()
 
         assert "TypeScript" in report.languages
         assert "JavaScript" in report.languages
@@ -33,14 +33,14 @@ class TestMojoLspDetection:
     def test_detects_package_managers(self, mojo_lsp_path: Path) -> None:
         """Should detect npm from package.json."""
         surveyor = RepoSurveyor(str(mojo_lsp_path))
-        report = surveyor.survey()
+        report = surveyor.tech_stacks()
 
         assert "npm" in report.package_managers
 
     def test_frameworks_detection(self, mojo_lsp_path: Path) -> None:
         """Should not detect web frameworks (this is an LSP library)."""
         surveyor = RepoSurveyor(str(mojo_lsp_path))
-        report = surveyor.survey()
+        report = surveyor.tech_stacks()
 
         # mojo-lsp is an LSP client library, not a web app
         # It uses vscode-languageserver-protocol, not React/Vue/etc.
@@ -49,7 +49,7 @@ class TestMojoLspDetection:
     def test_report_generation(self, mojo_lsp_path: Path) -> None:
         """Should generate a valid text report."""
         surveyor = RepoSurveyor(str(mojo_lsp_path))
-        report = surveyor.survey()
+        report = surveyor.tech_stacks()
         text = report.to_text()
 
         assert "Repository Survey:" in text
@@ -59,7 +59,7 @@ class TestMojoLspDetection:
     def test_directory_markers(self, mojo_lsp_path: Path) -> None:
         """Should detect directory markers for package.json and tsconfig.json."""
         surveyor = RepoSurveyor(str(mojo_lsp_path))
-        report = surveyor.survey()
+        report = surveyor.tech_stacks()
 
         # Should have directory markers
         assert len(report.directory_markers) >= 2
@@ -80,7 +80,7 @@ class TestMojoLspDetection:
     def test_directory_markers_in_report_text(self, mojo_lsp_path: Path) -> None:
         """Should include directory markers in the text report."""
         surveyor = RepoSurveyor(str(mojo_lsp_path))
-        report = surveyor.survey()
+        report = surveyor.tech_stacks()
         text = report.to_text()
 
         assert "Directory Markers:" in text
@@ -89,7 +89,7 @@ class TestMojoLspDetection:
 
     def test_random_repo(self):
         surveyor = RepoSurveyor("/Users/asgupta/code/smojol")
-        survey = surveyor.survey()
+        survey = surveyor.tech_stacks()
         print(survey.to_text())
 
 
@@ -245,7 +245,7 @@ class TestRepoSurveyorCTags:
     def test_run_ctags_on_java_repo(self) -> None:
         """Should run CTags on a Java repository."""
         surveyor = RepoSurveyor("/Users/asgupta/code/smojol")
-        result = surveyor.run_ctags(languages=["Java"])
+        result = surveyor.coarse_structure(languages=["Java"])
 
         assert result.success
         assert len(result.entries) > 0
@@ -255,7 +255,7 @@ class TestRepoSurveyorCTags:
     def test_run_ctags_with_custom_excludes(self) -> None:
         """Should respect custom exclude patterns."""
         surveyor = RepoSurveyor("/Users/asgupta/code/smojol")
-        result = surveyor.run_ctags(
+        result = surveyor.coarse_structure(
             languages=["Java"],
             exclude_patterns=[".git", ".idea", "target", "resources", "test"],
         )
@@ -268,7 +268,7 @@ class TestRepoSurveyorCTags:
     def test_run_ctags_returns_methods_with_signatures(self) -> None:
         """Should extract method signatures."""
         surveyor = RepoSurveyor("/Users/asgupta/code/smojol")
-        result = surveyor.run_ctags(languages=["Java"])
+        result = surveyor.coarse_structure(languages=["Java"])
 
         assert result.success
         method_entries = [e for e in result.entries if e.kind == "method"]

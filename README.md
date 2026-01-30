@@ -21,7 +21,7 @@ poetry install
 from src.repo_surveyor import RepoSurveyor
 
 surveyor = RepoSurveyor("/path/to/repo")
-report = surveyor.survey()
+report = surveyor.tech_stacks()
 print(report.to_text())
 ```
 
@@ -77,6 +77,33 @@ Directory Markers:
 | Docker | `Dockerfile`, `docker-compose.yml` | Docker, Docker Compose |
 | Terraform | `*.tf` | Terraform |
 | Kubernetes | `*.yaml` with k8s markers | Kubernetes |
+
+## Code Structure Analysis with CTags
+
+Extract code symbols (classes, methods, fields, etc.) using Universal CTags:
+
+```python
+from src.repo_surveyor import RepoSurveyor
+
+surveyor = RepoSurveyor("/path/to/repo")
+result = surveyor.coarse_structure(languages=["Java"])
+
+for entry in result.entries:
+    print(f"{entry.kind}: {entry.name} at {entry.path}:{entry.line}")
+```
+
+Options:
+- `languages`: Filter by language (e.g., `["Java", "Python"]`)
+- `exclude_patterns`: Directories to exclude (defaults: `.git`, `.idea`, `target`, `node_modules`, etc.)
+- `verbose`: Enable verbose CTags output
+
+Each `CTagsEntry` contains:
+- `name`, `path`, `kind`, `line`
+- `scope`, `scope_kind` (containing class/function)
+- `signature` (for methods)
+- `language`
+
+Requires [Universal CTags](https://github.com/universal-ctags/ctags) to be installed.
 
 ## Running Tests
 
