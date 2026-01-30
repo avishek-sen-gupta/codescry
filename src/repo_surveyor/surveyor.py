@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from .ctags import CTagsConfig, CTagsResult, run_ctags
 from .detectors import (
     detect_frameworks_for_file,
     detect_from_glob_patterns,
@@ -95,3 +96,40 @@ class RepoSurveyor:
             infrastructure=sorted(infrastructure),
             directory_markers=directory_markers,
         )
+
+    def run_ctags(
+        self,
+        languages: list[str] | None = None,
+        exclude_patterns: list[str] | None = None,
+        extra_fields: str = "+n+k+S+z+K+l",
+        extras: str = "+q",
+        verbose: bool = False,
+    ) -> CTagsResult:
+        """Run CTags on the repository to extract code symbols.
+
+        Args:
+            languages: List of languages to analyze (e.g., ["Java", "Python"]).
+                       If None, CTags will analyze all supported languages.
+            exclude_patterns: Patterns to exclude from analysis.
+                              Defaults to common build/dependency directories.
+            extra_fields: CTags field flags. Default is "+n+k+S+z+K+l" which includes:
+                          n=line number, k=kind, S=signature, z=kind (long),
+                          K=kind (full), l=language.
+            extras: CTags extras flags. Default is "+q" for qualified tags.
+            verbose: Whether to run CTags in verbose mode.
+
+        Returns:
+            CTagsResult containing parsed symbol entries and execution metadata.
+
+        Raises:
+            FileNotFoundError: If ctags is not installed or not in PATH.
+        """
+        config = CTagsConfig(
+            languages=languages or [],
+            exclude_patterns=exclude_patterns
+            or [".git", ".idea", "target", "node_modules", "__pycache__", ".venv", "venv"],
+            extra_fields=extra_fields,
+            extras=extras,
+            verbose=verbose,
+        )
+        return run_ctags(self.repo_path, config)
