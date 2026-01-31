@@ -468,21 +468,17 @@ def survey_and_persist(
     return tech_report, structure_result
 
 
-if __name__ == "__main__":
+def main_fn():
     # Get configuration from environment or command line
     repo = "/Users/asgupta/code/smojol/smojol-core"
     uri = os.environ.get("NEO4J_URI")
     username = os.environ.get("NEO4J_USERNAME")
     password = os.environ.get("NEO4J_PASSWORD")
-
     print(f"Analyzing repository: {repo}")
     print(f"Connecting to Neo4j at: {uri}")
-
     tech_report, structure_result = survey_and_persist(repo, uri, username, password)
-
     print(f"\nTech Stack Report:")
     print(tech_report.to_text())
-
     print(f"\nCode Structure:")
     print(f"  Symbols found: {len(structure_result.entries)}")
     if structure_result.entries:
@@ -490,3 +486,7 @@ if __name__ == "__main__":
         for entry in structure_result.entries:
             kinds[entry.kind] = kinds.get(entry.kind, 0) + 1
         print(f"  Symbol kinds: {kinds}")
+
+
+if __name__ == "__main__":
+    main_fn()
