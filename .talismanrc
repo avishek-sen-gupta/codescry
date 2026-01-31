@@ -1,0 +1,3 @@
+fileignoreconfig:
+- filename: src/repo_surveyor/neo4j_persistence.py
+  checksum: c256961b1bb777ebb70b46f78d48a28c9887e445b5e6c014cfa796b820c3ad56
