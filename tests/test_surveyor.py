@@ -267,7 +267,7 @@ class TestRepoSurveyorCTags:
 
     def test_run_ctags_returns_methods_with_signatures(self) -> None:
         """Should extract method signatures."""
-        surveyor = RepoSurveyor("/Users/asgupta/code/smojol")
+        surveyor = RepoSurveyor("/Users/asgupta/code/smojol/smojol-common")
         result = surveyor.coarse_structure(languages=["Java"])
 
         assert result.success

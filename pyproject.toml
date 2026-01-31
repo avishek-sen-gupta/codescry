@@ -20,6 +20,8 @@ black = "^26.1.0"
 mypy = "^1.19.1"
 pytest = "^9.0.2"
 coverage = "^7.13.2"
+neo4j = "6.1.0"
+python-dotenv = "1.2.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

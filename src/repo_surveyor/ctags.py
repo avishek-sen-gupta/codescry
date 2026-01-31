@@ -14,7 +14,8 @@ class CTagsConfig:
     exclude_patterns: list[str] = field(
         default_factory=lambda: [".git", ".idea", "target", "node_modules", "__pycache__", ".venv", "venv"]
     )
-    extra_fields: str = "+n+k+S+z+K+l"
+    # extra_fields: str = "+n+k+S+z+K+l"
+    extra_fields: str = "*"
     extras: str = "+q"
     verbose: bool = False
 
@@ -26,11 +27,11 @@ class CTagsEntry:
     name: str
     path: str
     kind: str
-    line: int | None = None
-    scope: str | None = None
-    scope_kind: str | None = None
-    signature: str | None = None
-    language: str | None = None
+    line: int
+    scope: str
+    scope_kind: str
+    signature: str
+    language: str
 
     @classmethod
     def from_json(cls, data: dict) -> "CTagsEntry":
@@ -62,7 +63,7 @@ class CTagsResult:
         return self.return_code == 0
 
 
-def run_ctags(repo_path: Path, config: CTagsConfig | None = None) -> CTagsResult:
+def run_ctags(repo_path: Path, config: CTagsConfig) -> CTagsResult:
     """Run CTags on a repository and return parsed results.
 
     Args:
@@ -75,8 +76,6 @@ def run_ctags(repo_path: Path, config: CTagsConfig | None = None) -> CTagsResult
     Raises:
         FileNotFoundError: If ctags is not installed or not in PATH.
     """
-    if config is None:
-        config = CTagsConfig()
 
     cmd = _build_ctags_command(config)
 
