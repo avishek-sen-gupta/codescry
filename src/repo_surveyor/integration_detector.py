@@ -6,10 +6,29 @@ from code symbols using text search and regex heuristics.
 
 import re
 from dataclasses import dataclass
+from enum import Enum
 from itertools import chain
 from typing import Iterator
 
 from .ctags import CTagsEntry, CTagsResult
+
+
+class IntegrationType(Enum):
+    """Types of system integrations that can be detected."""
+
+    HTTP_REST = "http_rest"
+    SOAP = "soap"
+    MESSAGING = "messaging"
+    SOCKET = "socket"
+    DATABASE = "database"
+
+
+class Confidence(Enum):
+    """Confidence levels for integration point detection."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
 
 
 @dataclass(frozen=True)
@@ -17,9 +36,9 @@ class IntegrationPoint:
     """A detected integration point."""
 
     entry: CTagsEntry
-    integration_type: str  # "http_rest", "soap", "messaging", "socket", "database"
-    confidence: str  # "high", "medium", "low"
-    matched_pattern: str  # The pattern that triggered detection
+    integration_type: IntegrationType
+    confidence: Confidence
+    matched_pattern: str
 
 
 @dataclass(frozen=True)
@@ -33,7 +52,7 @@ class IntegrationDetectorResult:
 # Pattern dictionaries for each integration type
 # Each category has patterns for name, signature, and scope matching
 INTEGRATION_PATTERNS = {
-    "http_rest": {
+    IntegrationType.HTTP_REST: {
         "name_patterns": [
             r"(?i)http",
             r"(?i)rest(?:ful)?",
@@ -80,7 +99,7 @@ INTEGRATION_PATTERNS = {
             r"(?i)webcontroller",
         ],
     },
-    "soap": {
+    IntegrationType.SOAP: {
         "name_patterns": [
             r"(?i)soap",
             r"(?i)wsdl",
@@ -111,7 +130,7 @@ INTEGRATION_PATTERNS = {
             r"(?i)portimpl",
         ],
     },
-    "messaging": {
+    IntegrationType.MESSAGING: {
         "name_patterns": [
             r"(?i)kafka",
             r"(?i)rabbit(?:mq)?",
@@ -154,7 +173,7 @@ INTEGRATION_PATTERNS = {
             r"(?i)subscriber",
         ],
     },
-    "socket": {
+    IntegrationType.SOCKET: {
         "name_patterns": [
             r"(?i)socket",
             r"(?i)websocket",
@@ -189,7 +208,7 @@ INTEGRATION_PATTERNS = {
             r"(?i)channelhandler",
         ],
     },
-    "database": {
+    IntegrationType.DATABASE: {
         "name_patterns": [
             r"(?i)jdbc",
             r"(?i)repository",
@@ -241,7 +260,7 @@ INTEGRATION_PATTERNS = {
 
 # Patterns that indicate high confidence (stronger signals)
 HIGH_CONFIDENCE_PATTERNS = {
-    "http_rest": [
+    IntegrationType.HTTP_REST: [
         r"@RequestMapping",
         r"@GetMapping",
         r"@PostMapping",
@@ -251,13 +270,13 @@ HIGH_CONFIDENCE_PATTERNS = {
         r"@POST",
         r"@Path\(",
     ],
-    "soap": [
+    IntegrationType.SOAP: [
         r"@WebService",
         r"@WebMethod",
         r"SOAPMessage",
         r"SOAPEnvelope",
     ],
-    "messaging": [
+    IntegrationType.MESSAGING: [
         r"@KafkaListener",
         r"@JmsListener",
         r"@RabbitListener",
@@ -265,14 +284,14 @@ HIGH_CONFIDENCE_PATTERNS = {
         r"JmsTemplate",
         r"RabbitTemplate",
     ],
-    "socket": [
+    IntegrationType.SOCKET: [
         r"@ServerEndpoint",
         r"@OnOpen",
         r"@OnMessage",
         r"WebSocketHandler",
         r"ServerSocket",
     ],
-    "database": [
+    IntegrationType.DATABASE: [
         r"@Repository",
         r"@Entity",
         r"@Query",
@@ -312,7 +331,9 @@ def first_matching_pattern(text: str | None, patterns: list[str]) -> str | None:
     )
 
 
-def _is_high_confidence_pattern(integration_type: str, matched_pattern: str) -> bool:
+def _is_high_confidence_pattern(
+    integration_type: IntegrationType, matched_pattern: str
+) -> bool:
     """Check if the matched pattern is a high confidence pattern."""
     high_patterns = HIGH_CONFIDENCE_PATTERNS.get(integration_type, [])
     return any(re.search(hp, matched_pattern) for hp in high_patterns)
@@ -325,12 +346,12 @@ def _has_strong_keyword(matched_pattern: str) -> bool:
 
 
 def determine_confidence(
-    integration_type: str,
+    integration_type: IntegrationType,
     matched_pattern: str,
     is_name_match: bool,
     is_signature_match: bool,
     is_scope_match: bool,
-) -> str:
+) -> Confidence:
     """Determine confidence level based on match characteristics.
 
     Args:
@@ -341,32 +362,32 @@ def determine_confidence(
         is_scope_match: Whether the match was on the scope.
 
     Returns:
-        Confidence level: "high", "medium", or "low".
+        Confidence level.
     """
     if _is_high_confidence_pattern(integration_type, matched_pattern):
-        return "high"
+        return Confidence.HIGH
 
     if is_signature_match:
-        return "high"
+        return Confidence.HIGH
 
     if is_scope_match:
-        return "medium"
+        return Confidence.MEDIUM
 
     if is_name_match and _has_strong_keyword(matched_pattern):
-        return "medium"
+        return Confidence.MEDIUM
 
-    return "low"
+    return Confidence.LOW
 
 
 def _check_field(
     text: str | None,
     patterns: list[str],
-    integration_type: str,
+    integration_type: IntegrationType,
     field_name: str,
     is_name: bool = False,
     is_signature: bool = False,
     is_scope: bool = False,
-) -> Iterator[tuple[str, str, str]]:
+) -> Iterator[tuple[IntegrationType, Confidence, str]]:
     """Check a single field against patterns and yield matches.
 
     Args:
@@ -391,9 +412,9 @@ def _check_field(
 
 def _classify_for_integration_type(
     entry: CTagsEntry,
-    integration_type: str,
+    integration_type: IntegrationType,
     patterns: dict[str, list[str]],
-) -> Iterator[tuple[str, str, str]]:
+) -> Iterator[tuple[IntegrationType, Confidence, str]]:
     """Classify an entry for a single integration type.
 
     Args:
@@ -427,7 +448,7 @@ def _classify_for_integration_type(
     )
 
 
-def classify_entry(entry: CTagsEntry) -> list[tuple[str, str, str]]:
+def classify_entry(entry: CTagsEntry) -> list[tuple[IntegrationType, Confidence, str]]:
     """Classify a single CTags entry into integration types.
 
     Args:

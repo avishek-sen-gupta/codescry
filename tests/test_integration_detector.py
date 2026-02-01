@@ -9,8 +9,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repo_surveyor import CTagsEntry, CTagsResult, detect_integrations
 from repo_surveyor.integration_detector import (
+    Confidence,
     IntegrationDetectorResult,
     IntegrationPoint,
+    IntegrationType,
     classify_entry,
     determine_confidence,
     first_matching_pattern,
@@ -90,43 +92,58 @@ class TestDetermineConfidence:
     def test_high_confidence_for_annotation_patterns(self) -> None:
         """Should return high confidence for annotation patterns."""
         assert (
-            determine_confidence("http_rest", "@RequestMapping", False, True, False)
-            == "high"
+            determine_confidence(
+                IntegrationType.HTTP_REST, "@RequestMapping", False, True, False
+            )
+            == Confidence.HIGH
         )
         assert (
-            determine_confidence("database", "@Repository", False, True, False)
-            == "high"
+            determine_confidence(
+                IntegrationType.DATABASE, "@Repository", False, True, False
+            )
+            == Confidence.HIGH
         )
 
     def test_high_confidence_for_signature_match(self) -> None:
         """Should return high confidence for signature matches."""
         assert (
-            determine_confidence("http_rest", "SomePattern", False, True, False)
-            == "high"
+            determine_confidence(
+                IntegrationType.HTTP_REST, "SomePattern", False, True, False
+            )
+            == Confidence.HIGH
         )
 
     def test_medium_confidence_for_scope_match(self) -> None:
         """Should return medium confidence for scope matches."""
         assert (
-            determine_confidence("http_rest", "(?i)controller", False, False, True)
-            == "medium"
+            determine_confidence(
+                IntegrationType.HTTP_REST, "(?i)controller", False, False, True
+            )
+            == Confidence.MEDIUM
         )
 
     def test_medium_confidence_for_strong_name_keywords(self) -> None:
         """Should return medium confidence for strong keyword names."""
         assert (
-            determine_confidence("http_rest", "(?i)controller", True, False, False)
-            == "medium"
+            determine_confidence(
+                IntegrationType.HTTP_REST, "(?i)controller", True, False, False
+            )
+            == Confidence.MEDIUM
         )
         assert (
-            determine_confidence("database", "(?i)repository", True, False, False)
-            == "medium"
+            determine_confidence(
+                IntegrationType.DATABASE, "(?i)repository", True, False, False
+            )
+            == Confidence.MEDIUM
         )
 
     def test_low_confidence_for_generic_name_match(self) -> None:
         """Should return low confidence for generic name matches."""
         assert (
-            determine_confidence("http_rest", "(?i)http", True, False, False) == "low"
+            determine_confidence(
+                IntegrationType.HTTP_REST, "(?i)http", True, False, False
+            )
+            == Confidence.LOW
         )
 
 
@@ -140,7 +157,7 @@ class TestClassifyEntry:
 
         assert len(matches) >= 1
         types = [m[0] for m in matches]
-        assert "http_rest" in types
+        assert IntegrationType.HTTP_REST in types
 
     def test_classify_http_rest_by_signature(self) -> None:
         """Should classify HTTP/REST entries by signature."""
@@ -148,9 +165,9 @@ class TestClassifyEntry:
         matches = classify_entry(entry)
 
         assert len(matches) >= 1
-        http_matches = [m for m in matches if m[0] == "http_rest"]
+        http_matches = [m for m in matches if m[0] == IntegrationType.HTTP_REST]
         assert len(http_matches) >= 1
-        assert http_matches[0][1] == "high"  # High confidence for annotation
+        assert http_matches[0][1] == Confidence.HIGH
 
     def test_classify_http_rest_by_scope(self) -> None:
         """Should classify HTTP/REST entries by scope."""
@@ -158,7 +175,7 @@ class TestClassifyEntry:
         matches = classify_entry(entry)
 
         assert len(matches) >= 1
-        http_matches = [m for m in matches if m[0] == "http_rest"]
+        http_matches = [m for m in matches if m[0] == IntegrationType.HTTP_REST]
         assert len(http_matches) >= 1
 
     def test_classify_database_by_name(self) -> None:
@@ -168,7 +185,7 @@ class TestClassifyEntry:
 
         assert len(matches) >= 1
         types = [m[0] for m in matches]
-        assert "database" in types
+        assert IntegrationType.DATABASE in types
 
     def test_classify_database_by_signature(self) -> None:
         """Should classify database entries by signature."""
@@ -176,9 +193,9 @@ class TestClassifyEntry:
         matches = classify_entry(entry)
 
         assert len(matches) >= 1
-        db_matches = [m for m in matches if m[0] == "database"]
+        db_matches = [m for m in matches if m[0] == IntegrationType.DATABASE]
         assert len(db_matches) >= 1
-        assert db_matches[0][1] == "high"
+        assert db_matches[0][1] == Confidence.HIGH
 
     def test_classify_messaging_by_name(self) -> None:
         """Should classify messaging entries by name."""
@@ -187,7 +204,7 @@ class TestClassifyEntry:
 
         assert len(matches) >= 1
         types = [m[0] for m in matches]
-        assert "messaging" in types
+        assert IntegrationType.MESSAGING in types
 
     def test_classify_messaging_by_signature(self) -> None:
         """Should classify messaging entries by signature."""
@@ -197,10 +214,10 @@ class TestClassifyEntry:
         matches = classify_entry(entry)
 
         assert len(matches) >= 1
-        msg_matches = [m for m in matches if m[0] == "messaging"]
+        msg_matches = [m for m in matches if m[0] == IntegrationType.MESSAGING]
         assert len(msg_matches) >= 1
         # Should have a high confidence match from the signature
-        high_confidence_matches = [m for m in msg_matches if m[1] == "high"]
+        high_confidence_matches = [m for m in msg_matches if m[1] == Confidence.HIGH]
         assert len(high_confidence_matches) >= 1
 
     def test_classify_socket_by_name(self) -> None:
@@ -210,7 +227,7 @@ class TestClassifyEntry:
 
         assert len(matches) >= 1
         types = [m[0] for m in matches]
-        assert "socket" in types
+        assert IntegrationType.SOCKET in types
 
     def test_classify_socket_by_signature(self) -> None:
         """Should classify socket entries by signature."""
@@ -218,9 +235,9 @@ class TestClassifyEntry:
         matches = classify_entry(entry)
 
         assert len(matches) >= 1
-        socket_matches = [m for m in matches if m[0] == "socket"]
+        socket_matches = [m for m in matches if m[0] == IntegrationType.SOCKET]
         assert len(socket_matches) >= 1
-        assert socket_matches[0][1] == "high"
+        assert socket_matches[0][1] == Confidence.HIGH
 
     def test_classify_soap_by_name(self) -> None:
         """Should classify SOAP entries by name."""
@@ -229,7 +246,7 @@ class TestClassifyEntry:
 
         assert len(matches) >= 1
         types = [m[0] for m in matches]
-        assert "soap" in types
+        assert IntegrationType.SOAP in types
 
     def test_classify_soap_by_signature(self) -> None:
         """Should classify SOAP entries by signature."""
@@ -237,9 +254,9 @@ class TestClassifyEntry:
         matches = classify_entry(entry)
 
         assert len(matches) >= 1
-        soap_matches = [m for m in matches if m[0] == "soap"]
+        soap_matches = [m for m in matches if m[0] == IntegrationType.SOAP]
         assert len(soap_matches) >= 1
-        assert soap_matches[0][1] == "high"
+        assert soap_matches[0][1] == Confidence.HIGH
 
     def test_classify_multiple_types(self) -> None:
         """Should detect multiple integration types for ambiguous names."""
@@ -249,7 +266,7 @@ class TestClassifyEntry:
 
         assert len(matches) >= 1
         types = [m[0] for m in matches]
-        assert "messaging" in types
+        assert IntegrationType.MESSAGING in types
 
     def test_classify_no_match(self) -> None:
         """Should return empty list for non-integration entries."""
@@ -268,7 +285,7 @@ class TestClassifyEntry:
 
         entry = make_entry(name="foo", signature="@GetMapping")
         matches = classify_entry(entry)
-        http_matches = [m for m in matches if m[0] == "http_rest"]
+        http_matches = [m for m in matches if m[0] == IntegrationType.HTTP_REST]
         assert len(http_matches) >= 1
         assert http_matches[0][2].startswith("signature:")
 
@@ -303,7 +320,7 @@ class TestDetectIntegrations:
         http_points = [
             p
             for p in detector_result.integration_points
-            if p.integration_type == "http_rest"
+            if p.integration_type == IntegrationType.HTTP_REST
         ]
         assert len(http_points) >= 1
 
@@ -320,7 +337,7 @@ class TestDetectIntegrations:
         db_points = [
             p
             for p in detector_result.integration_points
-            if p.integration_type == "database"
+            if p.integration_type == IntegrationType.DATABASE
         ]
         assert len(db_points) >= 1
 
@@ -337,7 +354,7 @@ class TestDetectIntegrations:
         msg_points = [
             p
             for p in detector_result.integration_points
-            if p.integration_type == "messaging"
+            if p.integration_type == IntegrationType.MESSAGING
         ]
         assert len(msg_points) >= 1
 
@@ -354,7 +371,7 @@ class TestDetectIntegrations:
         socket_points = [
             p
             for p in detector_result.integration_points
-            if p.integration_type == "socket"
+            if p.integration_type == IntegrationType.SOCKET
         ]
         assert len(socket_points) >= 1
 
@@ -371,7 +388,7 @@ class TestDetectIntegrations:
         soap_points = [
             p
             for p in detector_result.integration_points
-            if p.integration_type == "soap"
+            if p.integration_type == IntegrationType.SOAP
         ]
         assert len(soap_points) >= 1
 
@@ -417,10 +434,10 @@ class TestDetectIntegrations:
         db_points = [
             p
             for p in detector_result.integration_points
-            if p.integration_type == "database"
+            if p.integration_type == IntegrationType.DATABASE
         ]
         assert len(db_points) >= 1
-        assert db_points[0].confidence == "high"
+        assert db_points[0].confidence == Confidence.HIGH
 
 
 class TestPureFunctionBehavior:
@@ -448,8 +465,8 @@ class TestPureFunctionBehavior:
         assert entry.scope == original_scope
 
     def test_first_matching_pattern_is_pure(self) -> None:
-        """Should be a pure function (tuples are immutable)."""
-        patterns = (r"(?i)http", r"(?i)rest")
+        """Should be a pure function."""
+        patterns = [r"(?i)http", r"(?i)rest"]
         result1 = first_matching_pattern("HttpClient", patterns)
         result2 = first_matching_pattern("HttpClient", patterns)
 
@@ -468,7 +485,7 @@ class TestEdgeCases:
         # Should still match on name
         assert len(matches) >= 1
         types = [m[0] for m in matches]
-        assert "http_rest" in types
+        assert IntegrationType.HTTP_REST in types
 
     def test_entry_with_empty_string_fields(self) -> None:
         """Should handle entries with empty string fields."""
@@ -489,9 +506,9 @@ class TestEdgeCases:
         matches3 = classify_entry(entry3)
 
         # All should match http_rest
-        assert any(m[0] == "http_rest" for m in matches1)
-        assert any(m[0] == "http_rest" for m in matches2)
-        assert any(m[0] == "http_rest" for m in matches3)
+        assert any(m[0] == IntegrationType.HTTP_REST for m in matches1)
+        assert any(m[0] == IntegrationType.HTTP_REST for m in matches2)
+        assert any(m[0] == IntegrationType.HTTP_REST for m in matches3)
 
     def test_partial_matches_in_longer_names(self) -> None:
         """Should match patterns within longer names."""
@@ -499,7 +516,7 @@ class TestEdgeCases:
         matches = classify_entry(entry)
 
         types = [m[0] for m in matches]
-        assert "http_rest" in types
+        assert IntegrationType.HTTP_REST in types
 
     def test_special_characters_in_signature(self) -> None:
         """Should handle special characters in signatures."""
@@ -509,5 +526,5 @@ class TestEdgeCases:
         )
         matches = classify_entry(entry)
 
-        db_matches = [m for m in matches if m[0] == "database"]
+        db_matches = [m for m in matches if m[0] == IntegrationType.DATABASE]
         assert len(db_matches) >= 1
