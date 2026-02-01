@@ -74,12 +74,6 @@ class TestFirstMatchingPattern:
         result = first_matching_pattern("DatabaseHandler", patterns)
         assert result is None
 
-    def test_handles_none_input(self) -> None:
-        """Should return None for None input."""
-        patterns = [r"(?i)http"]
-        result = first_matching_pattern(None, patterns)
-        assert result is None
-
     def test_empty_patterns_list(self) -> None:
         """Should return None for empty patterns list."""
         result = first_matching_pattern("HttpClient", [])

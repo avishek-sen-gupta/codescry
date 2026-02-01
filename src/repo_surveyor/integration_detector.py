@@ -312,19 +312,16 @@ STRONG_KEYWORDS = [
 ]
 
 
-def first_matching_pattern(text: str | None, patterns: list[str]) -> str | None:
+def first_matching_pattern(text: str, patterns: list[str]) -> str | None:
     """Find the first pattern that matches the text.
 
     Args:
-        text: The text to check (can be None).
+        text: The text to check.
         patterns: List of regex patterns to match against.
 
     Returns:
         The first matched pattern string, or None if no match.
     """
-    if text is None:
-        return None
-
     return next(
         (pattern for pattern in patterns if re.search(pattern, text)),
         None,
@@ -380,13 +377,13 @@ def determine_confidence(
 
 
 def _check_field(
-    text: str | None,
+    text: str,
     patterns: list[str],
     integration_type: IntegrationType,
     field_name: str,
-    is_name: bool = False,
-    is_signature: bool = False,
-    is_scope: bool = False,
+    is_name: bool,
+    is_signature: bool,
+    is_scope: bool,
 ) -> Iterator[tuple[IntegrationType, Confidence, str]]:
     """Check a single field against patterns and yield matches.
 
@@ -431,21 +428,29 @@ def _classify_for_integration_type(
         integration_type,
         "name",
         is_name=True,
+        is_signature=False,
+        is_scope=False,
     )
-    yield from _check_field(
-        entry.signature,
-        patterns["signature_patterns"],
-        integration_type,
-        "signature",
-        is_signature=True,
-    )
-    yield from _check_field(
-        entry.scope,
-        patterns["scope_patterns"],
-        integration_type,
-        "scope",
-        is_scope=True,
-    )
+    if entry.signature is not None:
+        yield from _check_field(
+            entry.signature,
+            patterns["signature_patterns"],
+            integration_type,
+            "signature",
+            is_name=False,
+            is_signature=True,
+            is_scope=False,
+        )
+    if entry.scope is not None:
+        yield from _check_field(
+            entry.scope,
+            patterns["scope_patterns"],
+            integration_type,
+            "scope",
+            is_name=False,
+            is_signature=False,
+            is_scope=True,
+        )
 
 
 def classify_entry(entry: CTagsEntry) -> list[tuple[IntegrationType, Confidence, str]]:
