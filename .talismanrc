@@ -1,5 +1,5 @@
 fileignoreconfig:
 - filename: src/repo_surveyor/neo4j_persistence.py
-  checksum: c256961b1bb777ebb70b46f78d48a28c9887e445b5e6c014cfa796b820c3ad56
+  checksum: bafaca42d1ae6ef85e2df9e174dea0e9af0e18b7eb650a52ebf170966ca5656c
 - filename: tests/test_neo4j_persistence.py
   checksum: d35db69e945fb473cbc242cb63f8fff14f4e56d3cc84c0df24ebe422d5ebeada

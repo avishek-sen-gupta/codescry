@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -13,148 +13,155 @@ from repo_surveyor.neo4j_persistence import Neo4jPersistence
 from repo_surveyor.report import DirectoryMarker, SurveyReport
 from repo_surveyor.ctags import CTagsEntry, CTagsResult
 from repo_surveyor.surveyor import RepoSurveyor
+from repo_surveyor.graph_builder import (
+    build_tech_stack_graph,
+    build_coarse_structure_graph,
+    extract_package,
+)
+
+
+def create_mock_driver() -> MagicMock:
+    """Create a mock Neo4j driver for testing."""
+    mock_driver = MagicMock()
+    mock_session = MagicMock()
+    mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
+    mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+    return mock_driver
+
+
+def create_mock_driver_with_session() -> tuple[MagicMock, MagicMock]:
+    """Create a mock Neo4j driver and return both driver and session."""
+    mock_driver = MagicMock()
+    mock_session = MagicMock()
+    mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
+    mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+    return mock_driver, mock_session
 
 
 class TestNeo4jPersistenceInit:
     """Test Neo4jPersistence initialization and connection management."""
 
-    @patch("repo_surveyor.neo4j_persistence.GraphDatabase")
-    def test_init_creates_driver(self, mock_graph_db: MagicMock) -> None:
-        """Should create Neo4j driver with correct credentials."""
-        persistence = Neo4jPersistence(
-            uri="bolt://localhost:7687",
-            username="neo4j",
-            password="password123",
-        )
+    def test_init_stores_driver(self) -> None:
+        """Should store the injected driver."""
+        mock_driver = create_mock_driver()
+        persistence = Neo4jPersistence(mock_driver)
 
-        mock_graph_db.driver.assert_called_once_with(
-            "bolt://localhost:7687",
-            auth=("neo4j", "password123"),
-        )
+        assert persistence.driver is mock_driver
 
-    @patch("repo_surveyor.neo4j_persistence.GraphDatabase")
-    def test_close_closes_driver(self, mock_graph_db: MagicMock) -> None:
+    def test_close_closes_driver(self) -> None:
         """Should close the driver connection."""
-        mock_driver = MagicMock()
-        mock_graph_db.driver.return_value = mock_driver
+        mock_driver = create_mock_driver()
+        persistence = Neo4jPersistence(mock_driver)
 
-        persistence = Neo4jPersistence("bolt://localhost:7687", "neo4j", "pass")
         persistence.close()
 
         mock_driver.close.assert_called_once()
 
-    @patch("repo_surveyor.neo4j_persistence.GraphDatabase")
-    def test_context_manager_closes_on_exit(self, mock_graph_db: MagicMock) -> None:
+    def test_context_manager_closes_on_exit(self) -> None:
         """Should close driver when exiting context manager."""
-        mock_driver = MagicMock()
-        mock_graph_db.driver.return_value = mock_driver
+        mock_driver = create_mock_driver()
 
-        with Neo4jPersistence("bolt://localhost:7687", "neo4j", "pass") as persistence:
+        with Neo4jPersistence(mock_driver) as persistence:
             assert persistence is not None
 
         mock_driver.close.assert_called_once()
 
-    @patch("repo_surveyor.neo4j_persistence.GraphDatabase")
-    def test_context_manager_returns_self(self, mock_graph_db: MagicMock) -> None:
+    def test_context_manager_returns_self(self) -> None:
         """Should return self when entering context manager."""
-        with Neo4jPersistence("bolt://localhost:7687", "neo4j", "pass") as persistence:
+        mock_driver = create_mock_driver()
+
+        with Neo4jPersistence(mock_driver) as persistence:
             assert isinstance(persistence, Neo4jPersistence)
 
 
 class TestExtractPackage:
-    """Test _extract_package method for package name extraction."""
+    """Test extract_package function for package name extraction."""
 
-    @pytest.fixture
-    def persistence(self) -> Neo4jPersistence:
-        """Create persistence instance with mocked driver."""
-        with patch("repo_surveyor.neo4j_persistence.GraphDatabase"):
-            return Neo4jPersistence("bolt://localhost:7687", "neo4j", "pass")
-
-    def test_extract_java_package_from_standard_path(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_java_package_from_standard_path(self) -> None:
         """Should extract Java package from src/main/java path."""
-        package = persistence._extract_package(
+        package = extract_package(
             "src/main/java/com/example/utils/Helper.java",
             "Java",
         )
         assert package == "com.example.utils"
 
-    def test_extract_java_package_from_test_path(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_java_package_from_test_path(self) -> None:
         """Should extract Java package from src/test/java path."""
-        package = persistence._extract_package(
+        package = extract_package(
             "src/test/java/com/example/tests/HelperTest.java",
             "Java",
         )
         assert package == "com.example.tests"
 
-    def test_extract_java_package_from_src_path(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_java_package_from_src_path(self) -> None:
         """Should extract Java package from src/ path."""
-        package = persistence._extract_package(
+        package = extract_package(
             "src/com/example/Main.java",
             "Java",
         )
         assert package == "com.example"
 
-    def test_extract_java_package_fallback(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_java_package_fallback(self) -> None:
         """Should use full directory path as fallback for Java."""
-        package = persistence._extract_package(
+        package = extract_package(
             "java/com/example/Service.java",
             "Java",
         )
         assert package == "java.com.example"
 
-    def test_extract_python_package_from_src(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_python_package_from_src(self) -> None:
         """Should extract Python package from src/ path."""
-        package = persistence._extract_package(
+        package = extract_package(
             "src/mypackage/utils/helpers.py",
             "Python",
         )
         assert package == "mypackage.utils"
 
-    def test_extract_python_package_from_lib(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_python_package_from_lib(self) -> None:
         """Should extract Python package from lib/ path."""
-        package = persistence._extract_package(
+        package = extract_package(
             "lib/mypackage/core.py",
             "Python",
         )
         assert package == "mypackage"
 
-    def test_extract_python_package_fallback(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_python_package_fallback(self) -> None:
         """Should use full directory path as fallback for Python."""
-        package = persistence._extract_package(
+        package = extract_package(
             "mypackage/utils/helpers.py",
             "Python",
         )
         assert package == "mypackage.utils"
 
-    def test_extract_csharp_package(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_csharp_package(self) -> None:
         """Should extract C# namespace from directory path."""
-        package = persistence._extract_package(
+        package = extract_package(
             "MyProject/Utils/Helper.cs",
             "C#",
         )
         assert package == "MyProject.Utils"
 
-    def test_extract_csharp_package_alternate(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_csharp_package_alternate(self) -> None:
         """Should handle csharp as language name."""
-        package = persistence._extract_package(
+        package = extract_package(
             "MyProject/Services/Service.cs",
             "csharp",
         )
         assert package == "MyProject.Services"
 
-    def test_extract_package_returns_none_for_no_language(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_package_returns_none_for_no_language(self) -> None:
         """Should return None when language is None."""
-        package = persistence._extract_package("src/file.txt", None)
+        package = extract_package("src/file.txt", None)
         assert package is None
 
-    def test_extract_package_returns_none_for_no_directory(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_package_returns_none_for_no_directory(self) -> None:
         """Should return None when file has no directory."""
-        package = persistence._extract_package("Main.java", "Java")
+        package = extract_package("Main.java", "Java")
         assert package is None
 
-    def test_extract_package_default_language(self, persistence: Neo4jPersistence) -> None:
+    def test_extract_package_default_language(self) -> None:
         """Should use directory path for unknown languages."""
-        package = persistence._extract_package(
+        package = extract_package(
             "mymodule/components/widget.go",
             "Go",
         )
@@ -162,15 +169,9 @@ class TestExtractPackage:
 
 
 class TestBuildTechStackGraph:
-    """Test _build_tech_stack_graph method."""
+    """Test build_tech_stack_graph function."""
 
-    @pytest.fixture
-    def persistence(self) -> Neo4jPersistence:
-        """Create persistence instance with mocked driver."""
-        with patch("repo_surveyor.neo4j_persistence.GraphDatabase"):
-            return Neo4jPersistence("bolt://localhost:7687", "neo4j", "pass")
-
-    def test_empty_report(self, persistence: Neo4jPersistence) -> None:
+    def test_empty_report(self) -> None:
         """Should handle empty report with no directory markers."""
         report = SurveyReport(
             repo_path="/test/repo",
@@ -181,14 +182,14 @@ class TestBuildTechStackGraph:
             directory_markers=[],
         )
 
-        directories, relationships, tech_nodes, top_level = persistence._build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
 
         assert directories == []
         assert relationships == []
         assert tech_nodes == []
         assert top_level == set()
 
-    def test_single_directory_marker(self, persistence: Neo4jPersistence) -> None:
+    def test_single_directory_marker(self) -> None:
         """Should process single directory marker correctly."""
         report = SurveyReport(
             repo_path="/test/repo",
@@ -208,7 +209,7 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = persistence._build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
 
         assert len(directories) == 1
         assert directories[0]["path"] == "src"
@@ -218,7 +219,7 @@ class TestBuildTechStackGraph:
         assert len(tech_nodes) == 2  # Java + Maven
         assert "src" in top_level
 
-    def test_nested_directory_creates_hierarchy(self, persistence: Neo4jPersistence) -> None:
+    def test_nested_directory_creates_hierarchy(self) -> None:
         """Should create parent directories and relationships for nested paths."""
         report = SurveyReport(
             repo_path="/test/repo",
@@ -238,7 +239,7 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = persistence._build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
 
         # Should have 3 directories: src, src/mypackage, src/mypackage/utils
         dir_paths = [d["path"] for d in directories]
@@ -254,7 +255,7 @@ class TestBuildTechStackGraph:
         # Top level should be "src"
         assert top_level == {"src"}
 
-    def test_skips_root_directory(self, persistence: Neo4jPersistence) -> None:
+    def test_skips_root_directory(self) -> None:
         """Should skip root directory marker."""
         report = SurveyReport(
             repo_path="/test/repo",
@@ -274,12 +275,12 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = persistence._build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
 
         assert directories == []
         assert tech_nodes == []
 
-    def test_technology_nodes_created(self, persistence: Neo4jPersistence) -> None:
+    def test_technology_nodes_created(self) -> None:
         """Should create technology nodes for all detected technologies."""
         report = SurveyReport(
             repo_path="/test/repo",
@@ -299,7 +300,7 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = persistence._build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
 
         assert len(tech_nodes) == 4
 
@@ -315,7 +316,7 @@ class TestBuildTechStackGraph:
         assert "React" in names
         assert "Docker" in names
 
-    def test_multiple_markers_deduplicate_directories(self, persistence: Neo4jPersistence) -> None:
+    def test_multiple_markers_deduplicate_directories(self) -> None:
         """Should deduplicate directories when multiple markers exist."""
         report = SurveyReport(
             repo_path="/test/repo",
@@ -343,7 +344,7 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = persistence._build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
 
         # Should only have one directory entry
         assert len(directories) == 1
@@ -353,25 +354,19 @@ class TestBuildTechStackGraph:
 
 
 class TestBuildCoarseStructureGraph:
-    """Test _build_coarse_structure_graph method."""
+    """Test build_coarse_structure_graph function."""
 
-    @pytest.fixture
-    def persistence(self) -> Neo4jPersistence:
-        """Create persistence instance with mocked driver."""
-        with patch("repo_surveyor.neo4j_persistence.GraphDatabase"):
-            return Neo4jPersistence("bolt://localhost:7687", "neo4j", "pass")
-
-    def test_empty_result(self, persistence: Neo4jPersistence) -> None:
+    def test_empty_result(self) -> None:
         """Should handle empty CTags result."""
         result = CTagsResult(entries=[], raw_output="", return_code=0)
 
-        symbols, relationships, top_level = persistence._build_coarse_structure_graph(result)
+        symbols, relationships, top_level = build_coarse_structure_graph(result)
 
         assert symbols == []
         assert relationships == []
         assert top_level == set()
 
-    def test_single_class_symbol(self, persistence: Neo4jPersistence) -> None:
+    def test_single_class_symbol(self) -> None:
         """Should process single class symbol."""
         result = CTagsResult(
             entries=[
@@ -390,7 +385,7 @@ class TestBuildCoarseStructureGraph:
             return_code=0,
         )
 
-        symbols, relationships, top_level = persistence._build_coarse_structure_graph(result)
+        symbols, relationships, top_level = build_coarse_structure_graph(result)
 
         assert len(symbols) == 1
         assert symbols[0]["name"] == "MyClass"
@@ -398,7 +393,7 @@ class TestBuildCoarseStructureGraph:
         assert symbols[0]["package"] == "com.example"
         assert len(top_level) == 1  # Class is top-level (no parent)
 
-    def test_method_with_class_scope(self, persistence: Neo4jPersistence) -> None:
+    def test_method_with_class_scope(self) -> None:
         """Should create parent-child relationship for method in class."""
         result = CTagsResult(
             entries=[
@@ -427,7 +422,7 @@ class TestBuildCoarseStructureGraph:
             return_code=0,
         )
 
-        symbols, relationships, top_level = persistence._build_coarse_structure_graph(result)
+        symbols, relationships, top_level = build_coarse_structure_graph(result)
 
         assert len(symbols) == 2
         assert len(relationships) == 1
@@ -438,7 +433,7 @@ class TestBuildCoarseStructureGraph:
         assert "myMethod" in rel["child_id"]
         assert "MyClass" in rel["parent_id"]
 
-    def test_unique_symbol_id_format(self, persistence: Neo4jPersistence) -> None:
+    def test_unique_symbol_id_format(self) -> None:
         """Should create unique symbol IDs with path:name:kind:line format."""
         result = CTagsResult(
             entries=[
@@ -457,11 +452,11 @@ class TestBuildCoarseStructureGraph:
             return_code=0,
         )
 
-        symbols, relationships, top_level = persistence._build_coarse_structure_graph(result)
+        symbols, relationships, top_level = build_coarse_structure_graph(result)
 
         assert symbols[0]["id"] == "src/Foo.java:getValue:method:25"
 
-    def test_handles_overloaded_methods(self, persistence: Neo4jPersistence) -> None:
+    def test_handles_overloaded_methods(self) -> None:
         """Should handle overloaded methods with different line numbers."""
         result = CTagsResult(
             entries=[
@@ -490,7 +485,7 @@ class TestBuildCoarseStructureGraph:
             return_code=0,
         )
 
-        symbols, relationships, top_level = persistence._build_coarse_structure_graph(result)
+        symbols, relationships, top_level = build_coarse_structure_graph(result)
 
         # Should have 2 distinct symbols
         assert len(symbols) == 2
@@ -498,7 +493,7 @@ class TestBuildCoarseStructureGraph:
         assert "src/Service.java:process:method:10" in ids
         assert "src/Service.java:process:method:20" in ids
 
-    def test_scope_kind_filtering(self, persistence: Neo4jPersistence) -> None:
+    def test_scope_kind_filtering(self) -> None:
         """Should filter parent matching by scope_kind."""
         result = CTagsResult(
             entries=[
@@ -537,7 +532,7 @@ class TestBuildCoarseStructureGraph:
             return_code=0,
         )
 
-        symbols, relationships, top_level = persistence._build_coarse_structure_graph(result)
+        symbols, relationships, top_level = build_coarse_structure_graph(result)
 
         # Method should only link to class Config, not interface Config
         assert len(relationships) == 1
@@ -548,22 +543,10 @@ class TestBuildCoarseStructureGraph:
 class TestPersistTechStacks:
     """Test persist_tech_stacks method."""
 
-    @pytest.fixture
-    def mock_persistence(self) -> tuple[Neo4jPersistence, MagicMock]:
-        """Create persistence instance with mocked driver and session."""
-        with patch("repo_surveyor.neo4j_persistence.GraphDatabase") as mock_graph_db:
-            mock_driver = MagicMock()
-            mock_session = MagicMock()
-            mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
-            mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
-            mock_graph_db.driver.return_value = mock_driver
-
-            persistence = Neo4jPersistence("bolt://localhost:7687", "neo4j", "pass")
-            return persistence, mock_session
-
-    def test_creates_repository_node(self, mock_persistence: tuple[Neo4jPersistence, MagicMock]) -> None:
+    def test_creates_repository_node(self) -> None:
         """Should create Repository node with path and name."""
-        persistence, mock_session = mock_persistence
+        mock_driver, mock_session = create_mock_driver_with_session()
+        persistence = Neo4jPersistence(mock_driver)
 
         report = SurveyReport(
             repo_path="/home/user/myproject",
@@ -581,9 +564,10 @@ class TestPersistTechStacks:
         repo_call = [c for c in calls if "Repository" in str(c)]
         assert len(repo_call) >= 1
 
-    def test_creates_directory_nodes(self, mock_persistence: tuple[Neo4jPersistence, MagicMock]) -> None:
+    def test_creates_directory_nodes(self) -> None:
         """Should create Directory nodes for markers."""
-        persistence, mock_session = mock_persistence
+        mock_driver, mock_session = create_mock_driver_with_session()
+        persistence = Neo4jPersistence(mock_driver)
 
         report = SurveyReport(
             repo_path="/test/repo",
@@ -614,22 +598,10 @@ class TestPersistTechStacks:
 class TestPersistCoarseStructure:
     """Test persist_coarse_structure method."""
 
-    @pytest.fixture
-    def mock_persistence(self) -> tuple[Neo4jPersistence, MagicMock]:
-        """Create persistence instance with mocked driver."""
-        with patch("repo_surveyor.neo4j_persistence.GraphDatabase") as mock_graph_db:
-            mock_driver = MagicMock()
-            mock_session = MagicMock()
-            mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
-            mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
-            mock_graph_db.driver.return_value = mock_driver
-
-            persistence = Neo4jPersistence("bolt://localhost:7687", "neo4j", "pass")
-            return persistence, mock_session
-
-    def test_raises_on_failed_ctags_result(self, mock_persistence: tuple[Neo4jPersistence, MagicMock]) -> None:
+    def test_raises_on_failed_ctags_result(self) -> None:
         """Should raise ValueError when CTags failed."""
-        persistence, _ = mock_persistence
+        mock_driver = create_mock_driver()
+        persistence = Neo4jPersistence(mock_driver)
 
         result = CTagsResult(
             entries=[],
@@ -641,9 +613,10 @@ class TestPersistCoarseStructure:
         with pytest.raises(ValueError, match="CTags failed"):
             persistence.persist_coarse_structure(result, "/test/repo")
 
-    def test_handles_empty_symbols(self, mock_persistence: tuple[Neo4jPersistence, MagicMock]) -> None:
+    def test_handles_empty_symbols(self) -> None:
         """Should handle empty symbols list gracefully."""
-        persistence, mock_session = mock_persistence
+        mock_driver, mock_session = create_mock_driver_with_session()
+        persistence = Neo4jPersistence(mock_driver)
 
         result = CTagsResult(entries=[], raw_output="", return_code=0)
 
@@ -652,9 +625,10 @@ class TestPersistCoarseStructure:
         # Should not create any nodes
         mock_session.run.assert_not_called()
 
-    def test_creates_code_symbol_nodes(self, mock_persistence: tuple[Neo4jPersistence, MagicMock]) -> None:
+    def test_creates_code_symbol_nodes(self) -> None:
         """Should create CodeSymbol nodes for entries."""
-        persistence, mock_session = mock_persistence
+        mock_driver, mock_session = create_mock_driver_with_session()
+        persistence = Neo4jPersistence(mock_driver)
 
         result = CTagsResult(
             entries=[

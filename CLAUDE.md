@@ -26,15 +26,20 @@ poetry run black src/ tests/
 poetry run mypy src/
 ```
 
+## Build
+
+Before committing anything, run all tests, fixing them if necessary. If test assertions are being removed, ask me to review them.
+
 ## Testing Patterns
 
 - Use `pytest` with fixtures for test setup
-- Mock Neo4j driver with `unittest.mock.patch`
+- Do not patch with `unittest.mock.patch`. Use proper dependency injection, and then inject mock objects.
 - Use `tmp_path` fixture for filesystem tests
 - Tests requiring external repos (mojo-lsp, smojol) are integration tests
 
 ## Programming Patterns
 
+- Use proper dependency injection for interfaces to external systems like Neo4J, OS, and File I/O. Do not hardcode importing the concrete modules in these cases.
 - Minimise and/or avoid mutation
 - Write your code in the Functional Programming style, but balance it with readability
 
