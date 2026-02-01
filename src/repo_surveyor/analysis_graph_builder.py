@@ -31,8 +31,8 @@ class Neo4jDriver(Protocol):
     def close(self) -> None: ...
 
 
-class Neo4jPersistence:
-    """Persist repository survey data to Neo4j."""
+class AnalysisGraphBuilder:
+    """Build and persist repository analysis graphs to Neo4j."""
 
     def __init__(self, driver: Neo4jDriver) -> None:
         """Initialize with a Neo4j driver.
@@ -46,7 +46,7 @@ class Neo4jPersistence:
         """Close the Neo4j connection."""
         self.driver.close()
 
-    def __enter__(self) -> "Neo4jPersistence":
+    def __enter__(self) -> "AnalysisGraphBuilder":
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -211,8 +211,8 @@ class Neo4jPersistence:
         logger.info("Coarse structure persistence complete")
 
 
-def create_neo4j_persistence(uri: str, username: str, password: str) -> Neo4jPersistence:
-    """Factory function to create Neo4jPersistence with a real Neo4j driver.
+def create_analysis_graph_builder(uri: str, username: str, password: str) -> AnalysisGraphBuilder:
+    """Factory function to create AnalysisGraphBuilder with a real Neo4j driver.
 
     Args:
         uri: Neo4j connection URI (e.g., "bolt://localhost:7687")
@@ -220,11 +220,11 @@ def create_neo4j_persistence(uri: str, username: str, password: str) -> Neo4jPer
         password: Neo4j password
 
     Returns:
-        Neo4jPersistence instance configured with a Neo4j driver
+        AnalysisGraphBuilder instance configured with a Neo4j driver
     """
     from neo4j import GraphDatabase
     driver = GraphDatabase.driver(uri, auth=(username, password))
-    return Neo4jPersistence(driver)
+    return AnalysisGraphBuilder(driver)
 
 
 def survey_and_persist(
@@ -260,9 +260,9 @@ def survey_and_persist(
     )
     logger.info("Coarse structure completed")
 
-    with create_neo4j_persistence(neo4j_uri, neo4j_username, neo4j_password) as persistence:
-        persistence.persist_tech_stacks(tech_report)
-        persistence.persist_coarse_structure(structure_result, repo_path)
+    with create_analysis_graph_builder(neo4j_uri, neo4j_username, neo4j_password) as builder:
+        builder.persist_tech_stacks(tech_report)
+        builder.persist_coarse_structure(structure_result, repo_path)
 
     return tech_report, structure_result
 

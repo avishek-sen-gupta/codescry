@@ -1,4 +1,4 @@
-"""Tests for Neo4jPersistence class."""
+"""Tests for AnalysisGraphBuilder class."""
 
 import sys
 from pathlib import Path
@@ -9,7 +9,7 @@ import pytest
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from repo_surveyor.neo4j_persistence import Neo4jPersistence
+from repo_surveyor.analysis_graph_builder import AnalysisGraphBuilder
 from repo_surveyor.report import DirectoryMarker, SurveyReport
 from repo_surveyor.ctags import CTagsEntry, CTagsResult
 from repo_surveyor.surveyor import RepoSurveyor
@@ -38,20 +38,20 @@ def create_mock_driver_with_session() -> tuple[MagicMock, MagicMock]:
     return mock_driver, mock_session
 
 
-class TestNeo4jPersistenceInit:
-    """Test Neo4jPersistence initialization and connection management."""
+class TestAnalysisGraphBuilderInit:
+    """Test AnalysisGraphBuilder initialization and connection management."""
 
     def test_init_stores_driver(self) -> None:
         """Should store the injected driver."""
         mock_driver = create_mock_driver()
-        persistence = Neo4jPersistence(mock_driver)
+        persistence = AnalysisGraphBuilder(mock_driver)
 
         assert persistence.driver is mock_driver
 
     def test_close_closes_driver(self) -> None:
         """Should close the driver connection."""
         mock_driver = create_mock_driver()
-        persistence = Neo4jPersistence(mock_driver)
+        persistence = AnalysisGraphBuilder(mock_driver)
 
         persistence.close()
 
@@ -61,7 +61,7 @@ class TestNeo4jPersistenceInit:
         """Should close driver when exiting context manager."""
         mock_driver = create_mock_driver()
 
-        with Neo4jPersistence(mock_driver) as persistence:
+        with AnalysisGraphBuilder(mock_driver) as persistence:
             assert persistence is not None
 
         mock_driver.close.assert_called_once()
@@ -70,8 +70,8 @@ class TestNeo4jPersistenceInit:
         """Should return self when entering context manager."""
         mock_driver = create_mock_driver()
 
-        with Neo4jPersistence(mock_driver) as persistence:
-            assert isinstance(persistence, Neo4jPersistence)
+        with AnalysisGraphBuilder(mock_driver) as persistence:
+            assert isinstance(persistence, AnalysisGraphBuilder)
 
 
 class TestExtractPackage:
@@ -546,7 +546,7 @@ class TestPersistTechStacks:
     def test_creates_repository_node(self) -> None:
         """Should create Repository node with path and name."""
         mock_driver, mock_session = create_mock_driver_with_session()
-        persistence = Neo4jPersistence(mock_driver)
+        persistence = AnalysisGraphBuilder(mock_driver)
 
         report = SurveyReport(
             repo_path="/home/user/myproject",
@@ -567,7 +567,7 @@ class TestPersistTechStacks:
     def test_creates_directory_nodes(self) -> None:
         """Should create Directory nodes for markers."""
         mock_driver, mock_session = create_mock_driver_with_session()
-        persistence = Neo4jPersistence(mock_driver)
+        persistence = AnalysisGraphBuilder(mock_driver)
 
         report = SurveyReport(
             repo_path="/test/repo",
@@ -601,7 +601,7 @@ class TestPersistCoarseStructure:
     def test_raises_on_failed_ctags_result(self) -> None:
         """Should raise ValueError when CTags failed."""
         mock_driver = create_mock_driver()
-        persistence = Neo4jPersistence(mock_driver)
+        persistence = AnalysisGraphBuilder(mock_driver)
 
         result = CTagsResult(
             entries=[],
@@ -616,7 +616,7 @@ class TestPersistCoarseStructure:
     def test_handles_empty_symbols(self) -> None:
         """Should handle empty symbols list gracefully."""
         mock_driver, mock_session = create_mock_driver_with_session()
-        persistence = Neo4jPersistence(mock_driver)
+        persistence = AnalysisGraphBuilder(mock_driver)
 
         result = CTagsResult(entries=[], raw_output="", return_code=0)
 
@@ -628,7 +628,7 @@ class TestPersistCoarseStructure:
     def test_creates_code_symbol_nodes(self) -> None:
         """Should create CodeSymbol nodes for entries."""
         mock_driver, mock_session = create_mock_driver_with_session()
-        persistence = Neo4jPersistence(mock_driver)
+        persistence = AnalysisGraphBuilder(mock_driver)
 
         result = CTagsResult(
             entries=[
