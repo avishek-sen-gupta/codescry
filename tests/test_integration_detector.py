@@ -55,32 +55,32 @@ class TestFirstMatchingPattern:
 
     def test_returns_matched_pattern(self) -> None:
         """Should return the matched pattern."""
-        patterns = (r"(?i)http", r"(?i)rest")
+        patterns = [r"(?i)http", r"(?i)rest"]
         result = first_matching_pattern("HttpClient", patterns)
         assert result == r"(?i)http"
 
     def test_case_insensitive(self) -> None:
         """Should match case-insensitively when pattern specifies."""
-        patterns = (r"(?i)controller",)
+        patterns = [r"(?i)controller"]
         assert first_matching_pattern("UserController", patterns) is not None
         assert first_matching_pattern("CONTROLLER", patterns) is not None
         assert first_matching_pattern("controller", patterns) is not None
 
     def test_returns_none_for_no_match(self) -> None:
         """Should return None when no pattern matches."""
-        patterns = (r"(?i)http", r"(?i)rest")
+        patterns = [r"(?i)http", r"(?i)rest"]
         result = first_matching_pattern("DatabaseHandler", patterns)
         assert result is None
 
     def test_handles_none_input(self) -> None:
         """Should return None for None input."""
-        patterns = (r"(?i)http",)
+        patterns = [r"(?i)http"]
         result = first_matching_pattern(None, patterns)
         assert result is None
 
-    def test_empty_patterns_tuple(self) -> None:
-        """Should return None for empty patterns tuple."""
-        result = first_matching_pattern("HttpClient", ())
+    def test_empty_patterns_list(self) -> None:
+        """Should return None for empty patterns list."""
+        result = first_matching_pattern("HttpClient", [])
         assert result is None
 
 

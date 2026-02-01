@@ -32,9 +32,9 @@ class IntegrationDetectorResult:
 
 # Pattern dictionaries for each integration type
 # Each category has patterns for name, signature, and scope matching
-INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
+INTEGRATION_PATTERNS = {
     "http_rest": {
-        "name_patterns": (
+        "name_patterns": [
             r"(?i)http",
             r"(?i)rest(?:ful)?",
             r"(?i)api(?:client|handler|controller)?",
@@ -48,8 +48,8 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"(?i)put(?:mapping|request)",
             r"(?i)delete(?:mapping|request)",
             r"(?i)patch(?:mapping|request)",
-        ),
-        "signature_patterns": (
+        ],
+        "signature_patterns": [
             r"@RequestMapping",
             r"@GetMapping",
             r"@PostMapping",
@@ -71,17 +71,17 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"@Path\(",
             r"@Produces",
             r"@Consumes",
-        ),
-        "scope_patterns": (
+        ],
+        "scope_patterns": [
             r"(?i)controller",
             r"(?i)resource",
             r"(?i)restcontroller",
             r"(?i)apicontroller",
             r"(?i)webcontroller",
-        ),
+        ],
     },
     "soap": {
-        "name_patterns": (
+        "name_patterns": [
             r"(?i)soap",
             r"(?i)wsdl",
             r"(?i)xml(?:service|client|handler)",
@@ -90,8 +90,8 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"(?i)binding",
             r"(?i)envelope",
             r"(?i)soapaction",
-        ),
-        "signature_patterns": (
+        ],
+        "signature_patterns": [
             r"@WebService",
             r"@WebMethod",
             r"@WebParam",
@@ -104,15 +104,15 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"JAXBContext",
             r"Marshaller",
             r"Unmarshaller",
-        ),
-        "scope_patterns": (
+        ],
+        "scope_patterns": [
             r"(?i)soapservice",
             r"(?i)webserviceimpl",
             r"(?i)portimpl",
-        ),
+        ],
     },
     "messaging": {
-        "name_patterns": (
+        "name_patterns": [
             r"(?i)kafka",
             r"(?i)rabbit(?:mq)?",
             r"(?i)jms",
@@ -127,8 +127,8 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"(?i)pulsar",
             r"(?i)nats",
             r"(?i)redis(?:pub|sub)?",
-        ),
-        "signature_patterns": (
+        ],
+        "signature_patterns": [
             r"@KafkaListener",
             r"@JmsListener",
             r"@RabbitListener",
@@ -145,17 +145,17 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"MessageProducer",
             r"MessageConsumer",
             r"ConnectionFactory",
-        ),
-        "scope_patterns": (
+        ],
+        "scope_patterns": [
             r"(?i)kafkaconsumer",
             r"(?i)kafkaproducer",
             r"(?i)messagelistener",
             r"(?i)eventhandler",
             r"(?i)subscriber",
-        ),
+        ],
     },
     "socket": {
-        "name_patterns": (
+        "name_patterns": [
             r"(?i)socket",
             r"(?i)websocket",
             r"(?i)tcp",
@@ -165,8 +165,8 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"(?i)channel",
             r"(?i)serverchannel",
             r"(?i)socketchannel",
-        ),
-        "signature_patterns": (
+        ],
+        "signature_patterns": [
             r"@ServerEndpoint",
             r"@OnOpen",
             r"@OnClose",
@@ -181,16 +181,16 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"ServerSocketChannel",
             r"Selector",
             r"SelectionKey",
-        ),
-        "scope_patterns": (
+        ],
+        "scope_patterns": [
             r"(?i)websockethandler",
             r"(?i)socketserver",
             r"(?i)socketclient",
             r"(?i)channelhandler",
-        ),
+        ],
     },
     "database": {
-        "name_patterns": (
+        "name_patterns": [
             r"(?i)jdbc",
             r"(?i)repository",
             r"(?i)dao",
@@ -205,8 +205,8 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"(?i)hibernate",
             r"(?i)mybatis",
             r"(?i)jpa",
-        ),
-        "signature_patterns": (
+        ],
+        "signature_patterns": [
             r"@Repository",
             r"@Entity",
             r"@Table",
@@ -229,19 +229,19 @@ INTEGRATION_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
             r"SessionFactory",
             r"JdbcTemplate",
             r"NamedParameterJdbcTemplate",
-        ),
-        "scope_patterns": (
+        ],
+        "scope_patterns": [
             r"(?i)repository",
             r"(?i)dao",
             r"(?i)mapper",
             r"(?i)entitymanager",
-        ),
+        ],
     },
 }
 
 # Patterns that indicate high confidence (stronger signals)
-HIGH_CONFIDENCE_PATTERNS: dict[str, tuple[str, ...]] = {
-    "http_rest": (
+HIGH_CONFIDENCE_PATTERNS = {
+    "http_rest": [
         r"@RequestMapping",
         r"@GetMapping",
         r"@PostMapping",
@@ -250,29 +250,29 @@ HIGH_CONFIDENCE_PATTERNS: dict[str, tuple[str, ...]] = {
         r"@GET",
         r"@POST",
         r"@Path\(",
-    ),
-    "soap": (
+    ],
+    "soap": [
         r"@WebService",
         r"@WebMethod",
         r"SOAPMessage",
         r"SOAPEnvelope",
-    ),
-    "messaging": (
+    ],
+    "messaging": [
         r"@KafkaListener",
         r"@JmsListener",
         r"@RabbitListener",
         r"KafkaTemplate",
         r"JmsTemplate",
         r"RabbitTemplate",
-    ),
-    "socket": (
+    ],
+    "socket": [
         r"@ServerEndpoint",
         r"@OnOpen",
         r"@OnMessage",
         r"WebSocketHandler",
         r"ServerSocket",
-    ),
-    "database": (
+    ],
+    "database": [
         r"@Repository",
         r"@Entity",
         r"@Query",
@@ -280,25 +280,25 @@ HIGH_CONFIDENCE_PATTERNS: dict[str, tuple[str, ...]] = {
         r"EntityManager",
         r"JdbcTemplate",
         r"PreparedStatement",
-    ),
+    ],
 }
 
 # Strong keywords that indicate medium confidence for name matches
-STRONG_KEYWORDS: tuple[str, ...] = (
+STRONG_KEYWORDS = [
     "controller",
     "repository",
     "listener",
     "handler",
     "template",
-)
+]
 
 
-def first_matching_pattern(text: str | None, patterns: tuple[str, ...]) -> str | None:
+def first_matching_pattern(text: str | None, patterns: list[str]) -> str | None:
     """Find the first pattern that matches the text.
 
     Args:
         text: The text to check (can be None).
-        patterns: Tuple of regex patterns to match against.
+        patterns: List of regex patterns to match against.
 
     Returns:
         The first matched pattern string, or None if no match.
@@ -314,7 +314,7 @@ def first_matching_pattern(text: str | None, patterns: tuple[str, ...]) -> str |
 
 def _is_high_confidence_pattern(integration_type: str, matched_pattern: str) -> bool:
     """Check if the matched pattern is a high confidence pattern."""
-    high_patterns = HIGH_CONFIDENCE_PATTERNS.get(integration_type, ())
+    high_patterns = HIGH_CONFIDENCE_PATTERNS.get(integration_type, [])
     return any(re.search(hp, matched_pattern) for hp in high_patterns)
 
 
@@ -360,7 +360,7 @@ def determine_confidence(
 
 def _check_field(
     text: str | None,
-    patterns: tuple[str, ...],
+    patterns: list[str],
     integration_type: str,
     field_name: str,
     is_name: bool = False,
@@ -392,7 +392,7 @@ def _check_field(
 def _classify_for_integration_type(
     entry: CTagsEntry,
     integration_type: str,
-    patterns: dict[str, tuple[str, ...]],
+    patterns: dict[str, list[str]],
 ) -> Iterator[tuple[str, str, str]]:
     """Classify an entry for a single integration type.
 
