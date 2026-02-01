@@ -104,7 +104,7 @@ class TestCTagsCommandBuilding:
         assert cmd[0] == "ctags"
         assert "--output-format=json" in cmd
         assert "-R" in cmd
-        assert "--fields=+n+k+S+z+K+l" in cmd
+        assert "--fields=*" in cmd
         assert "--extras=+q" in cmd
 
     def test_build_command_with_languages(self) -> None:
@@ -267,7 +267,7 @@ class TestRepoSurveyorCTags:
 
     def test_run_ctags_returns_methods_with_signatures(self) -> None:
         """Should extract method signatures."""
-        surveyor = RepoSurveyor("/Users/asgupta/code/smojol/smojol-common")
+        surveyor = RepoSurveyor("/Users/asgupta/code/smojol")
         result = surveyor.coarse_structure(languages=["Java"])
 
         assert result.success
