@@ -26,7 +26,7 @@ class IntegrationPoint:
 class IntegrationDetectorResult:
     """Result of integration detection."""
 
-    integration_points: tuple[IntegrationPoint, ...]
+    integration_points: list[IntegrationPoint]
     entries_scanned: int
 
 
@@ -475,7 +475,7 @@ def detect_integrations(result: CTagsResult) -> IntegrationDetectorResult:
     Returns:
         IntegrationDetectorResult with detected integration points.
     """
-    integration_points = tuple(
+    integration_points = list(
         chain.from_iterable(
             _entry_to_integration_points(entry) for entry in result.entries
         )
