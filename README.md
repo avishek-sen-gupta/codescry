@@ -8,6 +8,7 @@ A Python library for analyzing repository technology stacks and code structure.
 - Scans indicator files (package.json, pyproject.toml, Dockerfile, etc.)
 - Associates technologies with their containing directories (useful for monorepos)
 - Extracts code symbols using Universal CTags
+- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases)
 - Persists analysis results to Neo4j graph database
 - Generates plain text reports
 
@@ -92,6 +93,59 @@ Each `CTagsEntry` contains:
 - `language`
 
 Requires [Universal CTags](https://github.com/universal-ctags/ctags) to be installed.
+
+### Integration Point Detection
+
+Detect system integration points in source code using pattern matching:
+
+```python
+from repo_surveyor import detect_integrations
+
+result = detect_integrations("/path/to/repo", languages=["Java"])
+
+for point in result.integration_points:
+    print(f"{point.integration_type.value}: {point.match.file_path}:{point.match.line_number}")
+    print(f"  Pattern: {point.matched_pattern}")
+    print(f"  Confidence: {point.confidence.value}")
+```
+
+Example output:
+
+```
+http_rest: /path/to/repo/src/UserController.java:15
+  Pattern: @RestController
+  Confidence: high
+database: /path/to/repo/src/UserRepository.java:8
+  Pattern: @Repository
+  Confidence: high
+messaging: /path/to/repo/src/OrderListener.java:12
+  Pattern: @KafkaListener
+  Confidence: high
+```
+
+#### Supported Integration Types
+
+| Type | Description | Example Patterns |
+|------|-------------|------------------|
+| `http_rest` | HTTP/REST endpoints and clients | `@RestController`, `@GetMapping`, `app.get(`, `use actix_web::` |
+| `soap` | SOAP/XML web services | `@WebService`, `SOAPMessage`, `XML PARSE` |
+| `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `MQGET` |
+| `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener` |
+| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `JdbcTemplate` |
+
+#### Supported Languages
+
+| Language | File Extensions | Notable Patterns |
+|----------|-----------------|------------------|
+| Java | `.java` | Spring annotations, JPA, JDBC, JMS |
+| Python | `.py` | Flask, FastAPI, Django, SQLAlchemy, Celery |
+| TypeScript | `.ts`, `.tsx` | NestJS, TypeORM, Prisma |
+| JavaScript | `.js`, `.jsx` | Express, Mongoose, Sequelize |
+| Rust | `.rs` | Actix, Axum, Diesel, SQLx |
+| Go | `.go` | Gin, Echo, GORM |
+| C# | `.cs` | ASP.NET, Entity Framework, SignalR |
+| COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ |
+| PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ |
 
 ### Persisting to Neo4j
 
