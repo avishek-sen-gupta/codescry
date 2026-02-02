@@ -5,6 +5,7 @@ from .analysis_graph_builder import AnalysisGraphBuilder, survey_and_persist
 from .integration_detector import (
     Confidence,
     EntityType,
+    FileMatch,
     IntegrationDetectorResult,
     IntegrationPoint,
     IntegrationType,
@@ -21,6 +22,7 @@ __all__ = [
     "CTagsResult",
     "DirectoryMarker",
     "EntityType",
+    "FileMatch",
     "IntegrationDetectorResult",
     "IntegrationPoint",
     "IntegrationType",

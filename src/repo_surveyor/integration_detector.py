@@ -1,7 +1,7 @@
-"""Integration point detection from CTags output.
+"""Integration point detection from file contents.
 
 Detects system integration points (HTTP, SOAP, messaging, sockets, database)
-from code symbols using text search and regex heuristics.
+from source file contents using regex pattern matching.
 
 Patterns are organized by language to support language-specific conventions.
 """
@@ -9,12 +9,8 @@ Patterns are organized by language to support language-specific conventions.
 import re
 from dataclasses import dataclass
 from enum import Enum
-from itertools import chain
 from pathlib import Path
 from typing import Iterator
-
-
-from .ctags import CTagsEntry, CTagsResult
 
 
 class IntegrationType(Enum):
@@ -38,15 +34,25 @@ class Confidence(Enum):
 class EntityType(Enum):
     """Type of entity where integration was detected."""
 
-    CODE_SYMBOL = "code_symbol"
+    FILE_CONTENT = "file_content"
     DIRECTORY = "directory"
+
+
+@dataclass(frozen=True)
+class FileMatch:
+    """A match found in a file."""
+
+    file_path: str
+    line_number: int
+    line_content: str
+    language: str
 
 
 @dataclass(frozen=True)
 class IntegrationPoint:
     """A detected integration point."""
 
-    entry: CTagsEntry
+    match: FileMatch
     integration_type: IntegrationType
     confidence: Confidence
     matched_pattern: str
@@ -58,23 +64,34 @@ class IntegrationDetectorResult:
     """Result of integration detection."""
 
     integration_points: list[IntegrationPoint]
-    entries_scanned: int
+    files_scanned: int
 
+
+# File extension to language mapping
+EXTENSION_TO_LANGUAGE = {
+    ".java": "Java",
+    ".rs": "Rust",
+    ".py": "Python",
+    ".ts": "TypeScript",
+    ".tsx": "TypeScript",
+    ".js": "JavaScript",
+    ".jsx": "JavaScript",
+    ".go": "Go",
+    ".cs": "C#",
+    ".kt": "Kotlin",
+    ".scala": "Scala",
+    ".rb": "Ruby",
+    ".php": "PHP",
+}
 
 # Common patterns that apply across all languages
 COMMON_PATTERNS = {
     IntegrationType.HTTP_REST: {
-        "name_patterns": [
-            r"(?i)http",
-            r"(?i)rest(?:ful)?",
-            r"(?i)api(?:client|handler)?",
-            r"(?i)endpoint",
-            r"(?i)web(?:client|service)",
-        ],
-        "signature_patterns": [],
-        "scope_patterns": [
-            r"(?i)controller",
-            r"(?i)resource",
+        "patterns": [
+            (r"(?i)\bhttp\b", Confidence.LOW),
+            (r"(?i)\brest(?:ful)?\b", Confidence.LOW),
+            (r"(?i)\bapi\b", Confidence.LOW),
+            (r"(?i)\bendpoint\b", Confidence.LOW),
         ],
         "directory_patterns": [
             r"(?i)^controllers?$",
@@ -82,48 +99,29 @@ COMMON_PATTERNS = {
             r"(?i)^rest$",
             r"(?i)^endpoints?$",
             r"(?i)^resources?$",
-            r"(?i)^web$",
-            r"(?i)^http$",
             r"(?i)^handlers?$",
             r"(?i)^routes?$",
         ],
     },
     IntegrationType.SOAP: {
-        "name_patterns": [
-            r"(?i)soap",
-            r"(?i)wsdl",
-            r"(?i)xml(?:service|client|handler)",
-            r"(?i)webservice",
-            r"(?i)envelope",
-        ],
-        "signature_patterns": [],
-        "scope_patterns": [
-            r"(?i)soapservice",
+        "patterns": [
+            (r"(?i)\bsoap\b", Confidence.MEDIUM),
+            (r"(?i)\bwsdl\b", Confidence.HIGH),
+            (r"(?i)\benvelope\b", Confidence.LOW),
         ],
         "directory_patterns": [
             r"(?i)^soap$",
             r"(?i)^wsdl$",
             r"(?i)^webservices?$",
-            r"(?i)^ws$",
         ],
     },
     IntegrationType.MESSAGING: {
-        "name_patterns": [
-            r"(?i)kafka",
-            r"(?i)rabbit(?:mq)?",
-            r"(?i)queue",
-            r"(?i)topic",
-            r"(?i)publisher",
-            r"(?i)subscriber",
-            r"(?i)event(?:handler|listener|publisher|bus)?",
-            r"(?i)amqp",
-            r"(?i)pulsar",
-            r"(?i)nats",
-        ],
-        "signature_patterns": [],
-        "scope_patterns": [
-            r"(?i)eventhandler",
-            r"(?i)subscriber",
+        "patterns": [
+            (r"(?i)\bkafka\b", Confidence.HIGH),
+            (r"(?i)\brabbit(?:mq)?\b", Confidence.HIGH),
+            (r"(?i)\bamqp\b", Confidence.HIGH),
+            (r"(?i)\bpulsar\b", Confidence.HIGH),
+            (r"(?i)\bnats\b", Confidence.MEDIUM),
         ],
         "directory_patterns": [
             r"(?i)^messaging$",
@@ -131,45 +129,23 @@ COMMON_PATTERNS = {
             r"(?i)^rabbit(?:mq)?$",
             r"(?i)^queues?$",
             r"(?i)^events?$",
-            r"(?i)^publishers?$",
-            r"(?i)^subscribers?$",
-            r"(?i)^listeners?$",
         ],
     },
     IntegrationType.SOCKET: {
-        "name_patterns": [
-            r"(?i)socket",
-            r"(?i)websocket",
-            r"(?i)tcp",
-            r"(?i)udp",
-        ],
-        "signature_patterns": [],
-        "scope_patterns": [
-            r"(?i)websockethandler",
-            r"(?i)socketserver",
-            r"(?i)socketclient",
+        "patterns": [
+            (r"(?i)\bwebsocket\b", Confidence.HIGH),
+            (r"(?i)\btcp\b", Confidence.MEDIUM),
+            (r"(?i)\budp\b", Confidence.MEDIUM),
         ],
         "directory_patterns": [
             r"(?i)^sockets?$",
             r"(?i)^websockets?$",
-            r"(?i)^tcp$",
-            r"(?i)^udp$",
         ],
     },
     IntegrationType.DATABASE: {
-        "name_patterns": [
-            r"(?i)repository",
-            r"(?i)dao",
-            r"(?i)database",
-            r"(?i)datasource",
-            r"(?i)query",
-            r"(?i)crud",
-            r"(?i)persist",
-        ],
-        "signature_patterns": [],
-        "scope_patterns": [
-            r"(?i)repository",
-            r"(?i)dao",
+        "patterns": [
+            (r"(?i)\bdatabase\b", Confidence.LOW),
+            (r"(?i)\bdatasource\b", Confidence.MEDIUM),
         ],
         "directory_patterns": [
             r"(?i)^repositor(?:y|ies)$",
@@ -177,1138 +153,563 @@ COMMON_PATTERNS = {
             r"(?i)^database$",
             r"(?i)^db$",
             r"(?i)^persistence$",
-            r"(?i)^entities$",
             r"(?i)^models?$",
-            r"(?i)^mappers?$",
         ],
     },
 }
 
-# Language-specific patterns
+# Language-specific patterns with confidence levels
 LANGUAGE_PATTERNS = {
     "Java": {
         IntegrationType.HTTP_REST: {
-            "name_patterns": [
-                r"(?i)request(?:handler|mapping)?",
-                r"(?i)response",
-                r"(?i)get(?:mapping|request)",
-                r"(?i)post(?:mapping|request)",
-                r"(?i)put(?:mapping|request)",
-                r"(?i)delete(?:mapping|request)",
-                r"(?i)patch(?:mapping|request)",
-                r"(?i)servlet",
-            ],
-            "signature_patterns": [
-                r"@RequestMapping",
-                r"@GetMapping",
-                r"@PostMapping",
-                r"@PutMapping",
-                r"@DeleteMapping",
-                r"@PatchMapping",
-                r"@RestController",
-                r"@Controller",
-                r"@RequestBody",
-                r"@ResponseBody",
-                r"@PathVariable",
-                r"@RequestParam",
-                r"HttpServletRequest",
-                r"HttpServletResponse",
-                r"@GET",
-                r"@POST",
-                r"@PUT",
-                r"@DELETE",
-                r"@Path\(",
-                r"@Produces",
-                r"@Consumes",
-            ],
-            "scope_patterns": [
-                r"(?i)restcontroller",
-                r"(?i)apicontroller",
-                r"(?i)webcontroller",
+            "patterns": [
+                (r"@RequestMapping", Confidence.HIGH),
+                (r"@GetMapping", Confidence.HIGH),
+                (r"@PostMapping", Confidence.HIGH),
+                (r"@PutMapping", Confidence.HIGH),
+                (r"@DeleteMapping", Confidence.HIGH),
+                (r"@PatchMapping", Confidence.HIGH),
+                (r"@RestController", Confidence.HIGH),
+                (r"@Controller", Confidence.HIGH),
+                (r"@RequestBody", Confidence.HIGH),
+                (r"@ResponseBody", Confidence.HIGH),
+                (r"@PathVariable", Confidence.HIGH),
+                (r"@RequestParam", Confidence.HIGH),
+                (r"@GET\b", Confidence.HIGH),
+                (r"@POST\b", Confidence.HIGH),
+                (r"@PUT\b", Confidence.HIGH),
+                (r"@DELETE\b", Confidence.HIGH),
+                (r"@Path\(", Confidence.HIGH),
+                (r"@Produces", Confidence.HIGH),
+                (r"@Consumes", Confidence.HIGH),
+                (r"HttpServletRequest", Confidence.MEDIUM),
+                (r"HttpServletResponse", Confidence.MEDIUM),
             ],
         },
         IntegrationType.SOAP: {
-            "name_patterns": [
-                r"(?i)porttype",
-                r"(?i)binding",
-                r"(?i)soapaction",
-            ],
-            "signature_patterns": [
-                r"@WebService",
-                r"@WebMethod",
-                r"@WebParam",
-                r"@SOAPBinding",
-                r"@WebResult",
-                r"SOAPMessage",
-                r"SOAPEnvelope",
-                r"SOAPBody",
-                r"SOAPHeader",
-                r"JAXBContext",
-                r"Marshaller",
-                r"Unmarshaller",
-            ],
-            "scope_patterns": [
-                r"(?i)webserviceimpl",
-                r"(?i)portimpl",
+            "patterns": [
+                (r"@WebService", Confidence.HIGH),
+                (r"@WebMethod", Confidence.HIGH),
+                (r"@WebParam", Confidence.HIGH),
+                (r"@SOAPBinding", Confidence.HIGH),
+                (r"SOAPMessage", Confidence.HIGH),
+                (r"SOAPEnvelope", Confidence.HIGH),
+                (r"JAXBContext", Confidence.MEDIUM),
             ],
         },
         IntegrationType.MESSAGING: {
-            "name_patterns": [
-                r"(?i)jms",
-                r"(?i)message(?:handler|listener|producer|consumer|sender|receiver)?",
-                r"(?i)activemq",
-            ],
-            "signature_patterns": [
-                r"@KafkaListener",
-                r"@JmsListener",
-                r"@RabbitListener",
-                r"@StreamListener",
-                r"@SendTo",
-                r"@EnableKafka",
-                r"@EnableJms",
-                r"@EnableRabbit",
-                r"KafkaTemplate",
-                r"JmsTemplate",
-                r"RabbitTemplate",
-                r"MessageChannel",
-                r"MessageListener",
-                r"MessageProducer",
-                r"MessageConsumer",
-                r"ConnectionFactory",
-            ],
-            "scope_patterns": [
-                r"(?i)kafkaconsumer",
-                r"(?i)kafkaproducer",
-                r"(?i)messagelistener",
+            "patterns": [
+                (r"@KafkaListener", Confidence.HIGH),
+                (r"@JmsListener", Confidence.HIGH),
+                (r"@RabbitListener", Confidence.HIGH),
+                (r"@StreamListener", Confidence.HIGH),
+                (r"@SendTo", Confidence.HIGH),
+                (r"KafkaTemplate", Confidence.HIGH),
+                (r"JmsTemplate", Confidence.HIGH),
+                (r"RabbitTemplate", Confidence.HIGH),
+                (r"MessageListener", Confidence.MEDIUM),
+                (r"MessageProducer", Confidence.MEDIUM),
+                (r"MessageConsumer", Confidence.MEDIUM),
             ],
         },
         IntegrationType.SOCKET: {
-            "name_patterns": [
-                r"(?i)netty",
-                r"(?i)nio",
-                r"(?i)channel",
-                r"(?i)serverchannel",
-                r"(?i)socketchannel",
-            ],
-            "signature_patterns": [
-                r"@ServerEndpoint",
-                r"@OnOpen",
-                r"@OnClose",
-                r"@OnMessage",
-                r"@OnError",
-                r"@EnableWebSocket",
-                r"WebSocketHandler",
-                r"WebSocketSession",
-                r"ServerSocket",
-                r"DatagramSocket",
-                r"SocketChannel",
-                r"ServerSocketChannel",
-                r"Selector",
-                r"SelectionKey",
-            ],
-            "scope_patterns": [
-                r"(?i)channelhandler",
+            "patterns": [
+                (r"@ServerEndpoint", Confidence.HIGH),
+                (r"@OnOpen", Confidence.HIGH),
+                (r"@OnClose", Confidence.HIGH),
+                (r"@OnMessage", Confidence.HIGH),
+                (r"@OnError", Confidence.HIGH),
+                (r"WebSocketHandler", Confidence.HIGH),
+                (r"ServerSocket\b", Confidence.HIGH),
+                (r"DatagramSocket", Confidence.HIGH),
+                (r"SocketChannel", Confidence.MEDIUM),
             ],
         },
         IntegrationType.DATABASE: {
-            "name_patterns": [
-                r"(?i)jdbc",
-                r"(?i)entitymanager",
-                r"(?i)session(?:factory)?",
-                r"(?i)transaction",
-                r"(?i)hibernate",
-                r"(?i)mybatis",
-                r"(?i)jpa",
-            ],
-            "signature_patterns": [
-                r"@Repository",
-                r"@Entity",
-                r"@Table",
-                r"@Query",
-                r"@Transactional",
-                r"@PersistenceContext",
-                r"@Id",
-                r"@Column",
-                r"@JoinColumn",
-                r"@OneToMany",
-                r"@ManyToOne",
-                r"@ManyToMany",
-                r"@OneToOne",
-                r"Connection",
-                r"PreparedStatement",
-                r"ResultSet",
-                r"Statement",
-                r"DataSource",
-                r"EntityManager",
-                r"SessionFactory",
-                r"JdbcTemplate",
-                r"NamedParameterJdbcTemplate",
-            ],
-            "scope_patterns": [
-                r"(?i)mapper",
-                r"(?i)entitymanager",
+            "patterns": [
+                (r"@Repository", Confidence.HIGH),
+                (r"@Entity", Confidence.HIGH),
+                (r"@Table", Confidence.HIGH),
+                (r"@Query", Confidence.HIGH),
+                (r"@Transactional", Confidence.HIGH),
+                (r"@PersistenceContext", Confidence.HIGH),
+                (r"@Column", Confidence.MEDIUM),
+                (r"@JoinColumn", Confidence.MEDIUM),
+                (r"@OneToMany", Confidence.MEDIUM),
+                (r"@ManyToOne", Confidence.MEDIUM),
+                (r"@ManyToMany", Confidence.MEDIUM),
+                (r"JdbcTemplate", Confidence.HIGH),
+                (r"EntityManager", Confidence.HIGH),
+                (r"SessionFactory", Confidence.HIGH),
+                (r"PreparedStatement", Confidence.HIGH),
+                (r"ResultSet\b", Confidence.MEDIUM),
             ],
         },
     },
     "Rust": {
         IntegrationType.HTTP_REST: {
-            "name_patterns": [
-                r"(?i)actix",
-                r"(?i)axum",
-                r"(?i)rocket",
-                r"(?i)warp",
-                r"(?i)hyper",
-                r"(?i)reqwest",
-                r"(?i)handler",
-                r"(?i)router",
-                r"(?i)route",
-            ],
-            "signature_patterns": [
-                r"#\[get\(",
-                r"#\[post\(",
-                r"#\[put\(",
-                r"#\[delete\(",
-                r"#\[patch\(",
-                r"#\[route\(",
-                r"#\[api\(",
-                r"HttpRequest",
-                r"HttpResponse",
-                r"web::Json",
-                r"web::Path",
-                r"web::Query",
-                r"web::Data",
-                r"web::Form",
-                r"Json<",
-                r"Path<",
-                r"Query<",
-                r"State<",
-                r"Extension<",
-                r"Router::",
-                r"\.route\(",
-            ],
-            "scope_patterns": [
-                r"(?i)handler",
-                r"(?i)controller",
+            "patterns": [
+                (r'#\[get\("', Confidence.HIGH),
+                (r'#\[post\("', Confidence.HIGH),
+                (r'#\[put\("', Confidence.HIGH),
+                (r'#\[delete\("', Confidence.HIGH),
+                (r'#\[patch\("', Confidence.HIGH),
+                (r'#\[route\("', Confidence.HIGH),
+                (r"HttpResponse", Confidence.HIGH),
+                (r"HttpRequest", Confidence.HIGH),
+                (r"web::Json", Confidence.HIGH),
+                (r"web::Path", Confidence.HIGH),
+                (r"web::Query", Confidence.HIGH),
+                (r"web::Data", Confidence.HIGH),
+                (r"Json<", Confidence.HIGH),
+                (r"Path<", Confidence.MEDIUM),
+                (r"Query<", Confidence.MEDIUM),
+                (r"State<", Confidence.MEDIUM),
+                (r"Router::", Confidence.MEDIUM),
+                (r"\.route\(", Confidence.MEDIUM),
+                (r"use actix_web::", Confidence.HIGH),
+                (r"use axum::", Confidence.HIGH),
+                (r"use rocket::", Confidence.HIGH),
+                (r"use warp::", Confidence.HIGH),
+                (r"use hyper::", Confidence.MEDIUM),
+                (r"use reqwest::", Confidence.MEDIUM),
             ],
         },
         IntegrationType.SOAP: {
-            "name_patterns": [],
-            "signature_patterns": [],
-            "scope_patterns": [],
+            "patterns": [],
         },
         IntegrationType.MESSAGING: {
-            "name_patterns": [
-                r"(?i)rdkafka",
-                r"(?i)lapin",
-                r"(?i)tokio_amqp",
+            "patterns": [
+                (r"use rdkafka::", Confidence.HIGH),
+                (r"use lapin::", Confidence.HIGH),
+                (r"StreamConsumer", Confidence.HIGH),
+                (r"FutureProducer", Confidence.HIGH),
+                (r"BaseConsumer", Confidence.MEDIUM),
+                (r"BaseProducer", Confidence.MEDIUM),
             ],
-            "signature_patterns": [
-                r"StreamConsumer",
-                r"FutureProducer",
-                r"BaseConsumer",
-                r"BaseProducer",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.SOCKET: {
-            "name_patterns": [
-                r"(?i)tokio",
-                r"(?i)tungstenite",
-                r"(?i)async_std",
+            "patterns": [
+                (r"TcpListener::", Confidence.HIGH),
+                (r"TcpStream::", Confidence.HIGH),
+                (r"UdpSocket::", Confidence.HIGH),
+                (r"use tokio::net::", Confidence.HIGH),
+                (r"use async_std::net::", Confidence.HIGH),
+                (r"use tungstenite::", Confidence.HIGH),
+                (r"WebSocketStream", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"TcpListener",
-                r"TcpStream",
-                r"UdpSocket",
-                r"WebSocketStream",
-                r"tokio::net::",
-                r"async_std::net::",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.DATABASE: {
-            "name_patterns": [
-                r"(?i)diesel",
-                r"(?i)sqlx",
-                r"(?i)sea_orm",
-                r"(?i)tokio_postgres",
-                r"(?i)rusqlite",
+            "patterns": [
+                (r"use diesel::", Confidence.HIGH),
+                (r"use sqlx::", Confidence.HIGH),
+                (r"use sea_orm::", Confidence.HIGH),
+                (r"use tokio_postgres::", Confidence.HIGH),
+                (r"use rusqlite::", Confidence.HIGH),
+                (r"#\[derive\(.*Queryable", Confidence.HIGH),
+                (r"#\[derive\(.*Insertable", Confidence.HIGH),
+                (r"#\[table_name", Confidence.HIGH),
+                (r"#\[diesel\(", Confidence.HIGH),
+                (r"PgConnection", Confidence.HIGH),
+                (r"SqliteConnection", Confidence.HIGH),
+                (r"MysqlConnection", Confidence.HIGH),
+                (r"sqlx::query", Confidence.HIGH),
+                (r"query_as!", Confidence.HIGH),
+                (r"query!", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"#\[derive\(.*Queryable",
-                r"#\[derive\(.*Insertable",
-                r"#\[derive\(.*Selectable",
-                r"#\[table_name",
-                r"#\[diesel\(",
-                r"PgConnection",
-                r"SqliteConnection",
-                r"MysqlConnection",
-                r"Pool<",
-                r"query_as!",
-                r"query!",
-                r"sqlx::query",
-            ],
-            "scope_patterns": [],
         },
     },
     "Python": {
         IntegrationType.HTTP_REST: {
-            "name_patterns": [
-                r"(?i)flask",
-                r"(?i)django",
-                r"(?i)fastapi",
-                r"(?i)starlette",
-                r"(?i)aiohttp",
-                r"(?i)requests",
-                r"(?i)httpx",
-                r"(?i)view",
-            ],
-            "signature_patterns": [
-                r"@app\.route",
-                r"@app\.get",
-                r"@app\.post",
-                r"@app\.put",
-                r"@app\.delete",
-                r"@router\.get",
-                r"@router\.post",
-                r"@api_view",
-                r"@action",
-                r"APIView",
-                r"ViewSet",
-                r"GenericAPIView",
-                r"Request",
-                r"Response",
-            ],
-            "scope_patterns": [
-                r"(?i)view",
-                r"(?i)viewset",
+            "patterns": [
+                (r"@app\.route", Confidence.HIGH),
+                (r"@app\.get", Confidence.HIGH),
+                (r"@app\.post", Confidence.HIGH),
+                (r"@app\.put", Confidence.HIGH),
+                (r"@app\.delete", Confidence.HIGH),
+                (r"@router\.get", Confidence.HIGH),
+                (r"@router\.post", Confidence.HIGH),
+                (r"@api_view", Confidence.HIGH),
+                (r"@action", Confidence.MEDIUM),
+                (r"from flask import", Confidence.HIGH),
+                (r"from fastapi import", Confidence.HIGH),
+                (r"from django\.http import", Confidence.HIGH),
+                (r"from rest_framework", Confidence.HIGH),
+                (r"from starlette", Confidence.MEDIUM),
+                (r"from aiohttp import", Confidence.MEDIUM),
+                (r"import requests", Confidence.MEDIUM),
+                (r"import httpx", Confidence.MEDIUM),
+                (r"APIView", Confidence.HIGH),
+                (r"ViewSet", Confidence.HIGH),
+                (r"GenericAPIView", Confidence.HIGH),
             ],
         },
         IntegrationType.SOAP: {
-            "name_patterns": [
-                r"(?i)zeep",
-                r"(?i)suds",
+            "patterns": [
+                (r"from zeep import", Confidence.HIGH),
+                (r"import zeep", Confidence.HIGH),
+                (r"from suds", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"Client\(",
-                r"zeep\.Client",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.MESSAGING: {
-            "name_patterns": [
-                r"(?i)celery",
-                r"(?i)kombu",
-                r"(?i)pika",
-                r"(?i)aiokafka",
-                r"(?i)kafka_python",
+            "patterns": [
+                (r"@app\.task", Confidence.HIGH),
+                (r"@celery\.task", Confidence.HIGH),
+                (r"@shared_task", Confidence.HIGH),
+                (r"from celery import", Confidence.HIGH),
+                (r"from kombu import", Confidence.HIGH),
+                (r"import pika", Confidence.HIGH),
+                (r"from kafka import", Confidence.HIGH),
+                (r"from aiokafka import", Confidence.HIGH),
+                (r"KafkaConsumer", Confidence.HIGH),
+                (r"KafkaProducer", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"@app\.task",
-                r"@celery\.task",
-                r"@shared_task",
-                r"KafkaConsumer",
-                r"KafkaProducer",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.SOCKET: {
-            "name_patterns": [
-                r"(?i)websockets?",
-                r"(?i)socketio",
-                r"(?i)asyncio",
+            "patterns": [
+                (r"import websockets", Confidence.HIGH),
+                (r"from websockets import", Confidence.HIGH),
+                (r"import socketio", Confidence.HIGH),
+                (r"from socketio import", Confidence.HIGH),
+                (r"@socketio\.on", Confidence.HIGH),
+                (r"@sio\.on", Confidence.HIGH),
+                (r"import socket\b", Confidence.MEDIUM),
             ],
-            "signature_patterns": [
-                r"@socketio\.on",
-                r"@sio\.on",
-                r"websocket_connect",
-                r"WebSocket",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.DATABASE: {
-            "name_patterns": [
-                r"(?i)sqlalchemy",
-                r"(?i)peewee",
-                r"(?i)tortoise",
-                r"(?i)django\.db",
-                r"(?i)psycopg",
-                r"(?i)pymysql",
-                r"(?i)asyncpg",
-            ],
-            "signature_patterns": [
-                r"@declarative",
-                r"Column\(",
-                r"relationship\(",
-                r"ForeignKey\(",
-                r"Base\.metadata",
-                r"Session\(",
-                r"models\.Model",
-                r"CharField",
-                r"IntegerField",
-                r"TextField",
-            ],
-            "scope_patterns": [
-                r"(?i)model",
+            "patterns": [
+                (r"from sqlalchemy import", Confidence.HIGH),
+                (r"import sqlalchemy", Confidence.HIGH),
+                (r"from django\.db import", Confidence.HIGH),
+                (r"from peewee import", Confidence.HIGH),
+                (r"from tortoise", Confidence.HIGH),
+                (r"import psycopg", Confidence.HIGH),
+                (r"import pymysql", Confidence.HIGH),
+                (r"import asyncpg", Confidence.HIGH),
+                (r"@declarative", Confidence.HIGH),
+                (r"models\.Model", Confidence.HIGH),
+                (r"Column\(", Confidence.MEDIUM),
+                (r"relationship\(", Confidence.MEDIUM),
+                (r"ForeignKey\(", Confidence.MEDIUM),
             ],
         },
     },
     "TypeScript": {
         IntegrationType.HTTP_REST: {
-            "name_patterns": [
-                r"(?i)express",
-                r"(?i)nestjs",
-                r"(?i)fastify",
-                r"(?i)koa",
-                r"(?i)hapi",
-                r"(?i)axios",
-                r"(?i)fetch",
-            ],
-            "signature_patterns": [
-                r"@Controller\(",
-                r"@Get\(",
-                r"@Post\(",
-                r"@Put\(",
-                r"@Delete\(",
-                r"@Patch\(",
-                r"@Body\(",
-                r"@Param\(",
-                r"@Query\(",
-                r"app\.get\(",
-                r"app\.post\(",
-                r"router\.get\(",
-                r"router\.post\(",
-                r"Request",
-                r"Response",
-            ],
-            "scope_patterns": [
-                r"(?i)controller",
+            "patterns": [
+                (r"@Controller\(", Confidence.HIGH),
+                (r"@Get\(", Confidence.HIGH),
+                (r"@Post\(", Confidence.HIGH),
+                (r"@Put\(", Confidence.HIGH),
+                (r"@Delete\(", Confidence.HIGH),
+                (r"@Patch\(", Confidence.HIGH),
+                (r"@Body\(", Confidence.HIGH),
+                (r"@Param\(", Confidence.HIGH),
+                (r"@Query\(", Confidence.HIGH),
+                (r"from '@nestjs/common'", Confidence.HIGH),
+                (r"from 'express'", Confidence.HIGH),
+                (r"from 'fastify'", Confidence.HIGH),
+                (r"from 'koa'", Confidence.MEDIUM),
+                (r"import axios", Confidence.MEDIUM),
+                (r"app\.get\(", Confidence.HIGH),
+                (r"app\.post\(", Confidence.HIGH),
+                (r"router\.get\(", Confidence.HIGH),
+                (r"router\.post\(", Confidence.HIGH),
             ],
         },
         IntegrationType.SOAP: {
-            "name_patterns": [
-                r"(?i)soap",
+            "patterns": [
+                (r"import.*soap", Confidence.MEDIUM),
             ],
-            "signature_patterns": [],
-            "scope_patterns": [],
         },
         IntegrationType.MESSAGING: {
-            "name_patterns": [
-                r"(?i)kafkajs",
-                r"(?i)amqplib",
-                r"(?i)bull",
+            "patterns": [
+                (r"@MessagePattern\(", Confidence.HIGH),
+                (r"@EventPattern\(", Confidence.HIGH),
+                (r"from 'kafkajs'", Confidence.HIGH),
+                (r"from 'amqplib'", Confidence.HIGH),
+                (r"from 'bull'", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"@MessagePattern\(",
-                r"@EventPattern\(",
-                r"Kafka",
-                r"Consumer",
-                r"Producer",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.SOCKET: {
-            "name_patterns": [
-                r"(?i)socket\.io",
-                r"(?i)ws",
+            "patterns": [
+                (r"@WebSocketGateway", Confidence.HIGH),
+                (r"@SubscribeMessage", Confidence.HIGH),
+                (r"from 'socket.io'", Confidence.HIGH),
+                (r"from 'ws'", Confidence.HIGH),
+                (r"io\.on\(", Confidence.HIGH),
+                (r"socket\.on\(", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"@WebSocketGateway",
-                r"@SubscribeMessage",
-                r"io\.on\(",
-                r"socket\.on\(",
-                r"WebSocket",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.DATABASE: {
-            "name_patterns": [
-                r"(?i)typeorm",
-                r"(?i)prisma",
-                r"(?i)sequelize",
-                r"(?i)mongoose",
-                r"(?i)knex",
-            ],
-            "signature_patterns": [
-                r"@Entity\(",
-                r"@Column\(",
-                r"@PrimaryGeneratedColumn",
-                r"@ManyToOne",
-                r"@OneToMany",
-                r"@Repository\(",
-                r"prisma\.",
-                r"Schema\(",
-            ],
-            "scope_patterns": [
-                r"(?i)repository",
-                r"(?i)entity",
+            "patterns": [
+                (r"@Entity\(", Confidence.HIGH),
+                (r"@Column\(", Confidence.MEDIUM),
+                (r"@PrimaryGeneratedColumn", Confidence.HIGH),
+                (r"@ManyToOne", Confidence.MEDIUM),
+                (r"@OneToMany", Confidence.MEDIUM),
+                (r"@Repository\(", Confidence.HIGH),
+                (r"from 'typeorm'", Confidence.HIGH),
+                (r"from '@prisma/client'", Confidence.HIGH),
+                (r"from 'sequelize'", Confidence.HIGH),
+                (r"from 'mongoose'", Confidence.HIGH),
+                (r"prisma\.", Confidence.HIGH),
             ],
         },
     },
     "JavaScript": {
         IntegrationType.HTTP_REST: {
-            "name_patterns": [
-                r"(?i)express",
-                r"(?i)fastify",
-                r"(?i)koa",
-                r"(?i)hapi",
-                r"(?i)axios",
-                r"(?i)fetch",
+            "patterns": [
+                (r"require\(['\"]express['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]fastify['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]koa['\"]\)", Confidence.MEDIUM),
+                (r"require\(['\"]axios['\"]\)", Confidence.MEDIUM),
+                (r"app\.get\(", Confidence.HIGH),
+                (r"app\.post\(", Confidence.HIGH),
+                (r"app\.put\(", Confidence.HIGH),
+                (r"app\.delete\(", Confidence.HIGH),
+                (r"router\.get\(", Confidence.HIGH),
+                (r"router\.post\(", Confidence.HIGH),
+                (r"fetch\(", Confidence.MEDIUM),
             ],
-            "signature_patterns": [
-                r"app\.get\(",
-                r"app\.post\(",
-                r"app\.put\(",
-                r"app\.delete\(",
-                r"router\.get\(",
-                r"router\.post\(",
-                r"req,\s*res",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.SOAP: {
-            "name_patterns": [
-                r"(?i)soap",
+            "patterns": [
+                (r"require\(['\"]soap['\"]\)", Confidence.MEDIUM),
             ],
-            "signature_patterns": [],
-            "scope_patterns": [],
         },
         IntegrationType.MESSAGING: {
-            "name_patterns": [
-                r"(?i)kafkajs",
-                r"(?i)amqplib",
-                r"(?i)bull",
+            "patterns": [
+                (r"require\(['\"]kafkajs['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]amqplib['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]bull['\"]\)", Confidence.HIGH),
+                (r"consumer\.run\(", Confidence.HIGH),
+                (r"producer\.send\(", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"consumer\.run\(",
-                r"producer\.send\(",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.SOCKET: {
-            "name_patterns": [
-                r"(?i)socket\.io",
-                r"(?i)ws",
+            "patterns": [
+                (r"require\(['\"]socket.io['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]ws['\"]\)", Confidence.HIGH),
+                (r"io\.on\(", Confidence.HIGH),
+                (r"socket\.on\(", Confidence.HIGH),
+                (r"new WebSocket\(", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"io\.on\(",
-                r"socket\.on\(",
-                r"WebSocket",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.DATABASE: {
-            "name_patterns": [
-                r"(?i)sequelize",
-                r"(?i)mongoose",
-                r"(?i)knex",
-                r"(?i)mongodb",
-            ],
-            "signature_patterns": [
-                r"Schema\(",
-                r"model\(",
-                r"define\(",
-            ],
-            "scope_patterns": [
-                r"(?i)model",
+            "patterns": [
+                (r"require\(['\"]sequelize['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]mongoose['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]knex['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]mongodb['\"]\)", Confidence.HIGH),
+                (r"mongoose\.Schema", Confidence.HIGH),
+                (r"mongoose\.model\(", Confidence.HIGH),
+                (r"Sequelize\.define\(", Confidence.HIGH),
             ],
         },
     },
     "Go": {
         IntegrationType.HTTP_REST: {
-            "name_patterns": [
-                r"(?i)gin",
-                r"(?i)echo",
-                r"(?i)fiber",
-                r"(?i)chi",
-                r"(?i)mux",
-                r"(?i)handler",
-            ],
-            "signature_patterns": [
-                r"http\.Handler",
-                r"http\.HandleFunc",
-                r"gin\.Context",
-                r"echo\.Context",
-                r"fiber\.Ctx",
-                r"\.GET\(",
-                r"\.POST\(",
-                r"\.PUT\(",
-                r"\.DELETE\(",
-                r"r\.HandleFunc\(",
-            ],
-            "scope_patterns": [
-                r"(?i)handler",
+            "patterns": [
+                (r'"github\.com/gin-gonic/gin"', Confidence.HIGH),
+                (r'"github\.com/labstack/echo"', Confidence.HIGH),
+                (r'"github\.com/gofiber/fiber"', Confidence.HIGH),
+                (r'"github\.com/go-chi/chi"', Confidence.HIGH),
+                (r'"github\.com/gorilla/mux"', Confidence.HIGH),
+                (r'"net/http"', Confidence.MEDIUM),
+                (r"http\.HandleFunc", Confidence.HIGH),
+                (r"http\.Handle\(", Confidence.HIGH),
+                (r"gin\.Context", Confidence.HIGH),
+                (r"echo\.Context", Confidence.HIGH),
+                (r"fiber\.Ctx", Confidence.HIGH),
+                (r"\.GET\(", Confidence.HIGH),
+                (r"\.POST\(", Confidence.HIGH),
+                (r"\.PUT\(", Confidence.HIGH),
+                (r"\.DELETE\(", Confidence.HIGH),
+                (r"r\.HandleFunc\(", Confidence.HIGH),
             ],
         },
         IntegrationType.SOAP: {
-            "name_patterns": [],
-            "signature_patterns": [],
-            "scope_patterns": [],
+            "patterns": [],
         },
         IntegrationType.MESSAGING: {
-            "name_patterns": [
-                r"(?i)sarama",
-                r"(?i)amqp",
-                r"(?i)nats",
+            "patterns": [
+                (r'"github\.com/Shopify/sarama"', Confidence.HIGH),
+                (r'"github\.com/streadway/amqp"', Confidence.HIGH),
+                (r'"github\.com/nats-io/nats\.go"', Confidence.HIGH),
+                (r"sarama\.NewConsumer", Confidence.HIGH),
+                (r"sarama\.NewProducer", Confidence.HIGH),
+                (r"amqp\.Dial", Confidence.HIGH),
             ],
-            "signature_patterns": [
-                r"sarama\.Consumer",
-                r"sarama\.Producer",
-                r"amqp\.Channel",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.SOCKET: {
-            "name_patterns": [
-                r"(?i)gorilla",
-                r"(?i)websocket",
+            "patterns": [
+                (r'"github\.com/gorilla/websocket"', Confidence.HIGH),
+                (r"websocket\.Upgrader", Confidence.HIGH),
+                (r"net\.Listen\(", Confidence.MEDIUM),
+                (r"net\.Dial\(", Confidence.MEDIUM),
             ],
-            "signature_patterns": [
-                r"websocket\.Upgrader",
-                r"websocket\.Conn",
-                r"net\.Listen",
-                r"net\.Dial",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.DATABASE: {
-            "name_patterns": [
-                r"(?i)gorm",
-                r"(?i)sqlx",
-                r"(?i)pgx",
-            ],
-            "signature_patterns": [
-                r"gorm\.Model",
-                r"db\.Create\(",
-                r"db\.Find\(",
-                r"db\.Where\(",
-                r"sql\.DB",
-                r"sql\.Open\(",
-            ],
-            "scope_patterns": [
-                r"(?i)repository",
+            "patterns": [
+                (r'"gorm\.io/gorm"', Confidence.HIGH),
+                (r'"github\.com/jmoiron/sqlx"', Confidence.HIGH),
+                (r'"github\.com/jackc/pgx"', Confidence.HIGH),
+                (r'"database/sql"', Confidence.MEDIUM),
+                (r"gorm\.Model", Confidence.HIGH),
+                (r"db\.Create\(", Confidence.HIGH),
+                (r"db\.Find\(", Confidence.HIGH),
+                (r"db\.Where\(", Confidence.HIGH),
+                (r"sql\.Open\(", Confidence.HIGH),
             ],
         },
     },
     "C#": {
         IntegrationType.HTTP_REST: {
-            "name_patterns": [
-                r"(?i)controller",
-                r"(?i)apicontroller",
-            ],
-            "signature_patterns": [
-                r"\[ApiController\]",
-                r"\[HttpGet\]",
-                r"\[HttpPost\]",
-                r"\[HttpPut\]",
-                r"\[HttpDelete\]",
-                r"\[Route\(",
-                r"\[FromBody\]",
-                r"\[FromQuery\]",
-                r"IActionResult",
-                r"ActionResult",
-                r"ControllerBase",
-            ],
-            "scope_patterns": [
-                r"(?i)controller",
+            "patterns": [
+                (r"\[ApiController\]", Confidence.HIGH),
+                (r"\[HttpGet\]", Confidence.HIGH),
+                (r"\[HttpPost\]", Confidence.HIGH),
+                (r"\[HttpPut\]", Confidence.HIGH),
+                (r"\[HttpDelete\]", Confidence.HIGH),
+                (r"\[Route\(", Confidence.HIGH),
+                (r"\[FromBody\]", Confidence.HIGH),
+                (r"\[FromQuery\]", Confidence.HIGH),
+                (r"ControllerBase", Confidence.HIGH),
+                (r"IActionResult", Confidence.MEDIUM),
+                (r"ActionResult<", Confidence.MEDIUM),
             ],
         },
         IntegrationType.SOAP: {
-            "name_patterns": [
-                r"(?i)wcf",
-                r"(?i)servicecontract",
+            "patterns": [
+                (r"\[ServiceContract\]", Confidence.HIGH),
+                (r"\[OperationContract\]", Confidence.HIGH),
+                (r"\[DataContract\]", Confidence.HIGH),
+                (r"\[DataMember\]", Confidence.MEDIUM),
             ],
-            "signature_patterns": [
-                r"\[ServiceContract\]",
-                r"\[OperationContract\]",
-                r"\[DataContract\]",
-                r"\[DataMember\]",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.MESSAGING: {
-            "name_patterns": [
-                r"(?i)masstransit",
-                r"(?i)nservicebus",
-                r"(?i)rebus",
+            "patterns": [
+                (r"using MassTransit", Confidence.HIGH),
+                (r"using NServiceBus", Confidence.HIGH),
+                (r"using Rebus", Confidence.HIGH),
+                (r"IConsumer<", Confidence.HIGH),
+                (r"IMessageHandler", Confidence.HIGH),
+                (r"IBus\b", Confidence.MEDIUM),
             ],
-            "signature_patterns": [
-                r"IConsumer<",
-                r"IMessageHandler",
-                r"IBus",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.SOCKET: {
-            "name_patterns": [
-                r"(?i)signalr",
+            "patterns": [
+                (r"using Microsoft\.AspNetCore\.SignalR", Confidence.HIGH),
+                (r": Hub\b", Confidence.HIGH),
+                (r"HubConnection", Confidence.HIGH),
+                (r"TcpClient", Confidence.MEDIUM),
+                (r"TcpListener", Confidence.MEDIUM),
             ],
-            "signature_patterns": [
-                r"Hub<",
-                r"HubConnection",
-                r"TcpClient",
-                r"TcpListener",
-                r"WebSocket",
-            ],
-            "scope_patterns": [],
         },
         IntegrationType.DATABASE: {
-            "name_patterns": [
-                r"(?i)entityframework",
-                r"(?i)dbcontext",
-                r"(?i)dapper",
-            ],
-            "signature_patterns": [
-                r"DbContext",
-                r"DbSet<",
-                r"\[Table\(",
-                r"\[Key\]",
-                r"\[Column\(",
-                r"IRepository",
-                r"SqlConnection",
-            ],
-            "scope_patterns": [
-                r"(?i)repository",
-                r"(?i)context",
+            "patterns": [
+                (r"using.*EntityFramework", Confidence.HIGH),
+                (r": DbContext", Confidence.HIGH),
+                (r"DbSet<", Confidence.HIGH),
+                (r"\[Table\(", Confidence.HIGH),
+                (r"\[Key\]", Confidence.MEDIUM),
+                (r"\[Column\(", Confidence.MEDIUM),
+                (r"SqlConnection", Confidence.HIGH),
+                (r"using Dapper", Confidence.HIGH),
             ],
         },
     },
 }
 
-# High confidence patterns by language
-HIGH_CONFIDENCE_PATTERNS = {
-    "common": {
-        IntegrationType.HTTP_REST: [],
-        IntegrationType.SOAP: [],
-        IntegrationType.MESSAGING: [],
-        IntegrationType.SOCKET: [],
-        IntegrationType.DATABASE: [],
-    },
-    "Java": {
-        IntegrationType.HTTP_REST: [
-            r"@RequestMapping",
-            r"@GetMapping",
-            r"@PostMapping",
-            r"@RestController",
-            r"@Controller",
-            r"@GET",
-            r"@POST",
-            r"@Path\(",
-        ],
-        IntegrationType.SOAP: [
-            r"@WebService",
-            r"@WebMethod",
-            r"SOAPMessage",
-            r"SOAPEnvelope",
-        ],
-        IntegrationType.MESSAGING: [
-            r"@KafkaListener",
-            r"@JmsListener",
-            r"@RabbitListener",
-            r"KafkaTemplate",
-            r"JmsTemplate",
-            r"RabbitTemplate",
-        ],
-        IntegrationType.SOCKET: [
-            r"@ServerEndpoint",
-            r"@OnOpen",
-            r"@OnMessage",
-            r"WebSocketHandler",
-            r"ServerSocket",
-        ],
-        IntegrationType.DATABASE: [
-            r"@Repository",
-            r"@Entity",
-            r"@Query",
-            r"@Transactional",
-            r"EntityManager",
-            r"JdbcTemplate",
-            r"PreparedStatement",
-        ],
-    },
-    "Rust": {
-        IntegrationType.HTTP_REST: [
-            r"#\[get\(",
-            r"#\[post\(",
-            r"#\[put\(",
-            r"#\[delete\(",
-            r"HttpResponse",
-            r"web::Json",
-        ],
-        IntegrationType.SOAP: [],
-        IntegrationType.MESSAGING: [
-            r"StreamConsumer",
-            r"FutureProducer",
-        ],
-        IntegrationType.SOCKET: [
-            r"TcpListener",
-            r"WebSocketStream",
-        ],
-        IntegrationType.DATABASE: [
-            r"#\[derive\(.*Queryable",
-            r"#\[diesel\(",
-            r"sqlx::query",
-            r"PgConnection",
-        ],
-    },
-    "Python": {
-        IntegrationType.HTTP_REST: [
-            r"@app\.route",
-            r"@app\.get",
-            r"@app\.post",
-            r"@router\.get",
-            r"@api_view",
-            r"APIView",
-        ],
-        IntegrationType.SOAP: [],
-        IntegrationType.MESSAGING: [
-            r"@app\.task",
-            r"@celery\.task",
-            r"KafkaConsumer",
-            r"KafkaProducer",
-        ],
-        IntegrationType.SOCKET: [
-            r"@socketio\.on",
-            r"WebSocket",
-        ],
-        IntegrationType.DATABASE: [
-            r"@declarative",
-            r"models\.Model",
-            r"Session\(",
-        ],
-    },
-    "TypeScript": {
-        IntegrationType.HTTP_REST: [
-            r"@Controller\(",
-            r"@Get\(",
-            r"@Post\(",
-        ],
-        IntegrationType.SOAP: [],
-        IntegrationType.MESSAGING: [
-            r"@MessagePattern\(",
-            r"@EventPattern\(",
-        ],
-        IntegrationType.SOCKET: [
-            r"@WebSocketGateway",
-            r"@SubscribeMessage",
-        ],
-        IntegrationType.DATABASE: [
-            r"@Entity\(",
-            r"@Repository\(",
-            r"prisma\.",
-        ],
-    },
-    "JavaScript": {
-        IntegrationType.HTTP_REST: [
-            r"app\.get\(",
-            r"app\.post\(",
-            r"router\.get\(",
-        ],
-        IntegrationType.SOAP: [],
-        IntegrationType.MESSAGING: [],
-        IntegrationType.SOCKET: [
-            r"io\.on\(",
-            r"socket\.on\(",
-        ],
-        IntegrationType.DATABASE: [
-            r"Schema\(",
-            r"model\(",
-        ],
-    },
-    "Go": {
-        IntegrationType.HTTP_REST: [
-            r"http\.HandleFunc",
-            r"gin\.Context",
-            r"\.GET\(",
-            r"\.POST\(",
-        ],
-        IntegrationType.SOAP: [],
-        IntegrationType.MESSAGING: [
-            r"sarama\.Consumer",
-            r"sarama\.Producer",
-        ],
-        IntegrationType.SOCKET: [
-            r"websocket\.Upgrader",
-            r"net\.Listen",
-        ],
-        IntegrationType.DATABASE: [
-            r"gorm\.Model",
-            r"db\.Create\(",
-            r"sql\.Open\(",
-        ],
-    },
-    "C#": {
-        IntegrationType.HTTP_REST: [
-            r"\[ApiController\]",
-            r"\[HttpGet\]",
-            r"\[HttpPost\]",
-        ],
-        IntegrationType.SOAP: [
-            r"\[ServiceContract\]",
-            r"\[OperationContract\]",
-        ],
-        IntegrationType.MESSAGING: [
-            r"IConsumer<",
-        ],
-        IntegrationType.SOCKET: [
-            r"Hub<",
-            r"HubConnection",
-        ],
-        IntegrationType.DATABASE: [
-            r"DbContext",
-            r"DbSet<",
-        ],
-    },
-}
 
-# Strong keywords that indicate medium confidence for name matches
-STRONG_KEYWORDS = [
-    "controller",
-    "repository",
-    "listener",
-    "handler",
-    "template",
-]
-
-
-def _merge_patterns(
-    common: dict[str, list[str]], language_specific: dict[str, list[str]]
-) -> dict[str, list[str]]:
-    """Merge common patterns with language-specific patterns.
+def get_language_from_extension(file_path: str) -> str:
+    """Determine programming language from file extension.
 
     Args:
-        common: Common patterns dict.
-        language_specific: Language-specific patterns dict.
+        file_path: Path to the file.
 
     Returns:
-        Merged patterns dict with combined lists.
+        Language name or empty string if unknown.
     """
-    return {
-        key: common.get(key, []) + language_specific.get(key, [])
-        for key in set(common.keys()) | set(language_specific.keys())
-    }
+    ext = Path(file_path).suffix.lower()
+    return EXTENSION_TO_LANGUAGE.get(ext, "")
 
 
 def get_patterns_for_language(
     language: str,
-) -> dict[IntegrationType, dict[str, list[str]]]:
+) -> dict[IntegrationType, list[tuple[str, Confidence]]]:
     """Get integration patterns for a specific language.
 
     Args:
-        language: The programming language (e.g., "Java", "Rust", "Python").
-
-    Returns:
-        Dict mapping IntegrationType to pattern dicts.
-    """
-    language_patterns = LANGUAGE_PATTERNS.get(language, {})
-
-    return {
-        integration_type: _merge_patterns(
-            common_patterns, language_patterns.get(integration_type, {})
-        )
-        for integration_type, common_patterns in COMMON_PATTERNS.items()
-    }
-
-
-def get_high_confidence_patterns(language: str) -> dict[IntegrationType, list[str]]:
-    """Get high confidence patterns for a specific language.
-
-    Args:
         language: The programming language.
 
     Returns:
-        Dict mapping IntegrationType to high confidence pattern lists.
+        Dict mapping IntegrationType to list of (pattern, confidence) tuples.
     """
-    common = HIGH_CONFIDENCE_PATTERNS.get("common", {})
-    language_specific = HIGH_CONFIDENCE_PATTERNS.get(language, {})
+    result: dict[IntegrationType, list[tuple[str, Confidence]]] = {}
 
-    return {
-        integration_type: common.get(integration_type, [])
-        + language_specific.get(integration_type, [])
-        for integration_type in IntegrationType
-    }
+    for integration_type in IntegrationType:
+        patterns: list[tuple[str, Confidence]] = []
+
+        # Add common patterns
+        common = COMMON_PATTERNS.get(integration_type, {})
+        patterns.extend(common.get("patterns", []))
+
+        # Add language-specific patterns
+        lang_patterns = LANGUAGE_PATTERNS.get(language, {})
+        type_patterns = lang_patterns.get(integration_type, {})
+        patterns.extend(type_patterns.get("patterns", []))
+
+        result[integration_type] = patterns
+
+    return result
 
 
-def first_matching_pattern(text: str, patterns: list[str]) -> str | None:
-    """Find the first pattern that matches the text.
+def scan_file_for_integrations(
+    file_path: Path,
+) -> Iterator[IntegrationPoint]:
+    """Scan a single file for integration points.
 
     Args:
-        text: The text to check.
-        patterns: List of regex patterns to match against.
-
-    Returns:
-        The first matched pattern string, or None if no match.
-    """
-    return next(
-        (pattern for pattern in patterns if re.search(pattern, text)),
-        None,
-    )
-
-
-def _is_high_confidence_pattern(
-    integration_type: IntegrationType, matched_pattern: str, language: str
-) -> bool:
-    """Check if the matched pattern is a high confidence pattern."""
-    high_patterns = get_high_confidence_patterns(language).get(integration_type, [])
-    return any(re.search(hp, matched_pattern) for hp in high_patterns)
-
-
-def _has_strong_keyword(matched_pattern: str) -> bool:
-    """Check if the pattern contains a strong keyword."""
-    pattern_lower = matched_pattern.lower()
-    return any(kw in pattern_lower for kw in STRONG_KEYWORDS)
-
-
-def determine_confidence(
-    integration_type: IntegrationType,
-    matched_pattern: str,
-    is_name_match: bool,
-    is_signature_match: bool,
-    is_scope_match: bool,
-    language: str,
-) -> Confidence:
-    """Determine confidence level based on match characteristics.
-
-    Args:
-        integration_type: The type of integration detected.
-        matched_pattern: The pattern that triggered the match.
-        is_name_match: Whether the match was on the symbol name.
-        is_signature_match: Whether the match was on the signature.
-        is_scope_match: Whether the match was on the scope.
-        language: The programming language.
-
-    Returns:
-        Confidence level.
-    """
-    if _is_high_confidence_pattern(integration_type, matched_pattern, language):
-        return Confidence.HIGH
-
-    if is_signature_match:
-        return Confidence.HIGH
-
-    if is_scope_match:
-        return Confidence.MEDIUM
-
-    if is_name_match and _has_strong_keyword(matched_pattern):
-        return Confidence.MEDIUM
-
-    return Confidence.LOW
-
-
-def _check_field(
-    text: str,
-    patterns: list[str],
-    integration_type: IntegrationType,
-    field_name: str,
-    is_name: bool,
-    is_signature: bool,
-    is_scope: bool,
-    language: str,
-) -> Iterator[tuple[IntegrationType, Confidence, str]]:
-    """Check a single field against patterns and yield matches.
-
-    Args:
-        text: The text to check.
-        patterns: Patterns to match against.
-        integration_type: The integration type being checked.
-        field_name: Name of the field for the matched_pattern prefix.
-        is_name: Whether this is a name field match.
-        is_signature: Whether this is a signature field match.
-        is_scope: Whether this is a scope field match.
-        language: The programming language.
+        file_path: Path to the file to scan.
 
     Yields:
-        Tuples of (integration_type, confidence, matched_pattern).
+        IntegrationPoint instances for each match found.
     """
-    matched = first_matching_pattern(text, patterns)
-    if matched is not None:
-        confidence = determine_confidence(
-            integration_type, matched, is_name, is_signature, is_scope, language
-        )
-        yield (integration_type, confidence, f"{field_name}:{matched}")
+    try:
+        content = file_path.read_text(encoding="utf-8", errors="ignore")
+    except (OSError, IOError):
+        return
 
+    language = get_language_from_extension(str(file_path))
+    patterns = get_patterns_for_language(language)
 
-def _classify_for_integration_type(
-    entry: CTagsEntry,
-    integration_type: IntegrationType,
-    patterns: dict[str, list[str]],
-    language: str,
-) -> Iterator[tuple[IntegrationType, Confidence, str]]:
-    """Classify an entry for a single integration type.
+    lines = content.splitlines()
 
-    Args:
-        entry: The CTags entry to classify.
-        integration_type: The integration type to check.
-        patterns: The patterns dict for this integration type.
-        language: The programming language.
-
-    Yields:
-        Tuples of (integration_type, confidence, matched_pattern).
-    """
-    yield from _check_field(
-        entry.name,
-        patterns.get("name_patterns", []),
-        integration_type,
-        "name",
-        is_name=True,
-        is_signature=False,
-        is_scope=False,
-        language=language,
-    )
-    if entry.signature is not None:
-        yield from _check_field(
-            entry.signature,
-            patterns.get("signature_patterns", []),
-            integration_type,
-            "signature",
-            is_name=False,
-            is_signature=True,
-            is_scope=False,
-            language=language,
-        )
-    if entry.scope is not None:
-        yield from _check_field(
-            entry.scope,
-            patterns.get("scope_patterns", []),
-            integration_type,
-            "scope",
-            is_name=False,
-            is_signature=False,
-            is_scope=True,
-            language=language,
-        )
-
-
-def classify_entry(entry: CTagsEntry) -> list[tuple[IntegrationType, Confidence, str]]:
-    """Classify a single CTags entry into integration types.
-
-    Uses the entry's language field to select appropriate patterns.
-
-    Args:
-        entry: The CTags entry to classify.
-
-    Returns:
-        List of (integration_type, confidence, matched_pattern) tuples.
-    """
-    language = entry.language or ""
-    patterns_for_language = get_patterns_for_language(language)
-
-    return list(
-        chain.from_iterable(
-            _classify_for_integration_type(
-                entry, integration_type, patterns, language
-            )
-            for integration_type, patterns in patterns_for_language.items()
-        )
-    )
+    for line_num, line in enumerate(lines, start=1):
+        for integration_type, type_patterns in patterns.items():
+            for pattern, confidence in type_patterns:
+                if re.search(pattern, line):
+                    match = FileMatch(
+                        file_path=str(file_path),
+                        line_number=line_num,
+                        line_content=line.strip(),
+                        language=language,
+                    )
+                    yield IntegrationPoint(
+                        match=match,
+                        integration_type=integration_type,
+                        confidence=confidence,
+                        matched_pattern=pattern,
+                        entity_type=EntityType.FILE_CONTENT,
+                    )
 
 
 def classify_directory(
     directory_name: str,
 ) -> list[tuple[IntegrationType, Confidence, str]]:
     """Classify a directory name into integration types.
-
-    Uses common directory patterns only (not language-specific).
 
     Args:
         directory_name: The directory name to classify.
@@ -1320,134 +721,125 @@ def classify_directory(
 
     for integration_type, patterns in COMMON_PATTERNS.items():
         directory_patterns = patterns.get("directory_patterns", [])
-        matched = first_matching_pattern(directory_name, directory_patterns)
-        if matched is not None:
-            matches.append(
-                (integration_type, Confidence.MEDIUM, f"directory:{matched}")
-            )
+        for pattern in directory_patterns:
+            if re.search(pattern, directory_name):
+                matches.append(
+                    (integration_type, Confidence.MEDIUM, f"directory:{pattern}")
+                )
+                break
 
     return matches
 
 
-def _extract_directories(entries: list[CTagsEntry]) -> set[str]:
-    """Extract unique directory names from CTags entries.
+def _get_source_files(
+    repo_path: Path,
+    languages: list[str] | None = None,
+) -> Iterator[Path]:
+    """Get source files from a repository.
 
     Args:
-        entries: List of CTags entries.
-
-    Returns:
-        Set of unique directory names found in the paths.
-    """
-    directories: set[str] = set()
-
-    for entry in entries:
-        path = Path(entry.path)
-        for parent in path.parents:
-            if parent.name and parent.name not in (".", ""):
-                directories.add(parent.name)
-
-    return directories
-
-
-def _entry_to_integration_points(
-    entry: CTagsEntry,
-) -> Iterator[IntegrationPoint]:
-    """Convert a CTags entry to integration points.
-
-    Args:
-        entry: The CTags entry to process.
+        repo_path: Path to the repository.
+        languages: Optional list of languages to filter by.
 
     Yields:
-        IntegrationPoint instances for each classification match.
+        Paths to source files.
     """
-    return (
-        IntegrationPoint(
-            entry=entry,
-            integration_type=integration_type,
-            confidence=confidence,
-            matched_pattern=matched_pattern,
-            entity_type=EntityType.CODE_SYMBOL,
-        )
-        for integration_type, confidence, matched_pattern in classify_entry(entry)
-    )
+    # Directories to skip
+    skip_dirs = {
+        ".git",
+        ".idea",
+        ".vscode",
+        "node_modules",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "target",
+        "build",
+        "dist",
+        ".tox",
+        ".pytest_cache",
+        ".mypy_cache",
+    }
+
+    # Get allowed extensions based on languages
+    if languages:
+        allowed_extensions = {
+            ext
+            for ext, lang in EXTENSION_TO_LANGUAGE.items()
+            if lang in languages
+        }
+    else:
+        allowed_extensions = set(EXTENSION_TO_LANGUAGE.keys())
+
+    for path in repo_path.rglob("*"):
+        if path.is_file():
+            # Skip files in excluded directories
+            if any(skip_dir in path.parts for skip_dir in skip_dirs):
+                continue
+
+            # Check extension
+            if path.suffix.lower() in allowed_extensions:
+                yield path
 
 
-def _directory_to_integration_points(
-    directory_name: str,
-    representative_entry: CTagsEntry,
-) -> Iterator[IntegrationPoint]:
-    """Convert a directory name to integration points.
+def detect_integrations(
+    repo_path: str | Path,
+    languages: list[str] | None = None,
+) -> IntegrationDetectorResult:
+    """Detect integration points from repository file contents.
+
+    Scans source files for patterns indicating system integrations.
 
     Args:
-        directory_name: The directory name to check.
-        representative_entry: A representative entry from this directory.
-
-    Yields:
-        IntegrationPoint instances for each classification match.
-    """
-    return (
-        IntegrationPoint(
-            entry=representative_entry,
-            integration_type=integration_type,
-            confidence=confidence,
-            matched_pattern=matched_pattern,
-            entity_type=EntityType.DIRECTORY,
-        )
-        for integration_type, confidence, matched_pattern in classify_directory(
-            directory_name
-        )
-    )
-
-
-def _find_representative_entry(
-    directory_name: str, entries: list[CTagsEntry]
-) -> CTagsEntry | None:
-    """Find a representative entry for a directory.
-
-    Args:
-        directory_name: The directory name to find an entry for.
-        entries: List of CTags entries to search.
-
-    Returns:
-        A representative entry from the directory, or None if not found.
-    """
-    for entry in entries:
-        if directory_name in entry.path:
-            return entry
-    return None
-
-
-def detect_integrations(result: CTagsResult) -> IntegrationDetectorResult:
-    """Detect integration points from CTags result.
-
-    Analyzes both code symbols and directory names for integration patterns.
-    Uses language-specific patterns based on each entry's language field.
-
-    Args:
-        result: The CTags result containing code symbols.
+        repo_path: Path to the repository to scan.
+        languages: Optional list of languages to scan (e.g., ["Rust", "Python"]).
+                   If None, scans all supported languages.
 
     Returns:
         IntegrationDetectorResult with detected integration points.
     """
-    # Detect from code symbols
-    code_symbol_points = list(
-        chain.from_iterable(
-            _entry_to_integration_points(entry) for entry in result.entries
+    repo_path = Path(repo_path)
+
+    if not repo_path.is_dir():
+        return IntegrationDetectorResult(
+            integration_points=[],
+            files_scanned=0,
         )
-    )
 
-    # Detect from directory names
-    directories = _extract_directories(result.entries)
-    directory_points: list[IntegrationPoint] = []
+    integration_points: list[IntegrationPoint] = []
+    files_scanned = 0
 
-    for directory_name in directories:
-        representative = _find_representative_entry(directory_name, result.entries)
-        if representative is not None:
-            directory_points.extend(
-                _directory_to_integration_points(directory_name, representative)
-            )
+    # Scan source files
+    for file_path in _get_source_files(repo_path, languages):
+        files_scanned += 1
+        integration_points.extend(scan_file_for_integrations(file_path))
+
+    # Scan directory names
+    scanned_dirs: set[str] = set()
+    for file_path in _get_source_files(repo_path, languages):
+        for parent in file_path.relative_to(repo_path).parents:
+            dir_name = parent.name
+            if dir_name and dir_name not in scanned_dirs:
+                scanned_dirs.add(dir_name)
+                for int_type, confidence, pattern in classify_directory(dir_name):
+                    # Create a placeholder match for the directory
+                    match = FileMatch(
+                        file_path=str(repo_path / parent),
+                        line_number=0,
+                        line_content="",
+                        language="",
+                    )
+                    integration_points.append(
+                        IntegrationPoint(
+                            match=match,
+                            integration_type=int_type,
+                            confidence=confidence,
+                            matched_pattern=pattern,
+                            entity_type=EntityType.DIRECTORY,
+                        )
+                    )
 
     return IntegrationDetectorResult(
-        integration_points=code_symbol_points + directory_points,
-        entries_scanned=len(result.entries),
+        integration_points=integration_points,
+        files_scanned=files_scanned,
     )
