@@ -15,6 +15,7 @@ from repo_surveyor.integration_detector import (
     IntegrationDetectorResult,
     IntegrationPoint,
     IntegrationType,
+    Language,
     classify_directory,
     detect_integrations,
     get_language_from_extension,
@@ -28,51 +29,51 @@ class TestGetLanguageFromExtension:
 
     def test_java_extension(self) -> None:
         """Should detect Java from .java extension."""
-        assert get_language_from_extension("Test.java") == "Java"
-        assert get_language_from_extension("/path/to/Test.java") == "Java"
+        assert get_language_from_extension("Test.java") == Language.JAVA
+        assert get_language_from_extension("/path/to/Test.java") == Language.JAVA
 
     def test_rust_extension(self) -> None:
         """Should detect Rust from .rs extension."""
-        assert get_language_from_extension("main.rs") == "Rust"
+        assert get_language_from_extension("main.rs") == Language.RUST
 
     def test_python_extension(self) -> None:
         """Should detect Python from .py extension."""
-        assert get_language_from_extension("app.py") == "Python"
+        assert get_language_from_extension("app.py") == Language.PYTHON
 
     def test_typescript_extension(self) -> None:
         """Should detect TypeScript from .ts and .tsx extensions."""
-        assert get_language_from_extension("app.ts") == "TypeScript"
-        assert get_language_from_extension("component.tsx") == "TypeScript"
+        assert get_language_from_extension("app.ts") == Language.TYPESCRIPT
+        assert get_language_from_extension("component.tsx") == Language.TYPESCRIPT
 
     def test_javascript_extension(self) -> None:
         """Should detect JavaScript from .js and .jsx extensions."""
-        assert get_language_from_extension("app.js") == "JavaScript"
-        assert get_language_from_extension("component.jsx") == "JavaScript"
+        assert get_language_from_extension("app.js") == Language.JAVASCRIPT
+        assert get_language_from_extension("component.jsx") == Language.JAVASCRIPT
 
     def test_go_extension(self) -> None:
         """Should detect Go from .go extension."""
-        assert get_language_from_extension("main.go") == "Go"
+        assert get_language_from_extension("main.go") == Language.GO
 
     def test_csharp_extension(self) -> None:
         """Should detect C# from .cs extension."""
-        assert get_language_from_extension("Program.cs") == "C#"
+        assert get_language_from_extension("Program.cs") == Language.CSHARP
 
     def test_cobol_extension(self) -> None:
         """Should detect COBOL from .cbl, .cob, and .cpy extensions."""
-        assert get_language_from_extension("PROGRAM.cbl") == "COBOL"
-        assert get_language_from_extension("program.cob") == "COBOL"
-        assert get_language_from_extension("COPYBOOK.cpy") == "COBOL"
+        assert get_language_from_extension("PROGRAM.cbl") == Language.COBOL
+        assert get_language_from_extension("program.cob") == Language.COBOL
+        assert get_language_from_extension("COPYBOOK.cpy") == Language.COBOL
 
     def test_pli_extension(self) -> None:
         """Should detect PL/I from .pli and .pl1 extensions."""
-        assert get_language_from_extension("PROGRAM.pli") == "PL/I"
-        assert get_language_from_extension("program.pl1") == "PL/I"
-        assert get_language_from_extension("include.plinc") == "PL/I"
+        assert get_language_from_extension("PROGRAM.pli") == Language.PLI
+        assert get_language_from_extension("program.pl1") == Language.PLI
+        assert get_language_from_extension("include.plinc") == Language.PLI
 
     def test_unknown_extension(self) -> None:
-        """Should return empty string for unknown extensions."""
-        assert get_language_from_extension("file.xyz") == ""
-        assert get_language_from_extension("file.txt") == ""
+        """Should return None for unknown extensions."""
+        assert get_language_from_extension("file.xyz") is None
+        assert get_language_from_extension("file.txt") is None
 
 
 class TestGetPatternsForLanguage:
@@ -80,20 +81,20 @@ class TestGetPatternsForLanguage:
 
     def test_returns_patterns_for_known_language(self) -> None:
         """Should return patterns for known languages."""
-        patterns = get_patterns_for_language("Java")
+        patterns = get_patterns_for_language(Language.JAVA)
         assert IntegrationType.HTTP_REST in patterns
         assert len(patterns[IntegrationType.HTTP_REST]) > 0
 
-    def test_returns_common_patterns_for_unknown_language(self) -> None:
-        """Should return common patterns for unknown languages."""
-        patterns = get_patterns_for_language("UnknownLang")
+    def test_returns_common_patterns_for_none_language(self) -> None:
+        """Should return common patterns when language is None."""
+        patterns = get_patterns_for_language(None)
         assert IntegrationType.HTTP_REST in patterns
         # Should have common patterns
         assert len(patterns[IntegrationType.HTTP_REST]) > 0
 
     def test_rust_patterns_include_framework_imports(self) -> None:
         """Should include Rust-specific framework patterns."""
-        patterns = get_patterns_for_language("Rust")
+        patterns = get_patterns_for_language(Language.RUST)
         http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
         assert any("actix_web" in p for p in http_patterns)
         assert any("warp" in p for p in http_patterns)
@@ -571,7 +572,7 @@ public class UserController {
             py_file.write_text("from flask import Flask\napp = Flask(__name__)")
 
             # Filter to Java only
-            result = detect_integrations(tmpdir, languages=["Java"])
+            result = detect_integrations(tmpdir, languages=[Language.JAVA])
 
             assert result.files_scanned == 1
 
@@ -635,7 +636,7 @@ class TestIntegrationPointDataclass:
             file_path="/test.java",
             line_number=1,
             line_content="test",
-            language="Java",
+            language=Language.JAVA,
         )
         point = IntegrationPoint(
             match=match,
@@ -658,7 +659,7 @@ class TestFileMatchDataclass:
             file_path="/test.java",
             line_number=1,
             line_content="test",
-            language="Java",
+            language=Language.JAVA,
         )
 
         with pytest.raises(Exception):  # FrozenInstanceError

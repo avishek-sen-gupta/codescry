@@ -3,6 +3,24 @@
 from enum import Enum
 
 
+class Language(Enum):
+    """Supported programming languages for integration detection."""
+
+    JAVA = "Java"
+    RUST = "Rust"
+    PYTHON = "Python"
+    TYPESCRIPT = "TypeScript"
+    JAVASCRIPT = "JavaScript"
+    GO = "Go"
+    CSHARP = "C#"
+    KOTLIN = "Kotlin"
+    SCALA = "Scala"
+    RUBY = "Ruby"
+    PHP = "PHP"
+    COBOL = "COBOL"
+    PLI = "PL/I"
+
+
 class IntegrationType(Enum):
     """Types of system integrations that can be detected."""
 

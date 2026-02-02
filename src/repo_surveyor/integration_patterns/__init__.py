@@ -3,7 +3,7 @@
 Patterns are organized by language to support language-specific conventions.
 """
 
-from .types import Confidence, IntegrationType
+from .types import Confidence, IntegrationType, Language
 from . import common
 from . import java
 from . import rust
@@ -16,51 +16,51 @@ from . import cobol
 from . import pli
 
 # File extension to language mapping
-EXTENSION_TO_LANGUAGE = {
-    ".java": "Java",
-    ".rs": "Rust",
-    ".py": "Python",
-    ".ts": "TypeScript",
-    ".tsx": "TypeScript",
-    ".js": "JavaScript",
-    ".jsx": "JavaScript",
-    ".go": "Go",
-    ".cs": "C#",
-    ".kt": "Kotlin",
-    ".scala": "Scala",
-    ".rb": "Ruby",
-    ".php": "PHP",
-    ".cbl": "COBOL",
-    ".cob": "COBOL",
-    ".cpy": "COBOL",
-    ".pli": "PL/I",
-    ".pl1": "PL/I",
-    ".plinc": "PL/I",
+EXTENSION_TO_LANGUAGE: dict[str, Language] = {
+    ".java": Language.JAVA,
+    ".rs": Language.RUST,
+    ".py": Language.PYTHON,
+    ".ts": Language.TYPESCRIPT,
+    ".tsx": Language.TYPESCRIPT,
+    ".js": Language.JAVASCRIPT,
+    ".jsx": Language.JAVASCRIPT,
+    ".go": Language.GO,
+    ".cs": Language.CSHARP,
+    ".kt": Language.KOTLIN,
+    ".scala": Language.SCALA,
+    ".rb": Language.RUBY,
+    ".php": Language.PHP,
+    ".cbl": Language.COBOL,
+    ".cob": Language.COBOL,
+    ".cpy": Language.COBOL,
+    ".pli": Language.PLI,
+    ".pl1": Language.PLI,
+    ".plinc": Language.PLI,
 }
 
-# Map language names to their pattern modules
+# Map languages to their pattern modules
 LANGUAGE_MODULES = {
-    "Java": java,
-    "Rust": rust,
-    "Python": python,
-    "TypeScript": typescript,
-    "JavaScript": javascript,
-    "Go": go,
-    "C#": csharp,
-    "COBOL": cobol,
-    "PL/I": pli,
+    Language.JAVA: java,
+    Language.RUST: rust,
+    Language.PYTHON: python,
+    Language.TYPESCRIPT: typescript,
+    Language.JAVASCRIPT: javascript,
+    Language.GO: go,
+    Language.CSHARP: csharp,
+    Language.COBOL: cobol,
+    Language.PLI: pli,
 }
 
 
 def get_patterns_for_language(
-    language: str,
+    language: Language | None,
 ) -> dict[IntegrationType, list[tuple[str, Confidence]]]:
     """Get integration patterns for a specific language.
 
     Combines common patterns with language-specific patterns.
 
     Args:
-        language: The programming language.
+        language: The programming language, or None for common patterns only.
 
     Returns:
         Dict mapping IntegrationType to list of (pattern, confidence) tuples.
@@ -75,10 +75,11 @@ def get_patterns_for_language(
         patterns.extend(common_type_patterns.get("patterns", []))
 
         # Add language-specific patterns
-        lang_module = LANGUAGE_MODULES.get(language)
-        if lang_module is not None:
-            lang_type_patterns = lang_module.PATTERNS.get(integration_type, {})
-            patterns.extend(lang_type_patterns.get("patterns", []))
+        if language is not None:
+            lang_module = LANGUAGE_MODULES.get(language)
+            if lang_module is not None:
+                lang_type_patterns = lang_module.PATTERNS.get(integration_type, {})
+                patterns.extend(lang_type_patterns.get("patterns", []))
 
         result[integration_type] = patterns
 
@@ -100,6 +101,7 @@ def get_directory_patterns() -> dict[IntegrationType, list[str]]:
 __all__ = [
     "Confidence",
     "IntegrationType",
+    "Language",
     "EXTENSION_TO_LANGUAGE",
     "LANGUAGE_MODULES",
     "get_patterns_for_language",

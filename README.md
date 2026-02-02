@@ -99,9 +99,9 @@ Requires [Universal CTags](https://github.com/universal-ctags/ctags) to be insta
 Detect system integration points in source code using pattern matching:
 
 ```python
-from repo_surveyor import detect_integrations
+from repo_surveyor import detect_integrations, Language
 
-result = detect_integrations("/path/to/repo", languages=["Java"])
+result = detect_integrations("/path/to/repo", languages=[Language.JAVA])
 
 for point in result.integration_points:
     print(f"{point.integration_type.value}: {point.match.file_path}:{point.match.line_number}")

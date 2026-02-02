@@ -2,7 +2,7 @@
 
 from .ctags import CTagsConfig, CTagsEntry, CTagsResult
 from .analysis_graph_builder import AnalysisGraphBuilder, survey_and_persist
-from .integration_patterns import Confidence, IntegrationType
+from .integration_patterns import Confidence, IntegrationType, Language
 from .integration_detector import (
     EntityType,
     FileMatch,
@@ -25,6 +25,7 @@ __all__ = [
     "IntegrationDetectorResult",
     "IntegrationPoint",
     "IntegrationType",
+    "Language",
     "RepoSurveyor",
     "SurveyReport",
     "detect_integrations",

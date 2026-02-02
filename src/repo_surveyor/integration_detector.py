@@ -13,6 +13,7 @@ from typing import Iterator
 from .integration_patterns import (
     Confidence,
     IntegrationType,
+    Language,
     EXTENSION_TO_LANGUAGE,
     get_patterns_for_language,
     get_directory_patterns,
@@ -33,7 +34,7 @@ class FileMatch:
     file_path: str
     line_number: int
     line_content: str
-    language: str
+    language: Language | None
 
 
 @dataclass(frozen=True)
@@ -55,17 +56,17 @@ class IntegrationDetectorResult:
     files_scanned: int
 
 
-def get_language_from_extension(file_path: str) -> str:
+def get_language_from_extension(file_path: str) -> Language | None:
     """Determine programming language from file extension.
 
     Args:
         file_path: Path to the file.
 
     Returns:
-        Language name or empty string if unknown.
+        Language enum value or None if unknown.
     """
     ext = Path(file_path).suffix.lower()
-    return EXTENSION_TO_LANGUAGE.get(ext, "")
+    return EXTENSION_TO_LANGUAGE.get(ext)
 
 
 def scan_file_for_integrations(
@@ -135,13 +136,13 @@ def classify_directory(
 
 def _get_source_files(
     repo_path: Path,
-    languages: list[str] | None = None,
+    languages: list[Language] | None = None,
 ) -> Iterator[Path]:
     """Get source files from a repository.
 
     Args:
         repo_path: Path to the repository.
-        languages: Optional list of languages to filter by.
+        languages: Optional list of Language enums to filter by.
 
     Yields:
         Paths to source files.
@@ -165,10 +166,11 @@ def _get_source_files(
 
     # Get allowed extensions based on languages
     if languages:
+        language_set = set(languages)
         allowed_extensions = {
             ext
             for ext, lang in EXTENSION_TO_LANGUAGE.items()
-            if lang in languages
+            if lang in language_set
         }
     else:
         allowed_extensions = set(EXTENSION_TO_LANGUAGE.keys())
@@ -186,7 +188,7 @@ def _get_source_files(
 
 def detect_integrations(
     repo_path: str | Path,
-    languages: list[str] | None = None,
+    languages: list[Language] | None = None,
 ) -> IntegrationDetectorResult:
     """Detect integration points from repository file contents.
 
@@ -194,7 +196,7 @@ def detect_integrations(
 
     Args:
         repo_path: Path to the repository to scan.
-        languages: Optional list of languages to scan (e.g., ["Rust", "Python"]).
+        languages: Optional list of Language enums to scan (e.g., [Language.RUST, Language.PYTHON]).
                    If None, scans all supported languages.
 
     Returns:
