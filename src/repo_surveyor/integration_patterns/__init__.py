@@ -12,6 +12,7 @@ from . import typescript
 from . import javascript
 from . import go
 from . import csharp
+from . import cobol
 
 # File extension to language mapping
 EXTENSION_TO_LANGUAGE = {
@@ -28,6 +29,9 @@ EXTENSION_TO_LANGUAGE = {
     ".scala": "Scala",
     ".rb": "Ruby",
     ".php": "PHP",
+    ".cbl": "COBOL",
+    ".cob": "COBOL",
+    ".cpy": "COBOL",
 }
 
 # Map language names to their pattern modules
@@ -39,6 +43,7 @@ LANGUAGE_MODULES = {
     "JavaScript": javascript,
     "Go": go,
     "C#": csharp,
+    "COBOL": cobol,
 }
 
 
@@ -102,4 +107,5 @@ __all__ = [
     "javascript",
     "go",
     "csharp",
+    "cobol",
 ]

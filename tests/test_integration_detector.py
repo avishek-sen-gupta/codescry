@@ -57,6 +57,12 @@ class TestGetLanguageFromExtension:
         """Should detect C# from .cs extension."""
         assert get_language_from_extension("Program.cs") == "C#"
 
+    def test_cobol_extension(self) -> None:
+        """Should detect COBOL from .cbl, .cob, and .cpy extensions."""
+        assert get_language_from_extension("PROGRAM.cbl") == "COBOL"
+        assert get_language_from_extension("program.cob") == "COBOL"
+        assert get_language_from_extension("COPYBOOK.cpy") == "COBOL"
+
     def test_unknown_extension(self) -> None:
         """Should return empty string for unknown extensions."""
         assert get_language_from_extension("file.xyz") == ""
@@ -259,6 +265,114 @@ public void handleOrder(OrderEvent event) {
             points = list(scan_file_for_integrations(file_path))
             msg_points = [p for p in points if p.integration_type == IntegrationType.MESSAGING]
             assert len(msg_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_scan_cobol_file_with_db2(self) -> None:
+        """Should detect DB2 embedded SQL patterns in COBOL files."""
+        with tempfile.NamedTemporaryFile(
+            suffix=".cbl", mode="w", delete=False
+        ) as f:
+            f.write("""       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CUSTREAD.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+       PROCEDURE DIVISION.
+           EXEC SQL
+               SELECT CUST_NAME, CUST_ADDR
+               INTO :WS-CUST-NAME, :WS-CUST-ADDR
+               FROM CUSTOMER
+               WHERE CUST_ID = :WS-CUST-ID
+           END-EXEC.
+           IF SQLCODE = 0
+               DISPLAY 'CUSTOMER FOUND'
+           END-IF.
+           STOP RUN.
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            assert len(db_points) > 0
+
+            # EXEC SQL should be high confidence
+            high_conf = [p for p in db_points if p.confidence == Confidence.HIGH]
+            assert len(high_conf) > 0
+        finally:
+            file_path.unlink()
+
+    def test_scan_cobol_file_with_mq(self) -> None:
+        """Should detect MQ patterns in COBOL files."""
+        with tempfile.NamedTemporaryFile(
+            suffix=".cbl", mode="w", delete=False
+        ) as f:
+            f.write("""       IDENTIFICATION DIVISION.
+       PROGRAM-ID. MQSEND.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  MQOD.
+       01  MQMD.
+       PROCEDURE DIVISION.
+           CALL 'MQOPEN' USING HCONN MQOD MQOO HOBJ CC RC.
+           CALL 'MQPUT' USING HCONN HOBJ MQMD MQPMO MSGLENGTH MSGBUFFER CC RC.
+           CALL 'MQCLOSE' USING HCONN HOBJ MQCO CC RC.
+           STOP RUN.
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            msg_points = [p for p in points if p.integration_type == IntegrationType.MESSAGING]
+            assert len(msg_points) > 0
+
+            # MQPUT/MQGET should be high confidence
+            high_conf = [p for p in msg_points if p.confidence == Confidence.HIGH]
+            assert len(high_conf) > 0
+        finally:
+            file_path.unlink()
+
+    def test_scan_cobol_file_with_cics(self) -> None:
+        """Should detect CICS patterns in COBOL files."""
+        with tempfile.NamedTemporaryFile(
+            suffix=".cbl", mode="w", delete=False
+        ) as f:
+            f.write("""       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CICSWEB.
+       PROCEDURE DIVISION.
+           EXEC CICS WEB SEND
+               FROM(WS-RESPONSE)
+               FROMLENGTH(WS-RESP-LEN)
+               MEDIATYPE('application/json')
+           END-EXEC.
+           EXEC CICS READ
+               FILE('CUSTFILE')
+               INTO(WS-CUST-REC)
+               RIDFLD(WS-CUST-KEY)
+           END-EXEC.
+           EXEC CICS RETURN END-EXEC.
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            # Should detect HTTP/REST (CICS WEB)
+            http_points = [p for p in points if p.integration_type == IntegrationType.HTTP_REST]
+            assert len(http_points) > 0
+
+            # Should detect DATABASE (CICS READ)
+            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            assert len(db_points) > 0
         finally:
             file_path.unlink()
 
