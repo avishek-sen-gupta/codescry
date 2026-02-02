@@ -38,7 +38,7 @@ class FileMatch:
 
 
 @dataclass(frozen=True)
-class IntegrationPoint:
+class IntegrationSignal:
     """A detected integration point."""
 
     match: FileMatch
@@ -52,7 +52,7 @@ class IntegrationPoint:
 class IntegrationDetectorResult:
     """Result of integration detection."""
 
-    integration_points: list[IntegrationPoint]
+    integration_points: list[IntegrationSignal]
     files_scanned: int
 
 
@@ -71,14 +71,14 @@ def get_language_from_extension(file_path: str) -> Language | None:
 
 def scan_file_for_integrations(
     file_path: Path,
-) -> Iterator[IntegrationPoint]:
+) -> Iterator[IntegrationSignal]:
     """Scan a single file for integration points.
 
     Args:
         file_path: Path to the file to scan.
 
     Yields:
-        IntegrationPoint instances for each match found.
+        IntegrationSignal instances for each match found.
     """
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
@@ -100,7 +100,7 @@ def scan_file_for_integrations(
                         line_content=line.strip(),
                         language=language,
                     )
-                    yield IntegrationPoint(
+                    yield IntegrationSignal(
                         match=match,
                         integration_type=integration_type,
                         confidence=confidence,
@@ -210,7 +210,7 @@ def detect_integrations(
             files_scanned=0,
         )
 
-    integration_points: list[IntegrationPoint] = []
+    integration_points: list[IntegrationSignal] = []
     files_scanned = 0
 
     # Scan source files
@@ -234,7 +234,7 @@ def detect_integrations(
                         language="",
                     )
                     integration_points.append(
-                        IntegrationPoint(
+                        IntegrationSignal(
                             match=match,
                             integration_type=int_type,
                             confidence=confidence,

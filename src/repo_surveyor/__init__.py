@@ -7,7 +7,7 @@ from .integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
-    IntegrationPoint,
+    IntegrationSignal,
     detect_integrations,
 )
 from .report import DirectoryMarker, SurveyReport
@@ -23,7 +23,7 @@ __all__ = [
     "EntityType",
     "FileMatch",
     "IntegrationDetectorResult",
-    "IntegrationPoint",
+    "IntegrationSignal",
     "IntegrationType",
     "Language",
     "RepoSurveyor",

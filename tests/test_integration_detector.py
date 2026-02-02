@@ -13,7 +13,7 @@ from repo_surveyor.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
-    IntegrationPoint,
+    IntegrationSignal,
     IntegrationType,
     Language,
     classify_directory,
@@ -627,8 +627,8 @@ public class UserController {
             assert len(dir_points) >= 1
 
 
-class TestIntegrationPointDataclass:
-    """Tests for the IntegrationPoint dataclass."""
+class TestIntegrationSignalDataclass:
+    """Tests for the IntegrationSignal dataclass."""
 
     def test_integration_point_is_frozen(self) -> None:
         """Should be immutable."""
@@ -638,7 +638,7 @@ class TestIntegrationPointDataclass:
             line_content="test",
             language=Language.JAVA,
         )
-        point = IntegrationPoint(
+        point = IntegrationSignal(
             match=match,
             integration_type=IntegrationType.HTTP_REST,
             confidence=Confidence.HIGH,
