@@ -2,13 +2,12 @@
 
 from .ctags import CTagsConfig, CTagsEntry, CTagsResult
 from .analysis_graph_builder import AnalysisGraphBuilder, survey_and_persist
+from .integration_patterns import Confidence, IntegrationType
 from .integration_detector import (
-    Confidence,
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
     IntegrationPoint,
-    IntegrationType,
     detect_integrations,
 )
 from .report import DirectoryMarker, SurveyReport
