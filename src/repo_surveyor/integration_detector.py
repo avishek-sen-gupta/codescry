@@ -8,6 +8,7 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from itertools import chain
+from pathlib import Path
 from typing import Iterator
 
 from .ctags import CTagsEntry, CTagsResult
@@ -31,6 +32,13 @@ class Confidence(Enum):
     LOW = "low"
 
 
+class EntityType(Enum):
+    """Type of entity where integration was detected."""
+
+    CODE_SYMBOL = "code_symbol"
+    DIRECTORY = "directory"
+
+
 @dataclass(frozen=True)
 class IntegrationPoint:
     """A detected integration point."""
@@ -39,6 +47,7 @@ class IntegrationPoint:
     integration_type: IntegrationType
     confidence: Confidence
     matched_pattern: str
+    entity_type: EntityType
 
 
 @dataclass(frozen=True)
@@ -50,7 +59,7 @@ class IntegrationDetectorResult:
 
 
 # Pattern dictionaries for each integration type
-# Each category has patterns for name, signature, and scope matching
+# Each category has patterns for name, signature, scope, and directory matching
 INTEGRATION_PATTERNS = {
     IntegrationType.HTTP_REST: {
         "name_patterns": [
@@ -98,6 +107,15 @@ INTEGRATION_PATTERNS = {
             r"(?i)apicontroller",
             r"(?i)webcontroller",
         ],
+        "directory_patterns": [
+            r"(?i)^controllers?$",
+            r"(?i)^api$",
+            r"(?i)^rest$",
+            r"(?i)^endpoints?$",
+            r"(?i)^resources?$",
+            r"(?i)^web$",
+            r"(?i)^http$",
+        ],
     },
     IntegrationType.SOAP: {
         "name_patterns": [
@@ -128,6 +146,12 @@ INTEGRATION_PATTERNS = {
             r"(?i)soapservice",
             r"(?i)webserviceimpl",
             r"(?i)portimpl",
+        ],
+        "directory_patterns": [
+            r"(?i)^soap$",
+            r"(?i)^wsdl$",
+            r"(?i)^webservices?$",
+            r"(?i)^ws$",
         ],
     },
     IntegrationType.MESSAGING: {
@@ -172,6 +196,17 @@ INTEGRATION_PATTERNS = {
             r"(?i)eventhandler",
             r"(?i)subscriber",
         ],
+        "directory_patterns": [
+            r"(?i)^messaging$",
+            r"(?i)^kafka$",
+            r"(?i)^rabbit(?:mq)?$",
+            r"(?i)^jms$",
+            r"(?i)^queues?$",
+            r"(?i)^events?$",
+            r"(?i)^publishers?$",
+            r"(?i)^subscribers?$",
+            r"(?i)^listeners?$",
+        ],
     },
     IntegrationType.SOCKET: {
         "name_patterns": [
@@ -206,6 +241,13 @@ INTEGRATION_PATTERNS = {
             r"(?i)socketserver",
             r"(?i)socketclient",
             r"(?i)channelhandler",
+        ],
+        "directory_patterns": [
+            r"(?i)^sockets?$",
+            r"(?i)^websockets?$",
+            r"(?i)^tcp$",
+            r"(?i)^udp$",
+            r"(?i)^netty$",
         ],
     },
     IntegrationType.DATABASE: {
@@ -254,6 +296,16 @@ INTEGRATION_PATTERNS = {
             r"(?i)dao",
             r"(?i)mapper",
             r"(?i)entitymanager",
+        ],
+        "directory_patterns": [
+            r"(?i)^repositor(?:y|ies)$",
+            r"(?i)^dao$",
+            r"(?i)^database$",
+            r"(?i)^db$",
+            r"(?i)^persistence$",
+            r"(?i)^entities$",
+            r"(?i)^models?$",
+            r"(?i)^mappers?$",
         ],
     },
 }
@@ -470,6 +522,50 @@ def classify_entry(entry: CTagsEntry) -> list[tuple[IntegrationType, Confidence,
     )
 
 
+def classify_directory(
+    directory_name: str,
+) -> list[tuple[IntegrationType, Confidence, str]]:
+    """Classify a directory name into integration types.
+
+    Args:
+        directory_name: The directory name to classify.
+
+    Returns:
+        List of (integration_type, confidence, matched_pattern) tuples.
+    """
+    matches: list[tuple[IntegrationType, Confidence, str]] = []
+
+    for integration_type, patterns in INTEGRATION_PATTERNS.items():
+        directory_patterns = patterns.get("directory_patterns", [])
+        matched = first_matching_pattern(directory_name, directory_patterns)
+        if matched is not None:
+            matches.append(
+                (integration_type, Confidence.MEDIUM, f"directory:{matched}")
+            )
+
+    return matches
+
+
+def _extract_directories(entries: list[CTagsEntry]) -> set[str]:
+    """Extract unique directory names from CTags entries.
+
+    Args:
+        entries: List of CTags entries.
+
+    Returns:
+        Set of unique directory names found in the paths.
+    """
+    directories: set[str] = set()
+
+    for entry in entries:
+        path = Path(entry.path)
+        for parent in path.parents:
+            if parent.name and parent.name not in (".", ""):
+                directories.add(parent.name)
+
+    return directories
+
+
 def _entry_to_integration_points(
     entry: CTagsEntry,
 ) -> Iterator[IntegrationPoint]:
@@ -487,13 +583,61 @@ def _entry_to_integration_points(
             integration_type=integration_type,
             confidence=confidence,
             matched_pattern=matched_pattern,
+            entity_type=EntityType.CODE_SYMBOL,
         )
         for integration_type, confidence, matched_pattern in classify_entry(entry)
     )
 
 
+def _directory_to_integration_points(
+    directory_name: str,
+    representative_entry: CTagsEntry,
+) -> Iterator[IntegrationPoint]:
+    """Convert a directory name to integration points.
+
+    Args:
+        directory_name: The directory name to check.
+        representative_entry: A representative entry from this directory.
+
+    Yields:
+        IntegrationPoint instances for each classification match.
+    """
+    return (
+        IntegrationPoint(
+            entry=representative_entry,
+            integration_type=integration_type,
+            confidence=confidence,
+            matched_pattern=matched_pattern,
+            entity_type=EntityType.DIRECTORY,
+        )
+        for integration_type, confidence, matched_pattern in classify_directory(
+            directory_name
+        )
+    )
+
+
+def _find_representative_entry(
+    directory_name: str, entries: list[CTagsEntry]
+) -> CTagsEntry | None:
+    """Find a representative entry for a directory.
+
+    Args:
+        directory_name: The directory name to find an entry for.
+        entries: List of CTags entries to search.
+
+    Returns:
+        A representative entry from the directory, or None if not found.
+    """
+    for entry in entries:
+        if directory_name in entry.path:
+            return entry
+    return None
+
+
 def detect_integrations(result: CTagsResult) -> IntegrationDetectorResult:
     """Detect integration points from CTags result.
+
+    Analyzes both code symbols and directory names for integration patterns.
 
     Args:
         result: The CTags result containing code symbols.
@@ -501,13 +645,25 @@ def detect_integrations(result: CTagsResult) -> IntegrationDetectorResult:
     Returns:
         IntegrationDetectorResult with detected integration points.
     """
-    integration_points = list(
+    # Detect from code symbols
+    code_symbol_points = list(
         chain.from_iterable(
             _entry_to_integration_points(entry) for entry in result.entries
         )
     )
 
+    # Detect from directory names
+    directories = _extract_directories(result.entries)
+    directory_points: list[IntegrationPoint] = []
+
+    for directory_name in directories:
+        representative = _find_representative_entry(directory_name, result.entries)
+        if representative is not None:
+            directory_points.extend(
+                _directory_to_integration_points(directory_name, representative)
+            )
+
     return IntegrationDetectorResult(
-        integration_points=integration_points,
+        integration_points=code_symbol_points + directory_points,
         entries_scanned=len(result.entries),
     )

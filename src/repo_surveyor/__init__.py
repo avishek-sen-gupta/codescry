@@ -4,6 +4,7 @@ from .ctags import CTagsConfig, CTagsEntry, CTagsResult
 from .analysis_graph_builder import AnalysisGraphBuilder, survey_and_persist
 from .integration_detector import (
     Confidence,
+    EntityType,
     IntegrationDetectorResult,
     IntegrationPoint,
     IntegrationType,
@@ -19,6 +20,7 @@ __all__ = [
     "CTagsEntry",
     "CTagsResult",
     "DirectoryMarker",
+    "EntityType",
     "IntegrationDetectorResult",
     "IntegrationPoint",
     "IntegrationType",
