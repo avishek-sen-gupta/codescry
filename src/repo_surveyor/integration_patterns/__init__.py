@@ -13,6 +13,7 @@ from . import javascript
 from . import go
 from . import csharp
 from . import cobol
+from . import pli
 
 # File extension to language mapping
 EXTENSION_TO_LANGUAGE = {
@@ -32,6 +33,9 @@ EXTENSION_TO_LANGUAGE = {
     ".cbl": "COBOL",
     ".cob": "COBOL",
     ".cpy": "COBOL",
+    ".pli": "PL/I",
+    ".pl1": "PL/I",
+    ".plinc": "PL/I",
 }
 
 # Map language names to their pattern modules
@@ -44,6 +48,7 @@ LANGUAGE_MODULES = {
     "Go": go,
     "C#": csharp,
     "COBOL": cobol,
+    "PL/I": pli,
 }
 
 
@@ -108,4 +113,5 @@ __all__ = [
     "go",
     "csharp",
     "cobol",
+    "pli",
 ]

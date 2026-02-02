@@ -63,6 +63,12 @@ class TestGetLanguageFromExtension:
         assert get_language_from_extension("program.cob") == "COBOL"
         assert get_language_from_extension("COPYBOOK.cpy") == "COBOL"
 
+    def test_pli_extension(self) -> None:
+        """Should detect PL/I from .pli and .pl1 extensions."""
+        assert get_language_from_extension("PROGRAM.pli") == "PL/I"
+        assert get_language_from_extension("program.pl1") == "PL/I"
+        assert get_language_from_extension("include.plinc") == "PL/I"
+
     def test_unknown_extension(self) -> None:
         """Should return empty string for unknown extensions."""
         assert get_language_from_extension("file.xyz") == ""
@@ -381,6 +387,74 @@ public void handleOrder(OrderEvent event) {
             # Check for specific IDMS patterns
             patterns = [p.matched_pattern for p in db_points]
             assert any("BIND" in p or "OBTAIN" in p or "SUBSCHEMA-CTRL" in p for p in patterns)
+        finally:
+            file_path.unlink()
+
+    def test_scan_pli_file_with_db2(self) -> None:
+        """Should detect DB2 embedded SQL patterns in PL/I files."""
+        with tempfile.NamedTemporaryFile(
+            suffix=".pli", mode="w", delete=False
+        ) as f:
+            f.write("""CUSTREAD: PROC OPTIONS(MAIN);
+   DCL SQLCA EXTERNAL;
+   %INCLUDE SQLCA;
+
+   EXEC SQL
+       SELECT CUST_NAME, CUST_ADDR
+       INTO :WS_CUST_NAME, :WS_CUST_ADDR
+       FROM CUSTOMER
+       WHERE CUST_ID = :WS_CUST_ID;
+
+   IF SQLCODE = 0 THEN
+       PUT SKIP LIST('CUSTOMER FOUND');
+   END;
+END CUSTREAD;
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            assert len(db_points) > 0
+
+            # EXEC SQL and SQLCA should be high confidence
+            high_conf = [p for p in db_points if p.confidence == Confidence.HIGH]
+            assert len(high_conf) > 0
+        finally:
+            file_path.unlink()
+
+    def test_scan_pli_file_with_mq(self) -> None:
+        """Should detect MQ patterns in PL/I files."""
+        with tempfile.NamedTemporaryFile(
+            suffix=".pli", mode="w", delete=False
+        ) as f:
+            f.write("""MQSEND: PROC OPTIONS(MAIN);
+   %INCLUDE CMQP;
+
+   CALL MQCONN(QMGR_NAME, HCONN, CC, RC);
+   CALL MQOPEN(HCONN, MQOD, MQOO_OUTPUT, HOBJ, CC, RC);
+   CALL MQPUT(HCONN, HOBJ, MQMD, MQPMO, MSG_LEN, MSG_BUFFER, CC, RC);
+   CALL MQCLOSE(HCONN, HOBJ, MQCO_NONE, CC, RC);
+   CALL MQDISC(HCONN, CC, RC);
+
+END MQSEND;
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            msg_points = [p for p in points if p.integration_type == IntegrationType.MESSAGING]
+            assert len(msg_points) > 0
+
+            # CALL MQPUT/MQGET should be high confidence
+            high_conf = [p for p in msg_points if p.confidence == Confidence.HIGH]
+            assert len(high_conf) > 0
         finally:
             file_path.unlink()
 
