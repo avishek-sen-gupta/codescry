@@ -96,6 +96,39 @@ PATTERNS = {
             (r"ISRT\s+PCB", Confidence.HIGH),  # Insert
             (r"REPL\s+PCB", Confidence.HIGH),  # Replace
             (r"DLET\s+PCB", Confidence.HIGH),  # Delete
+            # CA IDMS Database
+            (r"EXEC\s+IDMS", Confidence.HIGH),  # IDMS DML prefix
+            (r"BIND\s+RUN-UNIT", Confidence.HIGH),
+            (r"READY\s+\w+", Confidence.HIGH),  # Ready an area
+            (r"FINISH\s+TASK", Confidence.HIGH),
+            (r"OBTAIN\s+", Confidence.HIGH),  # Retrieve record
+            (r"FIND\s+CALC", Confidence.HIGH),  # Find via CALC key
+            (r"FIND\s+FIRST", Confidence.HIGH),
+            (r"FIND\s+NEXT", Confidence.HIGH),
+            (r"FIND\s+PRIOR", Confidence.HIGH),
+            (r"FIND\s+LAST", Confidence.HIGH),
+            (r"FIND\s+OWNER", Confidence.HIGH),
+            (r"FIND\s+WITHIN", Confidence.HIGH),
+            (r"GET\s+\w+", Confidence.MEDIUM),  # Get current record
+            (r"STORE\s+\w+", Confidence.HIGH),  # Insert record
+            (r"MODIFY\s+\w+", Confidence.HIGH),  # Update record
+            (r"ERASE\s+\w+", Confidence.HIGH),  # Delete record
+            (r"CONNECT\s+\w+\s+TO", Confidence.HIGH),  # Connect to set
+            (r"DISCONNECT\s+\w+\s+FROM", Confidence.HIGH),  # Disconnect from set
+            (r"COMMIT\s+TASK", Confidence.HIGH),
+            (r"ROLLBACK\s+TASK", Confidence.HIGH),
+            (r"IDMS-STATUS", Confidence.HIGH),  # Status check
+            (r"SUBSCHEMA-CTRL", Confidence.HIGH),  # Subschema control block
+            (r"DB-REC-", Confidence.MEDIUM),  # IDMS record prefix convention
+            # IDMS-DC (Data Communications / Online)
+            (r"MAP\s+IN", Confidence.HIGH),  # Screen input
+            (r"MAP\s+OUT", Confidence.HIGH),  # Screen output
+            (r"TRANSFER\s+CONTROL", Confidence.HIGH),
+            (r"GET\s+SCRATCH", Confidence.HIGH),
+            (r"PUT\s+SCRATCH", Confidence.HIGH),
+            (r"DC\s+RETURN", Confidence.HIGH),
+            (r"ACCEPT\s+TASK\s+CODE", Confidence.MEDIUM),
+            (r"IDMS-DC", Confidence.HIGH),  # IDMS-DC section
         ],
     },
 }

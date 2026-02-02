@@ -339,6 +339,50 @@ public void handleOrder(OrderEvent event) {
         finally:
             file_path.unlink()
 
+    def test_scan_cobol_file_with_idms(self) -> None:
+        """Should detect IDMS patterns in COBOL files."""
+        with tempfile.NamedTemporaryFile(
+            suffix=".cbl", mode="w", delete=False
+        ) as f:
+            f.write("""       IDENTIFICATION DIVISION.
+       PROGRAM-ID. IDMSREAD.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  SUBSCHEMA-CTRL.
+       01  IDMS-STATUS.
+       PROCEDURE DIVISION.
+           BIND RUN-UNIT.
+           READY EMPLOYEE-AREA USAGE-MODE UPDATE.
+           OBTAIN CALC EMPLOYEE.
+           IF IDMS-STATUS = '0000'
+               MODIFY EMPLOYEE
+               COMMIT TASK
+           ELSE
+               ROLLBACK TASK
+           END-IF.
+           FINISH TASK.
+           STOP RUN.
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            assert len(db_points) > 0
+
+            # BIND RUN-UNIT and OBTAIN should be high confidence
+            high_conf = [p for p in db_points if p.confidence == Confidence.HIGH]
+            assert len(high_conf) > 0
+
+            # Check for specific IDMS patterns
+            patterns = [p.matched_pattern for p in db_points]
+            assert any("BIND" in p or "OBTAIN" in p or "SUBSCHEMA-CTRL" in p for p in patterns)
+        finally:
+            file_path.unlink()
+
     def test_scan_cobol_file_with_cics(self) -> None:
         """Should detect CICS patterns in COBOL files."""
         with tempfile.NamedTemporaryFile(
