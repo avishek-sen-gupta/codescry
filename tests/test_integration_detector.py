@@ -87,13 +87,13 @@ class TestDetermineConfidence:
         """Should return high confidence for annotation patterns."""
         assert (
             determine_confidence(
-                IntegrationType.HTTP_REST, "@RequestMapping", False, True, False
+                IntegrationType.HTTP_REST, "@RequestMapping", False, True, False, "Java"
             )
             == Confidence.HIGH
         )
         assert (
             determine_confidence(
-                IntegrationType.DATABASE, "@Repository", False, True, False
+                IntegrationType.DATABASE, "@Repository", False, True, False, "Java"
             )
             == Confidence.HIGH
         )
@@ -102,7 +102,7 @@ class TestDetermineConfidence:
         """Should return high confidence for signature matches."""
         assert (
             determine_confidence(
-                IntegrationType.HTTP_REST, "SomePattern", False, True, False
+                IntegrationType.HTTP_REST, "SomePattern", False, True, False, "Java"
             )
             == Confidence.HIGH
         )
@@ -111,7 +111,7 @@ class TestDetermineConfidence:
         """Should return medium confidence for scope matches."""
         assert (
             determine_confidence(
-                IntegrationType.HTTP_REST, "(?i)controller", False, False, True
+                IntegrationType.HTTP_REST, "(?i)controller", False, False, True, "Java"
             )
             == Confidence.MEDIUM
         )
@@ -120,13 +120,13 @@ class TestDetermineConfidence:
         """Should return medium confidence for strong keyword names."""
         assert (
             determine_confidence(
-                IntegrationType.HTTP_REST, "(?i)controller", True, False, False
+                IntegrationType.HTTP_REST, "(?i)controller", True, False, False, "Java"
             )
             == Confidence.MEDIUM
         )
         assert (
             determine_confidence(
-                IntegrationType.DATABASE, "(?i)repository", True, False, False
+                IntegrationType.DATABASE, "(?i)repository", True, False, False, "Java"
             )
             == Confidence.MEDIUM
         )
@@ -135,7 +135,7 @@ class TestDetermineConfidence:
         """Should return low confidence for generic name matches."""
         assert (
             determine_confidence(
-                IntegrationType.HTTP_REST, "(?i)http", True, False, False
+                IntegrationType.HTTP_REST, "(?i)http", True, False, False, "Java"
             )
             == Confidence.LOW
         )
