@@ -90,44 +90,38 @@ PATTERNS = {
             (r"EXEC\s+CICS\s+READPREV", Confidence.HIGH),
             # IMS DB
             (r"CALL\s+['\"]CBLTDLI['\"]", Confidence.HIGH),
-            (r"GU\s+PCB", Confidence.HIGH),  # Get Unique
-            (r"GN\s+PCB", Confidence.HIGH),  # Get Next
-            (r"GNP\s+PCB", Confidence.HIGH),  # Get Next within Parent
-            (r"ISRT\s+PCB", Confidence.HIGH),  # Insert
-            (r"REPL\s+PCB", Confidence.HIGH),  # Replace
-            (r"DLET\s+PCB", Confidence.HIGH),  # Delete
+            (r"CALL\s+['\"]PLITDLI['\"]", Confidence.HIGH),  # PL/I variant
+            (r"CALL\s+['\"]AIBTDLI['\"]", Confidence.HIGH),  # AIB variant
+            (r"PCB\s+MASK", Confidence.HIGH),  # PCB mask definition
+            (r"SSA\s+AREA", Confidence.MEDIUM),  # Segment search argument
+            (r"IO-PCB", Confidence.HIGH),  # I/O PCB
+            (r"DB-PCB", Confidence.HIGH),  # Database PCB
             # CA IDMS Database
             (r"EXEC\s+IDMS", Confidence.HIGH),  # IDMS DML prefix
             (r"BIND\s+RUN-UNIT", Confidence.HIGH),
-            (r"READY\s+\w+", Confidence.HIGH),  # Ready an area
+            (r"READY\s+\w+\s+USAGE-MODE", Confidence.HIGH),  # Ready an area with usage mode
             (r"FINISH\s+TASK", Confidence.HIGH),
-            (r"OBTAIN\s+", Confidence.HIGH),  # Retrieve record
+            (r"OBTAIN\s+(CALC|FIRST|NEXT|PRIOR|LAST|OWNER|WITHIN)", Confidence.HIGH),
             (r"FIND\s+CALC", Confidence.HIGH),  # Find via CALC key
-            (r"FIND\s+FIRST", Confidence.HIGH),
-            (r"FIND\s+NEXT", Confidence.HIGH),
+            (r"FIND\s+FIRST\s+\w+\s+WITHIN", Confidence.HIGH),
+            (r"FIND\s+NEXT\s+\w+\s+WITHIN", Confidence.HIGH),
             (r"FIND\s+PRIOR", Confidence.HIGH),
             (r"FIND\s+LAST", Confidence.HIGH),
             (r"FIND\s+OWNER", Confidence.HIGH),
-            (r"FIND\s+WITHIN", Confidence.HIGH),
-            (r"GET\s+\w+", Confidence.MEDIUM),  # Get current record
-            (r"STORE\s+\w+", Confidence.HIGH),  # Insert record
-            (r"MODIFY\s+\w+", Confidence.HIGH),  # Update record
-            (r"ERASE\s+\w+", Confidence.HIGH),  # Delete record
-            (r"CONNECT\s+\w+\s+TO", Confidence.HIGH),  # Connect to set
-            (r"DISCONNECT\s+\w+\s+FROM", Confidence.HIGH),  # Disconnect from set
+            (r"FIND\s+\w+\s+WITHIN\s+\w+", Confidence.HIGH),
+            (r"CONNECT\s+\w+\s+TO\s+\w+", Confidence.HIGH),  # Connect to set
+            (r"DISCONNECT\s+\w+\s+FROM\s+\w+", Confidence.HIGH),  # Disconnect from set
             (r"COMMIT\s+TASK", Confidence.HIGH),
             (r"ROLLBACK\s+TASK", Confidence.HIGH),
             (r"IDMS-STATUS", Confidence.HIGH),  # Status check
             (r"SUBSCHEMA-CTRL", Confidence.HIGH),  # Subschema control block
-            (r"DB-REC-", Confidence.MEDIUM),  # IDMS record prefix convention
+            (r"COPY\s+IDMS\s+", Confidence.HIGH),  # IDMS copybook
+            (r"SCHEMA\s+SECTION", Confidence.HIGH),  # IDMS schema section
             # IDMS-DC (Data Communications / Online)
-            (r"MAP\s+IN", Confidence.HIGH),  # Screen input
-            (r"MAP\s+OUT", Confidence.HIGH),  # Screen output
-            (r"TRANSFER\s+CONTROL", Confidence.HIGH),
+            (r"DC\s+RETURN", Confidence.HIGH),
             (r"GET\s+SCRATCH", Confidence.HIGH),
             (r"PUT\s+SCRATCH", Confidence.HIGH),
-            (r"DC\s+RETURN", Confidence.HIGH),
-            (r"ACCEPT\s+TASK\s+CODE", Confidence.MEDIUM),
+            (r"TRANSFER\s+CONTROL\s+TO", Confidence.HIGH),
             (r"IDMS-DC", Confidence.HIGH),  # IDMS-DC section
         ],
     },

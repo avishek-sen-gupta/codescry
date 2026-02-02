@@ -347,6 +347,8 @@ public void handleOrder(OrderEvent event) {
             f.write("""       IDENTIFICATION DIVISION.
        PROGRAM-ID. IDMSREAD.
        DATA DIVISION.
+       SCHEMA SECTION.
+           COPY IDMS SUBSCHEMA-DESCRIPTION.
        WORKING-STORAGE SECTION.
        01  SUBSCHEMA-CTRL.
        01  IDMS-STATUS.
@@ -355,7 +357,6 @@ public void handleOrder(OrderEvent event) {
            READY EMPLOYEE-AREA USAGE-MODE UPDATE.
            OBTAIN CALC EMPLOYEE.
            IF IDMS-STATUS = '0000'
-               MODIFY EMPLOYEE
                COMMIT TASK
            ELSE
                ROLLBACK TASK
@@ -373,7 +374,7 @@ public void handleOrder(OrderEvent event) {
             db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
             assert len(db_points) > 0
 
-            # BIND RUN-UNIT and OBTAIN should be high confidence
+            # BIND RUN-UNIT, OBTAIN CALC, and SUBSCHEMA-CTRL should be high confidence
             high_conf = [p for p in db_points if p.confidence == Confidence.HIGH]
             assert len(high_conf) > 0
 

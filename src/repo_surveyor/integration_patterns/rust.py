@@ -5,12 +5,12 @@ from .types import Confidence, IntegrationType
 PATTERNS = {
     IntegrationType.HTTP_REST: {
         "patterns": [
-            (r'#\[get\("', Confidence.HIGH),
-            (r'#\[post\("', Confidence.HIGH),
-            (r'#\[put\("', Confidence.HIGH),
-            (r'#\[delete\("', Confidence.HIGH),
-            (r'#\[patch\("', Confidence.HIGH),
-            (r'#\[route\("', Confidence.HIGH),
+            (r"#\[get\(", Confidence.HIGH),
+            (r"#\[post\(", Confidence.HIGH),
+            (r"#\[put\(", Confidence.HIGH),
+            (r"#\[delete\(", Confidence.HIGH),
+            (r"#\[patch\(", Confidence.HIGH),
+            (r"#\[route\(", Confidence.HIGH),
             (r"HttpResponse", Confidence.HIGH),
             (r"HttpRequest", Confidence.HIGH),
             (r"web::Json", Confidence.HIGH),
