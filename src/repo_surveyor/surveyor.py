@@ -56,12 +56,16 @@ class RepoSurveyor:
             infrastructure.update(marker_data["infrastructure"])
 
             # Detect frameworks from the specific marker file
-            marker_file_path = self.repo_path / marker_data["directory"] / marker_data["marker_file"]
+            marker_file_path = (
+                self.repo_path / marker_data["directory"] / marker_data["marker_file"]
+            )
             detected_frameworks = detect_frameworks_for_file(marker_file_path)
             frameworks.update(detected_frameworks)
 
             # Add frameworks to the marker data
-            marker_frameworks = list(set(marker_data["frameworks"] + detected_frameworks))
+            marker_frameworks = list(
+                set(marker_data["frameworks"] + detected_frameworks)
+            )
 
             directory_markers.append(
                 DirectoryMarker(
@@ -127,7 +131,15 @@ class RepoSurveyor:
         config = CTagsConfig(
             languages=languages or [],
             exclude_patterns=exclude_patterns
-            or [".git", ".idea", "target", "node_modules", "__pycache__", ".venv", "venv"],
+            or [
+                ".git",
+                ".idea",
+                "target",
+                "node_modules",
+                "__pycache__",
+                ".venv",
+                "venv",
+            ],
             extra_fields=extra_fields,
             extras=extras,
             verbose=verbose,

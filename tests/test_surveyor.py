@@ -65,14 +65,18 @@ class TestMojoLspDetection:
         assert len(report.directory_markers) >= 2
 
         # Find the package.json marker
-        package_markers = [m for m in report.directory_markers if m.marker_file == "package.json"]
+        package_markers = [
+            m for m in report.directory_markers if m.marker_file == "package.json"
+        ]
         assert len(package_markers) == 1
         assert package_markers[0].directory == "."
         assert "JavaScript" in package_markers[0].languages
         assert "npm" in package_markers[0].package_managers
 
         # Find the tsconfig.json marker
-        tsconfig_markers = [m for m in report.directory_markers if m.marker_file == "tsconfig.json"]
+        tsconfig_markers = [
+            m for m in report.directory_markers if m.marker_file == "tsconfig.json"
+        ]
         assert len(tsconfig_markers) == 1
         assert tsconfig_markers[0].directory == "."
         assert "TypeScript" in tsconfig_markers[0].languages

@@ -48,13 +48,21 @@ class SurveyReport(BaseModel):
                 lines.append(f"  {marker.directory}/")
                 lines.append(f"    Marker: {marker.marker_file}")
                 if marker.languages:
-                    lines.append(f"    Languages: {', '.join(sorted(marker.languages))}")
+                    lines.append(
+                        f"    Languages: {', '.join(sorted(marker.languages))}"
+                    )
                 if marker.package_managers:
-                    lines.append(f"    Package Managers: {', '.join(sorted(marker.package_managers))}")
+                    lines.append(
+                        f"    Package Managers: {', '.join(sorted(marker.package_managers))}"
+                    )
                 if marker.frameworks:
-                    lines.append(f"    Frameworks: {', '.join(sorted(marker.frameworks))}")
+                    lines.append(
+                        f"    Frameworks: {', '.join(sorted(marker.frameworks))}"
+                    )
                 if marker.infrastructure:
-                    lines.append(f"    Infrastructure: {', '.join(sorted(marker.infrastructure))}")
+                    lines.append(
+                        f"    Infrastructure: {', '.join(sorted(marker.infrastructure))}"
+                    )
             lines.append("")
 
         return "\n".join(lines).rstrip() + "\n"

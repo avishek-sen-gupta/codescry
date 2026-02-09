@@ -12,6 +12,12 @@ dependencies = [
     "neo4j (>=6.1.0,<7.0.0)"
 ]
 
+[project.optional-dependencies]
+ml = [
+    "llama-cpp-python (>=0.3.0)",
+    "huggingface-hub (>=0.25.0)",
+]
+
 [tool.poetry]
 package-mode = false
 

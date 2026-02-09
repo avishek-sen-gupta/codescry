@@ -144,9 +144,7 @@ class TestScanFileForIntegrations:
 
     def test_scan_java_file_with_spring_annotations(self) -> None:
         """Should detect Spring annotations in Java files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".java", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write("""
 @RestController
 @RequestMapping("/api/users")
@@ -164,7 +162,9 @@ public class UserController {
             points = list(scan_file_for_integrations(file_path))
             assert len(points) > 0
 
-            http_points = [p for p in points if p.integration_type == IntegrationType.HTTP_REST]
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+            ]
             assert len(http_points) > 0
 
             # Check for high confidence matches
@@ -175,9 +175,7 @@ public class UserController {
 
     def test_scan_rust_file_with_actix(self) -> None:
         """Should detect Actix patterns in Rust files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".rs", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
             f.write("""
 use actix_web::{get, web, HttpResponse};
 
@@ -193,7 +191,9 @@ async fn hello() -> HttpResponse {
             points = list(scan_file_for_integrations(file_path))
             assert len(points) > 0
 
-            http_points = [p for p in points if p.integration_type == IntegrationType.HTTP_REST]
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+            ]
             assert len(http_points) > 0
 
             # Should have high confidence matches for actix imports
@@ -204,9 +204,7 @@ async fn hello() -> HttpResponse {
 
     def test_scan_python_file_with_flask(self) -> None:
         """Should detect Flask patterns in Python files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".py", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
             f.write("""
 from flask import Flask, jsonify
 
@@ -223,16 +221,16 @@ def get_users():
             points = list(scan_file_for_integrations(file_path))
             assert len(points) > 0
 
-            http_points = [p for p in points if p.integration_type == IntegrationType.HTTP_REST]
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+            ]
             assert len(http_points) > 0
         finally:
             file_path.unlink()
 
     def test_scan_file_with_database_patterns(self) -> None:
         """Should detect database patterns."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".java", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write("""
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -245,7 +243,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         try:
             points = list(scan_file_for_integrations(file_path))
-            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            db_points = [
+                p for p in points if p.integration_type == IntegrationType.DATABASE
+            ]
             assert len(db_points) > 0
 
             # @Repository should be high confidence
@@ -256,9 +256,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     def test_scan_file_with_messaging_patterns(self) -> None:
         """Should detect messaging patterns."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".java", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write("""
 @KafkaListener(topics = "orders")
 public void handleOrder(OrderEvent event) {
@@ -270,16 +268,16 @@ public void handleOrder(OrderEvent event) {
 
         try:
             points = list(scan_file_for_integrations(file_path))
-            msg_points = [p for p in points if p.integration_type == IntegrationType.MESSAGING]
+            msg_points = [
+                p for p in points if p.integration_type == IntegrationType.MESSAGING
+            ]
             assert len(msg_points) > 0
         finally:
             file_path.unlink()
 
     def test_scan_cobol_file_with_db2(self) -> None:
         """Should detect DB2 embedded SQL patterns in COBOL files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".cbl", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".cbl", mode="w", delete=False) as f:
             f.write("""       IDENTIFICATION DIVISION.
        PROGRAM-ID. CUSTREAD.
        DATA DIVISION.
@@ -304,7 +302,9 @@ public void handleOrder(OrderEvent event) {
             points = list(scan_file_for_integrations(file_path))
             assert len(points) > 0
 
-            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            db_points = [
+                p for p in points if p.integration_type == IntegrationType.DATABASE
+            ]
             assert len(db_points) > 0
 
             # EXEC SQL should be high confidence
@@ -315,9 +315,7 @@ public void handleOrder(OrderEvent event) {
 
     def test_scan_cobol_file_with_mq(self) -> None:
         """Should detect MQ patterns in COBOL files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".cbl", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".cbl", mode="w", delete=False) as f:
             f.write("""       IDENTIFICATION DIVISION.
        PROGRAM-ID. MQSEND.
        DATA DIVISION.
@@ -337,7 +335,9 @@ public void handleOrder(OrderEvent event) {
             points = list(scan_file_for_integrations(file_path))
             assert len(points) > 0
 
-            msg_points = [p for p in points if p.integration_type == IntegrationType.MESSAGING]
+            msg_points = [
+                p for p in points if p.integration_type == IntegrationType.MESSAGING
+            ]
             assert len(msg_points) > 0
 
             # MQPUT/MQGET should be high confidence
@@ -348,9 +348,7 @@ public void handleOrder(OrderEvent event) {
 
     def test_scan_cobol_file_with_idms(self) -> None:
         """Should detect IDMS patterns in COBOL files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".cbl", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".cbl", mode="w", delete=False) as f:
             f.write("""       IDENTIFICATION DIVISION.
        PROGRAM-ID. IDMSREAD.
        DATA DIVISION.
@@ -378,7 +376,9 @@ public void handleOrder(OrderEvent event) {
             points = list(scan_file_for_integrations(file_path))
             assert len(points) > 0
 
-            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            db_points = [
+                p for p in points if p.integration_type == IntegrationType.DATABASE
+            ]
             assert len(db_points) > 0
 
             # BIND RUN-UNIT, OBTAIN CALC, and SUBSCHEMA-CTRL should be high confidence
@@ -387,15 +387,15 @@ public void handleOrder(OrderEvent event) {
 
             # Check for specific IDMS patterns
             patterns = [p.matched_pattern for p in db_points]
-            assert any("BIND" in p or "OBTAIN" in p or "SUBSCHEMA-CTRL" in p for p in patterns)
+            assert any(
+                "BIND" in p or "OBTAIN" in p or "SUBSCHEMA-CTRL" in p for p in patterns
+            )
         finally:
             file_path.unlink()
 
     def test_scan_pli_file_with_db2(self) -> None:
         """Should detect DB2 embedded SQL patterns in PL/I files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".pli", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".pli", mode="w", delete=False) as f:
             f.write("""CUSTREAD: PROC OPTIONS(MAIN);
    DCL SQLCA EXTERNAL;
    %INCLUDE SQLCA;
@@ -418,7 +418,9 @@ END CUSTREAD;
             points = list(scan_file_for_integrations(file_path))
             assert len(points) > 0
 
-            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            db_points = [
+                p for p in points if p.integration_type == IntegrationType.DATABASE
+            ]
             assert len(db_points) > 0
 
             # EXEC SQL and SQLCA should be high confidence
@@ -429,9 +431,7 @@ END CUSTREAD;
 
     def test_scan_pli_file_with_mq(self) -> None:
         """Should detect MQ patterns in PL/I files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".pli", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".pli", mode="w", delete=False) as f:
             f.write("""MQSEND: PROC OPTIONS(MAIN);
    %INCLUDE CMQP;
 
@@ -450,7 +450,9 @@ END MQSEND;
             points = list(scan_file_for_integrations(file_path))
             assert len(points) > 0
 
-            msg_points = [p for p in points if p.integration_type == IntegrationType.MESSAGING]
+            msg_points = [
+                p for p in points if p.integration_type == IntegrationType.MESSAGING
+            ]
             assert len(msg_points) > 0
 
             # CALL MQPUT/MQGET should be high confidence
@@ -461,9 +463,7 @@ END MQSEND;
 
     def test_scan_cobol_file_with_cics(self) -> None:
         """Should detect CICS patterns in COBOL files."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".cbl", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".cbl", mode="w", delete=False) as f:
             f.write("""       IDENTIFICATION DIVISION.
        PROGRAM-ID. CICSWEB.
        PROCEDURE DIVISION.
@@ -487,20 +487,22 @@ END MQSEND;
             assert len(points) > 0
 
             # Should detect HTTP/REST (CICS WEB)
-            http_points = [p for p in points if p.integration_type == IntegrationType.HTTP_REST]
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+            ]
             assert len(http_points) > 0
 
             # Should detect DATABASE (CICS READ)
-            db_points = [p for p in points if p.integration_type == IntegrationType.DATABASE]
+            db_points = [
+                p for p in points if p.integration_type == IntegrationType.DATABASE
+            ]
             assert len(db_points) > 0
         finally:
             file_path.unlink()
 
     def test_scan_file_returns_line_info(self) -> None:
         """Should return correct line number and content."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".java", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write("""package com.example;
 
 import org.springframework.web.bind.annotation.*;
@@ -556,7 +558,8 @@ public class UserController {
             result = detect_integrations(tmpdir)
 
             http_points = [
-                p for p in result.integration_points
+                p
+                for p in result.integration_points
                 if p.integration_type == IntegrationType.HTTP_REST
             ]
             assert len(http_points) >= 1
@@ -621,7 +624,8 @@ public class UserController {
             result = detect_integrations(tmpdir)
 
             dir_points = [
-                p for p in result.integration_points
+                p
+                for p in result.integration_points
                 if p.entity_type == EntityType.DIRECTORY
             ]
             assert len(dir_points) >= 1
@@ -671,9 +675,7 @@ class TestConfidenceLevels:
 
     def test_high_confidence_for_annotations(self) -> None:
         """Annotations should have high confidence."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".java", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write("@RestController\npublic class Test {}")
             f.flush()
             file_path = Path(f.name)
@@ -690,19 +692,14 @@ class TestConfidenceLevels:
 
     def test_low_confidence_for_generic_terms(self) -> None:
         """Generic terms should have low confidence."""
-        with tempfile.NamedTemporaryFile(
-            suffix=".java", mode="w", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write("// This is an API endpoint")
             f.flush()
             file_path = Path(f.name)
 
         try:
             points = list(scan_file_for_integrations(file_path))
-            api_points = [
-                p for p in points
-                if "(?i)\\bapi\\b" in p.matched_pattern
-            ]
+            api_points = [p for p in points if "(?i)\\bapi\\b" in p.matched_pattern]
             assert len(api_points) > 0
             assert api_points[0].confidence == Confidence.LOW
         finally:

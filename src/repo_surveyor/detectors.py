@@ -3,7 +3,6 @@
 import os
 from pathlib import Path
 
-
 # Indicator files mapped to their technologies
 INDICATOR_FILES: dict[str, dict[str, list[str]]] = {
     # Python ecosystem
@@ -20,7 +19,10 @@ INDICATOR_FILES: dict[str, dict[str, list[str]]] = {
     # Java ecosystem
     "pom.xml": {"languages": ["Java"], "package_managers": ["Maven"]},
     "build.gradle": {"languages": ["Java"], "package_managers": ["Gradle"]},
-    "build.gradle.kts": {"languages": ["Java", "Kotlin"], "package_managers": ["Gradle"]},
+    "build.gradle.kts": {
+        "languages": ["Java", "Kotlin"],
+        "package_managers": ["Gradle"],
+    },
     # Go
     "go.mod": {"languages": ["Go"]},
     # Rust

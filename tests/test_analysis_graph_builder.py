@@ -182,7 +182,9 @@ class TestBuildTechStackGraph:
             directory_markers=[],
         )
 
-        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(
+            report
+        )
 
         assert directories == []
         assert relationships == []
@@ -209,7 +211,9 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(
+            report
+        )
 
         assert len(directories) == 1
         assert directories[0]["path"] == "src"
@@ -239,7 +243,9 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(
+            report
+        )
 
         # Should have 3 directories: src, src/mypackage, src/mypackage/utils
         dir_paths = [d["path"] for d in directories]
@@ -250,7 +256,10 @@ class TestBuildTechStackGraph:
         # Should have 2 relationships
         assert len(relationships) == 2
         assert {"parent": "src", "child": "src/mypackage"} in relationships
-        assert {"parent": "src/mypackage", "child": "src/mypackage/utils"} in relationships
+        assert {
+            "parent": "src/mypackage",
+            "child": "src/mypackage/utils",
+        } in relationships
 
         # Top level should be "src"
         assert top_level == {"src"}
@@ -275,7 +284,9 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(
+            report
+        )
 
         assert directories == []
         assert tech_nodes == []
@@ -300,7 +311,9 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(
+            report
+        )
 
         assert len(tech_nodes) == 4
 
@@ -344,7 +357,9 @@ class TestBuildTechStackGraph:
             ],
         )
 
-        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(report)
+        directories, relationships, tech_nodes, top_level = build_tech_stack_graph(
+            report
+        )
 
         # Should only have one directory entry
         assert len(directories) == 1

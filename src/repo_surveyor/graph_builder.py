@@ -52,7 +52,7 @@ def _extract_python_package(dir_path: str) -> str | None:
     python_markers = ["src/", "lib/"]
     for marker in python_markers:
         if dir_path.startswith(marker):
-            package_path = dir_path[len(marker):]
+            package_path = dir_path[len(marker) :]
             return package_path.replace("/", ".") if package_path else None
     return dir_path.replace("/", ".")
 
@@ -94,7 +94,9 @@ def build_tech_stack_graph(
             continue
 
         directories = _add_directory(directories, path, marker.marker_file)
-        dir_relationships = _build_directory_hierarchy(directories, dir_relationships, path)
+        dir_relationships = _build_directory_hierarchy(
+            directories, dir_relationships, path
+        )
         top_level_dirs.add(_get_top_level_dir(path))
         tech_nodes = _collect_tech_nodes(tech_nodes, path, marker)
 
@@ -159,9 +161,7 @@ def _get_top_level_dir(path: str) -> str:
     return path.split("/")[0] if "/" in path else path
 
 
-def _collect_tech_nodes(
-    tech_nodes: list[dict], path: str, marker
-) -> list[dict]:
+def _collect_tech_nodes(tech_nodes: list[dict], path: str, marker) -> list[dict]:
     """Collect technology nodes for a directory marker."""
     new_nodes = list(tech_nodes)
 
@@ -174,12 +174,14 @@ def _collect_tech_nodes(
 
     for items, tech_type, rel_type in tech_mappings:
         for item in items:
-            new_nodes.append({
-                "directory": path,
-                "type": tech_type,
-                "name": item,
-                "rel_type": rel_type,
-            })
+            new_nodes.append(
+                {
+                    "directory": path,
+                    "type": tech_type,
+                    "name": item,
+                    "rel_type": rel_type,
+                }
+            )
 
     return new_nodes
 
@@ -260,10 +262,12 @@ def _resolve_relationships(
         )
 
         for parent in matching_parents:
-            relationships.append({
-                "child_id": symbol["id"],
-                "parent_id": parent["id"],
-            })
+            relationships.append(
+                {
+                    "child_id": symbol["id"],
+                    "parent_id": parent["id"],
+                }
+            )
             symbols_with_parents.add(symbol["id"])
 
     return relationships, symbols_with_parents

@@ -19,7 +19,9 @@ logger.setLevel(logging.DEBUG)
 if not logger.handlers:
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
@@ -63,7 +65,9 @@ class AnalysisGraphBuilder:
         Args:
             report: The SurveyReport from tech_stacks()
         """
-        directories, dir_relationships, tech_nodes, top_level_dirs = build_tech_stack_graph(report)
+        directories, dir_relationships, tech_nodes, top_level_dirs = (
+            build_tech_stack_graph(report)
+        )
 
         with self.driver.session() as session:
             session.run(
@@ -194,7 +198,9 @@ class AnalysisGraphBuilder:
             logger.info(f"Created {len(relationships)} parent-child relationships")
 
         if top_level_symbols:
-            logger.info(f"Linking {len(top_level_symbols)} top-level symbols to Repository...")
+            logger.info(
+                f"Linking {len(top_level_symbols)} top-level symbols to Repository..."
+            )
             with self.driver.session() as session:
                 session.run(
                     """
@@ -206,12 +212,16 @@ class AnalysisGraphBuilder:
                     repo_path=repo_path,
                     top_level=list(top_level_symbols),
                 )
-            logger.info(f"Linked {len(top_level_symbols)} top-level symbols to Repository")
+            logger.info(
+                f"Linked {len(top_level_symbols)} top-level symbols to Repository"
+            )
 
         logger.info("Coarse structure persistence complete")
 
 
-def create_analysis_graph_builder(uri: str, username: str, password: str) -> AnalysisGraphBuilder:
+def create_analysis_graph_builder(
+    uri: str, username: str, password: str
+) -> AnalysisGraphBuilder:
     """Factory function to create AnalysisGraphBuilder with a real Neo4j driver.
 
     Args:
@@ -223,6 +233,7 @@ def create_analysis_graph_builder(uri: str, username: str, password: str) -> Ana
         AnalysisGraphBuilder instance configured with a Neo4j driver
     """
     from neo4j import GraphDatabase
+
     driver = GraphDatabase.driver(uri, auth=(username, password))
     return AnalysisGraphBuilder(driver)
 
@@ -254,13 +265,20 @@ def survey_and_persist(
     structure_result = surveyor.coarse_structure(
         languages=["Java"],
         exclude_patterns=[
-            "target", "resources", "node_modules", ".mypy_cache",
-            ".idea", ".dist", "gen"
+            "target",
+            "resources",
+            "node_modules",
+            ".mypy_cache",
+            ".idea",
+            ".dist",
+            "gen",
         ],
     )
     logger.info("Coarse structure completed")
 
-    with create_analysis_graph_builder(neo4j_uri, neo4j_username, neo4j_password) as builder:
+    with create_analysis_graph_builder(
+        neo4j_uri, neo4j_username, neo4j_password
+    ) as builder:
         builder.persist_tech_stacks(tech_report)
         builder.persist_coarse_structure(structure_result, repo_path)
 

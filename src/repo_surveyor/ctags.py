@@ -12,7 +12,15 @@ class CTagsConfig:
 
     languages: list[str] = field(default_factory=list)
     exclude_patterns: list[str] = field(
-        default_factory=lambda: [".git", ".idea", "target", "node_modules", "__pycache__", ".venv", "venv"]
+        default_factory=lambda: [
+            ".git",
+            ".idea",
+            "target",
+            "node_modules",
+            "__pycache__",
+            ".venv",
+            "venv",
+        ]
     )
     # extra_fields: str = "+n+k+S+z+K+l"
     extra_fields: str = "*"

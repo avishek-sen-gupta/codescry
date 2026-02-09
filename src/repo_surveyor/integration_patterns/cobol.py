@@ -99,7 +99,10 @@ PATTERNS = {
             # CA IDMS Database
             (r"EXEC\s+IDMS", Confidence.HIGH),  # IDMS DML prefix
             (r"BIND\s+RUN-UNIT", Confidence.HIGH),
-            (r"READY\s+\w+\s+USAGE-MODE", Confidence.HIGH),  # Ready an area with usage mode
+            (
+                r"READY\s+\w+\s+USAGE-MODE",
+                Confidence.HIGH,
+            ),  # Ready an area with usage mode
             (r"FINISH\s+TASK", Confidence.HIGH),
             (r"OBTAIN\s+(CALC|FIRST|NEXT|PRIOR|LAST|OWNER|WITHIN)", Confidence.HIGH),
             (r"FIND\s+CALC", Confidence.HIGH),  # Find via CALC key

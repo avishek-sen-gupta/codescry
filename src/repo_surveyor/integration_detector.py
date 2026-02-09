@@ -168,9 +168,7 @@ def _get_source_files(
     if languages:
         language_set = set(languages)
         allowed_extensions = {
-            ext
-            for ext, lang in EXTENSION_TO_LANGUAGE.items()
-            if lang in language_set
+            ext for ext, lang in EXTENSION_TO_LANGUAGE.items() if lang in language_set
         }
     else:
         allowed_extensions = set(EXTENSION_TO_LANGUAGE.keys())
