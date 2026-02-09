@@ -1,6 +1,9 @@
 """Integration tests for ml_classifier using a StubClassifierModel."""
 
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repo_surveyor.ml_classifier.classifier import classify_file, classify_repository
 from repo_surveyor.ml_classifier.types import (
