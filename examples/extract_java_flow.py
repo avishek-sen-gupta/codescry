@@ -12,11 +12,13 @@ layout() → parseSpec(), typeSpec(), build(); typeSpec() → alphanumericLayout
 and those methods call various numChars() overloads.
 """
 
-import re
 import sys
 import time
 from pathlib import Path
+
 import requests
+from tree_sitter import Query, QueryCursor
+from tree_sitter_language_pack import get_language, get_parser
 
 BRIDGE_URL = "http://localhost:3000"
 ROOT_PATH = Path("/Users/asgupta/code/smojol")
@@ -27,6 +29,10 @@ INDEX_WAIT_SECONDS = 30
 
 # LSP SymbolKind: 6 = Method, 9 = Constructor, 12 = Function
 METHOD_KINDS = {6, 9, 12}
+
+JAVA_LANGUAGE = get_language("java")
+JAVA_PARSER = get_parser("java")
+METHOD_INVOCATION_QUERY = Query(JAVA_LANGUAGE, "(method_invocation name: (identifier) @name)")
 
 
 def start_server():
@@ -123,29 +129,21 @@ def normalise_uri(uri):
     return uri
 
 
-def extract_call_identifiers(source_lines, start_line, end_line):
-    """Find candidate method-call identifiers within a line range.
+def extract_call_identifiers(tree, start_line, end_line):
+    """Find method invocations within a line range using tree-sitter.
 
     Returns a list of (line, character, identifier) tuples.
     """
-    call_pattern = re.compile(r"\b([a-zA-Z_]\w*)\s*\(")
-    java_keywords = {
-        "if", "else", "for", "while", "do", "switch", "case", "return",
-        "new", "throw", "catch", "try", "finally", "synchronized",
-        "assert", "instanceof", "super", "this", "class", "interface",
-    }
-    candidates = []
-    for line_no in range(start_line, min(end_line + 1, len(source_lines))):
-        line_text = source_lines[line_no]
-        for m in call_pattern.finditer(line_text):
-            ident = m.group(1)
-            if ident in java_keywords:
-                continue
-            candidates.append((line_no, m.start(1), ident))
-    return candidates
+    cursor = QueryCursor(METHOD_INVOCATION_QUERY)
+    cursor.set_point_range((start_line, 0), (end_line + 1, 0))
+    captures = cursor.captures(tree.root_node)
+    return [
+        (node.start_point[0], node.start_point[1], node.text.decode())
+        for node in captures.get("name", [])
+    ]
 
 
-def extract_call_tree(entry_method, method_map, source_lines):
+def extract_call_tree(entry_method, method_map, tree):
     """Walk the call tree starting from entry_method using go-to-definition.
 
     Returns a dict: caller → set of callee method names (within the same file).
@@ -164,7 +162,7 @@ def extract_call_tree(entry_method, method_map, source_lines):
 
         callees = set()
         for r in ranges:
-            candidates = extract_call_identifiers(source_lines, r["start"], r["end"])
+            candidates = extract_call_identifiers(tree, r["start"], r["end"])
             for line, char, ident in candidates:
                 locations = get_definition(line, char)
                 for loc in locations:
@@ -204,7 +202,7 @@ def main():
     start_server()
 
     source_text = open_document()
-    source_lines = source_text.splitlines()
+    tree = JAVA_PARSER.parse(source_text.encode("utf-8"))
 
     print(f"Waiting {INDEX_WAIT_SECONDS}s for JDTLS to index the project...")
     time.sleep(INDEX_WAIT_SECONDS)
@@ -223,7 +221,7 @@ def main():
         sys.exit(1)
 
     print(f"\nTracing call flow from {ENTRY_METHOD}()...\n")
-    edges = extract_call_tree(ENTRY_METHOD, method_map, source_lines)
+    edges = extract_call_tree(ENTRY_METHOD, method_map, tree)
 
     print("=== Call Tree ===\n")
     print_call_tree(edges, ENTRY_METHOD)
