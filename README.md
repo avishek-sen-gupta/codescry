@@ -147,6 +147,32 @@ messaging: /path/to/repo/src/OrderListener.java:12
 | COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ |
 | PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ |
 
+### LSP Bridge Client
+
+Communicate with language servers via the [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) REST bridge to get symbols, definitions, and more:
+
+```python
+from repo_surveyor.lsp_bridge import RequestsLspBridgeClient
+
+client = RequestsLspBridgeClient("http://localhost:3000")
+
+client.start_server("java", "file:///path/to/project")
+client.open_document("file:///path/to/File.java", "java", source_text)
+
+symbols = client.get_symbols("file:///path/to/File.java")
+locations = client.get_definition("file:///path/to/File.java", line=10, character=5)
+
+client.close_document("file:///path/to/File.java")
+client.stop_server()
+```
+
+The module provides:
+- `LspBridgeClient` — a Protocol for dependency injection
+- `RequestsLspBridgeClient` — concrete implementation using HTTP requests
+- `DocumentSymbol`, `Location` — frozen dataclasses for typed LSP responses
+
+See `examples/extract_java_flow.py` for a full call-flow extraction example using JDTLS.
+
 ### Persisting to Neo4j
 
 Persist analysis results to a Neo4j graph database:

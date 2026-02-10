@@ -16,9 +16,10 @@ import sys
 import time
 from pathlib import Path
 
-import requests
 from tree_sitter import Query, QueryCursor
 from tree_sitter_language_pack import get_language, get_parser
+
+from repo_surveyor.lsp_bridge import RequestsLspBridgeClient
 
 BRIDGE_URL = "http://localhost:3000"
 ROOT_PATH = Path("/Users/asgupta/code/smojol")
@@ -34,52 +35,7 @@ JAVA_LANGUAGE = get_language("java")
 JAVA_PARSER = get_parser("java")
 METHOD_INVOCATION_QUERY = Query(JAVA_LANGUAGE, "(method_invocation name: (identifier) @name)")
 
-
-def start_server():
-    resp = requests.post(f"{BRIDGE_URL}/start", json={
-        "language": "java",
-        "rootUri": f"file://{ROOT_PATH}",
-    })
-    resp.raise_for_status()
-    print("JDTLS started.")
-    return resp.json()
-
-
-def open_document():
-    text = TARGET_FILE.read_text()
-    resp = requests.post(f"{BRIDGE_URL}/document/open", json={
-        "uri": FILE_URI,
-        "languageId": "java",
-        "text": text,
-    })
-    resp.raise_for_status()
-    print(f"Opened {TARGET_FILE.name}")
-    return text
-
-
-def get_symbols():
-    resp = requests.post(f"{BRIDGE_URL}/symbols", json={"uri": FILE_URI})
-    resp.raise_for_status()
-    return resp.json().get("symbols") or []
-
-
-def get_definition(line, character):
-    resp = requests.post(f"{BRIDGE_URL}/definition", json={
-        "uri": FILE_URI,
-        "line": line,
-        "character": character,
-    })
-    resp.raise_for_status()
-    locations = resp.json().get("locations")
-    return locations or []
-
-
-def close_document():
-    requests.post(f"{BRIDGE_URL}/document/close", json={"uri": FILE_URI})
-
-
-def stop_server():
-    requests.post(f"{BRIDGE_URL}/stop", json={})
+client = RequestsLspBridgeClient(BRIDGE_URL)
 
 
 def _base_name(symbol_name):
@@ -91,14 +47,13 @@ def _base_name(symbol_name):
 def _collect_methods(symbols, out):
     """Recursively collect method symbols from a DocumentSymbol tree."""
     for sym in symbols:
-        if sym["kind"] in METHOD_KINDS:
-            name = _base_name(sym["name"])
-            rng = sym["range"]
+        if sym.kind in METHOD_KINDS:
+            name = _base_name(sym.name)
             out.setdefault(name, []).append({
-                "start": rng["start"]["line"],
-                "end": rng["end"]["line"],
+                "start": sym.range_start_line,
+                "end": sym.range_end_line,
             })
-        for child in sym.get("children", []):
+        for child in sym.children:
             _collect_methods([child], out)
 
 
@@ -158,10 +113,10 @@ def extract_call_tree(entry_method, method_map, tree):
         for r in method_map[method_name]:
             candidates = extract_call_identifiers(tree, r["start"], r["end"])
             for line, char, ident in candidates:
-                locations = get_definition(line, char)
+                locations = client.get_definition(FILE_URI, line, char)
                 for loc in locations:
-                    target_uri = normalise_uri(loc["uri"])
-                    target_line = loc["range"]["start"]["line"]
+                    target_uri = normalise_uri(loc.uri)
+                    target_line = loc.range_start_line
                     if target_uri != str(TARGET_FILE):
                         continue
                     callee = find_method_containing(method_map, target_line)
@@ -193,16 +148,18 @@ def main():
     print("--- Java Call-Flow Extraction via JDTLS ---\n")
 
     print("Starting JDTLS...")
-    start_server()
+    client.start_server("java", f"file://{ROOT_PATH}")
 
-    source_text = open_document()
+    source_text = TARGET_FILE.read_text()
+    client.open_document(FILE_URI, "java", source_text)
+    print(f"Opened {TARGET_FILE.name}")
     tree = JAVA_PARSER.parse(source_text.encode("utf-8"))
 
     print(f"Waiting {INDEX_WAIT_SECONDS}s for JDTLS to index the project...")
     time.sleep(INDEX_WAIT_SECONDS)
 
     print("Fetching document symbols...")
-    symbols = get_symbols()
+    symbols = client.get_symbols(FILE_URI)
     method_map = build_method_map(symbols)
     print(f"Found {sum(len(v) for v in method_map.values())} method symbols "
           f"({len(method_map)} unique names):\n  " +
@@ -210,8 +167,8 @@ def main():
 
     if ENTRY_METHOD not in method_map:
         print(f"\nEntry method '{ENTRY_METHOD}' not found in symbols. Available: {sorted(method_map.keys())}")
-        close_document()
-        stop_server()
+        client.close_document(FILE_URI)
+        client.stop_server()
         sys.exit(1)
 
     print(f"\nTracing call flow from {ENTRY_METHOD}()...\n")
@@ -226,8 +183,8 @@ def main():
             print(f"  {caller}() -> {callee}()")
 
     print("\nCleaning up...")
-    close_document()
-    stop_server()
+    client.close_document(FILE_URI)
+    client.stop_server()
     print("Done.")
 
 
