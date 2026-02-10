@@ -70,6 +70,9 @@ EXTENSION_LANGUAGES: dict[str, str] = {
     ".sh": "Shell",
     ".bash": "Shell",
     ".zsh": "Shell",
+    ".cbl": "COBOL",
+    ".cob": "COBOL",
+    ".cpy": "COBOL",
 }
 
 # Glob patterns for infrastructure detection

@@ -236,6 +236,7 @@ This creates a graph with:
 | Go | `go.mod` | Go |
 | Rust | `Cargo.toml` | Rust, Cargo |
 | Ruby | `Gemfile` | Ruby, Bundler |
+| COBOL | `.cbl`, `.cob`, `.cpy` | COBOL |
 | .NET | `*.csproj`, `*.sln` | C#, .NET |
 | Docker | `Dockerfile`, `docker-compose.yml` | Docker, Docker Compose |
 | Terraform | `*.tf` | Terraform |
