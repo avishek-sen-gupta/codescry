@@ -2,6 +2,8 @@
 
 A Python library for analyzing repository technology stacks and code structure.
 
+**Note:** Most of this codebase was vibe-coded.
+
 ## Features
 
 - Detects programming languages, package managers, frameworks, and infrastructure
