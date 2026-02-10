@@ -173,7 +173,33 @@ The module provides:
 - `RequestsLspBridgeClient` — concrete implementation using HTTP requests
 - `DocumentSymbol`, `Location` — frozen dataclasses for typed LSP responses
 
-See `examples/extract_java_flow.py` for a full call-flow extraction example using JDTLS.
+### Call-Flow Extraction
+
+Extract a method call tree from a source file using LSP go-to-definition. The `call_flow` module walks calls recursively starting from an entry method, resolving each call site via the language server:
+
+```python
+from repo_surveyor.lsp_bridge import RequestsLspBridgeClient
+from repo_surveyor.call_flow import extract_call_tree, format_call_tree
+
+client = RequestsLspBridgeClient("http://localhost:3000")
+client.start_server("java", "file:///path/to/project")
+client.open_document(file_uri, "java", source_text)
+
+call_tree = extract_call_tree(client, file_uri, "/path/to/File.java", source_text, "layout", "java")
+print(format_call_tree(call_tree))
+
+# call_tree.edges is a dict[str, frozenset[str]] mapping caller → callees
+for caller, callees in sorted(call_tree.edges.items()):
+    for callee in sorted(callees):
+        print(f"  {caller}() -> {callee}()")
+```
+
+The module provides:
+- `extract_call_tree()` — traces calls from an entry method, returns a frozen `CallTree`
+- `format_call_tree()` — renders a `CallTree` as an indented string
+- `CallTree` — frozen dataclass with `entry_method` and `edges`
+
+See `examples/extract_java_flow.py` for a full end-to-end example using JDTLS.
 
 ### Persisting to Neo4j
 
