@@ -1,6 +1,6 @@
 # Cartographer
 
-A Python library for analyzing repository technology stacks and code structure.
+A Python library for experiments in analysing repository technology stacks and code structure.
 
 **Note:** Most of this codebase was vibe-coded.
 
