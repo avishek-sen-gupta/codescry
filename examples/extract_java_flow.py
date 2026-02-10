@@ -91,7 +91,7 @@ def _base_name(symbol_name):
 def _collect_methods(symbols, out):
     """Recursively collect method symbols from a DocumentSymbol tree."""
     for sym in symbols:
-        if sym.get("kind") in METHOD_KINDS:
+        if sym["kind"] in METHOD_KINDS:
             name = _base_name(sym["name"])
             rng = sym["range"]
             out.setdefault(name, []).append({
@@ -123,10 +123,8 @@ def find_method_containing(method_map, line):
 
 
 def normalise_uri(uri):
-    """Strip the URI down to a plain file path for comparison."""
-    if uri.startswith("file://"):
-        return uri[len("file://"):]
-    return uri
+    """Strip the file:// prefix for path comparison."""
+    return uri.removeprefix("file://")
 
 
 def extract_call_identifiers(tree, start_line, end_line):
@@ -156,12 +154,8 @@ def extract_call_tree(entry_method, method_map, tree):
             return
         visited.add(method_name)
 
-        ranges = method_map.get(method_name)
-        if not ranges:
-            return
-
         callees = set()
-        for r in ranges:
+        for r in method_map[method_name]:
             candidates = extract_call_identifiers(tree, r["start"], r["end"])
             for line, char, ident in candidates:
                 locations = get_definition(line, char)
