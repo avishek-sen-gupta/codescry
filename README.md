@@ -11,6 +11,7 @@ A Python library for analyzing repository technology stacks and code structure.
 - Associates technologies with their containing directories (useful for monorepos)
 - Extracts code symbols using Universal CTags
 - Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases)
+- Extracts method call trees via [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) LSP bridge and tree-sitter
 - Persists analysis results to Neo4j graph database
 - Generates plain text reports
 
