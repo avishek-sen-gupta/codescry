@@ -1,52 +1,35 @@
-"""Concrete LineClassifierModel implementation using Qwen2.5-Coder via llama-cpp-python."""
+"""Concrete LineClassifierModel implementation using Qwen2.5-Coder via Ollama."""
 
 from .types import CompletionResult
 
-_REPO_ID = "Qwen/Qwen2.5-Coder-0.5B-Instruct-GGUF"
-_FILENAME = "qwen2.5-coder-0.5b-instruct-q8_0.gguf"
+_MODEL = "qwen2.5-coder:1.5b-instruct"
 
 
 class QwenClassifierModel:
-    """Qwen2.5-Coder-0.5B-Instruct model loaded via llama-cpp-python.
+    """Qwen2.5-Coder-1.5B-Instruct model served by Ollama."""
 
-    Downloads the GGUF file from HuggingFace Hub on first use.
-    """
+    def __init__(self, model: str = _MODEL) -> None:
+        import ollama  # type: ignore[import-not-found]
 
-    def __init__(
-        self,
-        n_ctx: int = 4096,
-        n_gpu_layers: int = -1,
-        verbose: bool = False,
-    ) -> None:
-        from huggingface_hub import hf_hub_download  # type: ignore[import-not-found]
-        from llama_cpp import Llama  # type: ignore[import-not-found]
-
-        model_path = hf_hub_download(repo_id=_REPO_ID, filename=_FILENAME)
-        self._llm = Llama(
-            model_path=model_path,
-            n_ctx=n_ctx,
-            n_gpu_layers=n_gpu_layers,
-            verbose=verbose,
-        )
-        self._model_id = f"{_REPO_ID}/{_FILENAME}"
+        self._client = ollama.Client()
+        self._model = model
 
     @property
     def model_id(self) -> str:
-        return self._model_id
+        return self._model
 
     def classify(self, system_prompt: str, user_prompt: str) -> CompletionResult:
-        response = self._llm.create_chat_completion(
+        response = self._client.chat(
+            model=self._model,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.0,
-            max_tokens=2048,
+            options={"temperature": 0.0},
         )
-        text = response["choices"][0]["message"]["content"] or ""
-        usage = response.get("usage", {})
+        text = response.message.content or ""
         return CompletionResult(
             text=text,
-            prompt_tokens=usage.get("prompt_tokens", 0),
-            completion_tokens=usage.get("completion_tokens", 0),
+            prompt_tokens=response.prompt_eval_count or 0,
+            completion_tokens=response.eval_count or 0,
         )

@@ -8,6 +8,13 @@ SYSTEM_PROMPT = f"""You are a code integration classifier. For each line of sour
 
 Categories: {_CATEGORIES}
 
+Hints for COBOL / mainframe code:
+- IDMS DML verbs are database operations: BIND RUN-UNIT (database_connection), READY (database_connection), OBTAIN/FIND (database_query), STORE (database_query), MODIFY (database_query), ERASE (database_query), FINISH (database_connection)
+- EXEC SQL is database_query; EXEC SQL INCLUDE SQLCA is database_connection
+- EXEC CICS SEND / EXEC CICS RECEIVE are http_server (terminal I/O)
+- CALL 'MQCONN' / CALL 'MQOPEN' are message_publish; CALL 'MQPUT' is message_publish; CALL 'MQGET' is message_subscribe; CALL 'MQCLOSE' is message_publish
+- CALL 'CBLTDLI' is database_query (IMS DB)
+
 Rules:
 - Output one line per input line, in the format: LINE_NUMBER|CATEGORY
 - CATEGORY must be one of the listed categories exactly
