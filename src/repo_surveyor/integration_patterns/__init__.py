@@ -4,7 +4,7 @@ Patterns are organized by language with base patterns that always apply
 and framework-specific patterns that apply when a framework is active.
 """
 
-from .types import Confidence, IntegrationType, Language
+from .types import Confidence, IntegrationType, Language, PatternKey
 from . import common
 
 from ..language_plugin import PluginRegistry
@@ -41,20 +41,20 @@ def get_patterns_for_language(
 
         # Add common patterns
         common_type_patterns = common.COMMON.patterns.get(integration_type, {})
-        patterns.extend(common_type_patterns.get("patterns", []))
+        patterns.extend(common_type_patterns.get(PatternKey.PATTERNS, []))
 
         # Add language-specific base patterns
         if language is not None:
             lang_module = LANGUAGE_MODULES.get(language)
             if lang_module is not None:
                 lang_type_patterns = lang_module.BASE_PATTERNS.get(integration_type, {})
-                patterns.extend(lang_type_patterns.get("patterns", []))
+                patterns.extend(lang_type_patterns.get(PatternKey.PATTERNS, []))
 
                 # Add framework-specific patterns for active frameworks
                 for framework in frameworks:
                     fw_patterns = lang_module.FRAMEWORK_PATTERNS.get(framework, {})
                     fw_type_patterns = fw_patterns.get(integration_type, {})
-                    patterns.extend(fw_type_patterns.get("patterns", []))
+                    patterns.extend(fw_type_patterns.get(PatternKey.PATTERNS, []))
 
         result[integration_type] = patterns
 
@@ -68,7 +68,7 @@ def get_directory_patterns() -> dict[IntegrationType, list[str]]:
         Dict mapping IntegrationType to list of directory patterns.
     """
     return {
-        integration_type: patterns.get("directory_patterns", [])
+        integration_type: patterns.get(PatternKey.DIRECTORY_PATTERNS, [])
         for integration_type, patterns in common.COMMON.patterns.items()
     }
 

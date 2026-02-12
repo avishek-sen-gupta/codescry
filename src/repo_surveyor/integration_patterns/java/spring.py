@@ -1,12 +1,12 @@
 """Spring framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Spring",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@RestController", Confidence.HIGH),
                 (r"@Controller", Confidence.HIGH),
                 (r"@RequestMapping", Confidence.HIGH),
@@ -22,7 +22,7 @@ FRAMEWORK = FrameworkPatternSpec(
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@KafkaListener", Confidence.HIGH),
                 (r"@JmsListener", Confidence.HIGH),
                 (r"@RabbitListener", Confidence.HIGH),
@@ -34,7 +34,7 @@ FRAMEWORK = FrameworkPatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@Repository", Confidence.HIGH),
                 (r"@Query", Confidence.HIGH),
                 (r"JdbcTemplate", Confidence.HIGH),
@@ -42,7 +42,7 @@ FRAMEWORK = FrameworkPatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"WebSocketHandler", Confidence.HIGH),
             ],
         },

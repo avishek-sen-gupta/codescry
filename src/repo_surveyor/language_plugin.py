@@ -13,8 +13,24 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from .constants import TechCategory
+
 if TYPE_CHECKING:
     from .integration_patterns.types import Language
+
+# JSON config keys (used only within this module)
+_EXTENSIONS = "extensions"
+_INDICATOR_FILES = "indicator_files"
+_GLOB_INDICATORS = "glob_indicators"
+_PACKAGE_MANAGERS = "package_managers"
+_FRAMEWORKS = "frameworks"
+_PARSER = "parser"
+_ADDITIONAL_LANGUAGES = "additional_languages"
+_PACKAGE_MANAGER_INDICATORS = "package_manager_indicators"
+_FRAMEWORK_PATTERNS = "framework_patterns"
+_INTEGRATION_MODULE = "integration_module"
+_SHARED_FRAMEWORK_PATTERNS = "shared_framework_patterns"
+_YAML_CONTENT_MARKERS = "yaml_content_markers"
 
 
 @dataclass(frozen=True)
@@ -80,38 +96,38 @@ class PluginRegistry:
     def _load_languages(self, languages_raw: dict[str, Any]) -> None:
         # First pass: build all plugins with their own framework_patterns
         for lang_name, lang_data in languages_raw.items():
-            extensions = tuple(lang_data.get("extensions", []))
+            extensions = tuple(lang_data.get(_EXTENSIONS, []))
 
             # Build indicator file configs
             indicator_files: list[IndicatorFileConfig] = []
-            for filename, file_cfg in lang_data.get("indicator_files", {}).items():
-                additional = file_cfg.get("additional_languages", [])
+            for filename, file_cfg in lang_data.get(_INDICATOR_FILES, {}).items():
+                additional = file_cfg.get(_ADDITIONAL_LANGUAGES, [])
                 all_languages = (lang_name, *additional)
                 indicator_files.append(
                     IndicatorFileConfig(
                         filename=filename,
                         languages=all_languages,
-                        package_managers=tuple(file_cfg.get("package_managers", [])),
-                        parser_module_name=file_cfg.get("parser", ""),
+                        package_managers=tuple(file_cfg.get(_PACKAGE_MANAGERS, [])),
+                        parser_module_name=file_cfg.get(_PARSER, ""),
                     )
                 )
 
             # Build glob indicator configs
             glob_indicators: list[GlobIndicatorConfig] = []
-            for pattern, glob_cfg in lang_data.get("glob_indicators", {}).items():
+            for pattern, glob_cfg in lang_data.get(_GLOB_INDICATORS, {}).items():
                 glob_indicators.append(
                     GlobIndicatorConfig(
                         pattern=pattern,
                         languages=(lang_name,),
-                        package_managers=tuple(glob_cfg.get("package_managers", [])),
-                        frameworks=tuple(glob_cfg.get("frameworks", [])),
-                        parser_module_name=glob_cfg.get("parser", ""),
+                        package_managers=tuple(glob_cfg.get(_PACKAGE_MANAGERS, [])),
+                        frameworks=tuple(glob_cfg.get(_FRAMEWORKS, [])),
+                        parser_module_name=glob_cfg.get(_PARSER, ""),
                     )
                 )
 
-            pm_indicators = lang_data.get("package_manager_indicators", {})
-            framework_patterns = lang_data.get("framework_patterns", {})
-            integration_module = lang_data.get("integration_module", "")
+            pm_indicators = lang_data.get(_PACKAGE_MANAGER_INDICATORS, {})
+            framework_patterns = lang_data.get(_FRAMEWORK_PATTERNS, {})
+            integration_module = lang_data.get(_INTEGRATION_MODULE, "")
 
             self._plugins[lang_name] = LanguagePlugin(
                 name=lang_name,
@@ -125,7 +141,7 @@ class PluginRegistry:
 
         # Second pass: resolve shared_framework_patterns
         for lang_name, lang_data in languages_raw.items():
-            shared_ref = lang_data.get("shared_framework_patterns")
+            shared_ref = lang_data.get(_SHARED_FRAMEWORK_PATTERNS)
             if shared_ref and shared_ref in self._plugins:
                 source_patterns = self._plugins[shared_ref].framework_patterns
                 current = self._plugins[lang_name]
@@ -144,9 +160,9 @@ class PluginRegistry:
         for name, cfg in infra_raw.items():
             self._infra[name] = InfrastructureConfig(
                 name=name,
-                indicator_files=tuple(cfg.get("indicator_files", [])),
-                glob_indicators=tuple(cfg.get("glob_indicators", [])),
-                yaml_content_markers=tuple(cfg.get("yaml_content_markers", [])),
+                indicator_files=tuple(cfg.get(_INDICATOR_FILES, [])),
+                glob_indicators=tuple(cfg.get(_GLOB_INDICATORS, [])),
+                yaml_content_markers=tuple(cfg.get(_YAML_CONTENT_MARKERS, [])),
             )
 
     # --- Backward-compatible query APIs ---
@@ -160,19 +176,19 @@ class PluginRegistry:
             for ind in plugin.indicator_files:
                 entry: dict[str, list[str]] = {}
                 if ind.languages:
-                    entry["languages"] = list(ind.languages)
+                    entry[TechCategory.LANGUAGES] = list(ind.languages)
                 if ind.package_managers:
-                    entry["package_managers"] = list(ind.package_managers)
+                    entry[TechCategory.PACKAGE_MANAGERS] = list(ind.package_managers)
                 result[ind.filename] = entry
 
             # Package manager indicators (no language, just PM)
             for filename, pm_name in plugin.package_manager_indicators.items():
-                result[filename] = {"package_managers": [pm_name]}
+                result[filename] = {TechCategory.PACKAGE_MANAGERS: [pm_name]}
 
         # Infrastructure indicator files
         for infra in self._infra.values():
             for filename in infra.indicator_files:
-                result[filename] = {"infrastructure": [infra.name]}
+                result[filename] = {TechCategory.INFRASTRUCTURE: [infra.name]}
 
         return result
 
@@ -192,7 +208,7 @@ class PluginRegistry:
         result: dict[str, dict[str, str]] = {}
         for plugin in self._plugins.values():
             for dep_pattern, framework_name in plugin.framework_patterns.items():
-                result[dep_pattern] = {"frameworks": framework_name}
+                result[dep_pattern] = {TechCategory.FRAMEWORKS: framework_name}
         return result
 
     def glob_patterns(self) -> dict[str, dict[str, list[str]]]:
@@ -204,17 +220,19 @@ class PluginRegistry:
             for glob_ind in plugin.glob_indicators:
                 entry: dict[str, list[str]] = {}
                 if glob_ind.languages:
-                    entry["languages"] = list(glob_ind.languages)
+                    entry[TechCategory.LANGUAGES] = list(glob_ind.languages)
                 if glob_ind.package_managers:
-                    entry["package_managers"] = list(glob_ind.package_managers)
+                    entry[TechCategory.PACKAGE_MANAGERS] = list(
+                        glob_ind.package_managers
+                    )
                 if glob_ind.frameworks:
-                    entry["frameworks"] = list(glob_ind.frameworks)
+                    entry[TechCategory.FRAMEWORKS] = list(glob_ind.frameworks)
                 result[glob_ind.pattern] = entry
 
         # Infrastructure glob indicators
         for infra in self._infra.values():
             for pattern in infra.glob_indicators:
-                result[pattern] = {"infrastructure": [infra.name]}
+                result[pattern] = {TechCategory.INFRASTRUCTURE: [infra.name]}
 
         return result
 

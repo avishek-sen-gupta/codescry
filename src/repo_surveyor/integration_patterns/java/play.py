@@ -1,12 +1,12 @@
 """Play framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Play",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"import play\.mvc", Confidence.HIGH),
                 (r"import play\.api\.mvc", Confidence.HIGH),
                 (r"Action \{", Confidence.HIGH),

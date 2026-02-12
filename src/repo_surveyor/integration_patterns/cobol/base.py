@@ -1,11 +1,11 @@
 """COBOL base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # CICS Web Services
                 (r"EXEC\s+CICS\s+WEB\s+", Confidence.HIGH),
                 (r"EXEC\s+CICS\s+INVOKE\s+WEBSERVICE", Confidence.HIGH),
@@ -17,7 +17,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # SOAP/XML processing
                 (r"EXEC\s+CICS\s+TRANSFORM", Confidence.HIGH),
                 (r"XML\s+PARSE", Confidence.HIGH),
@@ -29,7 +29,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # IBM MQ (MQSeries)
                 (r"MQOPEN", Confidence.HIGH),
                 (r"MQPUT", Confidence.HIGH),
@@ -50,7 +50,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # TCP/IP Sockets
                 (r"EZASOKET", Confidence.HIGH),  # IBM TCP/IP socket API
                 (r"CALL\s+['\"]EZASOKET['\"]", Confidence.HIGH),
@@ -62,7 +62,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # Embedded SQL (DB2)
                 (r"EXEC\s+SQL", Confidence.HIGH),
                 (r"SQLCA", Confidence.HIGH),
@@ -136,7 +136,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"OPEN\s+INPUT", Confidence.HIGH),
                 (r"OPEN\s+OUTPUT", Confidence.HIGH),
                 (r"OPEN\s+I-O", Confidence.HIGH),

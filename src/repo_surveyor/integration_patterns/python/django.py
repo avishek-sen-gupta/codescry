@@ -1,12 +1,12 @@
 """Django framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Django",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@api_view", Confidence.HIGH),
                 (r"@action", Confidence.MEDIUM),
                 (r"from django\.http import", Confidence.HIGH),
@@ -17,7 +17,7 @@ FRAMEWORK = FrameworkPatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"from django\.db import", Confidence.HIGH),
                 (r"models\.Model", Confidence.HIGH),
                 (r"ForeignKey\(", Confidence.MEDIUM),

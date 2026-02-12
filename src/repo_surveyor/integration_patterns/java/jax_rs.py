@@ -1,12 +1,12 @@
 """JAX-RS framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="JAX-RS",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@GET\b", Confidence.HIGH),
                 (r"@POST\b", Confidence.HIGH),
                 (r"@PUT\b", Confidence.HIGH),

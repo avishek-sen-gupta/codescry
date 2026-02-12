@@ -1,11 +1,11 @@
 """JavaScript base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"require\(['\"]fastify['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]koa['\"]\)", Confidence.MEDIUM),
                 (r"require\(['\"]axios['\"]\)", Confidence.MEDIUM),
@@ -13,12 +13,12 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"require\(['\"]soap['\"]\)", Confidence.MEDIUM),
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"require\(['\"]kafkajs['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]amqplib['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]bull['\"]\)", Confidence.HIGH),
@@ -27,7 +27,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"require\(['\"]socket.io['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]ws['\"]\)", Confidence.HIGH),
                 (r"io\.on\(", Confidence.HIGH),
@@ -36,7 +36,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"require\(['\"]sequelize['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]mongoose['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]knex['\"]\)", Confidence.HIGH),
@@ -47,7 +47,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"require\(['\"]fs['\"]\)", Confidence.HIGH),
                 (r"fs\.readFileSync", Confidence.HIGH),
                 (r"require\(['\"]aws-sdk['\"]\)", Confidence.MEDIUM),
@@ -55,7 +55,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.GRPC: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"require\(['\"]@grpc/grpc-js['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]@grpc/proto-loader['\"]\)", Confidence.HIGH),
             ],

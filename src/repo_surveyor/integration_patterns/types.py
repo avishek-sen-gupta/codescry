@@ -70,3 +70,10 @@ class FrameworkPatternSpec:
 
     name: str
     patterns: dict
+
+
+class PatternKey:
+    """Dict keys inside integration pattern dicts."""
+
+    PATTERNS = "patterns"
+    DIRECTORY_PATTERNS = "directory_patterns"

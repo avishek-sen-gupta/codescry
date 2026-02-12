@@ -1,12 +1,12 @@
 """Actix framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Actix",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"use actix_web::", Confidence.HIGH),
                 (r"#\[get\(", Confidence.HIGH),
                 (r"#\[post\(", Confidence.HIGH),

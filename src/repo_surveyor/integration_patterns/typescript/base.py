@@ -1,31 +1,31 @@
 """TypeScript base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"from ['\"]fastify['\"]", Confidence.HIGH),
                 (r"from ['\"]koa['\"]", Confidence.MEDIUM),
                 (r"import axios", Confidence.MEDIUM),
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"from ['\"]soap['\"]", Confidence.MEDIUM),
                 (r"import.*soap", Confidence.MEDIUM),
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"from ['\"]kafkajs['\"]", Confidence.HIGH),
                 (r"from ['\"]amqplib['\"]", Confidence.HIGH),
                 (r"from ['\"]bull['\"]", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"from ['\"]socket\.io['\"]", Confidence.HIGH),
                 (r"from ['\"]ws['\"]", Confidence.HIGH),
                 (r"io\.on\(", Confidence.HIGH),
@@ -33,7 +33,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@Entity\(", Confidence.HIGH),
                 (r"@Column\(", Confidence.MEDIUM),
                 (r"@PrimaryGeneratedColumn", Confidence.HIGH),
@@ -48,7 +48,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"fs\.readFile", Confidence.HIGH),
                 (r"fs\.writeFile", Confidence.HIGH),
                 (r"from ['\"]@aws-sdk/client-s3['\"]", Confidence.HIGH),
@@ -56,7 +56,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.GRPC: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"from ['\"]@grpc/grpc-js['\"]", Confidence.HIGH),
                 (r"from ['\"]@grpc/proto-loader['\"]", Confidence.HIGH),
             ],

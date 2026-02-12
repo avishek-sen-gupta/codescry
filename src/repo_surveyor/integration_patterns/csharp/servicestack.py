@@ -1,12 +1,12 @@
 """ServiceStack framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="ServiceStack",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"using ServiceStack", Confidence.HIGH),
                 (r"IReturn<", Confidence.HIGH),
                 (r"IGet\b", Confidence.HIGH),

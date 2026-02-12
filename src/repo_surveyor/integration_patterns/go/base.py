@@ -1,11 +1,11 @@
 """Go base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r'"net/http"', Confidence.MEDIUM),
                 (r"http\.HandleFunc", Confidence.HIGH),
                 (r"http\.Handle\(", Confidence.HIGH),
@@ -16,13 +16,13 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r'"github\.com/hooklift/gowsdl"', Confidence.HIGH),
                 (r'"encoding/xml"', Confidence.MEDIUM),
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r'"github\.com/Shopify/sarama"', Confidence.HIGH),
                 (r'"github\.com/streadway/amqp"', Confidence.HIGH),
                 (r'"github\.com/nats-io/nats\.go"', Confidence.HIGH),
@@ -32,7 +32,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r'"github\.com/gorilla/websocket"', Confidence.HIGH),
                 (r"websocket\.Upgrader", Confidence.HIGH),
                 (r"net\.Listen\(", Confidence.MEDIUM),
@@ -40,7 +40,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r'"gorm\.io/gorm"', Confidence.HIGH),
                 (r'"github\.com/jmoiron/sqlx"', Confidence.HIGH),
                 (r'"github\.com/jackc/pgx"', Confidence.HIGH),
@@ -53,7 +53,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"os\.Open\(", Confidence.HIGH),
                 (r"os\.Create\(", Confidence.HIGH),
                 (r"io\.Copy\(", Confidence.MEDIUM),
@@ -62,7 +62,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.GRPC: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r'"google\.golang\.org/grpc"', Confidence.HIGH),
                 (r"pb\.Register.*Server", Confidence.HIGH),
             ],

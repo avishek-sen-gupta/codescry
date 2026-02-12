@@ -1,11 +1,11 @@
 """Rust base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"Json<", Confidence.HIGH),
                 (r"Path<", Confidence.MEDIUM),
                 (r"Query<", Confidence.MEDIUM),
@@ -15,13 +15,13 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"use yaserde::", Confidence.HIGH),
                 (r"use quick_xml::", Confidence.HIGH),
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"use rdkafka::", Confidence.HIGH),
                 (r"use lapin::", Confidence.HIGH),
                 (r"StreamConsumer", Confidence.HIGH),
@@ -31,7 +31,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"TcpListener::", Confidence.HIGH),
                 (r"TcpStream::", Confidence.HIGH),
                 (r"UdpSocket::", Confidence.HIGH),
@@ -42,7 +42,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"use diesel::", Confidence.HIGH),
                 (r"use sqlx::", Confidence.HIGH),
                 (r"use sea_orm::", Confidence.HIGH),
@@ -61,14 +61,14 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"std::fs", Confidence.HIGH),
                 (r"tokio::fs", Confidence.HIGH),
                 (r"aws-sdk-s3", Confidence.HIGH),
             ],
         },
         IntegrationType.GRPC: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"tonic::", Confidence.HIGH),
                 (r"#\[tonic::async_trait\]", Confidence.HIGH),
             ],

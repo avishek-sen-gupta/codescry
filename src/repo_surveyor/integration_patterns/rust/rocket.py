@@ -1,12 +1,12 @@
 """Rocket framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Rocket",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"use rocket::", Confidence.HIGH),
                 (r"#\[get\(", Confidence.HIGH),
                 (r"#\[post\(", Confidence.HIGH),

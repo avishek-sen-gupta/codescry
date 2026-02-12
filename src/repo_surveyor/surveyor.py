@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from .constants import MarkerKey, TechCategory
 from .ctags import CTagsConfig, CTagsResult, run_ctags
 from .detectors import (
     detect_frameworks_for_file,
@@ -50,40 +51,42 @@ class RepoSurveyor:
 
         for marker_data in dir_markers_data:
             # Aggregate into global sets
-            languages.update(marker_data["languages"])
-            package_managers.update(marker_data["package_managers"])
-            frameworks.update(marker_data["frameworks"])
-            infrastructure.update(marker_data["infrastructure"])
+            languages.update(marker_data[TechCategory.LANGUAGES])
+            package_managers.update(marker_data[TechCategory.PACKAGE_MANAGERS])
+            frameworks.update(marker_data[TechCategory.FRAMEWORKS])
+            infrastructure.update(marker_data[TechCategory.INFRASTRUCTURE])
 
             # Detect frameworks from the specific marker file
             marker_file_path = (
-                self.repo_path / marker_data["directory"] / marker_data["marker_file"]
+                self.repo_path
+                / marker_data[MarkerKey.DIRECTORY]
+                / marker_data[MarkerKey.MARKER_FILE]
             )
             detected_frameworks = detect_frameworks_for_file(marker_file_path)
             frameworks.update(detected_frameworks)
 
             # Add frameworks to the marker data
             marker_frameworks = list(
-                set(marker_data["frameworks"] + detected_frameworks)
+                set(marker_data[TechCategory.FRAMEWORKS] + detected_frameworks)
             )
 
             directory_markers.append(
                 DirectoryMarker(
-                    directory=marker_data["directory"],
-                    marker_file=marker_data["marker_file"],
-                    languages=marker_data["languages"],
-                    package_managers=marker_data["package_managers"],
+                    directory=marker_data[MarkerKey.DIRECTORY],
+                    marker_file=marker_data[MarkerKey.MARKER_FILE],
+                    languages=marker_data[TechCategory.LANGUAGES],
+                    package_managers=marker_data[TechCategory.PACKAGE_MANAGERS],
                     frameworks=marker_frameworks,
-                    infrastructure=marker_data["infrastructure"],
+                    infrastructure=marker_data[TechCategory.INFRASTRUCTURE],
                 )
             )
 
         # Detect from glob patterns
         glob_results = detect_from_glob_patterns(self.repo_path)
-        languages.update(glob_results["languages"])
-        package_managers.update(glob_results["package_managers"])
-        frameworks.update(glob_results["frameworks"])
-        infrastructure.update(glob_results["infrastructure"])
+        languages.update(glob_results[TechCategory.LANGUAGES])
+        package_managers.update(glob_results[TechCategory.PACKAGE_MANAGERS])
+        frameworks.update(glob_results[TechCategory.FRAMEWORKS])
+        infrastructure.update(glob_results[TechCategory.INFRASTRUCTURE])
 
         # Detect Kubernetes
         if detect_kubernetes(self.repo_path):

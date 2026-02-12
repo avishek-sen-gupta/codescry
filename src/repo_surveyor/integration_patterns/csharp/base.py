@@ -1,11 +1,11 @@
 """C# base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"\[ApiController\]", Confidence.HIGH),
                 (r"\[HttpGet\]", Confidence.HIGH),
                 (r"\[HttpPost\]", Confidence.HIGH),
@@ -20,7 +20,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"\[ServiceContract\]", Confidence.HIGH),
                 (r"\[OperationContract\]", Confidence.HIGH),
                 (r"\[DataContract\]", Confidence.HIGH),
@@ -28,7 +28,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"using MassTransit", Confidence.HIGH),
                 (r"using NServiceBus", Confidence.HIGH),
                 (r"using Rebus", Confidence.HIGH),
@@ -38,7 +38,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"using Microsoft\.AspNetCore\.SignalR", Confidence.HIGH),
                 (r": Hub\b", Confidence.HIGH),
                 (r"HubConnection", Confidence.HIGH),
@@ -47,7 +47,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"using.*EntityFramework", Confidence.HIGH),
                 (r": DbContext", Confidence.HIGH),
                 (r"DbSet<", Confidence.HIGH),
@@ -59,7 +59,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"File\.Read", Confidence.HIGH),
                 (r"File\.Write", Confidence.HIGH),
                 (r"StreamReader", Confidence.HIGH),
@@ -69,7 +69,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.GRPC: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"Grpc\.Core", Confidence.HIGH),
                 (r"Grpc\.Net\.Client", Confidence.HIGH),
                 (r"ServerServiceDefinition", Confidence.HIGH),

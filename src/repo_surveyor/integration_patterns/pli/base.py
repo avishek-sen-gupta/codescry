@@ -1,11 +1,11 @@
 """PL/I base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # CICS Web Services
                 (r"EXEC\s+CICS\s+WEB\s+", Confidence.HIGH),
                 (r"EXEC\s+CICS\s+INVOKE\s+WEBSERVICE", Confidence.HIGH),
@@ -13,7 +13,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # XML processing
                 (r"PLISAXA", Confidence.HIGH),  # PL/I SAX parser
                 (r"PLISAXB", Confidence.HIGH),  # PL/I SAX parser (event-based)
@@ -23,7 +23,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # IBM MQ (MQSeries)
                 (r"CALL\s+MQOPEN", Confidence.HIGH),
                 (r"CALL\s+MQPUT", Confidence.HIGH),
@@ -41,7 +41,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # TCP/IP Sockets
                 (r"CALL\s+EZASOKET", Confidence.HIGH),
                 (r"CALL\s+SOCKET", Confidence.MEDIUM),
@@ -51,7 +51,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 # Embedded SQL (DB2)
                 (r"EXEC\s+SQL", Confidence.HIGH),
                 (r"SQLCA", Confidence.HIGH),
@@ -91,7 +91,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"OPEN\s+FILE", Confidence.HIGH),
                 (r"READ\s+FILE", Confidence.HIGH),
                 (r"WRITE\s+FILE", Confidence.HIGH),

@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 
+from .constants import MarkerKey, TechCategory
 from .language_plugin import PluginRegistry
 
 _registry = PluginRegistry()
@@ -18,10 +19,10 @@ K8S_MARKERS = _registry.k8s_markers()
 def detect_from_indicator_files(repo_path: Path) -> dict[str, set[str]]:
     """Detect technologies from indicator files in root only."""
     results: dict[str, set[str]] = {
-        "languages": set(),
-        "package_managers": set(),
-        "frameworks": set(),
-        "infrastructure": set(),
+        TechCategory.LANGUAGES: set(),
+        TechCategory.PACKAGE_MANAGERS: set(),
+        TechCategory.FRAMEWORKS: set(),
+        TechCategory.INFRASTRUCTURE: set(),
     }
 
     for filename, techs in INDICATOR_FILES.items():
@@ -71,12 +72,18 @@ def detect_indicator_files_with_directories(
             if filename in INDICATOR_FILES:
                 techs = INDICATOR_FILES[filename]
                 marker_result = {
-                    "directory": dir_str,
-                    "marker_file": filename,
-                    "languages": list(techs.get("languages", [])),
-                    "package_managers": list(techs.get("package_managers", [])),
-                    "frameworks": list(techs.get("frameworks", [])),
-                    "infrastructure": list(techs.get("infrastructure", [])),
+                    MarkerKey.DIRECTORY: dir_str,
+                    MarkerKey.MARKER_FILE: filename,
+                    TechCategory.LANGUAGES: list(techs.get(TechCategory.LANGUAGES, [])),
+                    TechCategory.PACKAGE_MANAGERS: list(
+                        techs.get(TechCategory.PACKAGE_MANAGERS, [])
+                    ),
+                    TechCategory.FRAMEWORKS: list(
+                        techs.get(TechCategory.FRAMEWORKS, [])
+                    ),
+                    TechCategory.INFRASTRUCTURE: list(
+                        techs.get(TechCategory.INFRASTRUCTURE, [])
+                    ),
                 }
                 results.append(marker_result)
 
@@ -88,10 +95,10 @@ def detect_from_glob_patterns(repo_path: Path) -> dict[str, set[str]]:
     from .package_parsers import match_frameworks, parse_dependencies
 
     results: dict[str, set[str]] = {
-        "languages": set(),
-        "package_managers": set(),
-        "frameworks": set(),
-        "infrastructure": set(),
+        TechCategory.LANGUAGES: set(),
+        TechCategory.PACKAGE_MANAGERS: set(),
+        TechCategory.FRAMEWORKS: set(),
+        TechCategory.INFRASTRUCTURE: set(),
     }
 
     for pattern, techs in GLOB_PATTERNS.items():
@@ -107,7 +114,9 @@ def detect_from_glob_patterns(repo_path: Path) -> dict[str, set[str]]:
             try:
                 content = filepath.read_text(encoding="utf-8", errors="ignore")
                 deps = parse_dependencies(filepath.name, content)
-                results["frameworks"].update(match_frameworks(deps, FRAMEWORK_PATTERNS))
+                results[TechCategory.FRAMEWORKS].update(
+                    match_frameworks(deps, FRAMEWORK_PATTERNS)
+                )
             except (OSError, PermissionError):
                 continue
 

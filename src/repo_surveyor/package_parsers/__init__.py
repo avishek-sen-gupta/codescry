@@ -3,6 +3,7 @@
 Dispatches to format-specific parsers and provides smart framework matching.
 """
 
+from ..constants import TechCategory
 from .types import ParsedDependency
 from . import (
     build_gradle,
@@ -99,8 +100,10 @@ def match_frameworks(
 
     for dep in dependencies:
         for pattern, tech in patterns.items():
-            if "frameworks" in tech and _dep_matches_pattern(dep.name, pattern):
-                name = tech["frameworks"]
+            if TechCategory.FRAMEWORKS in tech and _dep_matches_pattern(
+                dep.name, pattern
+            ):
+                name = tech[TechCategory.FRAMEWORKS]
                 if name not in seen:
                     seen.add(name)
                     frameworks.append(name)

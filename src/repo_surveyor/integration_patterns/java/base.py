@@ -1,17 +1,17 @@
 """Java base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"HttpServletRequest", Confidence.MEDIUM),
                 (r"HttpServletResponse", Confidence.MEDIUM),
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@WebService", Confidence.HIGH),
                 (r"@WebMethod", Confidence.HIGH),
                 (r"@WebParam", Confidence.HIGH),
@@ -22,14 +22,14 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"MessageListener", Confidence.MEDIUM),
                 (r"MessageProducer", Confidence.MEDIUM),
                 (r"MessageConsumer", Confidence.MEDIUM),
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@ServerEndpoint", Confidence.HIGH),
                 (r"@OnOpen", Confidence.HIGH),
                 (r"@OnClose", Confidence.HIGH),
@@ -41,7 +41,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@Entity", Confidence.HIGH),
                 (r"@Table", Confidence.HIGH),
                 (r"@Column", Confidence.MEDIUM),
@@ -57,7 +57,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"FileInputStream", Confidence.HIGH),
                 (r"FileOutputStream", Confidence.HIGH),
                 (r"BufferedReader", Confidence.MEDIUM),
@@ -69,7 +69,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.GRPC: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"import io\.grpc", Confidence.HIGH),
                 (r"@GrpcService", Confidence.HIGH),
                 (r"StreamObserver", Confidence.HIGH),

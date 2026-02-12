@@ -1,24 +1,24 @@
 """Python base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType
+from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"import requests", Confidence.MEDIUM),
                 (r"import httpx", Confidence.MEDIUM),
             ],
         },
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"from zeep import", Confidence.HIGH),
                 (r"import zeep", Confidence.HIGH),
                 (r"from suds", Confidence.HIGH),
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@\w+\.task", Confidence.HIGH),
                 (r"@shared_task", Confidence.HIGH),
                 (r"from celery import", Confidence.HIGH),
@@ -31,7 +31,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"import websockets", Confidence.HIGH),
                 (r"from websockets import", Confidence.HIGH),
                 (r"import socketio", Confidence.HIGH),
@@ -42,7 +42,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.DATABASE: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"from sqlalchemy import", Confidence.HIGH),
                 (r"import sqlalchemy", Confidence.HIGH),
                 (r"from peewee import", Confidence.HIGH),
@@ -56,7 +56,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.FILE_IO: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"open\(", Confidence.MEDIUM),
                 (r"pathlib\.Path", Confidence.MEDIUM),
                 (r"import shutil", Confidence.HIGH),
@@ -66,7 +66,7 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.GRPC: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"import grpc", Confidence.HIGH),
                 (r"grpc\.server", Confidence.HIGH),
                 (r"add_.*Servicer_to_server", Confidence.HIGH),

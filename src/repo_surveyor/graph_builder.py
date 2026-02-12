@@ -4,8 +4,45 @@ Pure functions that transform survey data into graph representations.
 These are independent of any specific graph database.
 """
 
+from .constants import TechLabel, TechRelType
 from .ctags import CTagsResult
 from .report import SurveyReport
+
+
+class _DirNode:
+    PATH = "path"
+    NAME = "name"
+    MARKER_FILE = "marker_file"
+
+
+class _TechNode:
+    DIRECTORY = "directory"
+    TYPE = "type"
+    NAME = "name"
+    REL_TYPE = "rel_type"
+
+
+class _DirRel:
+    PARENT = "parent"
+    CHILD = "child"
+
+
+class _SymbolNode:
+    ID = "id"
+    NAME = "name"
+    PATH = "path"
+    KIND = "kind"
+    LINE = "line"
+    SIGNATURE = "signature"
+    LANGUAGE = "language"
+    SCOPE = "scope"
+    SCOPE_KIND = "scope_kind"
+    PACKAGE = "package"
+
+
+class _SymbolRel:
+    CHILD_ID = "child_id"
+    PARENT_ID = "parent_id"
 
 
 def extract_package(file_path: str, language: str | None) -> str:
@@ -111,14 +148,14 @@ def _add_directory(
         return {
             **directories,
             path: {
-                "path": path,
-                "name": path.split("/")[-1],
-                "marker_file": marker_file,
+                _DirNode.PATH: path,
+                _DirNode.NAME: path.split("/")[-1],
+                _DirNode.MARKER_FILE: marker_file,
             },
         }
 
-    if not directories[path]["marker_file"] and marker_file:
-        updated = {**directories[path], "marker_file": marker_file}
+    if not directories[path][_DirNode.MARKER_FILE] and marker_file:
+        updated = {**directories[path], _DirNode.MARKER_FILE: marker_file}
         return {**directories, path: updated}
 
     return directories
@@ -141,12 +178,12 @@ def _build_directory_hierarchy(
 
         if parent not in new_directories:
             new_directories[parent] = {
-                "path": parent,
-                "name": parent.split("/")[-1],
-                "marker_file": "",
+                _DirNode.PATH: parent,
+                _DirNode.NAME: parent.split("/")[-1],
+                _DirNode.MARKER_FILE: "",
             }
 
-        rel = {"parent": parent, "child": current}
+        rel = {_DirRel.PARENT: parent, _DirRel.CHILD: current}
         if rel not in new_relationships:
             new_relationships.append(rel)
 
@@ -166,20 +203,28 @@ def _collect_tech_nodes(tech_nodes: list[dict], path: str, marker) -> list[dict]
     new_nodes = list(tech_nodes)
 
     tech_mappings = [
-        (marker.languages, "Language", "USES_LANGUAGE"),
-        (marker.package_managers, "PackageManager", "USES_PACKAGE_MANAGER"),
-        (marker.frameworks, "Framework", "USES_FRAMEWORK"),
-        (marker.infrastructure, "Infrastructure", "USES_INFRASTRUCTURE"),
+        (marker.languages, TechLabel.LANGUAGE, TechRelType.USES_LANGUAGE),
+        (
+            marker.package_managers,
+            TechLabel.PACKAGE_MANAGER,
+            TechRelType.USES_PACKAGE_MANAGER,
+        ),
+        (marker.frameworks, TechLabel.FRAMEWORK, TechRelType.USES_FRAMEWORK),
+        (
+            marker.infrastructure,
+            TechLabel.INFRASTRUCTURE,
+            TechRelType.USES_INFRASTRUCTURE,
+        ),
     ]
 
     for items, tech_type, rel_type in tech_mappings:
         for item in items:
             new_nodes.append(
                 {
-                    "directory": path,
-                    "type": tech_type,
-                    "name": item,
-                    "rel_type": rel_type,
+                    _TechNode.DIRECTORY: path,
+                    _TechNode.TYPE: tech_type,
+                    _TechNode.NAME: item,
+                    _TechNode.REL_TYPE: rel_type,
                 }
             )
 
@@ -219,16 +264,16 @@ def _index_symbols(
         package = extract_package(entry.path, entry.language)
 
         symbol = {
-            "id": symbol_id,
-            "name": entry.name,
-            "path": entry.path,
-            "kind": entry.kind,
-            "line": entry.line,
-            "signature": entry.signature,
-            "language": entry.language,
-            "scope": entry.scope,
-            "scope_kind": entry.scope_kind,
-            "package": package,
+            _SymbolNode.ID: symbol_id,
+            _SymbolNode.NAME: entry.name,
+            _SymbolNode.PATH: entry.path,
+            _SymbolNode.KIND: entry.kind,
+            _SymbolNode.LINE: entry.line,
+            _SymbolNode.SIGNATURE: entry.signature,
+            _SymbolNode.LANGUAGE: entry.language,
+            _SymbolNode.SCOPE: entry.scope,
+            _SymbolNode.SCOPE_KIND: entry.scope_kind,
+            _SymbolNode.PACKAGE: package,
         }
         symbols[symbol_id] = symbol
 
@@ -249,25 +294,29 @@ def _resolve_relationships(
     symbols_with_parents: set[str] = set()
 
     for symbol in symbols.values():
-        if not symbol["scope"]:
+        if not symbol[_SymbolNode.SCOPE]:
             continue
 
-        parent_key = (symbol["path"], symbol["scope"])
+        parent_key = (symbol[_SymbolNode.PATH], symbol[_SymbolNode.SCOPE])
         potential_parents = symbol_index.get(parent_key, [])
 
         matching_parents = (
-            [p for p in potential_parents if p["kind"] == symbol["scope_kind"]]
-            if symbol["scope_kind"]
+            [
+                p
+                for p in potential_parents
+                if p[_SymbolNode.KIND] == symbol[_SymbolNode.SCOPE_KIND]
+            ]
+            if symbol[_SymbolNode.SCOPE_KIND]
             else potential_parents
         )
 
         for parent in matching_parents:
             relationships.append(
                 {
-                    "child_id": symbol["id"],
-                    "parent_id": parent["id"],
+                    _SymbolRel.CHILD_ID: symbol[_SymbolNode.ID],
+                    _SymbolRel.PARENT_ID: parent[_SymbolNode.ID],
                 }
             )
-            symbols_with_parents.add(symbol["id"])
+            symbols_with_parents.add(symbol[_SymbolNode.ID])
 
     return relationships, symbols_with_parents

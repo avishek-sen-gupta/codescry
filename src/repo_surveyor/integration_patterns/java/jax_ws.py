@@ -1,12 +1,12 @@
 """JAX-WS framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="JAX-WS",
     patterns={
         IntegrationType.SOAP: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"javax\.xml\.ws", Confidence.HIGH),
                 (r"jakarta\.xml\.ws", Confidence.HIGH),
                 (r"@WebServiceClient", Confidence.HIGH),

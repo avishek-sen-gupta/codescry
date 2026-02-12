@@ -1,12 +1,12 @@
 """NestJS framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="NestJS",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@Controller\(", Confidence.HIGH),
                 (r"@Get\(", Confidence.HIGH),
                 (r"@Post\(", Confidence.HIGH),
@@ -20,13 +20,13 @@ FRAMEWORK = FrameworkPatternSpec(
             ],
         },
         IntegrationType.MESSAGING: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@MessagePattern\(", Confidence.HIGH),
                 (r"@EventPattern\(", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"@WebSocketGateway", Confidence.HIGH),
                 (r"@SubscribeMessage", Confidence.HIGH),
             ],

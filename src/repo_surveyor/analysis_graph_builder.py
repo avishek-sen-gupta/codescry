@@ -6,8 +6,13 @@ from typing import Protocol
 
 from dotenv import load_dotenv
 
+from .constants import TechLabel
 from .ctags import CTagsResult
-from .graph_builder import build_coarse_structure_graph, build_tech_stack_graph
+from .graph_builder import (
+    _TechNode,
+    build_coarse_structure_graph,
+    build_tech_stack_graph,
+)
 from .report import SurveyReport
 from .surveyor import RepoSurveyor
 
@@ -117,10 +122,15 @@ class AnalysisGraphBuilder:
                     top_level=list(top_level_dirs),
                 )
 
-            for label in ["Language", "PackageManager", "Framework", "Infrastructure"]:
-                nodes_of_type = [n for n in tech_nodes if n["type"] == label]
+            for label in [
+                TechLabel.LANGUAGE,
+                TechLabel.PACKAGE_MANAGER,
+                TechLabel.FRAMEWORK,
+                TechLabel.INFRASTRUCTURE,
+            ]:
+                nodes_of_type = [n for n in tech_nodes if n[_TechNode.TYPE] == label]
                 if nodes_of_type:
-                    rel_type = nodes_of_type[0]["rel_type"]
+                    rel_type = nodes_of_type[0][_TechNode.REL_TYPE]
                     session.run(
                         f"""
                         UNWIND $nodes AS node

@@ -1,12 +1,12 @@
 """Javalin framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Javalin",
     patterns={
         IntegrationType.HTTP_REST: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"import io\.javalin", Confidence.HIGH),
                 (r"Javalin\.create", Confidence.HIGH),
                 (r"\w+\.get\(", Confidence.HIGH),
@@ -17,7 +17,7 @@ FRAMEWORK = FrameworkPatternSpec(
             ],
         },
         IntegrationType.SOCKET: {
-            "patterns": [
+            PatternKey.PATTERNS: [
                 (r"\w+\.ws\(", Confidence.HIGH),
                 (r"WsConfig", Confidence.HIGH),
             ],
