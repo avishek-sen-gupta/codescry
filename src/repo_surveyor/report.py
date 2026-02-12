@@ -24,6 +24,10 @@ class SurveyReport(BaseModel):
     infrastructure: list[str] = []
     directory_markers: list[DirectoryMarker] = []
 
+    def to_json(self, indent: int | None = 2) -> str:
+        """Generate a JSON representation of the report."""
+        return self.model_dump_json(indent=indent)
+
     def to_text(self) -> str:
         """Generate a human-readable plain text report."""
         lines = [f"Repository Survey: {self.repo_path}", ""]

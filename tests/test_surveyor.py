@@ -1,5 +1,6 @@
 """Tests for the repo surveyor."""
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -11,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repo_surveyor import CTagsConfig, CTagsEntry, RepoSurveyor
 from repo_surveyor.ctags import _build_ctags_command, _parse_ctags_json_output
+from repo_surveyor.report import DirectoryMarker, SurveyReport
 
 
 class TestMojoLspDetection:
@@ -97,6 +99,68 @@ class TestMojoLspDetection:
         surveyor = RepoSurveyor("/Users/asgupta/code/smojol")
         survey = surveyor.tech_stacks()
         print(survey.to_text())
+
+
+class TestSurveyReportJson:
+    """Tests for SurveyReport JSON output."""
+
+    def test_to_json_returns_valid_json(self) -> None:
+        """to_json() should return parseable JSON."""
+        report = SurveyReport(
+            repo_path="/test/repo",
+            languages=["Python", "Java"],
+            package_managers=["Poetry"],
+            frameworks=["FastAPI"],
+            infrastructure=["Docker"],
+        )
+        result = json.loads(report.to_json())
+
+        assert result["repo_path"] == "/test/repo"
+        assert result["languages"] == ["Python", "Java"]
+        assert result["package_managers"] == ["Poetry"]
+        assert result["frameworks"] == ["FastAPI"]
+        assert result["infrastructure"] == ["Docker"]
+
+    def test_to_json_includes_directory_markers(self) -> None:
+        """to_json() should include directory markers."""
+        report = SurveyReport(
+            repo_path="/test/repo",
+            languages=["Java"],
+            directory_markers=[
+                DirectoryMarker(
+                    directory="backend",
+                    marker_file="pom.xml",
+                    languages=["Java"],
+                    package_managers=["Maven"],
+                    frameworks=["Spring"],
+                ),
+            ],
+        )
+        result = json.loads(report.to_json())
+
+        assert len(result["directory_markers"]) == 1
+        marker = result["directory_markers"][0]
+        assert marker["directory"] == "backend"
+        assert marker["marker_file"] == "pom.xml"
+        assert marker["frameworks"] == ["Spring"]
+
+    def test_to_json_empty_report(self) -> None:
+        """to_json() should handle an empty report."""
+        report = SurveyReport(repo_path="/empty")
+        result = json.loads(report.to_json())
+
+        assert result["repo_path"] == "/empty"
+        assert result["languages"] == []
+        assert result["directory_markers"] == []
+
+    def test_to_json_respects_indent(self) -> None:
+        """to_json() should respect the indent parameter."""
+        report = SurveyReport(repo_path="/test")
+        compact = report.to_json(indent=None)
+        indented = report.to_json(indent=4)
+
+        assert "\n" not in compact
+        assert "\n" in indented
 
 
 class TestCTagsCommandBuilding:
