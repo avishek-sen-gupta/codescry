@@ -13,7 +13,7 @@ A Python library for experiments in analysing repository technology stacks and c
 - Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases) with framework-aware pattern matching
 - Extracts method call trees via [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) LSP bridge and tree-sitter
 - Persists analysis results to Neo4j graph database
-- Generates plain text reports
+- Generates plain text and JSON reports
 
 ## Installation
 
