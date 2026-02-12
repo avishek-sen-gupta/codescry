@@ -18,8 +18,7 @@ BASE_PATTERNS = {
     },
     IntegrationType.MESSAGING: {
         "patterns": [
-            (r"@app\.task", Confidence.HIGH),
-            (r"@celery\.task", Confidence.HIGH),
+            (r"@\w+\.task", Confidence.HIGH),
             (r"@shared_task", Confidence.HIGH),
             (r"from celery import", Confidence.HIGH),
             (r"from kombu import", Confidence.HIGH),
@@ -61,7 +60,7 @@ FRAMEWORK_PATTERNS = {
     "Flask": {
         IntegrationType.HTTP_REST: {
             "patterns": [
-                (r"@app\.route", Confidence.HIGH),
+                (r"@\w+\.route", Confidence.HIGH),
                 (r"from flask import", Confidence.HIGH),
             ],
         },
@@ -69,12 +68,10 @@ FRAMEWORK_PATTERNS = {
     "FastAPI": {
         IntegrationType.HTTP_REST: {
             "patterns": [
-                (r"@app\.get", Confidence.HIGH),
-                (r"@app\.post", Confidence.HIGH),
-                (r"@app\.put", Confidence.HIGH),
-                (r"@app\.delete", Confidence.HIGH),
-                (r"@router\.get", Confidence.HIGH),
-                (r"@router\.post", Confidence.HIGH),
+                (r"@\w+\.get", Confidence.HIGH),
+                (r"@\w+\.post", Confidence.HIGH),
+                (r"@\w+\.put", Confidence.HIGH),
+                (r"@\w+\.delete", Confidence.HIGH),
                 (r"from fastapi import", Confidence.HIGH),
             ],
         },

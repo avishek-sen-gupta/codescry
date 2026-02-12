@@ -52,12 +52,10 @@ FRAMEWORK_PATTERNS = {
         IntegrationType.HTTP_REST: {
             "patterns": [
                 (r"require\(['\"]express['\"]\)", Confidence.HIGH),
-                (r"app\.get\(", Confidence.HIGH),
-                (r"app\.post\(", Confidence.HIGH),
-                (r"app\.put\(", Confidence.HIGH),
-                (r"app\.delete\(", Confidence.HIGH),
-                (r"router\.get\(", Confidence.HIGH),
-                (r"router\.post\(", Confidence.HIGH),
+                (r"\w+\.get\(", Confidence.HIGH),
+                (r"\w+\.post\(", Confidence.HIGH),
+                (r"\w+\.put\(", Confidence.HIGH),
+                (r"\w+\.delete\(", Confidence.HIGH),
             ],
         },
     },

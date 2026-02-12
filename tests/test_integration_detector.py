@@ -750,7 +750,7 @@ class TestFrameworkAwarePatterns:
                 p
                 for p in points_without
                 if "from fastapi import" in p.matched_pattern
-                or r"@app\.get" in p.matched_pattern
+                or r"@\w+\.get" in p.matched_pattern
             ]
             assert len(fastapi_points) == 0
 
@@ -762,7 +762,7 @@ class TestFrameworkAwarePatterns:
                 p
                 for p in points_with
                 if "from fastapi import" in p.matched_pattern
-                or r"@app\.get" in p.matched_pattern
+                or r"@\w+\.get" in p.matched_pattern
             ]
             assert len(fastapi_points) > 0
         finally:
@@ -955,7 +955,7 @@ class TestGetPatternsForLanguageWithFrameworks:
         patterns = get_patterns_for_language(Language.PYTHON, frameworks=["Flask"])
         http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
         assert any("from flask import" in p for p in http_patterns)
-        assert any(r"@app\.route" in p for p in http_patterns)
+        assert any(r"@\w+\.route" in p for p in http_patterns)
         # Base should still be there
         assert any("import requests" in p for p in http_patterns)
 
@@ -1002,7 +1002,7 @@ class TestDetectIntegrationsWithFrameworks:
                 if p.entity_type == EntityType.FILE_CONTENT
                 and (
                     "from flask import" in p.matched_pattern
-                    or r"@app\.route" in p.matched_pattern
+                    or r"@\w+\.route" in p.matched_pattern
                 )
             ]
             assert len(flask_points) > 0
@@ -1021,7 +1021,7 @@ class TestDetectIntegrationsWithFrameworks:
                 if p.entity_type == EntityType.FILE_CONTENT
                 and (
                     "from flask import" in p.matched_pattern
-                    or r"@app\.route" in p.matched_pattern
+                    or r"@\w+\.route" in p.matched_pattern
                 )
             ]
             assert len(flask_specific_points) == 0
@@ -1045,7 +1045,7 @@ class TestDetectIntegrationsWithFrameworks:
                 if p.entity_type == EntityType.FILE_CONTENT
                 and (
                     "from fastapi import" in p.matched_pattern
-                    or r"@app\.get" in p.matched_pattern
+                    or r"@\w+\.get" in p.matched_pattern
                 )
             ]
             assert len(fastapi_points) > 0
