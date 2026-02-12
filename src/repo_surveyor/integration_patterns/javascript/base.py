@@ -1,6 +1,6 @@
-"""JavaScript integration patterns."""
+"""JavaScript base integration patterns."""
 
-from .types import Confidence, IntegrationType
+from ..types import Confidence, IntegrationType
 
 BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
@@ -58,30 +58,5 @@ BASE_PATTERNS = {
             (r"require\(['\"]@grpc/grpc-js['\"]\)", Confidence.HIGH),
             (r"require\(['\"]@grpc/proto-loader['\"]\)", Confidence.HIGH),
         ],
-    },
-}
-
-FRAMEWORK_PATTERNS = {
-    "Express": {
-        IntegrationType.HTTP_REST: {
-            "patterns": [
-                (r"require\(['\"]express['\"]\)", Confidence.HIGH),
-                (r"\w+\.get\(", Confidence.HIGH),
-                (r"\w+\.post\(", Confidence.HIGH),
-                (r"\w+\.put\(", Confidence.HIGH),
-                (r"\w+\.delete\(", Confidence.HIGH),
-            ],
-        },
-    },
-    "Next.js": {
-        IntegrationType.HTTP_REST: {
-            "patterns": [
-                (r"NextApiRequest", Confidence.HIGH),
-                (r"NextApiResponse", Confidence.HIGH),
-                (r"getServerSideProps", Confidence.HIGH),
-                (r"getStaticProps", Confidence.HIGH),
-                (r"require\(['\"]next/server['\"]\)", Confidence.HIGH),
-            ],
-        },
     },
 }

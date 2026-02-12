@@ -1,6 +1,6 @@
-"""Rust integration patterns."""
+"""Rust base integration patterns."""
 
-from .types import Confidence, IntegrationType
+from ..types import Confidence, IntegrationType
 
 BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
@@ -71,55 +71,5 @@ BASE_PATTERNS = {
             (r"tonic::", Confidence.HIGH),
             (r"#\[tonic::async_trait\]", Confidence.HIGH),
         ],
-    },
-}
-
-FRAMEWORK_PATTERNS = {
-    "Actix": {
-        IntegrationType.HTTP_REST: {
-            "patterns": [
-                (r"use actix_web::", Confidence.HIGH),
-                (r"#\[get\(", Confidence.HIGH),
-                (r"#\[post\(", Confidence.HIGH),
-                (r"#\[put\(", Confidence.HIGH),
-                (r"#\[delete\(", Confidence.HIGH),
-                (r"#\[patch\(", Confidence.HIGH),
-                (r"HttpResponse", Confidence.HIGH),
-                (r"HttpRequest", Confidence.HIGH),
-                (r"web::Json", Confidence.HIGH),
-                (r"web::Path", Confidence.HIGH),
-                (r"web::Query", Confidence.HIGH),
-                (r"web::Data", Confidence.HIGH),
-            ],
-        },
-    },
-    "Axum": {
-        IntegrationType.HTTP_REST: {
-            "patterns": [
-                (r"use axum::", Confidence.HIGH),
-                (r"Router::", Confidence.MEDIUM),
-                (r"\.route\(", Confidence.MEDIUM),
-            ],
-        },
-    },
-    "Rocket": {
-        IntegrationType.HTTP_REST: {
-            "patterns": [
-                (r"use rocket::", Confidence.HIGH),
-                (r"#\[get\(", Confidence.HIGH),
-                (r"#\[post\(", Confidence.HIGH),
-                (r"#\[put\(", Confidence.HIGH),
-                (r"#\[delete\(", Confidence.HIGH),
-                (r"#\[patch\(", Confidence.HIGH),
-                (r"#\[route\(", Confidence.HIGH),
-            ],
-        },
-    },
-    "Warp": {
-        IntegrationType.HTTP_REST: {
-            "patterns": [
-                (r"use warp::", Confidence.HIGH),
-            ],
-        },
     },
 }

@@ -1,6 +1,6 @@
-"""COBOL integration patterns."""
+"""COBOL base integration patterns."""
 
-from .types import Confidence, IntegrationType
+from ..types import Confidence, IntegrationType
 
 BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
@@ -140,5 +140,3 @@ BASE_PATTERNS = {
         ],
     },
 }
-
-FRAMEWORK_PATTERNS = {}
