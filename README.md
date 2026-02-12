@@ -303,6 +303,235 @@ This prevents false positives like `"reactive-streams"` matching `"react"` or `"
 | Rust | Actix, Axum, Rocket, Warp |
 | .NET | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
 
+## Technical Documentation
+
+This section describes the internal code flows and architecture of each major subsystem.
+
+### Architecture Overview
+
+```
+RepoSurveyor
+├── tech_stacks()
+│   ├── detectors.detect_indicator_files_with_directories()
+│   │   └── package_parsers.parse_dependencies() → match_frameworks()
+│   ├── detectors.detect_from_glob_patterns()
+│   │   └── package_parsers.parse_dependencies() → match_frameworks()
+│   ├── detectors.detect_kubernetes()
+│   └── detectors.detect_languages_from_extensions()
+│
+├── coarse_structure()
+│   └── ctags.run_ctags()
+│       ├── _build_ctags_command()
+│       └── _parse_ctags_json_output()
+│
+├── (integration detection — standalone)
+│   └── integration_detector.detect_integrations()
+│       ├── integration_patterns.get_patterns_for_language()
+│       │   └── common + language base + framework-specific patterns
+│       ├── scan_file_for_integrations()
+│       └── classify_directory()
+│
+├── (call flow extraction — standalone)
+│   └── call_flow.extract_call_tree()
+│       ├── lsp_bridge.LspBridgeClient (Protocol)
+│       │   └── RequestsLspBridgeClient (HTTP → mojo-lsp)
+│       └── tree-sitter (source parsing)
+│
+└── (graph persistence — standalone)
+    └── analysis_graph_builder.AnalysisGraphBuilder
+        ├── persist_tech_stacks()
+        │   └── graph_builder.build_tech_stack_graph()
+        └── persist_coarse_structure()
+            └── graph_builder.build_coarse_structure_graph()
+```
+
+### Tech Stack Analysis: `RepoSurveyor.tech_stacks()`
+
+**Entry point:** `surveyor.py` → `RepoSurveyor.tech_stacks()`
+
+The tech stack analysis runs five detection stages in sequence, aggregating results into a `SurveyReport`:
+
+**Stage 1 — Indicator file walk** (`detectors.py` → `detect_indicator_files_with_directories()`): Walks the repository directory tree (skipping `.git`, `node_modules`, `__pycache__`, etc.) and matches filenames against the `INDICATOR_FILES` dict. Each match (e.g. `pyproject.toml` → Python + Poetry, `pom.xml` → Java + Maven) produces a `DirectoryMarker` recording what was found and in which directory.
+
+**Stage 2 — Framework detection from config files** (`detectors.py` → `detect_frameworks_for_file()`): For each indicator file found in Stage 1, the file's content is parsed for framework dependencies. This delegates to the package parser subsystem (see below). The detected frameworks are merged into the marker's `frameworks` list.
+
+**Stage 3 — Glob pattern detection** (`detectors.py` → `detect_from_glob_patterns()`): Matches glob patterns like `*.csproj`, `*.sln`, and `*.tf` across the repo. Matched files are also parsed for framework dependencies via the package parser subsystem.
+
+**Stage 4 — Kubernetes detection** (`detectors.py` → `detect_kubernetes()`): Scans all `.yaml`/`.yml` files for Kubernetes markers (`apiVersion:`, `kind: Deployment`, etc.). Returns a boolean.
+
+**Stage 5 — Language extension scan** (`detectors.py` → `detect_languages_from_extensions()`): Walks the repo and maps file extensions (`.py`, `.java`, `.rs`, etc.) to language names using the `EXTENSION_LANGUAGES` dict. This catches languages not represented by indicator files (e.g. a `.go` file in a Python project).
+
+The final `SurveyReport` (defined in `report.py`) contains sorted, deduplicated lists of languages, package managers, frameworks, infrastructure, and the per-directory `DirectoryMarker` list. `SurveyReport.to_text()` renders a human-readable plain text report.
+
+#### Package Parser Subsystem
+
+**Entry point:** `package_parsers/__init__.py` → `parse_dependencies(filename, content)`
+
+The parser dispatcher maps exact filenames (e.g. `"pom.xml"`, `"package.json"`) to format-specific parsers, with extension-based fallback for variable names (e.g. `MyApp.csproj`). Each parser returns a list of `ParsedDependency(name, source)` objects. Supported formats:
+
+| Parser module | File format | Technique |
+|---|---|---|
+| `pyproject_toml` | `pyproject.toml` | `tomllib` — reads PEP 621 `[project.dependencies]` and Poetry `[tool.poetry.dependencies]` |
+| `requirements_txt` | `requirements.txt` | Line parsing — extracts PEP 508 package names |
+| `pipfile` | `Pipfile` | `tomllib` — reads `[packages]` and `[dev-packages]` |
+| `setup_py` | `setup.py` | Regex — extracts `install_requires=[...]` |
+| `package_json` | `package.json` | `json` — reads `dependencies`, `devDependencies`, `peerDependencies` |
+| `pom_xml` | `pom.xml` | `xml.etree` — extracts `<artifactId>` from `<dependency>` elements |
+| `build_gradle` | `build.gradle` / `.kts` | Regex — extracts `implementation`, `api`, `compile` declarations |
+| `go_mod` | `go.mod` | Line parsing — extracts module paths from `require` blocks |
+| `cargo_toml` | `Cargo.toml` | `tomllib` — reads `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` |
+| `csproj` | `*.csproj` | `xml.etree` — extracts `<PackageReference Include="...">` attributes |
+| `packages_config` | `packages.config` | `xml.etree` — extracts `<package id="...">` attributes |
+
+**Framework matching** (`_dep_matches_pattern()` + `match_frameworks()`): Parsed dependency names are matched against the `FRAMEWORK_PATTERNS` dict using four rules tried in order:
+
+1. **Exact match**: `"fastapi"` == `"fastapi"`
+2. **Prefix-separator**: `"spring-boot-starter-web"` starts with `"spring-boot-"` → match
+3. **Path subsequence**: `"github.com/gin-gonic/gin"` contains `"/gin-gonic/gin/"` → match
+4. **npm scoped**: `"@nestjs/core"` → scope `"nestjs"` or name `"core"` matches pattern
+
+### Code Structure Extraction: `RepoSurveyor.coarse_structure()`
+
+**Entry point:** `surveyor.py` → `RepoSurveyor.coarse_structure()` → `ctags.py` → `run_ctags()`
+
+This subsystem extracts code symbols (classes, methods, fields, functions, etc.) by shelling out to Universal CTags.
+
+**Step 1 — Build command** (`ctags.py` → `_build_ctags_command()`): Constructs a `ctags` CLI invocation from a `CTagsConfig` object:
+```
+ctags --output-format=json --fields=* --extras=+q -R
+      [--languages=Java,Python] [--exclude=.git] [--exclude=target] ...
+```
+
+**Step 2 — Execute** (`ctags.py` → `run_ctags()`): Runs ctags as a subprocess with a 300-second timeout. Captures stdout (JSON Lines) and stderr.
+
+**Step 3 — Parse** (`ctags.py` → `_parse_ctags_json_output()`): Reads the JSON Lines output line by line. Each line with `"_type": "tag"` is converted into a `CTagsEntry` via `CTagsEntry.from_json()`. Metadata lines are skipped.
+
+The result is a `CTagsResult` containing a list of `CTagsEntry` objects (each with `name`, `path`, `kind`, `line`, `scope`, `scope_kind`, `signature`, `language`), the raw output, the return code, and a `success` property.
+
+### Integration Point Detection: `detect_integrations()`
+
+**Entry point:** `integration_detector.py` → `detect_integrations()`
+
+This subsystem scans source files for regex patterns that indicate system integration points (HTTP/REST, SOAP, messaging, sockets, databases, file I/O, gRPC).
+
+#### Pattern organisation
+
+Patterns are organised in three layers, merged by `get_patterns_for_language()` in `integration_patterns/__init__.py`:
+
+```
+For each IntegrationType:
+  1. Common patterns (common.py) — low-confidence, language-agnostic
+     e.g. (?i)\bhttp\b, (?i)\bkafka\b
+  2. Language base patterns (java.py, python.py, ...) — always active for that language
+     e.g. @Entity, import requests, std::fs
+  3. Framework-specific patterns — active only when framework detected in directory
+     e.g. @RestController (Spring), @app.get (FastAPI)
+```
+
+Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIUM, or LOW.
+
+#### File scanning flow
+
+1. **File iteration** (`_get_source_files()`): Walks the repo, filters by file extension (using `EXTENSION_TO_LANGUAGE`), and skips excluded directories.
+
+2. **Framework resolution** (`_find_frameworks_for_file()`): For each file, walks up the directory hierarchy looking up entries in the `directory_frameworks` mapping. This allows a file in `backend/api/routes.py` to inherit frameworks declared for `"backend"` or `"."`.
+
+3. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, calls `get_patterns_for_language(language, frameworks)` to get the merged pattern set, then tests each line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, and entity type.
+
+4. **Directory classification** (`classify_directory()`): After scanning files, directory names themselves are matched against the directory patterns from `common.py` (e.g. `controllers` → HTTP_REST, `proto` → GRPC). These produce directory-level `IntegrationSignal` entries.
+
+The result is an `IntegrationDetectorResult` containing all `IntegrationSignal` instances and the count of files scanned.
+
+### Call Flow Extraction: `extract_call_tree()`
+
+**Entry point:** `call_flow/extractor.py` → `extract_call_tree()`
+
+This subsystem traces method call hierarchies within a single file using two tools: tree-sitter for identifying call sites, and LSP go-to-definition for resolving what each call site refers to.
+
+**Step 1 — Parse the source** with tree-sitter to build a syntax tree. A language-specific query (currently only Java: `"(method_invocation name: (identifier) @name)"`) is used to locate call expressions.
+
+**Step 2 — Get document symbols** via the LSP bridge (`client.get_symbols()`). This returns a tree of `DocumentSymbol` objects representing methods, constructors, and functions in the file.
+
+**Step 3 — Build a method map** (`_build_method_map()`): Recursively collects all method-like symbols (LSP SymbolKinds 6, 9, 12) into a dict mapping method name → list of `{start, end}` line ranges. Parameter signatures are stripped (e.g. `"layout(String)"` → `"layout"`).
+
+**Step 4 — Walk the call tree** starting from the entry method. For each method:
+- Use the tree-sitter query to extract call identifiers within the method's line range (`_extract_call_identifiers()`)
+- For each identifier, call `client.get_definition()` to resolve where it's defined
+- Map the definition line back to a method name using `_find_method_containing()`
+- If the callee is a different method in the same file, record the edge and recurse into it
+- Cycle detection prevents infinite recursion
+
+The result is a frozen `CallTree` (defined in `call_flow/types.py`) with an `entry_method` and `edges: dict[str, frozenset[str]]` mapping callers to callees. `format_call_tree()` renders this as an indented tree string with recursion markers.
+
+**Limitations**: Currently only supports Java. Only traces calls within a single file (cross-file calls are ignored).
+
+### LSP Bridge
+
+**Protocol:** `lsp_bridge/client_protocol.py` → `LspBridgeClient` (a `typing.Protocol`)
+
+The LSP bridge provides access to Language Server Protocol operations through an HTTP REST interface (the [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) bridge server).
+
+The `LspBridgeClient` protocol defines six operations: `start_server`, `stop_server`, `open_document`, `close_document`, `get_symbols`, and `get_definition`. Using a Protocol rather than an abstract base class allows any object with matching method signatures to satisfy the interface — this enables test doubles without inheritance.
+
+**Concrete implementation:** `lsp_bridge/requests_client.py` → `RequestsLspBridgeClient`
+
+Each method is a POST to the mojo-lsp bridge:
+
+| Method | Endpoint | Request body | Response |
+|---|---|---|---|
+| `start_server()` | `POST /start` | `{language, rootUri}` | Server config dict |
+| `stop_server()` | `POST /stop` | `{}` | — |
+| `open_document()` | `POST /document/open` | `{uri, languageId, text}` | — |
+| `close_document()` | `POST /document/close` | `{uri}` | — |
+| `get_symbols()` | `POST /symbols` | `{uri}` | `{symbols: [...]}` → `list[DocumentSymbol]` |
+| `get_definition()` | `POST /definition` | `{uri, line, character}` | `{locations: [...]}` → `list[Location]` |
+
+Response JSON is parsed into frozen dataclasses (`DocumentSymbol`, `Location`) defined in `lsp_bridge/types.py`. `DocumentSymbol` has recursive `children` (a tuple of `DocumentSymbol`) representing the symbol tree.
+
+### Neo4j Persistence: `AnalysisGraphBuilder`
+
+**Entry point:** `analysis_graph_builder.py` → `AnalysisGraphBuilder`
+
+This subsystem persists tech stack and code structure analysis results into a Neo4j graph database. It uses Protocol-based dependency injection (`Neo4jDriver` protocol) for testability.
+
+#### Tech stack persistence: `persist_tech_stacks(report)`
+
+**Step 1 — Build graph data** (`graph_builder.py` → `build_tech_stack_graph()`): Transforms the `SurveyReport` into four outputs:
+- `directories`: List of directory node dicts (path, name, marker_file)
+- `dir_relationships`: Parent-child directory edges (built by walking up each path to create intermediate directories)
+- `tech_nodes`: Technology nodes (Language, PackageManager, Framework, Infrastructure) linked to their directories
+- `top_level_dirs`: Directories that link directly to the Repository node
+
+**Step 2 — Execute Cypher**: Creates nodes and relationships in five batched Cypher queries:
+1. `CREATE (r:Repository {path, name})`
+2. `UNWIND $directories ... CREATE (d:Directory {...})`
+3. `UNWIND $relationships ... CREATE (parent)-[:CONTAINS_DIRECTORY]->(child)`
+4. `UNWIND $top_level ... CREATE (r)-[:CONTAINS_DIRECTORY]->(d)`
+5. For each tech type: `UNWIND $nodes ... CREATE (d)-[:USES_LANGUAGE|USES_FRAMEWORK|...]->(t:TechType {name})`
+
+#### Code structure persistence: `persist_coarse_structure(result, repo_path)`
+
+**Step 1 — Build graph data** (`graph_builder.py` → `build_coarse_structure_graph()`):
+- `_index_symbols()`: Creates a unique ID for each symbol (`{path}:{name}:{kind}:{line}`) and extracts the package name using language-aware heuristics (e.g. Java `src/main/java/com/example/` → `com.example`). Builds a `(path, name)` index for parent lookup.
+- `_resolve_relationships()`: For each symbol with a `scope`, looks up the parent symbol by matching `(path, scope_name)` and optionally `scope_kind`. Records `{child_id, parent_id}` relationships.
+- Symbols with no resolved parent become `top_level_symbols`.
+
+**Step 2 — Execute Cypher**: Creates nodes and relationships in three batched queries:
+1. `UNWIND $symbols ... CREATE (s:CodeSymbol {...})`
+2. `UNWIND $relationships ... CREATE (parent)-[:CONTAINS]->(child)`
+3. `UNWIND $top_level ... CREATE (r:Repository)-[:CONTAINS]->(s:CodeSymbol)`
+
+A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()` and `coarse_structure()`, then persists both to Neo4j.
+
+### Design Patterns
+
+The codebase uses several consistent patterns:
+
+- **Protocol-based dependency injection**: External systems (Neo4j, LSP bridge) are accessed through `typing.Protocol` interfaces, with concrete implementations injected at construction time. This avoids hardcoded imports and enables testing with mock objects.
+- **Frozen dataclasses**: All data transfer objects (`IntegrationSignal`, `FileMatch`, `CallTree`, `DocumentSymbol`, `Location`) are frozen to prevent mutation after construction.
+- **Pure graph-building functions**: `graph_builder.py` contains pure functions that transform survey data into graph representations without side effects — the actual database writes are in `analysis_graph_builder.py`.
+- **Layered pattern merging**: Integration patterns are composed from three layers (common → language base → framework-specific) at query time, keeping each layer independently editable.
+
 ## Running Tests
 
 ```bash
