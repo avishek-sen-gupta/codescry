@@ -7,7 +7,7 @@ A Python library for experiments in analysing repository technology stacks and c
 ## Features
 
 - Detects programming languages, package managers, frameworks, and infrastructure
-- Scans indicator files (package.json, pyproject.toml, Dockerfile, etc.)
+- Structured parsing of config files (package.json, pyproject.toml, pom.xml, .csproj, etc.) for accurate framework detection — no false positives from substring matching
 - Associates technologies with their containing directories (useful for monorepos)
 - Extracts code symbols using Universal CTags
 - Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases) with framework-aware pattern matching
@@ -162,13 +162,13 @@ This means:
 
 | Language | File Extensions | Base Patterns | Framework-Specific Patterns |
 |----------|-----------------|---------------|----------------------------|
-| Java | `.java` | JPA, JDBC, JMS, servlet, SOAP | Spring, JAX-RS, Micronaut, Quarkus |
+| Java | `.java` | JPA, JDBC, JMS, servlet, SOAP | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS |
 | Python | `.py` | requests, SQLAlchemy, Celery, websockets | Flask, FastAPI, Django, Starlette, aiohttp, Tornado, Pyramid |
 | TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs | NestJS, Express, Angular, Next.js |
 | JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs | Express, Next.js |
 | Rust | `.rs` | Diesel, SQLx, rdkafka, tungstenite | Actix, Axum, Rocket, Warp |
 | Go | `.go` | net/http, GORM, sarama, gorilla/websocket | Gin, Echo, Fiber, Chi, Gorilla |
-| C# | `.cs` | ASP.NET, Entity Framework, SignalR | _(no framework detection yet)_ |
+| C# | `.cs` | ASP.NET, Entity Framework, SignalR | ASP.NET Core, ASP.NET Web API, WCF, CoreWCF, ServiceStack, Nancy, Carter |
 | COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ | _(no framework detection yet)_ |
 | PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ | _(no framework detection yet)_ |
 
@@ -259,10 +259,47 @@ This creates a graph with:
 | Rust | `Cargo.toml` | Rust, Cargo |
 | Ruby | `Gemfile` | Ruby, Bundler |
 | COBOL | `.cbl`, `.cob`, `.cpy` | COBOL |
-| .NET | `*.csproj`, `*.sln` | C#, .NET |
+| .NET | `*.csproj`, `*.sln`, `packages.config` | C#, .NET, NuGet |
 | Docker | `Dockerfile`, `docker-compose.yml` | Docker, Docker Compose |
 | Terraform | `*.tf` | Terraform |
 | Kubernetes | `*.yaml` with k8s markers | Kubernetes |
+
+## Framework Detection
+
+Framework detection uses structured parsing of config files rather than naive substring matching. Each file format has a dedicated parser that extracts actual dependency names:
+
+| File | Parser | Technique |
+|------|--------|-----------|
+| `pyproject.toml` | tomllib | PEP 621 `[project.dependencies]`, Poetry `[tool.poetry.dependencies]` |
+| `requirements.txt` | line parsing | PEP 508 name extraction |
+| `Pipfile` | tomllib | `[packages]`, `[dev-packages]` |
+| `setup.py` | regex | `install_requires=[...]` |
+| `package.json` | json | `dependencies`, `devDependencies`, `peerDependencies` |
+| `pom.xml` | xml.etree | `<artifactId>` from `<dependency>` elements |
+| `build.gradle` / `.kts` | regex | `implementation`, `api`, `compile` declarations |
+| `go.mod` | line parsing | `require` block module paths |
+| `Cargo.toml` | tomllib | `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` |
+| `*.csproj` | xml.etree | `<PackageReference Include="...">` |
+| `packages.config` | xml.etree | `<package id="...">` |
+
+Parsed dependency names are matched against framework patterns using smart matching rules:
+- **Exact match**: `"fastapi"` == `"fastapi"`
+- **Prefix-separator**: `"spring-boot-starter-web"` matches `"spring-boot"` (hyphen), `"microsoft.aspnetcore.mvc"` matches `"microsoft.aspnetcore"` (dot)
+- **Path subsequence**: `"github.com/gin-gonic/gin"` matches `"gin-gonic/gin"`
+- **npm scoped**: `"@nestjs/core"` matches `"nestjs"`
+
+This prevents false positives like `"reactive-streams"` matching `"react"` or `"expression"` matching `"express"`.
+
+### Detected Frameworks
+
+| Ecosystem | Frameworks |
+|-----------|-----------|
+| Python | FastAPI, Django, Flask, Starlette, Tornado, Pyramid, aiohttp |
+| JavaScript/Node | React, Vue.js, Angular, Next.js, Nuxt.js, Express, NestJS, Svelte, Gatsby, Fastify |
+| Java | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS |
+| Go | Gin, Echo, Fiber, Chi, Gorilla |
+| Rust | Actix, Axum, Rocket, Warp |
+| .NET | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
 
 ## Running Tests
 

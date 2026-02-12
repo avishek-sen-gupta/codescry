@@ -7,8 +7,10 @@ from .types import ParsedDependency
 from . import (
     build_gradle,
     cargo_toml,
+    csproj,
     go_mod,
     package_json,
+    packages_config,
     pipfile,
     pom_xml,
     pyproject_toml,
@@ -27,19 +29,32 @@ _PARSERS: dict[str, callable] = {
     "build.gradle.kts": build_gradle.parse,
     "go.mod": go_mod.parse,
     "Cargo.toml": cargo_toml.parse,
+    "packages.config": packages_config.parse,
+}
+
+# Extension-based fallback for files with variable names (e.g. MyApp.csproj)
+_EXT_PARSERS: dict[str, callable] = {
+    ".csproj": csproj.parse,
 }
 
 
 def parse_dependencies(filename: str, content: str) -> list[ParsedDependency]:
     """Parse dependencies from a config file.
 
-    Dispatches to the appropriate parser based on filename.
+    Dispatches to the appropriate parser based on exact filename first,
+    then falls back to file extension matching.
     Returns an empty list for unrecognised filenames.
     """
     parser = _PARSERS.get(filename)
-    if parser is None:
-        return []
-    return parser(content)
+    if parser is not None:
+        return parser(content)
+
+    # Extension-based fallback
+    for ext, ext_parser in _EXT_PARSERS.items():
+        if filename.endswith(ext):
+            return ext_parser(content)
+
+    return []
 
 
 def _dep_matches_pattern(dep_name: str, pattern: str) -> bool:
@@ -47,7 +62,7 @@ def _dep_matches_pattern(dep_name: str, pattern: str) -> bool:
 
     Matching rules (tried in order):
       1. Exact match
-      2. Prefix-hyphen: dep starts with ``pattern + "-"``
+      2. Prefix-separator: dep starts with ``pattern + "-"`` or ``pattern + "."``
       3. Path subsequence: pattern (possibly multi-segment) appears as a
          contiguous ``/``-delimited subsequence (e.g. ``"gin-gonic/gin"``
          matches ``"github.com/gin-gonic/gin"``)
@@ -55,7 +70,7 @@ def _dep_matches_pattern(dep_name: str, pattern: str) -> bool:
     """
     if dep_name == pattern:
         return True
-    if dep_name.startswith(pattern + "-"):
+    if dep_name.startswith(pattern + "-") or dep_name.startswith(pattern + "."):
         return True
     # Contiguous path subsequence: /pattern/ within /dep/
     if "/" in dep_name:

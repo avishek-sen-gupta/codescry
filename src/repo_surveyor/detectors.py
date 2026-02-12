@@ -29,6 +29,8 @@ INDICATOR_FILES: dict[str, dict[str, list[str]]] = {
     "Cargo.toml": {"languages": ["Rust"], "package_managers": ["Cargo"]},
     # Ruby
     "Gemfile": {"languages": ["Ruby"], "package_managers": ["Bundler"]},
+    # .NET (legacy NuGet format)
+    "packages.config": {"languages": ["C#"], "package_managers": ["NuGet"]},
     # Docker
     "Dockerfile": {"infrastructure": ["Docker"]},
     "docker-compose.yml": {"infrastructure": ["Docker Compose"]},
@@ -77,7 +79,7 @@ EXTENSION_LANGUAGES: dict[str, str] = {
 
 # Glob patterns for infrastructure detection
 GLOB_PATTERNS: dict[str, dict[str, list[str]]] = {
-    "*.csproj": {"languages": ["C#"], "frameworks": [".NET"]},
+    "*.csproj": {"languages": ["C#"], "package_managers": ["NuGet"], "frameworks": [".NET"]},
     "*.sln": {"frameworks": [".NET"]},
     "*.tf": {"infrastructure": ["Terraform"]},
 }
@@ -147,6 +149,14 @@ FRAMEWORK_PATTERNS: dict[str, dict[str, str]] = {
     "axum": {"frameworks": "Axum"},
     "rocket": {"frameworks": "Rocket"},
     "warp": {"frameworks": "Warp"},
+    # .NET frameworks (in .csproj or packages.config)
+    "microsoft.aspnetcore": {"frameworks": "ASP.NET Core"},
+    "microsoft.aspnet.webapi": {"frameworks": "ASP.NET Web API"},
+    "servicestack": {"frameworks": "ServiceStack"},
+    "nancy": {"frameworks": "Nancy"},
+    "carter": {"frameworks": "Carter"},
+    "system.servicemodel": {"frameworks": "WCF"},
+    "corewcf": {"frameworks": "CoreWCF"},
 }
 
 
@@ -220,6 +230,8 @@ def detect_indicator_files_with_directories(
 
 def detect_from_glob_patterns(repo_path: Path) -> dict[str, set[str]]:
     """Detect technologies from glob patterns."""
+    from .package_parsers import match_frameworks, parse_dependencies
+
     results: dict[str, set[str]] = {
         "languages": set(),
         "package_managers": set(),
@@ -228,9 +240,23 @@ def detect_from_glob_patterns(repo_path: Path) -> dict[str, set[str]]:
     }
 
     for pattern, techs in GLOB_PATTERNS.items():
-        if list(repo_path.glob(pattern)) or list(repo_path.glob(f"**/{pattern}")):
+        matched_files = list(repo_path.glob(pattern)) + list(
+            repo_path.glob(f"**/{pattern}")
+        )
+        if matched_files:
             for category, items in techs.items():
                 results[category].update(items)
+
+        # Parse matched files for framework dependencies
+        for filepath in matched_files:
+            try:
+                content = filepath.read_text(encoding="utf-8", errors="ignore")
+                deps = parse_dependencies(filepath.name, content)
+                results["frameworks"].update(
+                    match_frameworks(deps, FRAMEWORK_PATTERNS)
+                )
+            except (OSError, PermissionError):
+                continue
 
     return results
 

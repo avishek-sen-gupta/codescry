@@ -20,6 +20,8 @@ from repo_surveyor.package_parsers import pom_xml
 from repo_surveyor.package_parsers import build_gradle
 from repo_surveyor.package_parsers import go_mod
 from repo_surveyor.package_parsers import cargo_toml
+from repo_surveyor.package_parsers import csproj
+from repo_surveyor.package_parsers import packages_config
 from repo_surveyor.detectors import FRAMEWORK_PATTERNS
 
 
@@ -379,6 +381,90 @@ cc = "1"
 
 
 # ---------------------------------------------------------------------------
+# .csproj parser
+# ---------------------------------------------------------------------------
+class TestCsproj:
+    def test_sdk_style_project(self):
+        content = """\
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+</Project>
+"""
+        deps = csproj.parse(content)
+        names = [d.name for d in deps]
+        assert "microsoft.aspnetcore.mvc" in names
+        assert "newtonsoft.json" in names
+
+    def test_old_style_namespaced_project(self):
+        content = """\
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <PackageReference Include="System.ServiceModel.Http" Version="4.10.0" />
+  </ItemGroup>
+</Project>
+"""
+        deps = csproj.parse(content)
+        names = [d.name for d in deps]
+        assert "system.servicemodel.http" in names
+
+    def test_multiple_item_groups(self):
+        content = """\
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="ServiceStack" Version="6.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Carter" Version="7.0" />
+  </ItemGroup>
+</Project>
+"""
+        deps = csproj.parse(content)
+        names = [d.name for d in deps]
+        assert "servicestack" in names
+        assert "carter" in names
+
+    def test_malformed_xml_returns_empty(self):
+        assert csproj.parse("not xml <<<") == []
+
+    def test_source_field(self):
+        content = '<Project><ItemGroup><PackageReference Include="Nancy" Version="2.0" /></ItemGroup></Project>'
+        deps = csproj.parse(content)
+        assert deps[0].source == ".csproj"
+
+
+# ---------------------------------------------------------------------------
+# packages.config parser
+# ---------------------------------------------------------------------------
+class TestPackagesConfig:
+    def test_basic_packages(self):
+        content = """\
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="Microsoft.AspNet.WebApi.Core" version="5.2.9" targetFramework="net48" />
+  <package id="Newtonsoft.Json" version="13.0.1" targetFramework="net48" />
+  <package id="Nancy" version="2.0.0" targetFramework="net48" />
+</packages>
+"""
+        deps = packages_config.parse(content)
+        names = [d.name for d in deps]
+        assert "microsoft.aspnet.webapi.core" in names
+        assert "newtonsoft.json" in names
+        assert "nancy" in names
+
+    def test_malformed_xml_returns_empty(self):
+        assert packages_config.parse("not xml <<<") == []
+
+    def test_source_field(self):
+        content = '<packages><package id="Nancy" version="2.0" /></packages>'
+        deps = packages_config.parse(content)
+        assert deps[0].source == "packages.config"
+
+
+# ---------------------------------------------------------------------------
 # Smart matching logic
 # ---------------------------------------------------------------------------
 class TestDepMatchesPattern:
@@ -503,6 +589,39 @@ class TestMatchFrameworks:
         deps = [ParsedDependency("metro-jax-ws", "pom.xml")]
         assert "JAX-WS" in match_frameworks(deps, FRAMEWORK_PATTERNS)
 
+    def test_aspnet_core_detected(self):
+        deps = [ParsedDependency("microsoft.aspnetcore.mvc", ".csproj")]
+        assert "ASP.NET Core" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_aspnet_webapi_detected(self):
+        deps = [ParsedDependency("microsoft.aspnet.webapi.core", ".csproj")]
+        assert "ASP.NET Web API" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_servicestack_detected(self):
+        deps = [ParsedDependency("servicestack", ".csproj")]
+        assert "ServiceStack" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_nancy_detected(self):
+        deps = [ParsedDependency("nancy", "packages.config")]
+        assert "Nancy" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_carter_detected(self):
+        deps = [ParsedDependency("carter", ".csproj")]
+        assert "Carter" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_wcf_detected(self):
+        deps = [ParsedDependency("system.servicemodel.http", ".csproj")]
+        assert "WCF" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_corewcf_detected(self):
+        deps = [ParsedDependency("corewcf", ".csproj")]
+        assert "CoreWCF" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_aspnet_core_via_prefix_match(self):
+        """microsoft.aspnetcore.authentication should also match ASP.NET Core."""
+        deps = [ParsedDependency("microsoft.aspnetcore.authentication", ".csproj")]
+        assert "ASP.NET Core" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
 
 # ---------------------------------------------------------------------------
 # parse_dependencies dispatch
@@ -522,3 +641,15 @@ class TestParseDependencies:
         deps = parse_dependencies("build.gradle.kts", content)
         names = [d.name for d in deps]
         assert "spring-boot-starter-web" in names
+
+    def test_csproj_dispatches_by_extension(self):
+        content = '<Project><ItemGroup><PackageReference Include="Carter" Version="7.0" /></ItemGroup></Project>'
+        deps = parse_dependencies("MyApp.csproj", content)
+        assert len(deps) == 1
+        assert deps[0].name == "carter"
+
+    def test_packages_config_dispatches(self):
+        content = '<packages><package id="Nancy" version="2.0" /></packages>'
+        deps = parse_dependencies("packages.config", content)
+        assert len(deps) == 1
+        assert deps[0].name == "nancy"
