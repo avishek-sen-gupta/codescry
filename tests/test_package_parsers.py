@@ -218,7 +218,9 @@ class TestPackageJson:
         assert "@types/react" in names
 
     def test_scoped_packages(self):
-        content = '{"dependencies": {"@nestjs/core": "^10.0", "@nestjs/common": "^10.0"}}'
+        content = (
+            '{"dependencies": {"@nestjs/core": "^10.0", "@nestjs/common": "^10.0"}}'
+        )
         deps = package_json.parse(content)
         names = [d.name for d in deps]
         assert "@nestjs/core" in names
@@ -490,7 +492,9 @@ class TestDepMatchesPattern:
         assert not _dep_matches_pattern("@nestjs/core", "nest")
 
     def test_no_false_positive_express(self):
-        assert _dep_matches_pattern("express-validator", "express-validator")  # exact match is fine
+        assert _dep_matches_pattern(
+            "express-validator", "express-validator"
+        )  # exact match is fine
         assert not _dep_matches_pattern("expression", "express")
 
     def test_path_segment_partial_no_match(self):
@@ -637,7 +641,9 @@ class TestParseDependencies:
         assert parse_dependencies("unknown.xyz", "some content") == []
 
     def test_build_gradle_kts_dispatches(self):
-        content = 'implementation("org.springframework.boot:spring-boot-starter-web:3.0")'
+        content = (
+            'implementation("org.springframework.boot:spring-boot-starter-web:3.0")'
+        )
         deps = parse_dependencies("build.gradle.kts", content)
         names = [d.name for d in deps]
         assert "spring-boot-starter-web" in names

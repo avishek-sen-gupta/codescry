@@ -40,7 +40,7 @@ def get_patterns_for_language(
         patterns: list[tuple[str, Confidence]] = []
 
         # Add common patterns
-        common_type_patterns = common.PATTERNS.get(integration_type, {})
+        common_type_patterns = common.COMMON.patterns.get(integration_type, {})
         patterns.extend(common_type_patterns.get("patterns", []))
 
         # Add language-specific base patterns
@@ -69,7 +69,7 @@ def get_directory_patterns() -> dict[IntegrationType, list[str]]:
     """
     return {
         integration_type: patterns.get("directory_patterns", [])
-        for integration_type, patterns in common.PATTERNS.items()
+        for integration_type, patterns in common.COMMON.patterns.items()
     }
 
 

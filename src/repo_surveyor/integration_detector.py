@@ -71,9 +71,11 @@ class IntegrationDetectorResult:
                             "file_path": point.match.file_path,
                             "line_number": point.match.line_number,
                             "line_content": point.match.line_content,
-                            "language": point.match.language.value
-                            if isinstance(point.match.language, Language)
-                            else point.match.language,
+                            "language": (
+                                point.match.language.value
+                                if isinstance(point.match.language, Language)
+                                else point.match.language
+                            ),
                         },
                     }
                     for point in self.integration_points

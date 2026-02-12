@@ -162,9 +162,7 @@ public class UserController {
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Spring"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
             assert len(points) > 0
 
             http_points = [
@@ -193,9 +191,7 @@ async fn hello() -> HttpResponse {
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Actix"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Actix"]))
             assert len(points) > 0
 
             http_points = [
@@ -249,9 +245,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Spring"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
             db_points = [
                 p for p in points if p.integration_type == IntegrationType.DATABASE
             ]
@@ -276,9 +270,7 @@ public void handleOrder(OrderEvent event) {
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Spring"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
             msg_points = [
                 p for p in points if p.integration_type == IntegrationType.MESSAGING
             ]
@@ -526,9 +518,7 @@ public class MyController {
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Spring"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
             rest_controller_points = [
                 p for p in points if "@RestController" in p.matched_pattern
             ]
@@ -550,9 +540,7 @@ class TestDetectIntegrations:
             java_file = Path(tmpdir) / "Test.java"
             java_file.write_text("@RestController\npublic class Test {}")
 
-            result = detect_integrations(
-                tmpdir, directory_frameworks={".": ["Spring"]}
-            )
+            result = detect_integrations(tmpdir, directory_frameworks={".": ["Spring"]})
 
             assert isinstance(result, IntegrationDetectorResult)
             assert result.files_scanned >= 1
@@ -570,9 +558,7 @@ public class UserController {
 }
 """)
 
-            result = detect_integrations(
-                tmpdir, directory_frameworks={".": ["Spring"]}
-            )
+            result = detect_integrations(tmpdir, directory_frameworks={".": ["Spring"]})
 
             http_points = [
                 p
@@ -698,9 +684,7 @@ class TestConfidenceLevels:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Spring"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
             annotation_points = [
                 p for p in points if "@RestController" in p.matched_pattern
             ]
@@ -1118,8 +1102,8 @@ class TestJavalinFrameworkPatterns:
         """Javalin-specific patterns should only match when Javalin framework is active."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
-                'import io.javalin.Javalin;\n'
-                'var app = Javalin.create();\n'
+                "import io.javalin.Javalin;\n"
+                "var app = Javalin.create();\n"
                 'app.get("/hello", ctx -> ctx.result("Hello"));\n'
             )
             f.flush()
@@ -1163,9 +1147,7 @@ class TestJavalinFrameworkPatterns:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Javalin"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
             http_points = [
                 p
                 for p in points
@@ -1187,9 +1169,7 @@ class TestJavalinFrameworkPatterns:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Javalin"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
             ws_points = [
                 p
                 for p in points
@@ -1204,23 +1184,17 @@ class TestJavalinFrameworkPatterns:
         """Base Java patterns should still match alongside Javalin patterns."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
-                'import io.javalin.Javalin;\n'
-                '@Entity\n'
-                'public class User { }\n'
+                "import io.javalin.Javalin;\n" "@Entity\n" "public class User { }\n"
             )
             f.flush()
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Javalin"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
             javalin_points = [
                 p for p in points if "import io\\.javalin" in p.matched_pattern
             ]
-            entity_points = [
-                p for p in points if "@Entity" in p.matched_pattern
-            ]
+            entity_points = [p for p in points if "@Entity" in p.matched_pattern]
             assert len(javalin_points) > 0
             assert len(entity_points) > 0
         finally:
@@ -1240,7 +1214,9 @@ class TestFileIoPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             file_io_points = [
-                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                p
+                for p in points
+                if p.integration_type == IntegrationType.FILE_IO
                 and p.confidence == Confidence.HIGH
             ]
             assert len(file_io_points) > 0
@@ -1257,7 +1233,9 @@ class TestFileIoPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             file_io_points = [
-                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                p
+                for p in points
+                if p.integration_type == IntegrationType.FILE_IO
                 and "open\\(" in p.matched_pattern
             ]
             assert len(file_io_points) > 0
@@ -1274,7 +1252,9 @@ class TestFileIoPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             file_io_points = [
-                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                p
+                for p in points
+                if p.integration_type == IntegrationType.FILE_IO
                 and "pathlib" in p.matched_pattern
             ]
             assert len(file_io_points) > 0
@@ -1291,7 +1271,9 @@ class TestFileIoPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             file_io_points = [
-                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                p
+                for p in points
+                if p.integration_type == IntegrationType.FILE_IO
                 and p.confidence == Confidence.HIGH
             ]
             assert len(file_io_points) > 0
@@ -1308,7 +1290,9 @@ class TestFileIoPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             file_io_points = [
-                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                p
+                for p in points
+                if p.integration_type == IntegrationType.FILE_IO
                 and p.confidence == Confidence.HIGH
             ]
             assert len(file_io_points) > 0
@@ -1325,7 +1309,9 @@ class TestFileIoPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             file_io_points = [
-                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                p
+                for p in points
+                if p.integration_type == IntegrationType.FILE_IO
                 and p.confidence == Confidence.HIGH
             ]
             assert len(file_io_points) > 0
@@ -1342,7 +1328,9 @@ class TestFileIoPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             file_io_points = [
-                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                p
+                for p in points
+                if p.integration_type == IntegrationType.FILE_IO
                 and p.confidence == Confidence.HIGH
             ]
             assert len(file_io_points) > 0
@@ -1363,7 +1351,9 @@ class TestGrpcPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             grpc_points = [
-                p for p in points if p.integration_type == IntegrationType.GRPC
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRPC
                 and p.confidence == Confidence.HIGH
             ]
             assert len(grpc_points) > 0
@@ -1380,7 +1370,9 @@ class TestGrpcPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             grpc_points = [
-                p for p in points if p.integration_type == IntegrationType.GRPC
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRPC
                 and p.confidence == Confidence.HIGH
             ]
             assert len(grpc_points) > 0
@@ -1397,7 +1389,9 @@ class TestGrpcPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             grpc_points = [
-                p for p in points if p.integration_type == IntegrationType.GRPC
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRPC
                 and p.confidence == Confidence.HIGH
             ]
             assert len(grpc_points) > 0
@@ -1414,7 +1408,9 @@ class TestGrpcPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             grpc_points = [
-                p for p in points if p.integration_type == IntegrationType.GRPC
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRPC
                 and p.confidence == Confidence.HIGH
             ]
             assert len(grpc_points) > 0
@@ -1431,7 +1427,9 @@ class TestGrpcPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             grpc_points = [
-                p for p in points if p.integration_type == IntegrationType.GRPC
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRPC
                 and p.confidence == Confidence.HIGH
             ]
             assert len(grpc_points) > 0
@@ -1446,9 +1444,9 @@ class TestDropwizardFrameworkPatterns:
         """Should detect Dropwizard HTTP/REST patterns."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
-                'import io.dropwizard.Application;\n'
+                "import io.dropwizard.Application;\n"
                 '@Path("/users")\n'
-                '@Produces(MediaType.APPLICATION_JSON)\n'
+                "@Produces(MediaType.APPLICATION_JSON)\n"
             )
             f.flush()
             file_path = Path(f.name)
@@ -1458,7 +1456,9 @@ class TestDropwizardFrameworkPatterns:
                 scan_file_for_integrations(file_path, frameworks=["Dropwizard"])
             )
             http_points = [
-                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
                 and p.confidence == Confidence.HIGH
             ]
             assert len(http_points) > 0
@@ -1491,19 +1491,19 @@ class TestVertxFrameworkPatterns:
         """Should detect Vert.x HTTP/REST patterns."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
-                'import io.vertx.core.Vertx;\n'
-                'vertx.createHttpServer();\n'
-                'Router.router(vertx);\n'
+                "import io.vertx.core.Vertx;\n"
+                "vertx.createHttpServer();\n"
+                "Router.router(vertx);\n"
             )
             f.flush()
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Vert.x"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Vert.x"]))
             http_points = [
-                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
                 and p.confidence == Confidence.HIGH
             ]
             assert len(http_points) > 0
@@ -1518,11 +1518,11 @@ class TestVertxFrameworkPatterns:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Vert.x"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Vert.x"]))
             socket_points = [
-                p for p in points if p.integration_type == IntegrationType.SOCKET
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOCKET
                 and "ServerWebSocket" in p.matched_pattern
             ]
             assert len(socket_points) > 0
@@ -1537,11 +1537,11 @@ class TestVertxFrameworkPatterns:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Vert.x"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Vert.x"]))
             msg_points = [
-                p for p in points if p.integration_type == IntegrationType.MESSAGING
+                p
+                for p in points
+                if p.integration_type == IntegrationType.MESSAGING
                 and p.confidence == Confidence.HIGH
             ]
             assert len(msg_points) > 0
@@ -1556,7 +1556,7 @@ class TestCsharpFrameworkPatterns:
         """Should detect ASP.NET Core HTTP/REST patterns."""
         with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
             f.write(
-                'var builder = WebApplication.CreateBuilder(args);\n'
+                "var builder = WebApplication.CreateBuilder(args);\n"
                 'app.MapGet("/hello", () => "Hello World");\n'
             )
             f.flush()
@@ -1567,7 +1567,9 @@ class TestCsharpFrameworkPatterns:
                 scan_file_for_integrations(file_path, frameworks=["ASP.NET Core"])
             )
             http_points = [
-                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
                 and p.confidence == Confidence.HIGH
             ]
             assert len(http_points) > 0
@@ -1586,7 +1588,9 @@ class TestCsharpFrameworkPatterns:
                 scan_file_for_integrations(file_path, frameworks=["ASP.NET Core"])
             )
             grpc_points = [
-                p for p in points if p.integration_type == IntegrationType.GRPC
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRPC
                 and "MapGrpcService" in p.matched_pattern
             ]
             assert len(grpc_points) > 0
@@ -1597,19 +1601,19 @@ class TestCsharpFrameworkPatterns:
         """Should detect WCF SOAP patterns."""
         with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
             f.write(
-                'using System.ServiceModel;\n'
-                'var host = new ServiceHost(typeof(MyService));\n'
-                'var binding = new BasicHttpBinding();\n'
+                "using System.ServiceModel;\n"
+                "var host = new ServiceHost(typeof(MyService));\n"
+                "var binding = new BasicHttpBinding();\n"
             )
             f.flush()
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["WCF"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["WCF"]))
             soap_points = [
-                p for p in points if p.integration_type == IntegrationType.SOAP
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOAP
                 and p.confidence == Confidence.HIGH
             ]
             assert len(soap_points) > 0
@@ -1624,11 +1628,11 @@ class TestCsharpFrameworkPatterns:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["CoreWCF"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["CoreWCF"]))
             soap_points = [
-                p for p in points if p.integration_type == IntegrationType.SOAP
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOAP
                 and p.confidence == Confidence.HIGH
             ]
             assert len(soap_points) > 0
@@ -1638,7 +1642,9 @@ class TestCsharpFrameworkPatterns:
     def test_servicestack_http_rest(self) -> None:
         """Should detect ServiceStack HTTP/REST patterns."""
         with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
-            f.write("using ServiceStack;\npublic class MyRequest : IReturn<MyResponse> {}\n")
+            f.write(
+                "using ServiceStack;\npublic class MyRequest : IReturn<MyResponse> {}\n"
+            )
             f.flush()
             file_path = Path(f.name)
 
@@ -1647,7 +1653,9 @@ class TestCsharpFrameworkPatterns:
                 scan_file_for_integrations(file_path, frameworks=["ServiceStack"])
             )
             http_points = [
-                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
                 and p.confidence == Confidence.HIGH
             ]
             assert len(http_points) > 0
@@ -1657,16 +1665,18 @@ class TestCsharpFrameworkPatterns:
     def test_nancy_http_rest(self) -> None:
         """Should detect Nancy HTTP/REST patterns."""
         with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
-            f.write('public class MyModule : NancyModule {\n    Get["/"] = _ => "Hello";\n}\n')
+            f.write(
+                'public class MyModule : NancyModule {\n    Get["/"] = _ => "Hello";\n}\n'
+            )
             f.flush()
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Nancy"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Nancy"]))
             http_points = [
-                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
                 and p.confidence == Confidence.HIGH
             ]
             assert len(http_points) > 0
@@ -1681,11 +1691,11 @@ class TestCsharpFrameworkPatterns:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Carter"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Carter"]))
             http_points = [
-                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
                 and "ICarterModule" in p.matched_pattern
             ]
             assert len(http_points) > 0
@@ -1706,7 +1716,9 @@ class TestGoSoapPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             soap_points = [
-                p for p in points if p.integration_type == IntegrationType.SOAP
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOAP
                 and p.confidence == Confidence.HIGH
             ]
             assert len(soap_points) > 0
@@ -1723,7 +1735,9 @@ class TestGoSoapPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             soap_points = [
-                p for p in points if p.integration_type == IntegrationType.SOAP
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOAP
                 and "encoding/xml" in p.matched_pattern
             ]
             assert len(soap_points) > 0
@@ -1744,7 +1758,9 @@ class TestRustSoapPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             soap_points = [
-                p for p in points if p.integration_type == IntegrationType.SOAP
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOAP
                 and p.confidence == Confidence.HIGH
             ]
             assert len(soap_points) > 0
@@ -1761,7 +1777,9 @@ class TestRustSoapPatterns:
         try:
             points = list(scan_file_for_integrations(file_path))
             soap_points = [
-                p for p in points if p.integration_type == IntegrationType.SOAP
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOAP
                 and p.confidence == Confidence.HIGH
             ]
             assert len(soap_points) > 0

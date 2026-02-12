@@ -9,9 +9,7 @@ SOURCE = "setup.py"
 _PEP508_NAME = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 # Match install_requires=[...] or install_requires = [...] with contents
-_INSTALL_REQUIRES = re.compile(
-    r"install_requires\s*=\s*\[([^\]]*)\]", re.DOTALL
-)
+_INSTALL_REQUIRES = re.compile(r"install_requires\s*=\s*\[([^\]]*)\]", re.DOTALL)
 
 _STRING_LITERAL = re.compile(r"""['"]([^'"]+)['"]""")
 

@@ -1,15 +1,16 @@
 """Axum framework integration patterns."""
 
-from ..types import Confidence, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType
 
-NAME = "Axum"
-
-PATTERNS = {
-    IntegrationType.HTTP_REST: {
-        "patterns": [
-            (r"use axum::", Confidence.HIGH),
-            (r"Router::", Confidence.MEDIUM),
-            (r"\.route\(", Confidence.MEDIUM),
-        ],
+FRAMEWORK = FrameworkPatternSpec(
+    name="Axum",
+    patterns={
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"use axum::", Confidence.HIGH),
+                (r"Router::", Confidence.MEDIUM),
+                (r"\.route\(", Confidence.MEDIUM),
+            ],
+        },
     },
-}
+)

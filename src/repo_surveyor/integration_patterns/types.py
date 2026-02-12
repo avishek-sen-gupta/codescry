@@ -1,5 +1,6 @@
 """Shared types for integration patterns."""
 
+from dataclasses import dataclass
 from enum import Enum
 
 
@@ -54,3 +55,18 @@ class Confidence(Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+
+
+@dataclass(frozen=True)
+class BasePatternSpec:
+    """Base integration patterns for a language or common patterns."""
+
+    patterns: dict
+
+
+@dataclass(frozen=True)
+class FrameworkPatternSpec:
+    """Integration patterns for a specific framework."""
+
+    name: str
+    patterns: dict

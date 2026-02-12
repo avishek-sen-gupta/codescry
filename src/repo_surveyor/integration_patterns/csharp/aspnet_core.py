@@ -1,23 +1,24 @@
 """ASP.NET Core framework integration patterns."""
 
-from ..types import Confidence, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType
 
-NAME = "ASP.NET Core"
-
-PATTERNS = {
-    IntegrationType.HTTP_REST: {
-        "patterns": [
-            (r"IApplicationBuilder", Confidence.HIGH),
-            (r"app\.MapGet", Confidence.HIGH),
-            (r"app\.MapPost", Confidence.HIGH),
-            (r"WebApplication\.CreateBuilder", Confidence.HIGH),
-            (r"MinimalApi", Confidence.HIGH),
-        ],
+FRAMEWORK = FrameworkPatternSpec(
+    name="ASP.NET Core",
+    patterns={
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"IApplicationBuilder", Confidence.HIGH),
+                (r"app\.MapGet", Confidence.HIGH),
+                (r"app\.MapPost", Confidence.HIGH),
+                (r"WebApplication\.CreateBuilder", Confidence.HIGH),
+                (r"MinimalApi", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.GRPC: {
+            "patterns": [
+                (r"MapGrpcService", Confidence.HIGH),
+                (r"Grpc\.AspNetCore", Confidence.HIGH),
+            ],
+        },
     },
-    IntegrationType.GRPC: {
-        "patterns": [
-            (r"MapGrpcService", Confidence.HIGH),
-            (r"Grpc\.AspNetCore", Confidence.HIGH),
-        ],
-    },
-}
+)

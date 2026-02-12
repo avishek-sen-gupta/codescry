@@ -255,7 +255,9 @@ class TestFrameworkPatternsParity:
 
     def test_dotnet_frameworks(self):
         assert self.patterns["microsoft.aspnetcore"] == {"frameworks": "ASP.NET Core"}
-        assert self.patterns["microsoft.aspnet.webapi"] == {"frameworks": "ASP.NET Web API"}
+        assert self.patterns["microsoft.aspnet.webapi"] == {
+            "frameworks": "ASP.NET Web API"
+        }
         assert self.patterns["servicestack"] == {"frameworks": "ServiceStack"}
         assert self.patterns["nancy"] == {"frameworks": "Nancy"}
         assert self.patterns["carter"] == {"frameworks": "Carter"}
@@ -346,9 +348,7 @@ class TestPluginSpecificBehavior:
     def test_csproj_glob_indicator_has_parser(self):
         plugin = self.registry.get_plugin("C#")
         assert plugin is not None
-        csproj_globs = [
-            g for g in plugin.glob_indicators if g.pattern == "*.csproj"
-        ]
+        csproj_globs = [g for g in plugin.glob_indicators if g.pattern == "*.csproj"]
         assert len(csproj_globs) == 1
         assert csproj_globs[0].parser_module_name == "csproj"
         assert ".NET" in csproj_globs[0].frameworks
@@ -420,8 +420,12 @@ class TestIntegrationPatternLayer:
     def test_language_modules_have_base_patterns(self):
         modules = self.registry.language_to_integration_module()
         for lang, module in modules.items():
-            assert hasattr(module, "BASE_PATTERNS"), f"{lang} module missing BASE_PATTERNS"
-            assert hasattr(module, "FRAMEWORK_PATTERNS"), f"{lang} module missing FRAMEWORK_PATTERNS"
+            assert hasattr(
+                module, "BASE_PATTERNS"
+            ), f"{lang} module missing BASE_PATTERNS"
+            assert hasattr(
+                module, "FRAMEWORK_PATTERNS"
+            ), f"{lang} module missing FRAMEWORK_PATTERNS"
 
 
 class TestLanguageFromName:

@@ -1,13 +1,14 @@
 """Warp framework integration patterns."""
 
-from ..types import Confidence, IntegrationType
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType
 
-NAME = "Warp"
-
-PATTERNS = {
-    IntegrationType.HTTP_REST: {
-        "patterns": [
-            (r"use warp::", Confidence.HIGH),
-        ],
+FRAMEWORK = FrameworkPatternSpec(
+    name="Warp",
+    patterns={
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"use warp::", Confidence.HIGH),
+            ],
+        },
     },
-}
+)

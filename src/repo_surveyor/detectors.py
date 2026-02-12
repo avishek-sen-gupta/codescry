@@ -107,9 +107,7 @@ def detect_from_glob_patterns(repo_path: Path) -> dict[str, set[str]]:
             try:
                 content = filepath.read_text(encoding="utf-8", errors="ignore")
                 deps = parse_dependencies(filepath.name, content)
-                results["frameworks"].update(
-                    match_frameworks(deps, FRAMEWORK_PATTERNS)
-                )
+                results["frameworks"].update(match_frameworks(deps, FRAMEWORK_PATTERNS))
             except (OSError, PermissionError):
                 continue
 

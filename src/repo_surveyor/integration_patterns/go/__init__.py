@@ -4,7 +4,9 @@ import importlib
 import pkgutil
 from pathlib import Path
 
-from .base import BASE_PATTERNS
+from .base import BASE
+
+BASE_PATTERNS = BASE.patterns
 
 FRAMEWORK_PATTERNS: dict = {}
 
@@ -13,5 +15,5 @@ for _importer, _modname, _ispkg in pkgutil.iter_modules([_pkg_path]):
     if _modname == "base":
         continue
     _module = importlib.import_module(f".{_modname}", package=__name__)
-    if hasattr(_module, "NAME") and hasattr(_module, "PATTERNS"):
-        FRAMEWORK_PATTERNS[_module.NAME] = _module.PATTERNS
+    if hasattr(_module, "FRAMEWORK"):
+        FRAMEWORK_PATTERNS[_module.FRAMEWORK.name] = _module.FRAMEWORK.patterns
