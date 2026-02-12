@@ -4,6 +4,7 @@ Detects system integration points (HTTP, SOAP, messaging, sockets, database)
 from source file contents using regex pattern matching.
 """
 
+import json
 import re
 from dataclasses import dataclass
 from enum import Enum
@@ -54,6 +55,32 @@ class IntegrationDetectorResult:
 
     integration_points: list[IntegrationSignal]
     files_scanned: int
+
+    def to_json(self, indent: int | None = 2) -> str:
+        """Generate a JSON representation of the result."""
+        return json.dumps(
+            {
+                "files_scanned": self.files_scanned,
+                "integration_points": [
+                    {
+                        "integration_type": point.integration_type.value,
+                        "confidence": point.confidence.value,
+                        "matched_pattern": point.matched_pattern,
+                        "entity_type": point.entity_type.value,
+                        "match": {
+                            "file_path": point.match.file_path,
+                            "line_number": point.match.line_number,
+                            "line_content": point.match.line_content,
+                            "language": point.match.language.value
+                            if isinstance(point.match.language, Language)
+                            else point.match.language,
+                        },
+                    }
+                    for point in self.integration_points
+                ],
+            },
+            indent=indent,
+        )
 
 
 def get_language_from_extension(file_path: str) -> Language | None:

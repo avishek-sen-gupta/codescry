@@ -155,6 +155,35 @@ messaging: /path/to/repo/src/OrderListener.java:12
   Confidence: high
 ```
 
+Results are also available as JSON via `to_json()`:
+
+```python
+print(result.to_json())             # pretty-printed (indent=2)
+print(result.to_json(indent=None))  # compact, single-line
+```
+
+Example output:
+
+```json
+{
+  "files_scanned": 3,
+  "integration_points": [
+    {
+      "integration_type": "http_rest",
+      "confidence": "high",
+      "matched_pattern": "@RestController",
+      "entity_type": "file_content",
+      "match": {
+        "file_path": "/path/to/repo/src/UserController.java",
+        "line_number": 15,
+        "line_content": "@RestController",
+        "language": "Java"
+      }
+    }
+  ]
+}
+```
+
 #### Framework-Aware Detection
 
 Integration patterns are grouped per framework. When you provide a `directory_frameworks` mapping, framework-specific patterns are applied only in directories where that framework is active. Base language patterns always apply regardless.

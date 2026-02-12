@@ -1,5 +1,6 @@
 """Tests for integration point detection from file contents."""
 
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -1794,3 +1795,102 @@ class TestDirectoryClassificationNewTypes:
         matches = classify_directory("grpc")
         types = [m[0] for m in matches]
         assert IntegrationType.GRPC in types
+
+
+class TestIntegrationDetectorResultJson:
+    """Tests for IntegrationDetectorResult.to_json()."""
+
+    def test_to_json_returns_valid_json(self) -> None:
+        """to_json() should return parseable JSON with correct structure."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("@Entity\npublic class User {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            result = detect_integrations(str(file_path.parent))
+            parsed = json.loads(result.to_json())
+
+            assert "files_scanned" in parsed
+            assert "integration_points" in parsed
+            assert isinstance(parsed["files_scanned"], int)
+            assert isinstance(parsed["integration_points"], list)
+        finally:
+            file_path.unlink()
+
+    def test_to_json_point_fields(self) -> None:
+        """Each integration point should have all expected fields."""
+        match = FileMatch(
+            file_path="/test.java",
+            line_number=5,
+            line_content="@RestController",
+            language=Language.JAVA,
+        )
+        signal = IntegrationSignal(
+            match=match,
+            integration_type=IntegrationType.HTTP_REST,
+            confidence=Confidence.HIGH,
+            matched_pattern="@RestController",
+            entity_type=EntityType.FILE_CONTENT,
+        )
+        result = IntegrationDetectorResult(
+            integration_points=[signal],
+            files_scanned=1,
+        )
+        parsed = json.loads(result.to_json())
+
+        point = parsed["integration_points"][0]
+        assert point["integration_type"] == "http_rest"
+        assert point["confidence"] == "high"
+        assert point["matched_pattern"] == "@RestController"
+        assert point["entity_type"] == "file_content"
+        assert point["match"]["file_path"] == "/test.java"
+        assert point["match"]["line_number"] == 5
+        assert point["match"]["line_content"] == "@RestController"
+        assert point["match"]["language"] == "Java"
+
+    def test_to_json_empty_result(self) -> None:
+        """to_json() should handle an empty result."""
+        result = IntegrationDetectorResult(
+            integration_points=[],
+            files_scanned=0,
+        )
+        parsed = json.loads(result.to_json())
+
+        assert parsed["files_scanned"] == 0
+        assert parsed["integration_points"] == []
+
+    def test_to_json_respects_indent(self) -> None:
+        """to_json() should respect the indent parameter."""
+        result = IntegrationDetectorResult(
+            integration_points=[],
+            files_scanned=0,
+        )
+        compact = result.to_json(indent=None)
+        indented = result.to_json(indent=4)
+
+        assert "\n" not in compact
+        assert "\n" in indented
+
+    def test_to_json_none_language(self) -> None:
+        """to_json() should handle None language gracefully."""
+        match = FileMatch(
+            file_path="/unknown.xyz",
+            line_number=1,
+            line_content="http endpoint",
+            language=None,
+        )
+        signal = IntegrationSignal(
+            match=match,
+            integration_type=IntegrationType.HTTP_REST,
+            confidence=Confidence.LOW,
+            matched_pattern="(?i)\\bhttp\\b",
+            entity_type=EntityType.FILE_CONTENT,
+        )
+        result = IntegrationDetectorResult(
+            integration_points=[signal],
+            files_scanned=1,
+        )
+        parsed = json.loads(result.to_json())
+
+        assert parsed["integration_points"][0]["match"]["language"] is None
