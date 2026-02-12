@@ -704,3 +704,389 @@ class TestConfidenceLevels:
             assert api_points[0].confidence == Confidence.LOW
         finally:
             file_path.unlink()
+
+
+class TestFrameworkAwarePatterns:
+    """Tests for framework-specific pattern matching."""
+
+    def test_flask_patterns_only_with_flask_framework(self) -> None:
+        """Flask-specific patterns should only match when Flask framework is active."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("from flask import Flask\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            # Without Flask framework: should NOT match flask-specific pattern
+            points_without = list(scan_file_for_integrations(file_path))
+            flask_import_points = [
+                p for p in points_without if "from flask import" in p.matched_pattern
+            ]
+            assert len(flask_import_points) == 0
+
+            # With Flask framework: should match
+            points_with = list(
+                scan_file_for_integrations(file_path, frameworks=["Flask"])
+            )
+            flask_import_points = [
+                p for p in points_with if "from flask import" in p.matched_pattern
+            ]
+            assert len(flask_import_points) > 0
+            assert flask_import_points[0].confidence == Confidence.HIGH
+        finally:
+            file_path.unlink()
+
+    def test_fastapi_patterns_only_with_fastapi_framework(self) -> None:
+        """FastAPI-specific patterns should only match when FastAPI framework is active."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("from fastapi import FastAPI\n@app.get('/users')\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            # Without FastAPI framework
+            points_without = list(scan_file_for_integrations(file_path))
+            fastapi_points = [
+                p
+                for p in points_without
+                if "from fastapi import" in p.matched_pattern
+                or r"@app\.get" in p.matched_pattern
+            ]
+            assert len(fastapi_points) == 0
+
+            # With FastAPI framework
+            points_with = list(
+                scan_file_for_integrations(file_path, frameworks=["FastAPI"])
+            )
+            fastapi_points = [
+                p
+                for p in points_with
+                if "from fastapi import" in p.matched_pattern
+                or r"@app\.get" in p.matched_pattern
+            ]
+            assert len(fastapi_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_django_patterns_only_with_django_framework(self) -> None:
+        """Django-specific patterns should only match when Django framework is active."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write(
+                "from django.db import models\nclass User(models.Model):\n    pass\n"
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            # Without Django framework
+            points_without = list(scan_file_for_integrations(file_path))
+            django_db_points = [
+                p
+                for p in points_without
+                if "from django" in p.matched_pattern
+                or r"models\.Model" in p.matched_pattern
+            ]
+            assert len(django_db_points) == 0
+
+            # With Django framework
+            points_with = list(
+                scan_file_for_integrations(file_path, frameworks=["Django"])
+            )
+            django_db_points = [
+                p
+                for p in points_with
+                if "from django" in p.matched_pattern
+                or r"models\.Model" in p.matched_pattern
+            ]
+            assert len(django_db_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_base_python_patterns_always_match(self) -> None:
+        """Base language patterns should match regardless of framework."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("from sqlalchemy import create_engine\nimport requests\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            # Without any framework
+            points = list(scan_file_for_integrations(file_path))
+            sqlalchemy_points = [
+                p for p in points if "from sqlalchemy import" in p.matched_pattern
+            ]
+            requests_points = [
+                p for p in points if "import requests" in p.matched_pattern
+            ]
+            assert len(sqlalchemy_points) > 0
+            assert len(requests_points) > 0
+
+            # With a framework - base patterns should still match
+            points_with_fw = list(
+                scan_file_for_integrations(file_path, frameworks=["Flask"])
+            )
+            sqlalchemy_points = [
+                p
+                for p in points_with_fw
+                if "from sqlalchemy import" in p.matched_pattern
+            ]
+            assert len(sqlalchemy_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_nestjs_patterns_only_with_nestjs_framework(self) -> None:
+        """NestJS-specific patterns should only match when NestJS framework is active."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("@Controller('users')\n@Get()\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            # Without NestJS framework
+            points_without = list(scan_file_for_integrations(file_path))
+            nestjs_points = [
+                p
+                for p in points_without
+                if r"@Controller\(" in p.matched_pattern
+                or r"@Get\(" in p.matched_pattern
+            ]
+            assert len(nestjs_points) == 0
+
+            # With NestJS framework
+            points_with = list(
+                scan_file_for_integrations(file_path, frameworks=["NestJS"])
+            )
+            nestjs_points = [
+                p
+                for p in points_with
+                if r"@Controller\(" in p.matched_pattern
+                or r"@Get\(" in p.matched_pattern
+            ]
+            assert len(nestjs_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_express_js_patterns_only_with_express_framework(self) -> None:
+        """Express-specific patterns should only match when Express framework is active."""
+        with tempfile.NamedTemporaryFile(suffix=".js", mode="w", delete=False) as f:
+            f.write("const express = require('express');\napp.get('/api', handler);\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            # Without Express framework
+            points_without = list(scan_file_for_integrations(file_path))
+            express_points = [
+                p
+                for p in points_without
+                if "require" in p.matched_pattern and "express" in p.matched_pattern
+            ]
+            assert len(express_points) == 0
+
+            # With Express framework
+            points_with = list(
+                scan_file_for_integrations(file_path, frameworks=["Express"])
+            )
+            express_points = [
+                p
+                for p in points_with
+                if "require" in p.matched_pattern and "express" in p.matched_pattern
+            ]
+            assert len(express_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_multiple_frameworks_combine_patterns(self) -> None:
+        """Multiple active frameworks should combine their patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("from flask import Flask\nfrom django.db import models\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Flask", "Django"])
+            )
+            flask_points = [
+                p for p in points if "from flask import" in p.matched_pattern
+            ]
+            django_points = [p for p in points if "from django" in p.matched_pattern]
+            assert len(flask_points) > 0
+            assert len(django_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_unrecognised_framework_is_ignored(self) -> None:
+        """An unrecognised framework name should not cause errors."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("import requests\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(
+                    file_path, frameworks=["NonExistentFramework"]
+                )
+            )
+            requests_points = [
+                p for p in points if "import requests" in p.matched_pattern
+            ]
+            assert len(requests_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestGetPatternsForLanguageWithFrameworks:
+    """Tests for get_patterns_for_language with framework parameter."""
+
+    def test_no_frameworks_returns_base_only(self) -> None:
+        """Without frameworks, should return only common + base patterns."""
+        patterns = get_patterns_for_language(Language.PYTHON)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        # Base pattern should be present
+        assert any("import requests" in p for p in http_patterns)
+        # Framework-specific pattern should NOT be present
+        assert not any("from flask import" in p for p in http_patterns)
+        assert not any("from fastapi import" in p for p in http_patterns)
+
+    def test_flask_framework_adds_flask_patterns(self) -> None:
+        """With Flask framework, should include Flask-specific patterns."""
+        patterns = get_patterns_for_language(Language.PYTHON, frameworks=["Flask"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("from flask import" in p for p in http_patterns)
+        assert any(r"@app\.route" in p for p in http_patterns)
+        # Base should still be there
+        assert any("import requests" in p for p in http_patterns)
+
+    def test_django_framework_adds_database_patterns(self) -> None:
+        """With Django framework, should include Django database patterns."""
+        patterns = get_patterns_for_language(Language.PYTHON, frameworks=["Django"])
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any(r"from django\.db import" in p for p in db_patterns)
+        assert any(r"models\.Model" in p for p in db_patterns)
+        # Base database patterns should still be there
+        assert any("from sqlalchemy import" in p for p in db_patterns)
+
+    def test_nestjs_framework_adds_nestjs_patterns(self) -> None:
+        """With NestJS framework, should include NestJS-specific patterns."""
+        patterns = get_patterns_for_language(Language.TYPESCRIPT, frameworks=["NestJS"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any(r"@Controller\(" in p for p in http_patterns)
+        assert any(r"@Get\(" in p for p in http_patterns)
+
+    def test_none_language_ignores_frameworks(self) -> None:
+        """With None language, frameworks parameter should be ignored."""
+        patterns_without = get_patterns_for_language(None)
+        patterns_with = get_patterns_for_language(None, frameworks=["Flask"])
+        assert patterns_without == patterns_with
+
+
+class TestDetectIntegrationsWithFrameworks:
+    """Tests for detect_integrations with directory_frameworks."""
+
+    def test_framework_patterns_applied_per_directory(self) -> None:
+        """Framework-specific patterns should apply based on directory mapping."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            py_file = Path(tmpdir) / "app.py"
+            py_file.write_text("from flask import Flask\n@app.route('/hello')\n")
+
+            result = detect_integrations(
+                tmpdir,
+                directory_frameworks={".": ["Flask"]},
+            )
+
+            flask_points = [
+                p
+                for p in result.integration_points
+                if p.entity_type == EntityType.FILE_CONTENT
+                and (
+                    "from flask import" in p.matched_pattern
+                    or r"@app\.route" in p.matched_pattern
+                )
+            ]
+            assert len(flask_points) > 0
+
+    def test_no_framework_patterns_without_mapping(self) -> None:
+        """Without directory_frameworks, framework-specific patterns should not match."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            py_file = Path(tmpdir) / "app.py"
+            py_file.write_text("from flask import Flask\n@app.route('/hello')\n")
+
+            result = detect_integrations(tmpdir)
+
+            flask_specific_points = [
+                p
+                for p in result.integration_points
+                if p.entity_type == EntityType.FILE_CONTENT
+                and (
+                    "from flask import" in p.matched_pattern
+                    or r"@app\.route" in p.matched_pattern
+                )
+            ]
+            assert len(flask_specific_points) == 0
+
+    def test_subdirectory_inherits_parent_frameworks(self) -> None:
+        """Files in subdirectories should inherit frameworks from parent directories."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sub_dir = Path(tmpdir) / "api"
+            sub_dir.mkdir()
+            py_file = sub_dir / "routes.py"
+            py_file.write_text("from fastapi import FastAPI\n@app.get('/users')\n")
+
+            result = detect_integrations(
+                tmpdir,
+                directory_frameworks={".": ["FastAPI"]},
+            )
+
+            fastapi_points = [
+                p
+                for p in result.integration_points
+                if p.entity_type == EntityType.FILE_CONTENT
+                and (
+                    "from fastapi import" in p.matched_pattern
+                    or r"@app\.get" in p.matched_pattern
+                )
+            ]
+            assert len(fastapi_points) > 0
+
+    def test_different_frameworks_per_directory(self) -> None:
+        """Different directories can have different frameworks."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Backend with FastAPI
+            backend = Path(tmpdir) / "backend"
+            backend.mkdir()
+            backend_file = backend / "main.py"
+            backend_file.write_text("from fastapi import FastAPI\n")
+
+            # Frontend API with Flask
+            frontend = Path(tmpdir) / "frontend"
+            frontend.mkdir()
+            frontend_file = frontend / "app.py"
+            frontend_file.write_text("from flask import Flask\n")
+
+            result = detect_integrations(
+                tmpdir,
+                directory_frameworks={
+                    "backend": ["FastAPI"],
+                    "frontend": ["Flask"],
+                },
+            )
+
+            # FastAPI pattern should match in backend
+            fastapi_points = [
+                p
+                for p in result.integration_points
+                if "from fastapi import" in p.matched_pattern
+            ]
+            assert len(fastapi_points) > 0
+            assert "backend" in fastapi_points[0].match.file_path
+
+            # Flask pattern should match in frontend
+            flask_points = [
+                p
+                for p in result.integration_points
+                if "from flask import" in p.matched_pattern
+            ]
+            assert len(flask_points) > 0
+            assert "frontend" in flask_points[0].match.file_path

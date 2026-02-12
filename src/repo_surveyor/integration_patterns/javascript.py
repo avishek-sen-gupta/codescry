@@ -2,19 +2,12 @@
 
 from .types import Confidence, IntegrationType
 
-PATTERNS = {
+BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
         "patterns": [
-            (r"require\(['\"]express['\"]\)", Confidence.HIGH),
             (r"require\(['\"]fastify['\"]\)", Confidence.HIGH),
             (r"require\(['\"]koa['\"]\)", Confidence.MEDIUM),
             (r"require\(['\"]axios['\"]\)", Confidence.MEDIUM),
-            (r"app\.get\(", Confidence.HIGH),
-            (r"app\.post\(", Confidence.HIGH),
-            (r"app\.put\(", Confidence.HIGH),
-            (r"app\.delete\(", Confidence.HIGH),
-            (r"router\.get\(", Confidence.HIGH),
-            (r"router\.post\(", Confidence.HIGH),
             (r"fetch\(", Confidence.MEDIUM),
         ],
     },
@@ -51,5 +44,21 @@ PATTERNS = {
             (r"mongoose\.model\(", Confidence.HIGH),
             (r"Sequelize\.define\(", Confidence.HIGH),
         ],
+    },
+}
+
+FRAMEWORK_PATTERNS = {
+    "Express": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"require\(['\"]express['\"]\)", Confidence.HIGH),
+                (r"app\.get\(", Confidence.HIGH),
+                (r"app\.post\(", Confidence.HIGH),
+                (r"app\.put\(", Confidence.HIGH),
+                (r"app\.delete\(", Confidence.HIGH),
+                (r"router\.get\(", Confidence.HIGH),
+                (r"router\.post\(", Confidence.HIGH),
+            ],
+        },
     },
 }

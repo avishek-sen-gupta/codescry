@@ -2,7 +2,7 @@
 
 from .types import Confidence, IntegrationType
 
-PATTERNS = {
+BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
         "patterns": [
             # CICS Web Services
@@ -129,3 +129,5 @@ PATTERNS = {
         ],
     },
 }
+
+FRAMEWORK_PATTERNS = {}

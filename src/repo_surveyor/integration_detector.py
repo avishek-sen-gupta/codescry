@@ -69,13 +69,44 @@ def get_language_from_extension(file_path: str) -> Language | None:
     return EXTENSION_TO_LANGUAGE.get(ext)
 
 
+def _find_frameworks_for_file(
+    file_path: Path,
+    repo_path: Path,
+    directory_frameworks: dict[str, list[str]],
+) -> list[str]:
+    """Find applicable frameworks for a file based on its directory hierarchy.
+
+    Walks up from the file's parent directory to the repo root, collecting
+    frameworks from all matching directories in the mapping.
+
+    Args:
+        file_path: Absolute path to the file.
+        repo_path: Absolute path to the repository root.
+        directory_frameworks: Mapping of directory paths (relative to repo root)
+                              to their detected frameworks.
+
+    Returns:
+        List of framework names applicable to this file.
+    """
+    rel_path = file_path.relative_to(repo_path)
+    frameworks: list[str] = []
+    for parent in [rel_path.parent, *rel_path.parent.parents]:
+        dir_key = "." if parent == Path(".") else str(parent)
+        if dir_key in directory_frameworks:
+            frameworks.extend(directory_frameworks[dir_key])
+    return frameworks
+
+
 def scan_file_for_integrations(
     file_path: Path,
+    frameworks: list[str] = [],
 ) -> Iterator[IntegrationSignal]:
     """Scan a single file for integration points.
 
     Args:
         file_path: Path to the file to scan.
+        frameworks: List of active framework names for this file's context.
+                    Framework-specific patterns are included for these frameworks.
 
     Yields:
         IntegrationSignal instances for each match found.
@@ -86,7 +117,7 @@ def scan_file_for_integrations(
         return
 
     language = get_language_from_extension(str(file_path))
-    patterns = get_patterns_for_language(language)
+    patterns = get_patterns_for_language(language, frameworks)
 
     lines = content.splitlines()
 
@@ -187,15 +218,22 @@ def _get_source_files(
 def detect_integrations(
     repo_path: str | Path,
     languages: list[Language] | None = None,
+    directory_frameworks: dict[str, list[str]] = {},
 ) -> IntegrationDetectorResult:
     """Detect integration points from repository file contents.
 
     Scans source files for patterns indicating system integrations.
+    Framework-specific patterns are applied based on the frameworks
+    active in each file's directory.
 
     Args:
         repo_path: Path to the repository to scan.
         languages: Optional list of Language enums to scan (e.g., [Language.RUST, Language.PYTHON]).
                    If None, scans all supported languages.
+        directory_frameworks: Mapping of directory paths (relative to repo root,
+                              e.g., "." or "backend") to their detected framework names
+                              (e.g., ["FastAPI", "Django"]). Files in those
+                              directories will be scanned with framework-specific patterns.
 
     Returns:
         IntegrationDetectorResult with detected integration points.
@@ -214,7 +252,10 @@ def detect_integrations(
     # Scan source files
     for file_path in _get_source_files(repo_path, languages):
         files_scanned += 1
-        integration_points.extend(scan_file_for_integrations(file_path))
+        frameworks = _find_frameworks_for_file(
+            file_path, repo_path, directory_frameworks
+        )
+        integration_points.extend(scan_file_for_integrations(file_path, frameworks))
 
     # Scan directory names
     scanned_dirs: set[str] = set()

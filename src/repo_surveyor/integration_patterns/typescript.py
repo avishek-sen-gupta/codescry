@@ -2,27 +2,12 @@
 
 from .types import Confidence, IntegrationType
 
-PATTERNS = {
+BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
         "patterns": [
-            (r"@Controller\(", Confidence.HIGH),
-            (r"@Get\(", Confidence.HIGH),
-            (r"@Post\(", Confidence.HIGH),
-            (r"@Put\(", Confidence.HIGH),
-            (r"@Delete\(", Confidence.HIGH),
-            (r"@Patch\(", Confidence.HIGH),
-            (r"@Body\(", Confidence.HIGH),
-            (r"@Param\(", Confidence.HIGH),
-            (r"@Query\(", Confidence.HIGH),
-            (r"from ['\"]@nestjs/common['\"]", Confidence.HIGH),
-            (r"from ['\"]express['\"]", Confidence.HIGH),
             (r"from ['\"]fastify['\"]", Confidence.HIGH),
             (r"from ['\"]koa['\"]", Confidence.MEDIUM),
             (r"import axios", Confidence.MEDIUM),
-            (r"app\.get\(", Confidence.HIGH),
-            (r"app\.post\(", Confidence.HIGH),
-            (r"router\.get\(", Confidence.HIGH),
-            (r"router\.post\(", Confidence.HIGH),
         ],
     },
     IntegrationType.SOAP: {
@@ -33,8 +18,6 @@ PATTERNS = {
     },
     IntegrationType.MESSAGING: {
         "patterns": [
-            (r"@MessagePattern\(", Confidence.HIGH),
-            (r"@EventPattern\(", Confidence.HIGH),
             (r"from ['\"]kafkajs['\"]", Confidence.HIGH),
             (r"from ['\"]amqplib['\"]", Confidence.HIGH),
             (r"from ['\"]bull['\"]", Confidence.HIGH),
@@ -42,8 +25,6 @@ PATTERNS = {
     },
     IntegrationType.SOCKET: {
         "patterns": [
-            (r"@WebSocketGateway", Confidence.HIGH),
-            (r"@SubscribeMessage", Confidence.HIGH),
             (r"from ['\"]socket\.io['\"]", Confidence.HIGH),
             (r"from ['\"]ws['\"]", Confidence.HIGH),
             (r"io\.on\(", Confidence.HIGH),
@@ -64,5 +45,47 @@ PATTERNS = {
             (r"from ['\"]mongoose['\"]", Confidence.HIGH),
             (r"prisma\.", Confidence.HIGH),
         ],
+    },
+}
+
+FRAMEWORK_PATTERNS = {
+    "NestJS": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"@Controller\(", Confidence.HIGH),
+                (r"@Get\(", Confidence.HIGH),
+                (r"@Post\(", Confidence.HIGH),
+                (r"@Put\(", Confidence.HIGH),
+                (r"@Delete\(", Confidence.HIGH),
+                (r"@Patch\(", Confidence.HIGH),
+                (r"@Body\(", Confidence.HIGH),
+                (r"@Param\(", Confidence.HIGH),
+                (r"@Query\(", Confidence.HIGH),
+                (r"from ['\"]@nestjs/common['\"]", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.MESSAGING: {
+            "patterns": [
+                (r"@MessagePattern\(", Confidence.HIGH),
+                (r"@EventPattern\(", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SOCKET: {
+            "patterns": [
+                (r"@WebSocketGateway", Confidence.HIGH),
+                (r"@SubscribeMessage", Confidence.HIGH),
+            ],
+        },
+    },
+    "Express": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"from ['\"]express['\"]", Confidence.HIGH),
+                (r"app\.get\(", Confidence.HIGH),
+                (r"app\.post\(", Confidence.HIGH),
+                (r"router\.get\(", Confidence.HIGH),
+                (r"router\.post\(", Confidence.HIGH),
+            ],
+        },
     },
 }

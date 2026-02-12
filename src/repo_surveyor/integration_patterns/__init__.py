@@ -1,6 +1,7 @@
 """Integration patterns for detecting system integration points.
 
-Patterns are organized by language to support language-specific conventions.
+Patterns are organized by language with base patterns that always apply
+and framework-specific patterns that apply when a framework is active.
 """
 
 from .types import Confidence, IntegrationType, Language
@@ -54,13 +55,18 @@ LANGUAGE_MODULES = {
 
 def get_patterns_for_language(
     language: Language | None,
+    frameworks: list[str] = [],
 ) -> dict[IntegrationType, list[tuple[str, Confidence]]]:
-    """Get integration patterns for a specific language.
+    """Get integration patterns for a specific language and active frameworks.
 
-    Combines common patterns with language-specific patterns.
+    Combines common patterns with language-specific base patterns and
+    framework-specific patterns for any active frameworks.
 
     Args:
         language: The programming language, or None for common patterns only.
+        frameworks: List of active framework names (e.g., ["FastAPI", "Django"]).
+                    Framework-specific patterns for these frameworks
+                    are included alongside base patterns.
 
     Returns:
         Dict mapping IntegrationType to list of (pattern, confidence) tuples.
@@ -74,12 +80,18 @@ def get_patterns_for_language(
         common_type_patterns = common.PATTERNS.get(integration_type, {})
         patterns.extend(common_type_patterns.get("patterns", []))
 
-        # Add language-specific patterns
+        # Add language-specific base patterns
         if language is not None:
             lang_module = LANGUAGE_MODULES.get(language)
             if lang_module is not None:
-                lang_type_patterns = lang_module.PATTERNS.get(integration_type, {})
+                lang_type_patterns = lang_module.BASE_PATTERNS.get(integration_type, {})
                 patterns.extend(lang_type_patterns.get("patterns", []))
+
+                # Add framework-specific patterns for active frameworks
+                for framework in frameworks:
+                    fw_patterns = lang_module.FRAMEWORK_PATTERNS.get(framework, {})
+                    fw_type_patterns = fw_patterns.get(integration_type, {})
+                    patterns.extend(fw_type_patterns.get("patterns", []))
 
         result[integration_type] = patterns
 

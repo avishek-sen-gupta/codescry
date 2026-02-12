@@ -2,7 +2,7 @@
 
 from .types import Confidence, IntegrationType
 
-PATTERNS = {
+BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
         "patterns": [
             (r"#\[get\(", Confidence.HIGH),
@@ -75,3 +75,5 @@ PATTERNS = {
         ],
     },
 }
+
+FRAMEWORK_PATTERNS = {}
