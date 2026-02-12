@@ -13,6 +13,7 @@ from .graph_builder import (
     build_coarse_structure_graph,
     build_tech_stack_graph,
 )
+from .integration_detector import IntegrationDetectorResult, detect_integrations
 from .report import SurveyReport
 from .surveyor import RepoSurveyor
 
@@ -254,8 +255,8 @@ def survey_and_persist(
     neo4j_username: str,
     neo4j_password: str,
     languages: list[str],
-) -> tuple[SurveyReport, CTagsResult]:
-    """Run tech_stacks() and coarse_structure(), persisting results to Neo4j.
+) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult]:
+    """Run tech_stacks(), coarse_structure(), and detect_integrations(), persisting results to Neo4j.
 
     Args:
         repo_path: Path to the repository to analyze
@@ -265,7 +266,7 @@ def survey_and_persist(
         languages: Optional list of languages for coarse_structure()
 
     Returns:
-        Tuple of (SurveyReport, CTagsResult)
+        Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult)
     """
     surveyor = RepoSurveyor(repo_path)
 
@@ -286,13 +287,25 @@ def survey_and_persist(
     )
     logger.info("Coarse structure completed")
 
+    directory_frameworks = {
+        m.directory: m.frameworks for m in tech_report.directory_markers if m.frameworks
+    }
+    integration_result = detect_integrations(
+        repo_path, directory_frameworks=directory_frameworks
+    )
+    logger.info(
+        "Integration detection completed: %d points in %d files",
+        len(integration_result.integration_points),
+        integration_result.files_scanned,
+    )
+
     with create_analysis_graph_builder(
         neo4j_uri, neo4j_username, neo4j_password
     ) as builder:
         builder.persist_tech_stacks(tech_report)
         builder.persist_coarse_structure(structure_result, repo_path)
 
-    return tech_report, structure_result
+    return tech_report, structure_result, integration_result
 
 
 def main_fn():
@@ -302,7 +315,9 @@ def main_fn():
     password = os.environ.get("NEO4J_PASSWORD")
     print(f"Analyzing repository: {repo}")
     print(f"Connecting to Neo4j at: {uri}")
-    tech_report, structure_result = survey_and_persist(repo, uri, username, password)
+    tech_report, structure_result, integration_result = survey_and_persist(
+        repo, uri, username, password
+    )
     print(f"\nTech Stack Report:")
     print(tech_report.to_text())
     print(f"\nCode Structure:")
@@ -312,6 +327,9 @@ def main_fn():
         for entry in structure_result.entries:
             kinds[entry.kind] = kinds.get(entry.kind, 0) + 1
         print(f"  Symbol kinds: {kinds}")
+    print(f"\nIntegration Detection:")
+    print(f"  Files scanned: {integration_result.files_scanned}")
+    print(f"  Integration points: {len(integration_result.integration_points)}")
 
 
 if __name__ == "__main__":

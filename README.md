@@ -379,8 +379,8 @@ PluginRegistry  (loads JSON, builds lookup tables, resolves shared patterns)
       └──► integration_patterns/__init__.py  (EXTENSION_TO_LANGUAGE, LANGUAGE_MODULES
                                                derived from registry)
 
-RepoSurveyor
-├── tech_stacks()
+survey_and_persist()  (full analysis pipeline)
+├── RepoSurveyor.tech_stacks()
 │   ├── detectors.detect_indicator_files_with_directories()
 │   │   └── package_parsers.parse_dependencies() → match_frameworks()
 │   ├── detectors.detect_from_glob_patterns()
@@ -388,30 +388,29 @@ RepoSurveyor
 │   ├── detectors.detect_kubernetes()
 │   └── detectors.detect_languages_from_extensions()
 │
-├── coarse_structure()
+├── RepoSurveyor.coarse_structure()
 │   └── ctags.run_ctags()
 │       ├── _build_ctags_command()
 │       └── _parse_ctags_json_output()
 │
-├── (integration detection — standalone)
-│   └── integration_detector.detect_integrations()
-│       ├── integration_patterns.get_patterns_for_language()
-│       │   └── common + language base + framework-specific patterns
-│       ├── scan_file_for_integrations()
-│       └── classify_directory()
+├── integration_detector.detect_integrations()
+│   │   (directory_frameworks built from tech_stacks() DirectoryMarkers)
+│   ├── integration_patterns.get_patterns_for_language()
+│   │   └── common + language base + framework-specific patterns
+│   ├── scan_file_for_integrations()
+│   └── classify_directory()
 │
-├── (call flow extraction — standalone)
-│   └── call_flow.extract_call_tree()
-│       ├── lsp_bridge.LspBridgeClient (Protocol)
-│       │   └── RequestsLspBridgeClient (HTTP → mojo-lsp)
-│       └── tree-sitter (source parsing)
+├── AnalysisGraphBuilder.persist_tech_stacks()
+│   └── graph_builder.build_tech_stack_graph()
 │
-└── (graph persistence — standalone)
-    └── analysis_graph_builder.AnalysisGraphBuilder
-        ├── persist_tech_stacks()
-        │   └── graph_builder.build_tech_stack_graph()
-        └── persist_coarse_structure()
-            └── graph_builder.build_coarse_structure_graph()
+└── AnalysisGraphBuilder.persist_coarse_structure()
+    └── graph_builder.build_coarse_structure_graph()
+
+(standalone — not part of survey_and_persist)
+├── call_flow.extract_call_tree()
+│   ├── lsp_bridge.LspBridgeClient (Protocol)
+│   │   └── RequestsLspBridgeClient (HTTP → mojo-lsp)
+│   └── tree-sitter (source parsing)
 ```
 
 ### Plugin Architecture
@@ -627,7 +626,7 @@ This subsystem persists tech stack and code structure analysis results into a Ne
 2. `UNWIND $relationships ... CREATE (parent)-[:CONTAINS]->(child)`
 3. `UNWIND $top_level ... CREATE (r:Repository)-[:CONTAINS]->(s:CodeSymbol)`
 
-A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()` and `coarse_structure()`, then persists both to Neo4j.
+A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()`, `coarse_structure()`, and `detect_integrations()` (using the per-directory framework mappings from tech stack detection), then persists tech stacks and code structure to Neo4j.
 
 ### Design Patterns
 
