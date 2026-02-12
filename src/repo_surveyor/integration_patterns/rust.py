@@ -5,28 +5,10 @@ from .types import Confidence, IntegrationType
 BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
         "patterns": [
-            (r"#\[get\(", Confidence.HIGH),
-            (r"#\[post\(", Confidence.HIGH),
-            (r"#\[put\(", Confidence.HIGH),
-            (r"#\[delete\(", Confidence.HIGH),
-            (r"#\[patch\(", Confidence.HIGH),
-            (r"#\[route\(", Confidence.HIGH),
-            (r"HttpResponse", Confidence.HIGH),
-            (r"HttpRequest", Confidence.HIGH),
-            (r"web::Json", Confidence.HIGH),
-            (r"web::Path", Confidence.HIGH),
-            (r"web::Query", Confidence.HIGH),
-            (r"web::Data", Confidence.HIGH),
             (r"Json<", Confidence.HIGH),
             (r"Path<", Confidence.MEDIUM),
             (r"Query<", Confidence.MEDIUM),
             (r"State<", Confidence.MEDIUM),
-            (r"Router::", Confidence.MEDIUM),
-            (r"\.route\(", Confidence.MEDIUM),
-            (r"use actix_web::", Confidence.HIGH),
-            (r"use axum::", Confidence.HIGH),
-            (r"use rocket::", Confidence.HIGH),
-            (r"use warp::", Confidence.HIGH),
             (r"use hyper::", Confidence.MEDIUM),
             (r"use reqwest::", Confidence.MEDIUM),
         ],
@@ -76,4 +58,52 @@ BASE_PATTERNS = {
     },
 }
 
-FRAMEWORK_PATTERNS = {}
+FRAMEWORK_PATTERNS = {
+    "Actix": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"use actix_web::", Confidence.HIGH),
+                (r"#\[get\(", Confidence.HIGH),
+                (r"#\[post\(", Confidence.HIGH),
+                (r"#\[put\(", Confidence.HIGH),
+                (r"#\[delete\(", Confidence.HIGH),
+                (r"#\[patch\(", Confidence.HIGH),
+                (r"HttpResponse", Confidence.HIGH),
+                (r"HttpRequest", Confidence.HIGH),
+                (r"web::Json", Confidence.HIGH),
+                (r"web::Path", Confidence.HIGH),
+                (r"web::Query", Confidence.HIGH),
+                (r"web::Data", Confidence.HIGH),
+            ],
+        },
+    },
+    "Axum": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"use axum::", Confidence.HIGH),
+                (r"Router::", Confidence.MEDIUM),
+                (r"\.route\(", Confidence.MEDIUM),
+            ],
+        },
+    },
+    "Rocket": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"use rocket::", Confidence.HIGH),
+                (r"#\[get\(", Confidence.HIGH),
+                (r"#\[post\(", Confidence.HIGH),
+                (r"#\[put\(", Confidence.HIGH),
+                (r"#\[delete\(", Confidence.HIGH),
+                (r"#\[patch\(", Confidence.HIGH),
+                (r"#\[route\(", Confidence.HIGH),
+            ],
+        },
+    },
+    "Warp": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"use warp::", Confidence.HIGH),
+            ],
+        },
+    },
+}

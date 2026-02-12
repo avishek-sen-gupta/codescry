@@ -110,4 +110,30 @@ FRAMEWORK_PATTERNS = {
             ],
         },
     },
+    "Tornado": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"import tornado", Confidence.HIGH),
+                (r"from tornado\.web import", Confidence.HIGH),
+                (r"from tornado\.httpclient import", Confidence.HIGH),
+                (r"RequestHandler", Confidence.MEDIUM),
+            ],
+        },
+        IntegrationType.SOCKET: {
+            "patterns": [
+                (r"from tornado\.websocket import", Confidence.HIGH),
+                (r"WebSocketHandler", Confidence.HIGH),
+            ],
+        },
+    },
+    "Pyramid": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"from pyramid import", Confidence.HIGH),
+                (r"from pyramid\.view import", Confidence.HIGH),
+                (r"@view_config", Confidence.HIGH),
+                (r"from pyramid\.config import", Confidence.HIGH),
+            ],
+        },
+    },
 }

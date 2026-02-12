@@ -162,12 +162,12 @@ This means:
 
 | Language | File Extensions | Base Patterns | Framework-Specific Patterns |
 |----------|-----------------|---------------|----------------------------|
-| Java | `.java` | JPA, JDBC, JMS, servlet | _(no framework detection yet)_ |
-| Python | `.py` | requests, SQLAlchemy, Celery, websockets | Flask, FastAPI, Django, Starlette, aiohttp |
-| TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs | NestJS, Express |
-| JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs | Express |
-| Rust | `.rs` | Actix, Axum, Diesel, SQLx | _(no framework detection yet)_ |
-| Go | `.go` | Gin, Echo, GORM | _(no framework detection yet)_ |
+| Java | `.java` | JPA, JDBC, JMS, servlet, SOAP | Spring, JAX-RS, Micronaut, Quarkus |
+| Python | `.py` | requests, SQLAlchemy, Celery, websockets | Flask, FastAPI, Django, Starlette, aiohttp, Tornado, Pyramid |
+| TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs | NestJS, Express, Angular, Next.js |
+| JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs | Express, Next.js |
+| Rust | `.rs` | Diesel, SQLx, rdkafka, tungstenite | Actix, Axum, Rocket, Warp |
+| Go | `.go` | net/http, GORM, sarama, gorilla/websocket | Gin, Echo, Fiber, Chi, Gorilla |
 | C# | `.cs` | ASP.NET, Entity Framework, SignalR | _(no framework detection yet)_ |
 | COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ | _(no framework detection yet)_ |
 | PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ | _(no framework detection yet)_ |

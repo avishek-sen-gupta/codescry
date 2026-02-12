@@ -88,4 +88,28 @@ FRAMEWORK_PATTERNS = {
             ],
         },
     },
+    "Angular": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"from ['\"]@angular/common/http['\"]", Confidence.HIGH),
+                (r"HttpClient", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SOCKET: {
+            "patterns": [
+                (r"from ['\"]@angular/.*websocket", Confidence.MEDIUM),
+            ],
+        },
+    },
+    "Next.js": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"NextApiRequest", Confidence.HIGH),
+                (r"NextApiResponse", Confidence.HIGH),
+                (r"getServerSideProps", Confidence.HIGH),
+                (r"getStaticProps", Confidence.HIGH),
+                (r"from ['\"]next/server['\"]", Confidence.HIGH),
+            ],
+        },
+    },
 }

@@ -5,22 +5,13 @@ from .types import Confidence, IntegrationType
 BASE_PATTERNS = {
     IntegrationType.HTTP_REST: {
         "patterns": [
-            (r'"github\.com/gin-gonic/gin"', Confidence.HIGH),
-            (r'"github\.com/labstack/echo"', Confidence.HIGH),
-            (r'"github\.com/gofiber/fiber"', Confidence.HIGH),
-            (r'"github\.com/go-chi/chi"', Confidence.HIGH),
-            (r'"github\.com/gorilla/mux"', Confidence.HIGH),
             (r'"net/http"', Confidence.MEDIUM),
             (r"http\.HandleFunc", Confidence.HIGH),
             (r"http\.Handle\(", Confidence.HIGH),
-            (r"gin\.Context", Confidence.HIGH),
-            (r"echo\.Context", Confidence.HIGH),
-            (r"fiber\.Ctx", Confidence.HIGH),
             (r"\.GET\(", Confidence.HIGH),
             (r"\.POST\(", Confidence.HIGH),
             (r"\.PUT\(", Confidence.HIGH),
             (r"\.DELETE\(", Confidence.HIGH),
-            (r"r\.HandleFunc\(", Confidence.HIGH),
         ],
     },
     IntegrationType.SOAP: {
@@ -59,4 +50,49 @@ BASE_PATTERNS = {
     },
 }
 
-FRAMEWORK_PATTERNS = {}
+FRAMEWORK_PATTERNS = {
+    "Gin": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r'"github\.com/gin-gonic/gin"', Confidence.HIGH),
+                (r"gin\.Context", Confidence.HIGH),
+                (r"gin\.Default\(", Confidence.HIGH),
+                (r"gin\.New\(", Confidence.HIGH),
+            ],
+        },
+    },
+    "Echo": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r'"github\.com/labstack/echo"', Confidence.HIGH),
+                (r"echo\.Context", Confidence.HIGH),
+                (r"echo\.New\(", Confidence.HIGH),
+            ],
+        },
+    },
+    "Fiber": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r'"github\.com/gofiber/fiber"', Confidence.HIGH),
+                (r"fiber\.Ctx", Confidence.HIGH),
+                (r"fiber\.New\(", Confidence.HIGH),
+            ],
+        },
+    },
+    "Chi": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r'"github\.com/go-chi/chi"', Confidence.HIGH),
+                (r"chi\.NewRouter\(", Confidence.HIGH),
+            ],
+        },
+    },
+    "Gorilla": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r'"github\.com/gorilla/mux"', Confidence.HIGH),
+                (r"mux\.NewRouter\(", Confidence.HIGH),
+            ],
+        },
+    },
+}

@@ -115,6 +115,25 @@ FRAMEWORK_PATTERNS: dict[str, dict[str, str]] = {
     "nestjs": {"frameworks": "NestJS"},
     "svelte": {"frameworks": "Svelte"},
     "gatsby": {"frameworks": "Gatsby"},
+    # Java frameworks (in pom.xml or build.gradle)
+    "spring-boot": {"frameworks": "Spring"},
+    "spring-web": {"frameworks": "Spring"},
+    "spring-webmvc": {"frameworks": "Spring"},
+    "jersey": {"frameworks": "JAX-RS"},
+    "resteasy": {"frameworks": "JAX-RS"},
+    "micronaut": {"frameworks": "Micronaut"},
+    "quarkus": {"frameworks": "Quarkus"},
+    # Go frameworks (in go.mod)
+    "gin-gonic/gin": {"frameworks": "Gin"},
+    "labstack/echo": {"frameworks": "Echo"},
+    "gofiber/fiber": {"frameworks": "Fiber"},
+    "go-chi/chi": {"frameworks": "Chi"},
+    "gorilla/mux": {"frameworks": "Gorilla"},
+    # Rust frameworks (in Cargo.toml)
+    "actix-web": {"frameworks": "Actix"},
+    "axum": {"frameworks": "Axum"},
+    "rocket": {"frameworks": "Rocket"},
+    "warp": {"frameworks": "Warp"},
 }
 
 
@@ -281,6 +300,43 @@ def detect_frameworks_from_packages(repo_path: Path) -> set[str]:
         except (OSError, PermissionError):
             pass
 
+    # Check Java package files
+    java_files = ["pom.xml", "build.gradle", "build.gradle.kts"]
+    for filename in java_files:
+        filepath = repo_path / filename
+        if filepath.exists():
+            try:
+                content = filepath.read_text(
+                    encoding="utf-8", errors="ignore"
+                ).lower()
+                for pattern, tech in FRAMEWORK_PATTERNS.items():
+                    if pattern in content and "frameworks" in tech:
+                        frameworks.add(tech["frameworks"])
+            except (OSError, PermissionError):
+                continue
+
+    # Check Go module file
+    go_mod = repo_path / "go.mod"
+    if go_mod.exists():
+        try:
+            content = go_mod.read_text(encoding="utf-8", errors="ignore").lower()
+            for pattern, tech in FRAMEWORK_PATTERNS.items():
+                if pattern in content and "frameworks" in tech:
+                    frameworks.add(tech["frameworks"])
+        except (OSError, PermissionError):
+            pass
+
+    # Check Rust Cargo.toml
+    cargo_toml = repo_path / "Cargo.toml"
+    if cargo_toml.exists():
+        try:
+            content = cargo_toml.read_text(encoding="utf-8", errors="ignore").lower()
+            for pattern, tech in FRAMEWORK_PATTERNS.items():
+                if pattern in content and "frameworks" in tech:
+                    frameworks.add(tech["frameworks"])
+        except (OSError, PermissionError):
+            pass
+
     return frameworks
 
 
@@ -307,6 +363,24 @@ def detect_frameworks_for_file(filepath: Path) -> list[str]:
     elif filename == "package.json":
         for pattern, tech in FRAMEWORK_PATTERNS.items():
             if f'"{pattern}"' in content and "frameworks" in tech:
+                frameworks.append(tech["frameworks"])
+
+    # Java package files
+    elif filename in ["pom.xml", "build.gradle", "build.gradle.kts"]:
+        for pattern, tech in FRAMEWORK_PATTERNS.items():
+            if pattern in content and "frameworks" in tech:
+                frameworks.append(tech["frameworks"])
+
+    # Go module file
+    elif filename == "go.mod":
+        for pattern, tech in FRAMEWORK_PATTERNS.items():
+            if pattern in content and "frameworks" in tech:
+                frameworks.append(tech["frameworks"])
+
+    # Rust Cargo.toml
+    elif filename == "Cargo.toml":
+        for pattern, tech in FRAMEWORK_PATTERNS.items():
+            if pattern in content and "frameworks" in tech:
                 frameworks.append(tech["frameworks"])
 
     return frameworks

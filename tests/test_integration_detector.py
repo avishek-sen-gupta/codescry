@@ -81,7 +81,7 @@ class TestGetPatternsForLanguage:
 
     def test_returns_patterns_for_known_language(self) -> None:
         """Should return patterns for known languages."""
-        patterns = get_patterns_for_language(Language.JAVA)
+        patterns = get_patterns_for_language(Language.JAVA, frameworks=["Spring"])
         assert IntegrationType.HTTP_REST in patterns
         assert len(patterns[IntegrationType.HTTP_REST]) > 0
 
@@ -93,8 +93,10 @@ class TestGetPatternsForLanguage:
         assert len(patterns[IntegrationType.HTTP_REST]) > 0
 
     def test_rust_patterns_include_framework_imports(self) -> None:
-        """Should include Rust-specific framework patterns."""
-        patterns = get_patterns_for_language(Language.RUST)
+        """Should include Rust-specific framework patterns when frameworks active."""
+        patterns = get_patterns_for_language(
+            Language.RUST, frameworks=["Actix", "Warp"]
+        )
         http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
         assert any("actix_web" in p for p in http_patterns)
         assert any("warp" in p for p in http_patterns)
@@ -159,7 +161,9 @@ public class UserController {
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path))
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Spring"])
+            )
             assert len(points) > 0
 
             http_points = [
@@ -188,7 +192,9 @@ async fn hello() -> HttpResponse {
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path))
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Actix"])
+            )
             assert len(points) > 0
 
             http_points = [
@@ -242,7 +248,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path))
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Spring"])
+            )
             db_points = [
                 p for p in points if p.integration_type == IntegrationType.DATABASE
             ]
@@ -267,7 +275,9 @@ public void handleOrder(OrderEvent event) {
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path))
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Spring"])
+            )
             msg_points = [
                 p for p in points if p.integration_type == IntegrationType.MESSAGING
             ]
@@ -515,7 +525,9 @@ public class MyController {
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path))
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Spring"])
+            )
             rest_controller_points = [
                 p for p in points if "@RestController" in p.matched_pattern
             ]
@@ -537,7 +549,9 @@ class TestDetectIntegrations:
             java_file = Path(tmpdir) / "Test.java"
             java_file.write_text("@RestController\npublic class Test {}")
 
-            result = detect_integrations(tmpdir)
+            result = detect_integrations(
+                tmpdir, directory_frameworks={".": ["Spring"]}
+            )
 
             assert isinstance(result, IntegrationDetectorResult)
             assert result.files_scanned >= 1
@@ -555,7 +569,9 @@ public class UserController {
 }
 """)
 
-            result = detect_integrations(tmpdir)
+            result = detect_integrations(
+                tmpdir, directory_frameworks={".": ["Spring"]}
+            )
 
             http_points = [
                 p
@@ -567,12 +583,12 @@ public class UserController {
     def test_detect_integrations_with_language_filter(self) -> None:
         """Should filter by language when specified."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create files in different languages
+            # Create files in different languages using base patterns
             java_file = Path(tmpdir) / "Test.java"
-            java_file.write_text("@RestController\npublic class Test {}")
+            java_file.write_text("@Entity\npublic class Test {}")
 
             py_file = Path(tmpdir) / "app.py"
-            py_file.write_text("from flask import Flask\napp = Flask(__name__)")
+            py_file.write_text("import requests\n")
 
             # Filter to Java only
             result = detect_integrations(tmpdir, languages=[Language.JAVA])
@@ -681,7 +697,9 @@ class TestConfidenceLevels:
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path))
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Spring"])
+            )
             annotation_points = [
                 p for p in points if "@RestController" in p.matched_pattern
             ]
