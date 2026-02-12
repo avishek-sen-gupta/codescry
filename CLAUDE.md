@@ -1,31 +1,5 @@
 # Cartographer - Claude Code Instructions
 
-## Project Overview
-
-Cartographer is a Python library for analyzing repository technology stacks and code structure. It detects languages, package managers, frameworks, and infrastructure from indicator files, and can extract code symbols using CTags.
-
-## Commands
-
-```bash
-# Install dependencies
-poetry install
-
-# Run tests
-poetry run pytest
-
-# Run tests with verbose output
-poetry run pytest -v
-
-# Run specific test file
-poetry run pytest tests/test_neo4j_persistence.py
-
-# Format code
-poetry run black src/ tests/
-
-# Type check
-poetry run mypy src/
-```
-
 ## Build
 
 Before committing anything, run all tests, fixing them if necessary. If test assertions are being removed, ask me to review them.
@@ -42,6 +16,12 @@ Before committing anything, run all tests, fixing them if necessary. If test ass
 - Use proper dependency injection for interfaces to external systems like Neo4J, OS, and File I/O. Do not hardcode importing the concrete modules in these cases.
 - Minimise and/or avoid mutation
 - Write your code in the Functional Programming style, but balance it with readability
+- Minimise magic strings and numbers by refactoring them into constants
+- Don't expose raw global variables in files indiscriminately; wrap them as constants in classes, etc.
+- Parameters in functions, if they must have default values, must have those values as empty structures corresponding to the non-empty types (empty dictionaries, lists, etc.). Categorically, do not use None.
+- If a function has a non-None return type, never return None.
+- If a function returns a non-None type in its signature, but cannot return an object of that type because of some condition, use null object pattern. Do not return None.
+- Prefer small, composable functions. Do not write massive functions.
 
 ## Dependencies
 
