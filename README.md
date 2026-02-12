@@ -10,7 +10,7 @@ A Python library for experiments in analysing repository technology stacks and c
 - Scans indicator files (package.json, pyproject.toml, Dockerfile, etc.)
 - Associates technologies with their containing directories (useful for monorepos)
 - Extracts code symbols using Universal CTags
-- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases)
+- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases) with framework-aware pattern matching
 - Extracts method call trees via [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) LSP bridge and tree-sitter
 - Persists analysis results to Neo4j graph database
 - Generates plain text reports
@@ -126,6 +126,28 @@ messaging: /path/to/repo/src/OrderListener.java:12
   Confidence: high
 ```
 
+#### Framework-Aware Detection
+
+Integration patterns are grouped per framework. When you provide a `directory_frameworks` mapping, framework-specific patterns are applied only in directories where that framework is active. Base language patterns always apply regardless.
+
+```python
+from repo_surveyor import detect_integrations
+
+# Map directories to their active frameworks (from tech stack detection)
+result = detect_integrations(
+    "/path/to/repo",
+    directory_frameworks={
+        "backend": ["FastAPI"],
+        "frontend": ["Express"],
+    },
+)
+```
+
+This means:
+- A Python file in `backend/` will match FastAPI patterns (`@app.get`, `from fastapi import`) alongside base Python patterns (`import requests`, `from sqlalchemy import`)
+- A JS file in `frontend/` will match Express patterns (`app.get(`, `require('express')`) alongside base JavaScript patterns (`require('kafkajs')`, `fetch(`)
+- Files in directories without a framework mapping only match common and base language patterns
+
 #### Supported Integration Types
 
 | Type | Description | Example Patterns |
@@ -136,19 +158,19 @@ messaging: /path/to/repo/src/OrderListener.java:12
 | `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener` |
 | `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `JdbcTemplate` |
 
-#### Supported Languages
+#### Supported Languages and Frameworks
 
-| Language | File Extensions | Notable Patterns |
-|----------|-----------------|------------------|
-| Java | `.java` | Spring annotations, JPA, JDBC, JMS |
-| Python | `.py` | Flask, FastAPI, Django, SQLAlchemy, Celery |
-| TypeScript | `.ts`, `.tsx` | NestJS, TypeORM, Prisma |
-| JavaScript | `.js`, `.jsx` | Express, Mongoose, Sequelize |
-| Rust | `.rs` | Actix, Axum, Diesel, SQLx |
-| Go | `.go` | Gin, Echo, GORM |
-| C# | `.cs` | ASP.NET, Entity Framework, SignalR |
-| COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ |
-| PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ |
+| Language | File Extensions | Base Patterns | Framework-Specific Patterns |
+|----------|-----------------|---------------|----------------------------|
+| Java | `.java` | JPA, JDBC, JMS, servlet | _(no framework detection yet)_ |
+| Python | `.py` | requests, SQLAlchemy, Celery, websockets | Flask, FastAPI, Django, Starlette, aiohttp |
+| TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs | NestJS, Express |
+| JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs | Express |
+| Rust | `.rs` | Actix, Axum, Diesel, SQLx | _(no framework detection yet)_ |
+| Go | `.go` | Gin, Echo, GORM | _(no framework detection yet)_ |
+| C# | `.cs` | ASP.NET, Entity Framework, SignalR | _(no framework detection yet)_ |
+| COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ | _(no framework detection yet)_ |
+| PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ | _(no framework detection yet)_ |
 
 ### LSP Bridge Client
 
