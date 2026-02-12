@@ -28,10 +28,12 @@ def _collect_methods(
     for sym in symbols:
         if sym.kind in _METHOD_KINDS:
             name = _base_name(sym.name)
-            out.setdefault(name, []).append({
-                "start": sym.range_start_line,
-                "end": sym.range_end_line,
-            })
+            out.setdefault(name, []).append(
+                {
+                    "start": sym.range_start_line,
+                    "end": sym.range_end_line,
+                }
+            )
         for child in sym.children:
             _collect_methods([child], out)
 
@@ -47,13 +49,13 @@ def _build_method_map(
 
 def _find_method_containing(
     method_map: dict[str, list[dict[str, int]]], line: int
-) -> str | None:
-    """Return the method name whose range contains the given line, or None."""
+) -> str:
+    """Return the method name whose range contains the given line, or empty string."""
     for name, ranges in method_map.items():
         for r in ranges:
             if r["start"] <= line <= r["end"]:
                 return name
-    return None
+    return ""
 
 
 def _normalise_uri(uri: str) -> str:

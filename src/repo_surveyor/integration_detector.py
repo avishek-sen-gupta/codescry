@@ -194,13 +194,13 @@ def classify_directory(
 
 def _get_source_files(
     repo_path: Path,
-    languages: list[Language] | None = None,
+    languages: list[Language] = [],
 ) -> Iterator[Path]:
     """Get source files from a repository.
 
     Args:
         repo_path: Path to the repository.
-        languages: Optional list of Language enums to filter by.
+        languages: List of Language enums to filter by. Empty means all.
 
     Yields:
         Paths to source files.
@@ -244,7 +244,7 @@ def _get_source_files(
 
 def detect_integrations(
     repo_path: str | Path,
-    languages: list[Language] | None = None,
+    languages: list[Language] = [],
     directory_frameworks: dict[str, list[str]] = {},
 ) -> IntegrationDetectorResult:
     """Detect integration points from repository file contents.
@@ -255,8 +255,8 @@ def detect_integrations(
 
     Args:
         repo_path: Path to the repository to scan.
-        languages: Optional list of Language enums to scan (e.g., [Language.RUST, Language.PYTHON]).
-                   If None, scans all supported languages.
+        languages: List of Language enums to scan (e.g., [Language.RUST, Language.PYTHON]).
+                   Empty list scans all supported languages.
         directory_frameworks: Mapping of directory paths (relative to repo root,
                               e.g., "." or "backend") to their detected framework names
                               (e.g., ["FastAPI", "Django"]). Files in those

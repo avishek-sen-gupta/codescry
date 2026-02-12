@@ -10,10 +10,10 @@ SOURCE = "pyproject.toml"
 _PEP508_NAME = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?)")
 
 
-def _extract_name(spec: str) -> str | None:
+def _extract_name(spec: str) -> str:
     """Extract the package name from a PEP 508 dependency specifier."""
     m = _PEP508_NAME.match(spec.strip())
-    return m.group(1).lower() if m else None
+    return m.group(1).lower() if m else ""
 
 
 def parse(content: str) -> list[ParsedDependency]:

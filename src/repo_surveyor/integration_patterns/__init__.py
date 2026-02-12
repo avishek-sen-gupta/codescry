@@ -6,51 +6,14 @@ and framework-specific patterns that apply when a framework is active.
 
 from .types import Confidence, IntegrationType, Language
 from . import common
-from . import java
-from . import rust
-from . import python
-from . import typescript
-from . import javascript
-from . import go
-from . import csharp
-from . import cobol
-from . import pli
 
-# File extension to language mapping
-EXTENSION_TO_LANGUAGE: dict[str, Language] = {
-    ".java": Language.JAVA,
-    ".rs": Language.RUST,
-    ".py": Language.PYTHON,
-    ".ts": Language.TYPESCRIPT,
-    ".tsx": Language.TYPESCRIPT,
-    ".js": Language.JAVASCRIPT,
-    ".jsx": Language.JAVASCRIPT,
-    ".go": Language.GO,
-    ".cs": Language.CSHARP,
-    ".kt": Language.KOTLIN,
-    ".scala": Language.SCALA,
-    ".rb": Language.RUBY,
-    ".php": Language.PHP,
-    ".cbl": Language.COBOL,
-    ".cob": Language.COBOL,
-    ".cpy": Language.COBOL,
-    ".pli": Language.PLI,
-    ".pl1": Language.PLI,
-    ".plinc": Language.PLI,
-}
+from ..language_plugin import PluginRegistry
 
-# Map languages to their pattern modules
-LANGUAGE_MODULES = {
-    Language.JAVA: java,
-    Language.RUST: rust,
-    Language.PYTHON: python,
-    Language.TYPESCRIPT: typescript,
-    Language.JAVASCRIPT: javascript,
-    Language.GO: go,
-    Language.CSHARP: csharp,
-    Language.COBOL: cobol,
-    Language.PLI: pli,
-}
+_registry = PluginRegistry()
+
+# Backward-compatible module-level exports (same shapes as old hardcoded dicts)
+EXTENSION_TO_LANGUAGE = _registry.extension_to_language_enum()
+LANGUAGE_MODULES = _registry.language_to_integration_module()
 
 
 def get_patterns_for_language(
@@ -119,13 +82,4 @@ __all__ = [
     "get_patterns_for_language",
     "get_directory_patterns",
     "common",
-    "java",
-    "rust",
-    "python",
-    "typescript",
-    "javascript",
-    "go",
-    "csharp",
-    "cobol",
-    "pli",
 ]

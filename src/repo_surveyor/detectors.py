@@ -3,161 +3,16 @@
 import os
 from pathlib import Path
 
-# Indicator files mapped to their technologies
-INDICATOR_FILES: dict[str, dict[str, list[str]]] = {
-    # Python ecosystem
-    "pyproject.toml": {"languages": ["Python"], "package_managers": ["Poetry"]},
-    "requirements.txt": {"languages": ["Python"], "package_managers": ["pip"]},
-    "setup.py": {"languages": ["Python"], "package_managers": ["pip"]},
-    "Pipfile": {"languages": ["Python"], "package_managers": ["Pipenv"]},
-    # JavaScript/Node ecosystem
-    "package.json": {"languages": ["JavaScript"], "package_managers": ["npm"]},
-    "yarn.lock": {"package_managers": ["Yarn"]},
-    "pnpm-lock.yaml": {"package_managers": ["pnpm"]},
-    # TypeScript
-    "tsconfig.json": {"languages": ["TypeScript"]},
-    # Java ecosystem
-    "pom.xml": {"languages": ["Java"], "package_managers": ["Maven"]},
-    "build.gradle": {"languages": ["Java"], "package_managers": ["Gradle"]},
-    "build.gradle.kts": {
-        "languages": ["Java", "Kotlin"],
-        "package_managers": ["Gradle"],
-    },
-    # Go
-    "go.mod": {"languages": ["Go"]},
-    # Rust
-    "Cargo.toml": {"languages": ["Rust"], "package_managers": ["Cargo"]},
-    # Ruby
-    "Gemfile": {"languages": ["Ruby"], "package_managers": ["Bundler"]},
-    # .NET (legacy NuGet format)
-    "packages.config": {"languages": ["C#"], "package_managers": ["NuGet"]},
-    # Docker
-    "Dockerfile": {"infrastructure": ["Docker"]},
-    "docker-compose.yml": {"infrastructure": ["Docker Compose"]},
-    "docker-compose.yaml": {"infrastructure": ["Docker Compose"]},
-}
+from .language_plugin import PluginRegistry
 
-# File extension to language mapping
-EXTENSION_LANGUAGES: dict[str, str] = {
-    ".py": "Python",
-    ".js": "JavaScript",
-    ".ts": "TypeScript",
-    ".tsx": "TypeScript",
-    ".jsx": "JavaScript",
-    ".java": "Java",
-    ".kt": "Kotlin",
-    ".go": "Go",
-    ".rs": "Rust",
-    ".rb": "Ruby",
-    ".cs": "C#",
-    ".cpp": "C++",
-    ".c": "C",
-    ".h": "C",
-    ".hpp": "C++",
-    ".swift": "Swift",
-    ".php": "PHP",
-    ".scala": "Scala",
-    ".clj": "Clojure",
-    ".ex": "Elixir",
-    ".exs": "Elixir",
-    ".erl": "Erlang",
-    ".hs": "Haskell",
-    ".ml": "OCaml",
-    ".fs": "F#",
-    ".r": "R",
-    ".R": "R",
-    ".jl": "Julia",
-    ".lua": "Lua",
-    ".pl": "Perl",
-    ".sh": "Shell",
-    ".bash": "Shell",
-    ".zsh": "Shell",
-    ".cbl": "COBOL",
-    ".cob": "COBOL",
-    ".cpy": "COBOL",
-}
+_registry = PluginRegistry()
 
-# Glob patterns for infrastructure detection
-GLOB_PATTERNS: dict[str, dict[str, list[str]]] = {
-    "*.csproj": {"languages": ["C#"], "package_managers": ["NuGet"], "frameworks": [".NET"]},
-    "*.sln": {"frameworks": [".NET"]},
-    "*.tf": {"infrastructure": ["Terraform"]},
-}
-
-# Kubernetes markers to look for in YAML files
-K8S_MARKERS = [
-    "apiVersion:",
-    "kind: Deployment",
-    "kind: Service",
-    "kind: Pod",
-    "kind: ConfigMap",
-    "kind: Secret",
-    "kind: Ingress",
-    "kind: StatefulSet",
-    "kind: DaemonSet",
-]
-
-# Framework detection patterns in package files
-FRAMEWORK_PATTERNS: dict[str, dict[str, str]] = {
-    # Python frameworks (in pyproject.toml or requirements.txt)
-    "fastapi": {"frameworks": "FastAPI"},
-    "django": {"frameworks": "Django"},
-    "flask": {"frameworks": "Flask"},
-    "starlette": {"frameworks": "Starlette"},
-    "tornado": {"frameworks": "Tornado"},
-    "pyramid": {"frameworks": "Pyramid"},
-    "aiohttp": {"frameworks": "aiohttp"},
-    # JavaScript/Node frameworks (in package.json)
-    "react": {"frameworks": "React"},
-    "vue": {"frameworks": "Vue.js"},
-    "angular": {"frameworks": "Angular"},
-    "next": {"frameworks": "Next.js"},
-    "nuxt": {"frameworks": "Nuxt.js"},
-    "express": {"frameworks": "Express"},
-    "nestjs": {"frameworks": "NestJS"},
-    "svelte": {"frameworks": "Svelte"},
-    "gatsby": {"frameworks": "Gatsby"},
-    "fastify": {"frameworks": "Fastify"},
-    # Java frameworks (in pom.xml or build.gradle)
-    "spring-boot": {"frameworks": "Spring"},
-    "spring-web": {"frameworks": "Spring"},
-    "spring-webmvc": {"frameworks": "Spring"},
-    "jersey": {"frameworks": "JAX-RS"},
-    "resteasy": {"frameworks": "JAX-RS"},
-    "micronaut": {"frameworks": "Micronaut"},
-    "quarkus": {"frameworks": "Quarkus"},
-    "javalin": {"frameworks": "Javalin"},
-    "dropwizard": {"frameworks": "Dropwizard"},
-    "vertx-web": {"frameworks": "Vert.x"},
-    "vertx-core": {"frameworks": "Vert.x"},
-    "play-java": {"frameworks": "Play"},
-    "play-scala": {"frameworks": "Play"},
-    "cxf-rt-frontend-jaxrs": {"frameworks": "Apache CXF"},
-    "cxf-rt-frontend-jaxws": {"frameworks": "Apache CXF"},
-    "axis2": {"frameworks": "Apache Axis2"},
-    "spring-ws": {"frameworks": "Spring WS"},
-    "jaxws-rt": {"frameworks": "JAX-WS"},
-    "metro-jax-ws": {"frameworks": "JAX-WS"},
-    # Go frameworks (in go.mod)
-    "gin-gonic/gin": {"frameworks": "Gin"},
-    "labstack/echo": {"frameworks": "Echo"},
-    "gofiber/fiber": {"frameworks": "Fiber"},
-    "go-chi/chi": {"frameworks": "Chi"},
-    "gorilla/mux": {"frameworks": "Gorilla"},
-    # Rust frameworks (in Cargo.toml)
-    "actix-web": {"frameworks": "Actix"},
-    "axum": {"frameworks": "Axum"},
-    "rocket": {"frameworks": "Rocket"},
-    "warp": {"frameworks": "Warp"},
-    # .NET frameworks (in .csproj or packages.config)
-    "microsoft.aspnetcore": {"frameworks": "ASP.NET Core"},
-    "microsoft.aspnet.webapi": {"frameworks": "ASP.NET Web API"},
-    "servicestack": {"frameworks": "ServiceStack"},
-    "nancy": {"frameworks": "Nancy"},
-    "carter": {"frameworks": "Carter"},
-    "system.servicemodel": {"frameworks": "WCF"},
-    "corewcf": {"frameworks": "CoreWCF"},
-}
+# Backward-compatible module-level exports (same variable names, same shapes)
+INDICATOR_FILES = _registry.indicator_files()
+EXTENSION_LANGUAGES = _registry.extension_languages()
+FRAMEWORK_PATTERNS = _registry.all_framework_patterns()
+GLOB_PATTERNS = _registry.glob_patterns()
+K8S_MARKERS = _registry.k8s_markers()
 
 
 def detect_from_indicator_files(repo_path: Path) -> dict[str, set[str]]:

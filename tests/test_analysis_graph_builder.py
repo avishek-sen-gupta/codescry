@@ -149,15 +149,15 @@ class TestExtractPackage:
         )
         assert package == "MyProject.Services"
 
-    def test_extract_package_returns_none_for_no_language(self) -> None:
-        """Should return None when language is None."""
+    def test_extract_package_returns_empty_for_no_language(self) -> None:
+        """Should return empty string when language is None."""
         package = extract_package("src/file.txt", None)
-        assert package is None
+        assert package == ""
 
-    def test_extract_package_returns_none_for_no_directory(self) -> None:
-        """Should return None when file has no directory."""
+    def test_extract_package_returns_empty_for_no_directory(self) -> None:
+        """Should return empty string when file has no directory."""
         package = extract_package("Main.java", "Java")
-        assert package is None
+        assert package == ""
 
     def test_extract_package_default_language(self) -> None:
         """Should use directory path for unknown languages."""

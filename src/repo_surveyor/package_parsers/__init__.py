@@ -94,11 +94,15 @@ def match_frameworks(
 
     Returns a deduplicated list of framework names.
     """
-    frameworks: dict[str, None] = {}  # ordered set
+    seen: set[str] = set()
+    frameworks: list[str] = []
 
     for dep in dependencies:
         for pattern, tech in patterns.items():
             if "frameworks" in tech and _dep_matches_pattern(dep.name, pattern):
-                frameworks[tech["frameworks"]] = None
+                name = tech["frameworks"]
+                if name not in seen:
+                    seen.add(name)
+                    frameworks.append(name)
 
-    return list(frameworks)
+    return frameworks

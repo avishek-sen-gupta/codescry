@@ -50,16 +50,12 @@ class RequestsLspBridgeClient:
         requests.post(f"{self._base_url}/document/close", json={"uri": uri})
 
     def get_symbols(self, uri: str) -> list[DocumentSymbol]:
-        resp = requests.post(
-            f"{self._base_url}/symbols", json={"uri": uri}
-        )
+        resp = requests.post(f"{self._base_url}/symbols", json={"uri": uri})
         resp.raise_for_status()
         raw_symbols = resp.json().get("symbols") or []
         return [_parse_symbol(s) for s in raw_symbols]
 
-    def get_definition(
-        self, uri: str, line: int, character: int
-    ) -> list[Location]:
+    def get_definition(self, uri: str, line: int, character: int) -> list[Location]:
         resp = requests.post(
             f"{self._base_url}/definition",
             json={"uri": uri, "line": line, "character": character},

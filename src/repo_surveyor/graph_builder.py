@@ -8,7 +8,7 @@ from .ctags import CTagsResult
 from .report import SurveyReport
 
 
-def extract_package(file_path: str, language: str | None) -> str | None:
+def extract_package(file_path: str, language: str | None) -> str:
     """Extract package name from file path based on language conventions.
 
     Args:
@@ -16,13 +16,13 @@ def extract_package(file_path: str, language: str | None) -> str | None:
         language: The programming language of the file
 
     Returns:
-        Package name in dot notation, or None if not determinable
+        Package name in dot notation, or empty string if not determinable
     """
     if not language:
-        return None
+        return ""
 
     if "/" not in file_path:
-        return None
+        return ""
 
     dir_path = file_path.rsplit("/", 1)[0]
 
@@ -37,23 +37,23 @@ def extract_package(file_path: str, language: str | None) -> str | None:
     return extractor(dir_path)
 
 
-def _extract_java_package(dir_path: str) -> str | None:
+def _extract_java_package(dir_path: str) -> str:
     """Extract Java package from directory path."""
     java_markers = ["src/main/java/", "src/test/java/", "src/"]
     for marker in java_markers:
         if marker in dir_path:
             package_path = dir_path.split(marker, 1)[-1]
-            return package_path.replace("/", ".") if package_path else None
+            return package_path.replace("/", ".") if package_path else ""
     return dir_path.replace("/", ".")
 
 
-def _extract_python_package(dir_path: str) -> str | None:
+def _extract_python_package(dir_path: str) -> str:
     """Extract Python package from directory path."""
     python_markers = ["src/", "lib/"]
     for marker in python_markers:
         if dir_path.startswith(marker):
             package_path = dir_path[len(marker) :]
-            return package_path.replace("/", ".") if package_path else None
+            return package_path.replace("/", ".") if package_path else ""
     return dir_path.replace("/", ".")
 
 
@@ -104,7 +104,7 @@ def build_tech_stack_graph(
 
 
 def _add_directory(
-    directories: dict[str, dict], path: str, marker_file: str | None
+    directories: dict[str, dict], path: str, marker_file: str
 ) -> dict[str, dict]:
     """Add a directory to the directories dict if not present."""
     if path not in directories:
@@ -117,7 +117,7 @@ def _add_directory(
             },
         }
 
-    if directories[path]["marker_file"] is None and marker_file is not None:
+    if not directories[path]["marker_file"] and marker_file:
         updated = {**directories[path], "marker_file": marker_file}
         return {**directories, path: updated}
 
@@ -143,7 +143,7 @@ def _build_directory_hierarchy(
             new_directories[parent] = {
                 "path": parent,
                 "name": parent.split("/")[-1],
-                "marker_file": None,
+                "marker_file": "",
             }
 
         rel = {"parent": parent, "child": current}

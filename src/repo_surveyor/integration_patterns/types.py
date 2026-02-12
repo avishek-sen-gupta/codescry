@@ -20,6 +20,21 @@ class Language(Enum):
     COBOL = "COBOL"
     PLI = "PL/I"
 
+    @classmethod
+    def from_name(cls, name: str) -> "Language | None":
+        """Look up a Language member by its value (display name).
+
+        Args:
+            name: The language display name, e.g. "Java", "C#", "PL/I".
+
+        Returns:
+            The matching Language member, or None if not found.
+        """
+        for member in cls:
+            if member.value == name:
+                return member
+        return None
+
 
 class IntegrationType(Enum):
     """Types of system integrations that can be detected."""

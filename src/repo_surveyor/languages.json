@@ -1,0 +1,221 @@
+{
+  "languages": {
+    "Python": {
+      "extensions": [".py"],
+      "indicator_files": {
+        "pyproject.toml": { "package_managers": ["Poetry"], "parser": "pyproject_toml" },
+        "requirements.txt": { "package_managers": ["pip"], "parser": "requirements_txt" },
+        "setup.py": { "package_managers": ["pip"], "parser": "setup_py" },
+        "Pipfile": { "package_managers": ["Pipenv"], "parser": "pipfile" }
+      },
+      "framework_patterns": {
+        "fastapi": "FastAPI",
+        "django": "Django",
+        "flask": "Flask",
+        "starlette": "Starlette",
+        "tornado": "Tornado",
+        "pyramid": "Pyramid",
+        "aiohttp": "aiohttp"
+      },
+      "integration_module": "python"
+    },
+    "JavaScript": {
+      "extensions": [".js", ".jsx"],
+      "indicator_files": {
+        "package.json": { "package_managers": ["npm"], "parser": "package_json" }
+      },
+      "package_manager_indicators": {
+        "yarn.lock": "Yarn",
+        "pnpm-lock.yaml": "pnpm"
+      },
+      "framework_patterns": {
+        "react": "React",
+        "vue": "Vue.js",
+        "angular": "Angular",
+        "next": "Next.js",
+        "nuxt": "Nuxt.js",
+        "express": "Express",
+        "nestjs": "NestJS",
+        "svelte": "Svelte",
+        "gatsby": "Gatsby",
+        "fastify": "Fastify"
+      },
+      "integration_module": "javascript"
+    },
+    "TypeScript": {
+      "extensions": [".ts", ".tsx"],
+      "indicator_files": {
+        "tsconfig.json": {}
+      },
+      "shared_framework_patterns": "JavaScript",
+      "integration_module": "typescript"
+    },
+    "Java": {
+      "extensions": [".java"],
+      "indicator_files": {
+        "pom.xml": { "package_managers": ["Maven"], "parser": "pom_xml" },
+        "build.gradle": { "package_managers": ["Gradle"], "parser": "build_gradle" },
+        "build.gradle.kts": { "package_managers": ["Gradle"], "parser": "build_gradle", "additional_languages": ["Kotlin"] }
+      },
+      "framework_patterns": {
+        "spring-boot": "Spring",
+        "spring-web": "Spring",
+        "spring-webmvc": "Spring",
+        "jersey": "JAX-RS",
+        "resteasy": "JAX-RS",
+        "micronaut": "Micronaut",
+        "quarkus": "Quarkus",
+        "javalin": "Javalin",
+        "dropwizard": "Dropwizard",
+        "vertx-web": "Vert.x",
+        "vertx-core": "Vert.x",
+        "play-java": "Play",
+        "play-scala": "Play",
+        "cxf-rt-frontend-jaxrs": "Apache CXF",
+        "cxf-rt-frontend-jaxws": "Apache CXF",
+        "axis2": "Apache Axis2",
+        "spring-ws": "Spring WS",
+        "jaxws-rt": "JAX-WS",
+        "metro-jax-ws": "JAX-WS"
+      },
+      "integration_module": "java"
+    },
+    "Kotlin": {
+      "extensions": [".kt"],
+      "shared_framework_patterns": "Java"
+    },
+    "Go": {
+      "extensions": [".go"],
+      "indicator_files": {
+        "go.mod": { "parser": "go_mod" }
+      },
+      "framework_patterns": {
+        "gin-gonic/gin": "Gin",
+        "labstack/echo": "Echo",
+        "gofiber/fiber": "Fiber",
+        "go-chi/chi": "Chi",
+        "gorilla/mux": "Gorilla"
+      },
+      "integration_module": "go"
+    },
+    "Rust": {
+      "extensions": [".rs"],
+      "indicator_files": {
+        "Cargo.toml": { "package_managers": ["Cargo"], "parser": "cargo_toml" }
+      },
+      "framework_patterns": {
+        "actix-web": "Actix",
+        "axum": "Axum",
+        "rocket": "Rocket",
+        "warp": "Warp"
+      },
+      "integration_module": "rust"
+    },
+    "Ruby": {
+      "extensions": [".rb"],
+      "indicator_files": {
+        "Gemfile": { "package_managers": ["Bundler"] }
+      }
+    },
+    "C#": {
+      "extensions": [".cs"],
+      "indicator_files": {
+        "packages.config": { "package_managers": ["NuGet"], "parser": "packages_config" }
+      },
+      "glob_indicators": {
+        "*.csproj": { "package_managers": ["NuGet"], "frameworks": [".NET"], "parser": "csproj" },
+        "*.sln": { "frameworks": [".NET"] }
+      },
+      "framework_patterns": {
+        "microsoft.aspnetcore": "ASP.NET Core",
+        "microsoft.aspnet.webapi": "ASP.NET Web API",
+        "servicestack": "ServiceStack",
+        "nancy": "Nancy",
+        "carter": "Carter",
+        "system.servicemodel": "WCF",
+        "corewcf": "CoreWCF"
+      },
+      "integration_module": "csharp"
+    },
+    "C++": {
+      "extensions": [".cpp", ".hpp"]
+    },
+    "C": {
+      "extensions": [".c", ".h"]
+    },
+    "Swift": {
+      "extensions": [".swift"]
+    },
+    "PHP": {
+      "extensions": [".php"]
+    },
+    "Scala": {
+      "extensions": [".scala"]
+    },
+    "Clojure": {
+      "extensions": [".clj"]
+    },
+    "Elixir": {
+      "extensions": [".ex", ".exs"]
+    },
+    "Erlang": {
+      "extensions": [".erl"]
+    },
+    "Haskell": {
+      "extensions": [".hs"]
+    },
+    "OCaml": {
+      "extensions": [".ml"]
+    },
+    "F#": {
+      "extensions": [".fs"]
+    },
+    "R": {
+      "extensions": [".r", ".R"]
+    },
+    "Julia": {
+      "extensions": [".jl"]
+    },
+    "Lua": {
+      "extensions": [".lua"]
+    },
+    "Perl": {
+      "extensions": [".pl"]
+    },
+    "Shell": {
+      "extensions": [".sh", ".bash", ".zsh"]
+    },
+    "COBOL": {
+      "extensions": [".cbl", ".cob", ".cpy"],
+      "integration_module": "cobol"
+    },
+    "PL/I": {
+      "extensions": [".pli", ".pl1", ".plinc"],
+      "integration_module": "pli"
+    }
+  },
+  "infrastructure": {
+    "Docker": {
+      "indicator_files": ["Dockerfile"]
+    },
+    "Docker Compose": {
+      "indicator_files": ["docker-compose.yml", "docker-compose.yaml"]
+    },
+    "Terraform": {
+      "glob_indicators": ["*.tf"]
+    },
+    "Kubernetes": {
+      "yaml_content_markers": [
+        "apiVersion:",
+        "kind: Deployment",
+        "kind: Service",
+        "kind: Pod",
+        "kind: ConfigMap",
+        "kind: Secret",
+        "kind: Ingress",
+        "kind: StatefulSet",
+        "kind: DaemonSet"
+      ]
+    }
+  }
+}

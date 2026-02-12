@@ -66,14 +66,14 @@ def classify_file(
 def classify_repository(
     repo_path: str | Path,
     model: LineClassifierModel,
-    languages: list[Language] | None = None,
+    languages: list[Language] = [],
 ) -> RepositoryClassification:
     """Classify all source files in a repository.
 
     Args:
         repo_path: Path to the repository.
         model: A LineClassifierModel implementation.
-        languages: Optional list of languages to filter by.
+        languages: List of languages to filter by. Empty means all.
 
     Returns:
         RepositoryClassification with results for all scanned files.

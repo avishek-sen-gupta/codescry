@@ -5,3 +5,5 @@ fileignoreconfig:
   checksum: 030bf5569c9d5f6b33b54039abebcd8bb55401339b25420d7cf2cc8e3eaf10d6
 - filename: tests/test_analysis_graph_builder.py
   checksum: d35db69e945fb473cbc242cb63f8fff14f4e56d3cc84c0df24ebe422d5ebeada
+- filename: src/repo_surveyor/language_plugin.py
+  checksum: b470bb3111f5f3efac9ab62c94e17c61da912fa82c0f65274188e27000045f43

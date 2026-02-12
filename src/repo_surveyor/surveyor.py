@@ -103,8 +103,16 @@ class RepoSurveyor:
 
     def coarse_structure(
         self,
-        languages: list[str] | None = None,
-        exclude_patterns: list[str] | None = None,
+        languages: list[str] = [],
+        exclude_patterns: list[str] = [
+            ".git",
+            ".idea",
+            "target",
+            "node_modules",
+            "__pycache__",
+            ".venv",
+            "venv",
+        ],
         extra_fields: str = "+n+k+S+z+K+l",
         extras: str = "+q",
         verbose: bool = False,
@@ -129,17 +137,8 @@ class RepoSurveyor:
             FileNotFoundError: If ctags is not installed or not in PATH.
         """
         config = CTagsConfig(
-            languages=languages or [],
-            exclude_patterns=exclude_patterns
-            or [
-                ".git",
-                ".idea",
-                "target",
-                "node_modules",
-                "__pycache__",
-                ".venv",
-                "venv",
-            ],
+            languages=languages,
+            exclude_patterns=exclude_patterns,
             extra_fields=extra_fields,
             extras=extras,
             verbose=verbose,

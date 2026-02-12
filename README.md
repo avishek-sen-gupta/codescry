@@ -368,6 +368,17 @@ This section describes the internal code flows and architecture of each major su
 ### Architecture Overview
 
 ```
+languages.json  (declarative: languages, indicators, parsers, framework patterns, infrastructure)
+      │
+      ▼
+PluginRegistry  (loads JSON, builds lookup tables, resolves shared patterns)
+      │
+      ├──► detectors.py        (INDICATOR_FILES, EXTENSION_LANGUAGES, FRAMEWORK_PATTERNS,
+      │                          GLOB_PATTERNS, K8S_MARKERS derived from registry)
+      │
+      └──► integration_patterns/__init__.py  (EXTENSION_TO_LANGUAGE, LANGUAGE_MODULES
+                                               derived from registry)
+
 RepoSurveyor
 ├── tech_stacks()
 │   ├── detectors.detect_indicator_files_with_directories()
@@ -403,13 +414,50 @@ RepoSurveyor
             └── graph_builder.build_coarse_structure_graph()
 ```
 
+### Plugin Architecture
+
+Language support is defined declaratively in `languages.json` and loaded by the `PluginRegistry` class in `language_plugin.py`. This replaces the previous approach of hardcoded dicts scattered across multiple files.
+
+**`languages.json`** contains two top-level sections:
+- `languages` — one entry per language with extensions, indicator files, framework patterns, glob indicators, package manager indicators, and integration module references
+- `infrastructure` — Docker, Terraform, Kubernetes definitions
+
+**`PluginRegistry`** loads the JSON at import time and provides backward-compatible query APIs that produce the same dict shapes as the old hardcoded constants. This means `detectors.py` and `integration_patterns/__init__.py` simply derive their module-level exports from the registry — all downstream code (surveyor, integration detector, tests) works unchanged.
+
+Key features:
+- **Shared framework patterns**: TypeScript inherits JavaScript's patterns via `"shared_framework_patterns": "JavaScript"`, Kotlin inherits Java's. Resolved at load time by merging.
+- **Additional languages**: `build.gradle.kts` signals both Java and Kotlin via `"additional_languages": ["Kotlin"]`.
+- **Dynamic module loading**: Integration pattern modules (e.g. `integration_patterns/java.py`) are loaded via `importlib.import_module()` based on the `"integration_module"` field.
+
+### Adding a New Language
+
+To add support for a new language, edit `languages.json`:
+
+```json
+"MyLanguage": {
+  "extensions": [".ml"],
+  "indicator_files": {
+    "myconfig.toml": { "package_managers": ["MyPM"], "parser": "myconfig_toml" }
+  },
+  "framework_patterns": {
+    "myframework": "MyFramework"
+  },
+  "integration_module": "mylanguage"
+}
+```
+
+Then:
+1. If the language has a config file parser, add a module in `package_parsers/` and register it in `package_parsers/__init__.py`
+2. If the language needs integration pattern detection, add a module in `integration_patterns/` with `BASE_PATTERNS` and `FRAMEWORK_PATTERNS` dicts, and add a `Language` enum member in `integration_patterns/types.py`
+3. Run `poetry run pytest` to verify
+
 ### Tech Stack Analysis: `RepoSurveyor.tech_stacks()`
 
 **Entry point:** `surveyor.py` → `RepoSurveyor.tech_stacks()`
 
 The tech stack analysis runs five detection stages in sequence, aggregating results into a `SurveyReport`:
 
-**Stage 1 — Indicator file walk** (`detectors.py` → `detect_indicator_files_with_directories()`): Walks the repository directory tree (skipping `.git`, `node_modules`, `__pycache__`, etc.) and matches filenames against the `INDICATOR_FILES` dict. Each match (e.g. `pyproject.toml` → Python + Poetry, `pom.xml` → Java + Maven) produces a `DirectoryMarker` recording what was found and in which directory.
+**Stage 1 — Indicator file walk** (`detectors.py` → `detect_indicator_files_with_directories()`): Walks the repository directory tree (skipping `.git`, `node_modules`, `__pycache__`, etc.) and matches filenames against the `INDICATOR_FILES` dict (derived from `languages.json` via `PluginRegistry`). Each match (e.g. `pyproject.toml` → Python + Poetry, `pom.xml` → Java + Maven) produces a `DirectoryMarker` recording what was found and in which directory.
 
 **Stage 2 — Framework detection from config files** (`detectors.py` → `detect_frameworks_for_file()`): For each indicator file found in Stage 1, the file's content is parsed for framework dependencies. This delegates to the package parser subsystem (see below). The detected frameworks are merged into the marker's `frameworks` list.
 
