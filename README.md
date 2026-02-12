@@ -427,7 +427,7 @@ Language support is defined declaratively in `languages.json` and loaded by the 
 Key features:
 - **Shared framework patterns**: TypeScript inherits JavaScript's patterns via `"shared_framework_patterns": "JavaScript"`, Kotlin inherits Java's. Resolved at load time by merging.
 - **Additional languages**: `build.gradle.kts` signals both Java and Kotlin via `"additional_languages": ["Kotlin"]`.
-- **Dynamic module loading**: Integration pattern modules (e.g. `integration_patterns/java.py`) are loaded via `importlib.import_module()` based on the `"integration_module"` field.
+- **Dynamic module loading**: Integration pattern packages (e.g. `integration_patterns/java/`) are loaded via `importlib.import_module()` based on the `"integration_module"` field. Each package auto-discovers its framework files at import time.
 
 ### Adding a New Language
 
@@ -448,7 +448,7 @@ To add support for a new language, edit `languages.json`:
 
 Then:
 1. If the language has a config file parser, add a module in `package_parsers/` and register it in `package_parsers/__init__.py`
-2. If the language needs integration pattern detection, add a module in `integration_patterns/` with `BASE_PATTERNS` and `FRAMEWORK_PATTERNS` dicts, and add a `Language` enum member in `integration_patterns/types.py`
+2. If the language needs integration pattern detection, add a package directory in `integration_patterns/` with a `base.py` exporting a `BASE = BasePatternSpec(patterns={...})` instance for base patterns, and optional per-framework files (e.g. `spring.py`) each exporting a `FRAMEWORK = FrameworkPatternSpec(name="...", patterns={...})` instance. The language's `__init__.py` auto-discovers framework files via `pkgutil`. Also add a `Language` enum member in `integration_patterns/types.py`
 3. Run `poetry run pytest` to verify
 
 ### Tech Stack Analysis: `RepoSurveyor.tech_stacks()`
@@ -526,15 +526,15 @@ Patterns are organised in three layers, merged by `get_patterns_for_language()` 
 
 ```
 For each IntegrationType:
-  1. Common patterns (common.py) — low-confidence, language-agnostic
+  1. Common patterns (common.py → COMMON: BasePatternSpec) — low-confidence, language-agnostic
      e.g. (?i)\bhttp\b, (?i)\bkafka\b
-  2. Language base patterns (java.py, python.py, ...) — always active for that language
+  2. Language base patterns (java/base.py → BASE: BasePatternSpec) — always active for that language
      e.g. @Entity, import requests, std::fs
-  3. Framework-specific patterns — active only when framework detected in directory
+  3. Framework-specific patterns (java/spring.py → FRAMEWORK: FrameworkPatternSpec) — active only when framework detected in directory
      e.g. @RestController (Spring), @app.get (FastAPI)
 ```
 
-Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIUM, or LOW.
+Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIUM, or LOW. The `BasePatternSpec` and `FrameworkPatternSpec` frozen dataclasses (defined in `types.py`) enforce an explicit type contract and immutability for all pattern definitions.
 
 #### File scanning flow
 
@@ -634,7 +634,7 @@ A convenience function `survey_and_persist()` orchestrates the full pipeline: ru
 The codebase uses several consistent patterns:
 
 - **Protocol-based dependency injection**: External systems (Neo4j, LSP bridge) are accessed through `typing.Protocol` interfaces, with concrete implementations injected at construction time. This avoids hardcoded imports and enables testing with mock objects.
-- **Frozen dataclasses**: All data transfer objects (`IntegrationSignal`, `FileMatch`, `CallTree`, `DocumentSymbol`, `Location`) are frozen to prevent mutation after construction.
+- **Frozen dataclasses**: All data transfer objects (`IntegrationSignal`, `FileMatch`, `CallTree`, `DocumentSymbol`, `Location`) and pattern specifications (`BasePatternSpec`, `FrameworkPatternSpec`) are frozen to prevent mutation after construction.
 - **Pure graph-building functions**: `graph_builder.py` contains pure functions that transform survey data into graph representations without side effects — the actual database writes are in `analysis_graph_builder.py`.
 - **Layered pattern merging**: Integration patterns are composed from three layers (common → language base → framework-specific) at query time, keeping each layer independently editable.
 
