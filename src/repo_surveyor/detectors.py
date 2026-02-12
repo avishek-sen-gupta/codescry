@@ -115,6 +115,7 @@ FRAMEWORK_PATTERNS: dict[str, dict[str, str]] = {
     "nestjs": {"frameworks": "NestJS"},
     "svelte": {"frameworks": "Svelte"},
     "gatsby": {"frameworks": "Gatsby"},
+    "fastify": {"frameworks": "Fastify"},
     # Java frameworks (in pom.xml or build.gradle)
     "spring-boot": {"frameworks": "Spring"},
     "spring-web": {"frameworks": "Spring"},

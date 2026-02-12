@@ -38,13 +38,15 @@ class TestMojoLspDetection:
         assert "npm" in report.package_managers
 
     def test_frameworks_detection(self, mojo_lsp_path: Path) -> None:
-        """Should not detect web frameworks (this is an LSP library)."""
+        """Should detect Fastify but not front-end frameworks."""
         surveyor = RepoSurveyor(str(mojo_lsp_path))
         report = surveyor.tech_stacks()
 
-        # mojo-lsp is an LSP client library, not a web app
-        # It uses vscode-languageserver-protocol, not React/Vue/etc.
-        assert report.frameworks == []
+        # mojo-lsp uses Fastify as its HTTP layer
+        assert "Fastify" in report.frameworks
+        # It is not a front-end app
+        assert "React" not in report.frameworks
+        assert "Vue.js" not in report.frameworks
 
     def test_report_generation(self, mojo_lsp_path: Path) -> None:
         """Should generate a valid text report."""
