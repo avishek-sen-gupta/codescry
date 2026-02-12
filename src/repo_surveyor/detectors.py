@@ -123,6 +123,7 @@ FRAMEWORK_PATTERNS: dict[str, dict[str, str]] = {
     "resteasy": {"frameworks": "JAX-RS"},
     "micronaut": {"frameworks": "Micronaut"},
     "quarkus": {"frameworks": "Quarkus"},
+    "javalin": {"frameworks": "Javalin"},
     # Go frameworks (in go.mod)
     "gin-gonic/gin": {"frameworks": "Gin"},
     "labstack/echo": {"frameworks": "Echo"},
@@ -274,113 +275,47 @@ def detect_languages_from_extensions(repo_path: Path) -> set[str]:
 
 def detect_frameworks_from_packages(repo_path: Path) -> set[str]:
     """Detect frameworks from package files."""
+    from .package_parsers import match_frameworks, parse_dependencies
+
     frameworks: set[str] = set()
 
-    # Check Python package files
-    python_files = ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"]
-    for filename in python_files:
+    config_files = [
+        "pyproject.toml",
+        "requirements.txt",
+        "setup.py",
+        "Pipfile",
+        "package.json",
+        "pom.xml",
+        "build.gradle",
+        "build.gradle.kts",
+        "go.mod",
+        "Cargo.toml",
+    ]
+
+    for filename in config_files:
         filepath = repo_path / filename
         if filepath.exists():
             try:
-                content = filepath.read_text(encoding="utf-8", errors="ignore").lower()
-                for pattern, tech in FRAMEWORK_PATTERNS.items():
-                    if pattern in content and "frameworks" in tech:
-                        frameworks.add(tech["frameworks"])
+                content = filepath.read_text(encoding="utf-8", errors="ignore")
+                deps = parse_dependencies(filename, content)
+                frameworks.update(match_frameworks(deps, FRAMEWORK_PATTERNS))
             except (OSError, PermissionError):
                 continue
-
-    # Check package.json for JS frameworks
-    package_json = repo_path / "package.json"
-    if package_json.exists():
-        try:
-            content = package_json.read_text(encoding="utf-8", errors="ignore").lower()
-            for pattern, tech in FRAMEWORK_PATTERNS.items():
-                if f'"{pattern}"' in content and "frameworks" in tech:
-                    frameworks.add(tech["frameworks"])
-        except (OSError, PermissionError):
-            pass
-
-    # Check Java package files
-    java_files = ["pom.xml", "build.gradle", "build.gradle.kts"]
-    for filename in java_files:
-        filepath = repo_path / filename
-        if filepath.exists():
-            try:
-                content = filepath.read_text(
-                    encoding="utf-8", errors="ignore"
-                ).lower()
-                for pattern, tech in FRAMEWORK_PATTERNS.items():
-                    if pattern in content and "frameworks" in tech:
-                        frameworks.add(tech["frameworks"])
-            except (OSError, PermissionError):
-                continue
-
-    # Check Go module file
-    go_mod = repo_path / "go.mod"
-    if go_mod.exists():
-        try:
-            content = go_mod.read_text(encoding="utf-8", errors="ignore").lower()
-            for pattern, tech in FRAMEWORK_PATTERNS.items():
-                if pattern in content and "frameworks" in tech:
-                    frameworks.add(tech["frameworks"])
-        except (OSError, PermissionError):
-            pass
-
-    # Check Rust Cargo.toml
-    cargo_toml = repo_path / "Cargo.toml"
-    if cargo_toml.exists():
-        try:
-            content = cargo_toml.read_text(encoding="utf-8", errors="ignore").lower()
-            for pattern, tech in FRAMEWORK_PATTERNS.items():
-                if pattern in content and "frameworks" in tech:
-                    frameworks.add(tech["frameworks"])
-        except (OSError, PermissionError):
-            pass
 
     return frameworks
 
 
 def detect_frameworks_for_file(filepath: Path) -> list[str]:
     """Detect frameworks from a specific package file."""
-    frameworks: list[str] = []
-    filename = filepath.name
+    from .package_parsers import match_frameworks, parse_dependencies
 
     if not filepath.exists():
-        return frameworks
+        return []
 
     try:
-        content = filepath.read_text(encoding="utf-8", errors="ignore").lower()
+        content = filepath.read_text(encoding="utf-8", errors="ignore")
     except (OSError, PermissionError):
-        return frameworks
+        return []
 
-    # Python package files
-    if filename in ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"]:
-        for pattern, tech in FRAMEWORK_PATTERNS.items():
-            if pattern in content and "frameworks" in tech:
-                frameworks.append(tech["frameworks"])
-
-    # JavaScript package.json
-    elif filename == "package.json":
-        for pattern, tech in FRAMEWORK_PATTERNS.items():
-            if f'"{pattern}"' in content and "frameworks" in tech:
-                frameworks.append(tech["frameworks"])
-
-    # Java package files
-    elif filename in ["pom.xml", "build.gradle", "build.gradle.kts"]:
-        for pattern, tech in FRAMEWORK_PATTERNS.items():
-            if pattern in content and "frameworks" in tech:
-                frameworks.append(tech["frameworks"])
-
-    # Go module file
-    elif filename == "go.mod":
-        for pattern, tech in FRAMEWORK_PATTERNS.items():
-            if pattern in content and "frameworks" in tech:
-                frameworks.append(tech["frameworks"])
-
-    # Rust Cargo.toml
-    elif filename == "Cargo.toml":
-        for pattern, tech in FRAMEWORK_PATTERNS.items():
-            if pattern in content and "frameworks" in tech:
-                frameworks.append(tech["frameworks"])
-
-    return frameworks
+    deps = parse_dependencies(filepath.name, content)
+    return match_frameworks(deps, FRAMEWORK_PATTERNS)
