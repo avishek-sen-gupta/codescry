@@ -463,6 +463,46 @@ class TestMatchFrameworks:
         assert "FastAPI" in frameworks
         assert "Starlette" in frameworks
 
+    def test_dropwizard_detected(self):
+        deps = [ParsedDependency("dropwizard-core", "pom.xml")]
+        assert "Dropwizard" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_vertx_detected(self):
+        deps = [ParsedDependency("vertx-web", "pom.xml")]
+        assert "Vert.x" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_vertx_core_detected(self):
+        deps = [ParsedDependency("vertx-core", "pom.xml")]
+        assert "Vert.x" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_play_java_detected(self):
+        deps = [ParsedDependency("play-java", "build.gradle")]
+        assert "Play" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_apache_cxf_jaxrs_detected(self):
+        deps = [ParsedDependency("cxf-rt-frontend-jaxrs", "pom.xml")]
+        assert "Apache CXF" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_apache_cxf_jaxws_detected(self):
+        deps = [ParsedDependency("cxf-rt-frontend-jaxws", "pom.xml")]
+        assert "Apache CXF" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_axis2_detected(self):
+        deps = [ParsedDependency("axis2", "pom.xml")]
+        assert "Apache Axis2" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_spring_ws_detected(self):
+        deps = [ParsedDependency("spring-ws-core", "pom.xml")]
+        assert "Spring WS" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_jaxws_rt_detected(self):
+        deps = [ParsedDependency("jaxws-rt", "pom.xml")]
+        assert "JAX-WS" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_metro_jaxws_detected(self):
+        deps = [ParsedDependency("metro-jax-ws", "pom.xml")]
+        assert "JAX-WS" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
 
 # ---------------------------------------------------------------------------
 # parse_dependencies dispatch
