@@ -70,6 +70,35 @@ Directory Markers:
     Frameworks: React
 ```
 
+Reports are also available as JSON via `to_json()`:
+
+```python
+print(report.to_json())          # pretty-printed (indent=2)
+print(report.to_json(indent=None))  # compact, single-line
+```
+
+Example output:
+
+```json
+{
+  "repo_path": "/path/to/repo",
+  "languages": ["JavaScript", "Python", "TypeScript"],
+  "package_managers": ["Poetry", "npm"],
+  "frameworks": ["FastAPI", "React"],
+  "infrastructure": ["Docker"],
+  "directory_markers": [
+    {
+      "directory": "backend",
+      "marker_file": "pyproject.toml",
+      "languages": ["Python"],
+      "package_managers": ["Poetry"],
+      "frameworks": ["FastAPI"],
+      "infrastructure": []
+    }
+  ]
+}
+```
+
 ### Code Structure Analysis with CTags
 
 Extract code symbols (classes, methods, fields, etc.) using Universal CTags:
