@@ -157,20 +157,22 @@ This means:
 | `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `MQGET` |
 | `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener` |
 | `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `JdbcTemplate` |
+| `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `OPEN INPUT`, `boto3` |
+| `grpc` | gRPC services and clients | `io.grpc`, `import grpc`, `tonic::`, `Grpc.Core` |
 
 #### Supported Languages and Frameworks
 
 | Language | File Extensions | Base Patterns | Framework-Specific Patterns |
 |----------|-----------------|---------------|----------------------------|
-| Java | `.java` | JPA, JDBC, JMS, servlet, SOAP | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS |
-| Python | `.py` | requests, SQLAlchemy, Celery, websockets | Flask, FastAPI, Django, Starlette, aiohttp, Tornado, Pyramid |
-| TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs | NestJS, Express, Angular, Next.js |
-| JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs | Express, Next.js |
-| Rust | `.rs` | Diesel, SQLx, rdkafka, tungstenite | Actix, Axum, Rocket, Warp |
-| Go | `.go` | net/http, GORM, sarama, gorilla/websocket | Gin, Echo, Fiber, Chi, Gorilla |
-| C# | `.cs` | ASP.NET, Entity Framework, SignalR | ASP.NET Core, ASP.NET Web API, WCF, CoreWCF, ServiceStack, Nancy, Carter |
-| COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ | _(no framework detection yet)_ |
-| PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ | _(no framework detection yet)_ |
+| Java | `.java` | JPA, JDBC, JMS, servlet, SOAP, file I/O, gRPC | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Spring WS, JAX-WS |
+| Python | `.py` | requests, SQLAlchemy, Celery, websockets, file I/O, gRPC | Flask, FastAPI, Django, Starlette, aiohttp, Tornado, Pyramid |
+| TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs, file I/O, gRPC | NestJS, Express, Angular, Next.js |
+| JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs, file I/O, gRPC | Express, Next.js |
+| Rust | `.rs` | Diesel, SQLx, rdkafka, tungstenite, SOAP, file I/O, gRPC | Actix, Axum, Rocket, Warp |
+| Go | `.go` | net/http, GORM, sarama, gorilla/websocket, SOAP, file I/O, gRPC | Gin, Echo, Fiber, Chi, Gorilla |
+| C# | `.cs` | ASP.NET, Entity Framework, SignalR, file I/O, gRPC | ASP.NET Core, WCF, CoreWCF, ServiceStack, Nancy, Carter |
+| COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ, file I/O | _(no framework detection yet)_ |
+| PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ, file I/O | _(no framework detection yet)_ |
 
 ### LSP Bridge Client
 

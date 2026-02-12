@@ -1108,3 +1108,689 @@ class TestDetectIntegrationsWithFrameworks:
             ]
             assert len(flask_points) > 0
             assert "frontend" in flask_points[0].match.file_path
+
+
+class TestJavalinFrameworkPatterns:
+    """Tests for Javalin framework-specific pattern matching."""
+
+    def test_javalin_patterns_only_with_javalin_framework(self) -> None:
+        """Javalin-specific patterns should only match when Javalin framework is active."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                'import io.javalin.Javalin;\n'
+                'var app = Javalin.create();\n'
+                'app.get("/hello", ctx -> ctx.result("Hello"));\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            # Without Javalin framework: should NOT match javalin-specific patterns
+            points_without = list(scan_file_for_integrations(file_path))
+            javalin_points = [
+                p
+                for p in points_without
+                if "import io\\.javalin" in p.matched_pattern
+                or "Javalin\\.create" in p.matched_pattern
+            ]
+            assert len(javalin_points) == 0
+
+            # With Javalin framework: should match
+            points_with = list(
+                scan_file_for_integrations(file_path, frameworks=["Javalin"])
+            )
+            javalin_points = [
+                p
+                for p in points_with
+                if "import io\\.javalin" in p.matched_pattern
+                or "Javalin\\.create" in p.matched_pattern
+            ]
+            assert len(javalin_points) > 0
+            assert all(p.confidence == Confidence.HIGH for p in javalin_points)
+        finally:
+            file_path.unlink()
+
+    def test_javalin_route_patterns(self) -> None:
+        """Javalin route handler patterns should match with Javalin framework."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                'app.get("/users", ctx -> ctx.json(users));\n'
+                'app.post("/users", ctx -> { });\n'
+                'app.delete("/users/{id}", ctx -> { });\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Javalin"])
+            )
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            matched_patterns = {p.matched_pattern for p in http_points}
+            assert r"\w+\.get\(" in matched_patterns
+            assert r"\w+\.post\(" in matched_patterns
+            assert r"\w+\.delete\(" in matched_patterns
+        finally:
+            file_path.unlink()
+
+    def test_javalin_websocket_patterns(self) -> None:
+        """Javalin WebSocket patterns should match with Javalin framework."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write('app.ws("/websocket", ws -> { });\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Javalin"])
+            )
+            ws_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOCKET
+                and r"\w+\.ws\(" in p.matched_pattern
+            ]
+            assert len(ws_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_javalin_base_patterns_still_match(self) -> None:
+        """Base Java patterns should still match alongside Javalin patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                'import io.javalin.Javalin;\n'
+                '@Entity\n'
+                'public class User { }\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Javalin"])
+            )
+            javalin_points = [
+                p for p in points if "import io\\.javalin" in p.matched_pattern
+            ]
+            entity_points = [
+                p for p in points if "@Entity" in p.matched_pattern
+            ]
+            assert len(javalin_points) > 0
+            assert len(entity_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestFileIoPatterns:
+    """Tests for FILE_IO integration type detection."""
+
+    def test_java_file_input_stream(self) -> None:
+        """Should detect FileInputStream as FILE_IO."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("FileInputStream fis = new FileInputStream(path);\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            file_io_points = [
+                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(file_io_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_python_open(self) -> None:
+        """Should detect open() as FILE_IO."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("with open('data.txt') as f:\n    data = f.read()\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            file_io_points = [
+                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                and "open\\(" in p.matched_pattern
+            ]
+            assert len(file_io_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_python_pathlib(self) -> None:
+        """Should detect pathlib.Path as FILE_IO."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("p = pathlib.Path('/tmp/data.txt')\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            file_io_points = [
+                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                and "pathlib" in p.matched_pattern
+            ]
+            assert len(file_io_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_cobol_open_input(self) -> None:
+        """Should detect OPEN INPUT as FILE_IO in COBOL."""
+        with tempfile.NamedTemporaryFile(suffix=".cbl", mode="w", delete=False) as f:
+            f.write("       OPEN INPUT CUSTOMER-FILE.\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            file_io_points = [
+                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(file_io_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_cobol_open_output(self) -> None:
+        """Should detect OPEN OUTPUT as FILE_IO in COBOL."""
+        with tempfile.NamedTemporaryFile(suffix=".cbl", mode="w", delete=False) as f:
+            f.write("       OPEN OUTPUT REPORT-FILE.\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            file_io_points = [
+                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(file_io_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_go_os_open(self) -> None:
+        """Should detect os.Open as FILE_IO in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('f, err := os.Open("data.txt")\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            file_io_points = [
+                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(file_io_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_pli_open_file(self) -> None:
+        """Should detect OPEN FILE as FILE_IO in PL/I."""
+        with tempfile.NamedTemporaryFile(suffix=".pli", mode="w", delete=False) as f:
+            f.write("OPEN FILE(CUSTFILE) INPUT;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            file_io_points = [
+                p for p in points if p.integration_type == IntegrationType.FILE_IO
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(file_io_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestGrpcPatterns:
+    """Tests for GRPC integration type detection."""
+
+    def test_java_grpc_import(self) -> None:
+        """Should detect io.grpc import as GRPC in Java."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("import io.grpc.ManagedChannel;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            grpc_points = [
+                p for p in points if p.integration_type == IntegrationType.GRPC
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(grpc_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_python_grpc_import(self) -> None:
+        """Should detect import grpc as GRPC in Python."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("import grpc\nserver = grpc.server(futures.ThreadPoolExecutor())\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            grpc_points = [
+                p for p in points if p.integration_type == IntegrationType.GRPC
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(grpc_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_go_grpc_import(self) -> None:
+        """Should detect google.golang.org/grpc as GRPC in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('"google.golang.org/grpc"\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            grpc_points = [
+                p for p in points if p.integration_type == IntegrationType.GRPC
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(grpc_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_csharp_grpc_core(self) -> None:
+        """Should detect Grpc.Core as GRPC in C#."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("using Grpc.Core;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            grpc_points = [
+                p for p in points if p.integration_type == IntegrationType.GRPC
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(grpc_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_rust_tonic_grpc(self) -> None:
+        """Should detect tonic:: as GRPC in Rust."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("use tonic::transport::Server;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            grpc_points = [
+                p for p in points if p.integration_type == IntegrationType.GRPC
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(grpc_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestDropwizardFrameworkPatterns:
+    """Tests for Dropwizard framework-specific pattern matching."""
+
+    def test_dropwizard_http_rest_patterns(self) -> None:
+        """Should detect Dropwizard HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                'import io.dropwizard.Application;\n'
+                '@Path("/users")\n'
+                '@Produces(MediaType.APPLICATION_JSON)\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Dropwizard"])
+            )
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+            matched = {p.matched_pattern for p in http_points}
+            assert r"import io\.dropwizard" in matched
+        finally:
+            file_path.unlink()
+
+    def test_dropwizard_patterns_only_with_framework(self) -> None:
+        """Dropwizard patterns should not match without framework."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("import io.dropwizard.Application;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            dropwizard_points = [
+                p for p in points if "import io\\.dropwizard" in p.matched_pattern
+            ]
+            assert len(dropwizard_points) == 0
+        finally:
+            file_path.unlink()
+
+
+class TestVertxFrameworkPatterns:
+    """Tests for Vert.x framework-specific pattern matching."""
+
+    def test_vertx_http_rest_patterns(self) -> None:
+        """Should detect Vert.x HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                'import io.vertx.core.Vertx;\n'
+                'vertx.createHttpServer();\n'
+                'Router.router(vertx);\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Vert.x"])
+            )
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_vertx_socket_patterns(self) -> None:
+        """Should detect Vert.x WebSocket patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("ServerWebSocket ws = conn.webSocket();\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Vert.x"])
+            )
+            socket_points = [
+                p for p in points if p.integration_type == IntegrationType.SOCKET
+                and "ServerWebSocket" in p.matched_pattern
+            ]
+            assert len(socket_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_vertx_messaging_patterns(self) -> None:
+        """Should detect Vert.x EventBus patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("EventBus eb = vertx.eventBus();\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Vert.x"])
+            )
+            msg_points = [
+                p for p in points if p.integration_type == IntegrationType.MESSAGING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(msg_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestCsharpFrameworkPatterns:
+    """Tests for C# framework-specific pattern matching."""
+
+    def test_aspnet_core_http_rest(self) -> None:
+        """Should detect ASP.NET Core HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write(
+                'var builder = WebApplication.CreateBuilder(args);\n'
+                'app.MapGet("/hello", () => "Hello World");\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["ASP.NET Core"])
+            )
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_aspnet_core_grpc(self) -> None:
+        """Should detect ASP.NET Core gRPC patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("app.MapGrpcService<GreeterService>();\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["ASP.NET Core"])
+            )
+            grpc_points = [
+                p for p in points if p.integration_type == IntegrationType.GRPC
+                and "MapGrpcService" in p.matched_pattern
+            ]
+            assert len(grpc_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_wcf_soap(self) -> None:
+        """Should detect WCF SOAP patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write(
+                'using System.ServiceModel;\n'
+                'var host = new ServiceHost(typeof(MyService));\n'
+                'var binding = new BasicHttpBinding();\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["WCF"])
+            )
+            soap_points = [
+                p for p in points if p.integration_type == IntegrationType.SOAP
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(soap_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_corewcf_soap(self) -> None:
+        """Should detect CoreWCF SOAP patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("using CoreWCF;\nusing CoreWCF.Http;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["CoreWCF"])
+            )
+            soap_points = [
+                p for p in points if p.integration_type == IntegrationType.SOAP
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(soap_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_servicestack_http_rest(self) -> None:
+        """Should detect ServiceStack HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("using ServiceStack;\npublic class MyRequest : IReturn<MyResponse> {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["ServiceStack"])
+            )
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_nancy_http_rest(self) -> None:
+        """Should detect Nancy HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write('public class MyModule : NancyModule {\n    Get["/"] = _ => "Hello";\n}\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Nancy"])
+            )
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_carter_http_rest(self) -> None:
+        """Should detect Carter HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("public class MyModule : ICarterModule {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Carter"])
+            )
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+                and "ICarterModule" in p.matched_pattern
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestGoSoapPatterns:
+    """Tests for Go SOAP patterns (gap fill)."""
+
+    def test_go_gowsdl(self) -> None:
+        """Should detect gowsdl import as SOAP in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('"github.com/hooklift/gowsdl"\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            soap_points = [
+                p for p in points if p.integration_type == IntegrationType.SOAP
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(soap_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_go_encoding_xml(self) -> None:
+        """Should detect encoding/xml as SOAP in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('"encoding/xml"\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            soap_points = [
+                p for p in points if p.integration_type == IntegrationType.SOAP
+                and "encoding/xml" in p.matched_pattern
+            ]
+            assert len(soap_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestRustSoapPatterns:
+    """Tests for Rust SOAP patterns (gap fill)."""
+
+    def test_rust_yaserde(self) -> None:
+        """Should detect yaserde as SOAP in Rust."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("use yaserde::YaDeserialize;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            soap_points = [
+                p for p in points if p.integration_type == IntegrationType.SOAP
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(soap_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_rust_quick_xml(self) -> None:
+        """Should detect quick-xml as SOAP in Rust."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("use quick_xml::Reader;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            soap_points = [
+                p for p in points if p.integration_type == IntegrationType.SOAP
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(soap_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestDirectoryClassificationNewTypes:
+    """Tests for directory classification with FILE_IO and GRPC types."""
+
+    def test_classify_uploads_directory(self) -> None:
+        """Should classify 'uploads' as FILE_IO."""
+        matches = classify_directory("uploads")
+        types = [m[0] for m in matches]
+        assert IntegrationType.FILE_IO in types
+
+    def test_classify_storage_directory(self) -> None:
+        """Should classify 'storage' as FILE_IO."""
+        matches = classify_directory("storage")
+        types = [m[0] for m in matches]
+        assert IntegrationType.FILE_IO in types
+
+    def test_classify_proto_directory(self) -> None:
+        """Should classify 'proto' as GRPC."""
+        matches = classify_directory("proto")
+        types = [m[0] for m in matches]
+        assert IntegrationType.GRPC in types
+
+    def test_classify_grpc_directory(self) -> None:
+        """Should classify 'grpc' as GRPC."""
+        matches = classify_directory("grpc")
+        types = [m[0] for m in matches]
+        assert IntegrationType.GRPC in types

@@ -15,7 +15,10 @@ BASE_PATTERNS = {
         ],
     },
     IntegrationType.SOAP: {
-        "patterns": [],
+        "patterns": [
+            (r'"github\.com/hooklift/gowsdl"', Confidence.HIGH),
+            (r'"encoding/xml"', Confidence.MEDIUM),
+        ],
     },
     IntegrationType.MESSAGING: {
         "patterns": [
@@ -46,6 +49,21 @@ BASE_PATTERNS = {
             (r"db\.Find\(", Confidence.HIGH),
             (r"db\.Where\(", Confidence.HIGH),
             (r"sql\.Open\(", Confidence.HIGH),
+        ],
+    },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"os\.Open\(", Confidence.HIGH),
+            (r"os\.Create\(", Confidence.HIGH),
+            (r"io\.Copy\(", Confidence.MEDIUM),
+            (r"s3manager", Confidence.HIGH),
+            (r'"github\.com/pkg/sftp"', Confidence.HIGH),
+        ],
+    },
+    IntegrationType.GRPC: {
+        "patterns": [
+            (r'"google\.golang\.org/grpc"', Confidence.HIGH),
+            (r"pb\.Register.*Server", Confidence.HIGH),
         ],
     },
 }

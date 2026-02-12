@@ -86,6 +86,15 @@ BASE_PATTERNS = {
             (r"FINISH\s+TASK", Confidence.HIGH),
         ],
     },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"OPEN\s+FILE", Confidence.HIGH),
+            (r"READ\s+FILE", Confidence.HIGH),
+            (r"WRITE\s+FILE", Confidence.HIGH),
+            (r"CLOSE\s+FILE", Confidence.HIGH),
+            (r"DECLARE\s+.*\s+FILE", Confidence.HIGH),
+        ],
+    },
 }
 
 FRAMEWORK_PATTERNS = {}

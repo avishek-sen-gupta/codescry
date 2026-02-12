@@ -45,6 +45,20 @@ BASE_PATTERNS = {
             (r"Sequelize\.define\(", Confidence.HIGH),
         ],
     },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"require\(['\"]fs['\"]\)", Confidence.HIGH),
+            (r"fs\.readFileSync", Confidence.HIGH),
+            (r"require\(['\"]aws-sdk['\"]\)", Confidence.MEDIUM),
+            (r"require\(['\"]multer['\"]\)", Confidence.HIGH),
+        ],
+    },
+    IntegrationType.GRPC: {
+        "patterns": [
+            (r"require\(['\"]@grpc/grpc-js['\"]\)", Confidence.HIGH),
+            (r"require\(['\"]@grpc/proto-loader['\"]\)", Confidence.HIGH),
+        ],
+    },
 }
 
 FRAMEWORK_PATTERNS = {

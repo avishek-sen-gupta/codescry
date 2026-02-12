@@ -14,7 +14,10 @@ BASE_PATTERNS = {
         ],
     },
     IntegrationType.SOAP: {
-        "patterns": [],
+        "patterns": [
+            (r"use yaserde::", Confidence.HIGH),
+            (r"use quick_xml::", Confidence.HIGH),
+        ],
     },
     IntegrationType.MESSAGING: {
         "patterns": [
@@ -54,6 +57,19 @@ BASE_PATTERNS = {
             (r"sqlx::query", Confidence.HIGH),
             (r"query_as!", Confidence.HIGH),
             (r"query!", Confidence.HIGH),
+        ],
+    },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"std::fs", Confidence.HIGH),
+            (r"tokio::fs", Confidence.HIGH),
+            (r"aws-sdk-s3", Confidence.HIGH),
+        ],
+    },
+    IntegrationType.GRPC: {
+        "patterns": [
+            (r"tonic::", Confidence.HIGH),
+            (r"#\[tonic::async_trait\]", Confidence.HIGH),
         ],
     },
 }

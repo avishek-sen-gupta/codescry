@@ -29,6 +29,8 @@ class IntegrationType(Enum):
     MESSAGING = "messaging"
     SOCKET = "socket"
     DATABASE = "database"
+    FILE_IO = "file_io"
+    GRPC = "grpc"
 
 
 class Confidence(Enum):

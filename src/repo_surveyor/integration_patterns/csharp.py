@@ -57,6 +57,86 @@ BASE_PATTERNS = {
             (r"using Dapper", Confidence.HIGH),
         ],
     },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"File\.Read", Confidence.HIGH),
+            (r"File\.Write", Confidence.HIGH),
+            (r"StreamReader", Confidence.HIGH),
+            (r"StreamWriter", Confidence.HIGH),
+            (r"AWSSDK\.S3", Confidence.HIGH),
+            (r"FtpWebRequest", Confidence.HIGH),
+        ],
+    },
+    IntegrationType.GRPC: {
+        "patterns": [
+            (r"Grpc\.Core", Confidence.HIGH),
+            (r"Grpc\.Net\.Client", Confidence.HIGH),
+            (r"ServerServiceDefinition", Confidence.HIGH),
+        ],
+    },
 }
 
-FRAMEWORK_PATTERNS = {}
+FRAMEWORK_PATTERNS = {
+    "ASP.NET Core": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"IApplicationBuilder", Confidence.HIGH),
+                (r"app\.MapGet", Confidence.HIGH),
+                (r"app\.MapPost", Confidence.HIGH),
+                (r"WebApplication\.CreateBuilder", Confidence.HIGH),
+                (r"MinimalApi", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.GRPC: {
+            "patterns": [
+                (r"MapGrpcService", Confidence.HIGH),
+                (r"Grpc\.AspNetCore", Confidence.HIGH),
+            ],
+        },
+    },
+    "WCF": {
+        IntegrationType.SOAP: {
+            "patterns": [
+                (r"System\.ServiceModel", Confidence.HIGH),
+                (r"ChannelFactory", Confidence.HIGH),
+                (r"BasicHttpBinding", Confidence.HIGH),
+                (r"ServiceHost", Confidence.HIGH),
+            ],
+        },
+    },
+    "CoreWCF": {
+        IntegrationType.SOAP: {
+            "patterns": [
+                (r"using CoreWCF", Confidence.HIGH),
+                (r"CoreWCF\.Http", Confidence.HIGH),
+            ],
+        },
+    },
+    "ServiceStack": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"using ServiceStack", Confidence.HIGH),
+                (r"IReturn<", Confidence.HIGH),
+                (r"IGet\b", Confidence.HIGH),
+                (r"IPost\b", Confidence.HIGH),
+            ],
+        },
+    },
+    "Nancy": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"NancyModule", Confidence.HIGH),
+                (r"Get\[", Confidence.HIGH),
+                (r"Post\[", Confidence.HIGH),
+            ],
+        },
+    },
+    "Carter": {
+        IntegrationType.HTTP_REST: {
+            "patterns": [
+                (r"CarterModule", Confidence.HIGH),
+                (r"ICarterModule", Confidence.HIGH),
+            ],
+        },
+    },
+}

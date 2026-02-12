@@ -128,6 +128,17 @@ BASE_PATTERNS = {
             (r"IDMS-DC", Confidence.HIGH),  # IDMS-DC section
         ],
     },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"OPEN\s+INPUT", Confidence.HIGH),
+            (r"OPEN\s+OUTPUT", Confidence.HIGH),
+            (r"OPEN\s+I-O", Confidence.HIGH),
+            (r"\bREAD\b", Confidence.MEDIUM),
+            (r"\bWRITE\b", Confidence.MEDIUM),
+            (r"\bCLOSE\b", Confidence.MEDIUM),
+            (r"FD\s+", Confidence.HIGH),
+        ],
+    },
 }
 
 FRAMEWORK_PATTERNS = {}

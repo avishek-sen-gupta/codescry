@@ -73,4 +73,28 @@ PATTERNS = {
             r"(?i)^models?$",
         ],
     },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"(?i)\bfile\b", Confidence.LOW),
+            (r"(?i)\bupload\b", Confidence.LOW),
+            (r"(?i)\bdownload\b", Confidence.LOW),
+        ],
+        "directory_patterns": [
+            r"(?i)^uploads?$",
+            r"(?i)^files?$",
+            r"(?i)^storage$",
+            r"(?i)^assets$",
+        ],
+    },
+    IntegrationType.GRPC: {
+        "patterns": [
+            (r"(?i)\bgrpc\b", Confidence.MEDIUM),
+            (r"(?i)\bprotobuf\b", Confidence.MEDIUM),
+        ],
+        "directory_patterns": [
+            r"(?i)^proto$",
+            r"(?i)^grpc$",
+            r"(?i)^protobuf$",
+        ],
+    },
 }

@@ -54,6 +54,23 @@ BASE_PATTERNS = {
             (r"relationship\(", Confidence.MEDIUM),
         ],
     },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"open\(", Confidence.MEDIUM),
+            (r"pathlib\.Path", Confidence.MEDIUM),
+            (r"import shutil", Confidence.HIGH),
+            (r"import boto3", Confidence.HIGH),
+            (r"import ftplib", Confidence.HIGH),
+            (r"import paramiko", Confidence.HIGH),
+        ],
+    },
+    IntegrationType.GRPC: {
+        "patterns": [
+            (r"import grpc", Confidence.HIGH),
+            (r"grpc\.server", Confidence.HIGH),
+            (r"add_.*Servicer_to_server", Confidence.HIGH),
+        ],
+    },
 }
 
 FRAMEWORK_PATTERNS = {

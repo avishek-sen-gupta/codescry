@@ -46,6 +46,20 @@ BASE_PATTERNS = {
             (r"prisma\.", Confidence.HIGH),
         ],
     },
+    IntegrationType.FILE_IO: {
+        "patterns": [
+            (r"fs\.readFile", Confidence.HIGH),
+            (r"fs\.writeFile", Confidence.HIGH),
+            (r"from ['\"]@aws-sdk/client-s3['\"]", Confidence.HIGH),
+            (r"from ['\"]multer['\"]", Confidence.HIGH),
+        ],
+    },
+    IntegrationType.GRPC: {
+        "patterns": [
+            (r"from ['\"]@grpc/grpc-js['\"]", Confidence.HIGH),
+            (r"from ['\"]@grpc/proto-loader['\"]", Confidence.HIGH),
+        ],
+    },
 }
 
 FRAMEWORK_PATTERNS = {
