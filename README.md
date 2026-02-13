@@ -57,7 +57,24 @@ Framework detection uses structured parsing of config files rather than naive su
 | `sse_streaming` | Server-sent events and streaming | `SseEmitter`, `StreamingResponse`, `EventSource`, `Sse<` |
 | `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron` |
 
-All 12 integration types are detected across Java, Python, TypeScript, JavaScript, Rust, Go, and C# (COBOL and PL/I cover database, messaging, HTTP, and file I/O).
+### Integration Pattern Coverage by Language
+
+| Integration Type | Java | Python | TypeScript | JavaScript | Go | Rust | C# | COBOL | PL/I |
+|------------------|:----:|:------:|:----------:|:----------:|:--:|:----:|:--:|:-----:|:----:|
+| `http_rest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `soap` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `messaging` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `socket` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `database` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `file_io` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `grpc` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `graphql` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+
+All 12 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, and C#. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
 
 ## Usage
 
