@@ -600,3 +600,7 @@ The codebase uses several consistent patterns:
 ```bash
 poetry run pytest
 ```
+
+## License
+
+This project is licensed under the MIT License — see [LICENSE.md](LICENSE.md) for details.
