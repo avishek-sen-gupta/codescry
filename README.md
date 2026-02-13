@@ -21,6 +21,44 @@ A Python library for experiments in analysing repository technology stacks and c
 poetry install
 ```
 
+## Supported Languages
+
+| Language | Extensions | Indicator Files | Package Managers | Detected Frameworks |
+|----------|-----------|-----------------|------------------|---------------------|
+| Java | `.java` | `pom.xml`, `build.gradle`, `build.gradle.kts` | Maven, Gradle | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS, Helidon |
+| Python | `.py` | `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile` | Poetry, pip, Pipenv | FastAPI, Django, Flask, Starlette, Tornado, Pyramid, aiohttp, Sanic, Litestar |
+| TypeScript | `.ts`, `.tsx` | `tsconfig.json` | _(shared with JS)_ | _(shared with JS)_ |
+| JavaScript | `.js`, `.jsx` | `package.json`, `yarn.lock`, `pnpm-lock.yaml` | npm, Yarn, pnpm | React, Vue.js, Angular, Next.js, Nuxt.js, Express, NestJS, Svelte, Gatsby, Fastify, Hono, Koa, Hapi |
+| Go | `.go` | `go.mod` | — | Gin, Echo, Fiber, Chi, Gorilla, Connect |
+| Rust | `.rs` | `Cargo.toml` | Cargo | Actix, Axum, Rocket, Warp |
+| C# | `.cs` | `*.csproj`, `*.sln`, `packages.config` | NuGet | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
+| COBOL | `.cbl`, `.cob`, `.cpy` | — | — | — |
+| PL/I | `.pli`, `.pl1`, `.plinc` | — | — | — |
+| Ruby | `.rb` | `Gemfile` | Bundler | — |
+
+Infrastructure detection: Docker (`Dockerfile`, `docker-compose.yml`), Terraform (`*.tf`), Kubernetes (`*.yaml` with k8s markers).
+
+Framework detection uses structured parsing of config files rather than naive substring matching — see [Package Parser Subsystem](#package-parser-subsystem) for parser details. This prevents false positives like `"reactive-streams"` matching `"react"` or `"expression"` matching `"express"`.
+
+## Supported Integration Types
+
+| Type | Description | Example Patterns |
+|------|-------------|------------------|
+| `http_rest` | HTTP/REST endpoints and clients | `@RestController`, `@GetMapping`, `app.get(`, `use actix_web::` |
+| `soap` | SOAP/XML web services | `@WebService`, `SOAPMessage`, `XML PARSE` |
+| `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `SqsClient` |
+| `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener` |
+| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `DynamoDbClient` |
+| `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `Azure.Storage.Blobs` |
+| `grpc` | gRPC services and clients | `io.grpc`, `import grpc`, `tonic::`, `Grpc.Core` |
+| `graphql` | GraphQL APIs and schemas | `@QueryMapping`, `apollo-server`, `graphene`, `HotChocolate` |
+| `email` | Email and SMTP services | `javax.mail`, `smtplib`, `nodemailer`, `MailKit` |
+| `caching` | Cache stores and distributed caching | `@Cacheable`, `RedisTemplate`, `ioredis`, `IDistributedCache` |
+| `sse_streaming` | Server-sent events and streaming | `SseEmitter`, `StreamingResponse`, `EventSource`, `Sse<` |
+| `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron` |
+
+All 12 integration types are detected across Java, Python, TypeScript, JavaScript, Rust, Go, and C# (COBOL and PL/I cover database, messaging, HTTP, and file I/O).
+
 ## Usage
 
 ### Tech Stack Analysis
@@ -206,25 +244,6 @@ This means:
 - A JS file in `frontend/` will match Express patterns (`app.get(`, `require('express')`) alongside base JavaScript patterns (`require('kafkajs')`, `fetch(`)
 - Files in directories without a framework mapping only match common and base language patterns
 
-#### Supported Integration Types
-
-| Type | Description | Example Patterns |
-|------|-------------|------------------|
-| `http_rest` | HTTP/REST endpoints and clients | `@RestController`, `@GetMapping`, `app.get(`, `use actix_web::` |
-| `soap` | SOAP/XML web services | `@WebService`, `SOAPMessage`, `XML PARSE` |
-| `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `SqsClient` |
-| `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener` |
-| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `DynamoDbClient` |
-| `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `Azure.Storage.Blobs` |
-| `grpc` | gRPC services and clients | `io.grpc`, `import grpc`, `tonic::`, `Grpc.Core` |
-| `graphql` | GraphQL APIs and schemas | `@QueryMapping`, `apollo-server`, `graphene`, `HotChocolate` |
-| `email` | Email and SMTP services | `javax.mail`, `smtplib`, `nodemailer`, `MailKit` |
-| `caching` | Cache stores and distributed caching | `@Cacheable`, `RedisTemplate`, `ioredis`, `IDistributedCache` |
-| `sse_streaming` | Server-sent events and streaming | `SseEmitter`, `StreamingResponse`, `EventSource`, `Sse<` |
-| `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron` |
-
-All 12 integration types are detected across Java, Python, TypeScript, JavaScript, Rust, Go, and C# (COBOL and PL/I cover database, messaging, HTTP, and file I/O). See [Supported Languages](#supported-languages) for the full language/framework matrix.
-
 ### LSP Bridge Client
 
 Communicate with language servers via the [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) REST bridge to get symbols, definitions, and more:
@@ -299,27 +318,6 @@ This creates a graph with:
 - `Directory` nodes with hierarchy relationships
 - `Language`, `PackageManager`, `Framework`, `Infrastructure` nodes
 - `CodeSymbol` nodes with parent-child relationships based on scope
-
-## Supported Languages
-
-| Language | Extensions | Indicator Files | Package Managers | Detected Frameworks |
-|----------|-----------|-----------------|------------------|---------------------|
-| Java | `.java` | `pom.xml`, `build.gradle`, `build.gradle.kts` | Maven, Gradle | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS, Helidon |
-| Python | `.py` | `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile` | Poetry, pip, Pipenv | FastAPI, Django, Flask, Starlette, Tornado, Pyramid, aiohttp, Sanic, Litestar |
-| TypeScript | `.ts`, `.tsx` | `tsconfig.json` | _(shared with JS)_ | _(shared with JS)_ |
-| JavaScript | `.js`, `.jsx` | `package.json`, `yarn.lock`, `pnpm-lock.yaml` | npm, Yarn, pnpm | React, Vue.js, Angular, Next.js, Nuxt.js, Express, NestJS, Svelte, Gatsby, Fastify, Hono, Koa, Hapi |
-| Go | `.go` | `go.mod` | — | Gin, Echo, Fiber, Chi, Gorilla, Connect |
-| Rust | `.rs` | `Cargo.toml` | Cargo | Actix, Axum, Rocket, Warp |
-| C# | `.cs` | `*.csproj`, `*.sln`, `packages.config` | NuGet | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
-| COBOL | `.cbl`, `.cob`, `.cpy` | — | — | — |
-| PL/I | `.pli`, `.pl1`, `.plinc` | — | — | — |
-| Ruby | `.rb` | `Gemfile` | Bundler | — |
-
-Infrastructure detection: Docker (`Dockerfile`, `docker-compose.yml`), Terraform (`*.tf`), Kubernetes (`*.yaml` with k8s markers).
-
-## Framework Detection
-
-Framework detection uses structured parsing of config files rather than naive substring matching — see [Package Parser Subsystem](#package-parser-subsystem) for parser details. This prevents false positives like `"reactive-streams"` matching `"react"` or `"expression"` matching `"express"`.
 
 ## Technical Documentation
 
