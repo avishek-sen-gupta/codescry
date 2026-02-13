@@ -26,6 +26,8 @@ BASE = BasePatternSpec(
                 (r"MessageListener", Confidence.MEDIUM),
                 (r"MessageProducer", Confidence.MEDIUM),
                 (r"MessageConsumer", Confidence.MEDIUM),
+                (r"SqsClient", Confidence.HIGH),
+                (r"SnsClient", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {
@@ -54,6 +56,7 @@ BASE = BasePatternSpec(
                 (r"EntityManager", Confidence.HIGH),
                 (r"PreparedStatement", Confidence.HIGH),
                 (r"ResultSet\b", Confidence.MEDIUM),
+                (r"DynamoDbClient", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {
@@ -66,6 +69,8 @@ BASE = BasePatternSpec(
                 (r"Files\.copy", Confidence.HIGH),
                 (r"AmazonS3Client", Confidence.HIGH),
                 (r"FTPClient", Confidence.HIGH),
+                (r"import com\.azure\.storage\.blob", Confidence.HIGH),
+                (r"import com\.google\.cloud\.storage", Confidence.HIGH),
             ],
         },
         IntegrationType.GRPC: {
@@ -74,6 +79,39 @@ BASE = BasePatternSpec(
                 (r"@GrpcService", Confidence.HIGH),
                 (r"StreamObserver", Confidence.HIGH),
                 (r"ManagedChannel", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"import graphql\.", Confidence.HIGH),
+                (r"GraphQLSchema", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"javax\.mail", Confidence.HIGH),
+                (r"jakarta\.mail", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"import redis\.clients\.jedis", Confidence.HIGH),
+                (r"import io\.lettuce", Confidence.HIGH),
+                (r"import javax\.cache", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"SseEmitter", Confidence.HIGH),
+                (r"text/event-stream", Confidence.MEDIUM),
+                (r"Flux<", Confidence.MEDIUM),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"import org\.quartz", Confidence.HIGH),
+                (r"@Schedule", Confidence.HIGH),
+                (r"ScheduledExecutorService", Confidence.HIGH),
             ],
         },
     },

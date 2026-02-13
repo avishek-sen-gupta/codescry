@@ -29,6 +29,7 @@ BASE = BasePatternSpec(
                 (r"sarama\.NewConsumer", Confidence.HIGH),
                 (r"sarama\.NewProducer", Confidence.HIGH),
                 (r"amqp\.Dial", Confidence.HIGH),
+                (r'"cloud\.google\.com/go/pubsub"', Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {
@@ -50,6 +51,8 @@ BASE = BasePatternSpec(
                 (r"db\.Find\(", Confidence.HIGH),
                 (r"db\.Where\(", Confidence.HIGH),
                 (r"sql\.Open\(", Confidence.HIGH),
+                (r'"github\.com/gocql/gocql"', Confidence.HIGH),
+                (r'"cloud\.google\.com/go/firestore"', Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {
@@ -59,12 +62,43 @@ BASE = BasePatternSpec(
                 (r"io\.Copy\(", Confidence.MEDIUM),
                 (r"s3manager", Confidence.HIGH),
                 (r'"github\.com/pkg/sftp"', Confidence.HIGH),
+                (r'"cloud\.google\.com/go/storage"', Confidence.HIGH),
             ],
         },
         IntegrationType.GRPC: {
             PatternKey.PATTERNS: [
                 (r'"google\.golang\.org/grpc"', Confidence.HIGH),
                 (r"pb\.Register.*Server", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r'"github\.com/99designs/gqlgen"', Confidence.HIGH),
+                (r'"github\.com/graphql-go/graphql"', Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r'"net/smtp"', Confidence.HIGH),
+                (r'"gopkg\.in/gomail"', Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r'"github\.com/go-redis/redis"', Confidence.HIGH),
+                (r'"github\.com/bradfitz/gomemcache"', Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"text/event-stream", Confidence.MEDIUM),
+                (r"http\.Flusher", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r'"github\.com/robfig/cron"', Confidence.HIGH),
+                (r"time\.NewTicker", Confidence.MEDIUM),
             ],
         },
     },

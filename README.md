@@ -10,7 +10,7 @@ A Python library for experiments in analysing repository technology stacks and c
 - Structured parsing of config files (package.json, pyproject.toml, pom.xml, .csproj, etc.) for accurate framework detection — no false positives from substring matching
 - Associates technologies with their containing directories (useful for monorepos)
 - Extracts code symbols using Universal CTags
-- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases) with framework-aware pattern matching
+- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases, GraphQL, email, caching, SSE/streaming, scheduling) with framework-aware pattern matching
 - Extracts method call trees via [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) LSP bridge and tree-sitter
 - Persists analysis results to Neo4j graph database
 - Generates plain text and JSON reports
@@ -212,23 +212,28 @@ This means:
 |------|-------------|------------------|
 | `http_rest` | HTTP/REST endpoints and clients | `@RestController`, `@GetMapping`, `app.get(`, `use actix_web::` |
 | `soap` | SOAP/XML web services | `@WebService`, `SOAPMessage`, `XML PARSE` |
-| `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `MQGET` |
+| `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `SqsClient` |
 | `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener` |
-| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `JdbcTemplate` |
-| `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `OPEN INPUT`, `boto3` |
+| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `DynamoDbClient` |
+| `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `Azure.Storage.Blobs` |
 | `grpc` | gRPC services and clients | `io.grpc`, `import grpc`, `tonic::`, `Grpc.Core` |
+| `graphql` | GraphQL APIs and schemas | `@QueryMapping`, `apollo-server`, `graphene`, `HotChocolate` |
+| `email` | Email and SMTP services | `javax.mail`, `smtplib`, `nodemailer`, `MailKit` |
+| `caching` | Cache stores and distributed caching | `@Cacheable`, `RedisTemplate`, `ioredis`, `IDistributedCache` |
+| `sse_streaming` | Server-sent events and streaming | `SseEmitter`, `StreamingResponse`, `EventSource`, `Sse<` |
+| `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron` |
 
 #### Supported Languages and Frameworks
 
 | Language | File Extensions | Base Patterns | Framework-Specific Patterns |
 |----------|-----------------|---------------|----------------------------|
-| Java | `.java` | JPA, JDBC, JMS, servlet, SOAP, file I/O, gRPC | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Spring WS, JAX-WS |
-| Python | `.py` | requests, SQLAlchemy, Celery, websockets, file I/O, gRPC | Flask, FastAPI, Django, Starlette, aiohttp, Tornado, Pyramid |
-| TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs, file I/O, gRPC | NestJS, Express, Angular, Next.js |
-| JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs, file I/O, gRPC | Express, Next.js |
-| Rust | `.rs` | Diesel, SQLx, rdkafka, tungstenite, SOAP, file I/O, gRPC | Actix, Axum, Rocket, Warp |
-| Go | `.go` | net/http, GORM, sarama, gorilla/websocket, SOAP, file I/O, gRPC | Gin, Echo, Fiber, Chi, Gorilla |
-| C# | `.cs` | ASP.NET, Entity Framework, SignalR, file I/O, gRPC | ASP.NET Core, WCF, CoreWCF, ServiceStack, Nancy, Carter |
+| Java | `.java` | JPA, JDBC, JMS, servlet, SOAP, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Spring WS, JAX-WS, Helidon |
+| Python | `.py` | requests, SQLAlchemy, Celery, websockets, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Flask, FastAPI, Django, Starlette, aiohttp, Tornado, Pyramid, Sanic, Litestar |
+| TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | NestJS, Express, Angular, Next.js, Hono |
+| JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Express, Next.js, Koa, Hapi |
+| Rust | `.rs` | Diesel, SQLx, rdkafka, tungstenite, SOAP, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Actix, Axum, Rocket, Warp |
+| Go | `.go` | net/http, GORM, sarama, gorilla/websocket, SOAP, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Gin, Echo, Fiber, Chi, Gorilla, Connect |
+| C# | `.cs` | ASP.NET, Entity Framework, SignalR, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | ASP.NET Core, WCF, CoreWCF, ServiceStack, Nancy, Carter |
 | COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ, file I/O | _(no framework detection yet)_ |
 | PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ, file I/O | _(no framework detection yet)_ |
 
@@ -354,10 +359,10 @@ This prevents false positives like `"reactive-streams"` matching `"react"` or `"
 
 | Ecosystem | Frameworks |
 |-----------|-----------|
-| Python | FastAPI, Django, Flask, Starlette, Tornado, Pyramid, aiohttp |
-| JavaScript/Node | React, Vue.js, Angular, Next.js, Nuxt.js, Express, NestJS, Svelte, Gatsby, Fastify |
-| Java | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS |
-| Go | Gin, Echo, Fiber, Chi, Gorilla |
+| Python | FastAPI, Django, Flask, Starlette, Tornado, Pyramid, aiohttp, Sanic, Litestar |
+| JavaScript/Node | React, Vue.js, Angular, Next.js, Nuxt.js, Express, NestJS, Svelte, Gatsby, Fastify, Hono, Koa, Hapi |
+| Java | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS, Helidon |
+| Go | Gin, Echo, Fiber, Chi, Gorilla, Connect |
 | Rust | Actix, Axum, Rocket, Warp |
 | .NET | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
 
@@ -517,7 +522,7 @@ The result is a `CTagsResult` containing a list of `CTagsEntry` objects (each wi
 
 **Entry point:** `integration_detector.py` → `detect_integrations()`
 
-This subsystem scans source files for regex patterns that indicate system integration points (HTTP/REST, SOAP, messaging, sockets, databases, file I/O, gRPC).
+This subsystem scans source files for regex patterns that indicate system integration points (HTTP/REST, SOAP, messaging, sockets, databases, file I/O, gRPC, GraphQL, email, caching, SSE/streaming, scheduling).
 
 #### Pattern organisation
 

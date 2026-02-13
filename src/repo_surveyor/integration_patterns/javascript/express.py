@@ -14,5 +14,10 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"\w+\.delete\(", Confidence.HIGH),
             ],
         },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"express-graphql", Confidence.HIGH),
+            ],
+        },
     },
 )

@@ -28,6 +28,7 @@ BASE = BasePatternSpec(
                 (r"from aiokafka import", Confidence.HIGH),
                 (r"KafkaConsumer", Confidence.HIGH),
                 (r"KafkaProducer", Confidence.HIGH),
+                (r"google\.cloud.*pubsub", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {
@@ -53,6 +54,8 @@ BASE = BasePatternSpec(
                 (r"@declarative", Confidence.HIGH),
                 (r"Column\(", Confidence.MEDIUM),
                 (r"relationship\(", Confidence.MEDIUM),
+                (r"from google\.cloud import firestore", Confidence.HIGH),
+                (r"from cassandra\.cluster", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {
@@ -63,6 +66,8 @@ BASE = BasePatternSpec(
                 (r"import boto3", Confidence.HIGH),
                 (r"import ftplib", Confidence.HIGH),
                 (r"import paramiko", Confidence.HIGH),
+                (r"from google\.cloud import storage", Confidence.HIGH),
+                (r"from azure\.storage\.blob", Confidence.HIGH),
             ],
         },
         IntegrationType.GRPC: {
@@ -70,6 +75,40 @@ BASE = BasePatternSpec(
                 (r"import grpc", Confidence.HIGH),
                 (r"grpc\.server", Confidence.HIGH),
                 (r"add_.*Servicer_to_server", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"import graphene", Confidence.HIGH),
+                (r"from ariadne import", Confidence.HIGH),
+                (r"from strawberry import", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"import smtplib", Confidence.HIGH),
+                (r"from email\.mime", Confidence.HIGH),
+                (r"import sendgrid", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"import redis", Confidence.HIGH),
+                (r"from pymemcache", Confidence.HIGH),
+                (r"from cachetools", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"sse_starlette", Confidence.HIGH),
+                (r"asyncio\.Queue", Confidence.MEDIUM),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"import schedule", Confidence.HIGH),
+                (r"from apscheduler", Confidence.HIGH),
+                (r"from celery\.schedules", Confidence.HIGH),
             ],
         },
     },

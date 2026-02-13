@@ -31,5 +31,38 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"@SubscribeMessage", Confidence.HIGH),
             ],
         },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"from ['\"]@nestjs/graphql['\"]", Confidence.HIGH),
+                (r"@Query\(\)", Confidence.HIGH),
+                (r"@Mutation\(\)", Confidence.HIGH),
+                (r"@Resolver\(\)", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"@nestjs-modules/mailer", Confidence.HIGH),
+                (r"MailerService", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"@nestjs/cache-manager", Confidence.HIGH),
+                (r"CacheModule", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"@Sse\(\)", Confidence.HIGH),
+                (r"Observable<MessageEvent>", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"@Cron\(", Confidence.HIGH),
+                (r"from ['\"]@nestjs/schedule['\"]", Confidence.HIGH),
+                (r"ScheduleModule", Confidence.HIGH),
+            ],
+        },
     },
 )

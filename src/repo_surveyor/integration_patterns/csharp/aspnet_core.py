@@ -20,5 +20,24 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"Grpc\.AspNetCore", Confidence.HIGH),
             ],
         },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"app\.MapGraphQL", Confidence.HIGH),
+                (r"AddGraphQLServer", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"AddStackExchangeRedisCache", Confidence.HIGH),
+                (r"AddDistributedMemoryCache", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"AddHangfire", Confidence.HIGH),
+                (r"UseHangfireDashboard", Confidence.HIGH),
+                (r"RecurringJob", Confidence.HIGH),
+            ],
+        },
     },
 )

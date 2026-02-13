@@ -46,5 +46,40 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"WebSocketHandler", Confidence.HIGH),
             ],
         },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"@QueryMapping", Confidence.HIGH),
+                (r"@MutationMapping", Confidence.HIGH),
+                (r"@SchemaMapping", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"SimpleMailMessage", Confidence.HIGH),
+                (r"MimeMessageHelper", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"@Cacheable", Confidence.HIGH),
+                (r"@CacheEvict", Confidence.HIGH),
+                (r"@CachePut", Confidence.HIGH),
+                (r"RedisTemplate", Confidence.HIGH),
+                (r"@EnableCaching", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"Flux<ServerSentEvent", Confidence.HIGH),
+                (r"@Tailable", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"@Scheduled", Confidence.HIGH),
+                (r"@EnableScheduling", Confidence.HIGH),
+                (r"TaskScheduler", Confidence.HIGH),
+            ],
+        },
     },
 )

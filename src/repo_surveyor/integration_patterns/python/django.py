@@ -23,5 +23,31 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"ForeignKey\(", Confidence.MEDIUM),
             ],
         },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"graphene_django", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"django\.core\.mail", Confidence.HIGH),
+                (r"send_mail", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"django\.core\.cache", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"StreamingHttpResponse", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"django_celery_beat", Confidence.HIGH),
+            ],
+        },
     },
 )

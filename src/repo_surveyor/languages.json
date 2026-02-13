@@ -15,7 +15,9 @@
         "starlette": "Starlette",
         "tornado": "Tornado",
         "pyramid": "Pyramid",
-        "aiohttp": "aiohttp"
+        "aiohttp": "aiohttp",
+        "sanic": "Sanic",
+        "litestar": "Litestar"
       },
       "integration_module": "python"
     },
@@ -38,7 +40,10 @@
         "nestjs": "NestJS",
         "svelte": "Svelte",
         "gatsby": "Gatsby",
-        "fastify": "Fastify"
+        "fastify": "Fastify",
+        "hono": "Hono",
+        "koa": "Koa",
+        "@hapi/hapi": "Hapi"
       },
       "integration_module": "javascript"
     },
@@ -76,7 +81,8 @@
         "axis2": "Apache Axis2",
         "spring-ws": "Spring WS",
         "jaxws-rt": "JAX-WS",
-        "metro-jax-ws": "JAX-WS"
+        "metro-jax-ws": "JAX-WS",
+        "helidon": "Helidon"
       },
       "integration_module": "java"
     },
@@ -94,7 +100,8 @@
         "labstack/echo": "Echo",
         "gofiber/fiber": "Fiber",
         "go-chi/chi": "Chi",
-        "gorilla/mux": "Gorilla"
+        "gorilla/mux": "Gorilla",
+        "connectrpc.com/connect": "Connect"
       },
       "integration_module": "go"
     },

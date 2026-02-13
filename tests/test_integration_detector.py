@@ -1912,3 +1912,1009 @@ class TestIntegrationDetectorResultJson:
         parsed = json.loads(result.to_json())
 
         assert parsed["integration_points"][0]["match"]["language"] is None
+
+
+class TestGraphqlPatterns:
+    """Tests for GRAPHQL integration type detection."""
+
+    def test_java_graphql_import(self) -> None:
+        """Should detect graphql import as GRAPHQL in Java."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("import graphql.schema.GraphQLSchema;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            graphql_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRAPHQL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(graphql_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_python_graphene(self) -> None:
+        """Should detect graphene as GRAPHQL in Python."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("import graphene\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            graphql_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRAPHQL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(graphql_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_typescript_apollo_server(self) -> None:
+        """Should detect apollo-server as GRAPHQL in TypeScript."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("import { ApolloServer } from 'apollo-server';\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            graphql_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRAPHQL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(graphql_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_go_gqlgen(self) -> None:
+        """Should detect gqlgen as GRAPHQL in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('"github.com/99designs/gqlgen"\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            graphql_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRAPHQL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(graphql_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_rust_juniper(self) -> None:
+        """Should detect juniper as GRAPHQL in Rust."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("use juniper::GraphQLObject;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            graphql_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRAPHQL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(graphql_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_csharp_hotchocolate(self) -> None:
+        """Should detect HotChocolate as GRAPHQL in C#."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("using HotChocolate;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            graphql_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRAPHQL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(graphql_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_spring_query_mapping(self) -> None:
+        """Should detect @QueryMapping as GRAPHQL with Spring framework."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("@QueryMapping\npublic Book bookById(@Argument String id) {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
+            graphql_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRAPHQL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(graphql_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_nestjs_resolver(self) -> None:
+        """Should detect @Resolver as GRAPHQL with NestJS framework."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("@Resolver()\nexport class CatsResolver {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["NestJS"]))
+            graphql_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRAPHQL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(graphql_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestEmailPatterns:
+    """Tests for EMAIL integration type detection."""
+
+    def test_java_javax_mail(self) -> None:
+        """Should detect javax.mail as EMAIL in Java."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("import javax.mail.Session;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_python_smtplib(self) -> None:
+        """Should detect smtplib as EMAIL in Python."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("import smtplib\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_typescript_nodemailer(self) -> None:
+        """Should detect nodemailer as EMAIL in TypeScript."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("import nodemailer from 'nodemailer';\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_go_net_smtp(self) -> None:
+        """Should detect net/smtp as EMAIL in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('"net/smtp"\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_rust_lettre(self) -> None:
+        """Should detect lettre as EMAIL in Rust."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("use lettre::SmtpTransport;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_csharp_system_net_mail(self) -> None:
+        """Should detect System.Net.Mail as EMAIL in C#."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("using System.Net.Mail;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_django_send_mail(self) -> None:
+        """Should detect django.core.mail as EMAIL with Django framework."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("from django.core.mail import send_mail\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Django"]))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestCachingPatterns:
+    """Tests for CACHING integration type detection."""
+
+    def test_java_jedis(self) -> None:
+        """Should detect jedis as CACHING in Java."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("import redis.clients.jedis.Jedis;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            cache_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.CACHING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(cache_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_python_redis(self) -> None:
+        """Should detect redis as CACHING in Python."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("import redis\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            cache_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.CACHING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(cache_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_typescript_ioredis(self) -> None:
+        """Should detect ioredis as CACHING in TypeScript."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("import Redis from 'ioredis';\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            cache_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.CACHING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(cache_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_go_redis(self) -> None:
+        """Should detect go-redis as CACHING in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('"github.com/go-redis/redis"\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            cache_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.CACHING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(cache_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_rust_redis(self) -> None:
+        """Should detect redis as CACHING in Rust."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("use redis::Client;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            cache_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.CACHING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(cache_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_csharp_idistributed_cache(self) -> None:
+        """Should detect IDistributedCache as CACHING in C#."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("private readonly IDistributedCache _cache;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            cache_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.CACHING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(cache_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_spring_cacheable(self) -> None:
+        """Should detect @Cacheable as CACHING with Spring framework."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write('@Cacheable("users")\npublic User getUser(Long id) {}\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
+            cache_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.CACHING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(cache_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestSseStreamingPatterns:
+    """Tests for SSE_STREAMING integration type detection."""
+
+    def test_java_sse_emitter(self) -> None:
+        """Should detect SseEmitter as SSE_STREAMING in Java."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("SseEmitter emitter = new SseEmitter();\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sse_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SSE_STREAMING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sse_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_go_http_flusher(self) -> None:
+        """Should detect http.Flusher as SSE_STREAMING in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write("flusher, ok := w.(http.Flusher)\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sse_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SSE_STREAMING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sse_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_rust_sse(self) -> None:
+        """Should detect Sse< as SSE_STREAMING in Rust."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("async fn handler() -> Sse<impl Stream> {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sse_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SSE_STREAMING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sse_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_csharp_iasync_enumerable(self) -> None:
+        """Should detect IAsyncEnumerable as SSE_STREAMING in C#."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("public async IAsyncEnumerable<int> GetStream() {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sse_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SSE_STREAMING
+                and "IAsyncEnumerable" in p.matched_pattern
+            ]
+            assert len(sse_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_fastapi_streaming_response(self) -> None:
+        """Should detect StreamingResponse as SSE_STREAMING with FastAPI."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("return StreamingResponse(generate())\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["FastAPI"]))
+            sse_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SSE_STREAMING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sse_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_axum_sse(self) -> None:
+        """Should detect axum::response::sse as SSE_STREAMING with Axum."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("use axum::response::sse::Event;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Axum"]))
+            sse_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SSE_STREAMING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sse_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestSchedulingPatterns:
+    """Tests for SCHEDULING integration type detection."""
+
+    def test_java_quartz(self) -> None:
+        """Should detect Quartz as SCHEDULING in Java."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("import org.quartz.Scheduler;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sched_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SCHEDULING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sched_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_python_apscheduler(self) -> None:
+        """Should detect APScheduler as SCHEDULING in Python."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write(
+                "from apscheduler.schedulers.background import BackgroundScheduler\n"
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sched_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SCHEDULING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sched_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_typescript_node_cron(self) -> None:
+        """Should detect node-cron as SCHEDULING in TypeScript."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("import cron from 'node-cron';\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sched_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SCHEDULING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sched_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_go_robfig_cron(self) -> None:
+        """Should detect robfig/cron as SCHEDULING in Go."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('"github.com/robfig/cron"\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sched_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SCHEDULING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sched_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_rust_tokio_cron_scheduler(self) -> None:
+        """Should detect tokio_cron_scheduler as SCHEDULING in Rust."""
+        with tempfile.NamedTemporaryFile(suffix=".rs", mode="w", delete=False) as f:
+            f.write("use tokio_cron_scheduler::JobScheduler;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sched_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SCHEDULING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sched_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_csharp_hangfire(self) -> None:
+        """Should detect Hangfire as SCHEDULING in C#."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write(
+                "using Hangfire;\nRecurringJob.AddOrUpdate(() => DoWork(), Cron.Daily);\n"
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            sched_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SCHEDULING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sched_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_spring_scheduled(self) -> None:
+        """Should detect @Scheduled as SCHEDULING with Spring framework."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("@Scheduled(fixedRate = 5000)\npublic void doWork() {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
+            sched_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SCHEDULING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sched_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_nestjs_cron(self) -> None:
+        """Should detect @Cron as SCHEDULING with NestJS framework."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("@Cron('45 * * * * *')\nhandleCron() {}\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["NestJS"]))
+            sched_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SCHEDULING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(sched_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestDirectoryClassificationNewIntegrationTypes:
+    """Tests for directory classification with new integration types."""
+
+    def test_classify_graphql_directory(self) -> None:
+        """Should classify 'graphql' as GRAPHQL."""
+        matches = classify_directory("graphql")
+        types = [m[0] for m in matches]
+        assert IntegrationType.GRAPHQL in types
+
+    def test_classify_email_directory(self) -> None:
+        """Should classify 'email' as EMAIL."""
+        matches = classify_directory("email")
+        types = [m[0] for m in matches]
+        assert IntegrationType.EMAIL in types
+
+    def test_classify_mail_directory(self) -> None:
+        """Should classify 'mail' as EMAIL."""
+        matches = classify_directory("mail")
+        types = [m[0] for m in matches]
+        assert IntegrationType.EMAIL in types
+
+    def test_classify_notifications_directory(self) -> None:
+        """Should classify 'notifications' as EMAIL."""
+        matches = classify_directory("notifications")
+        types = [m[0] for m in matches]
+        assert IntegrationType.EMAIL in types
+
+    def test_classify_cache_directory(self) -> None:
+        """Should classify 'cache' as CACHING."""
+        matches = classify_directory("cache")
+        types = [m[0] for m in matches]
+        assert IntegrationType.CACHING in types
+
+    def test_classify_streaming_directory(self) -> None:
+        """Should classify 'streaming' as SSE_STREAMING."""
+        matches = classify_directory("streaming")
+        types = [m[0] for m in matches]
+        assert IntegrationType.SSE_STREAMING in types
+
+    def test_classify_sse_directory(self) -> None:
+        """Should classify 'sse' as SSE_STREAMING."""
+        matches = classify_directory("sse")
+        types = [m[0] for m in matches]
+        assert IntegrationType.SSE_STREAMING in types
+
+    def test_classify_scheduler_directory(self) -> None:
+        """Should classify 'scheduler' as SCHEDULING."""
+        matches = classify_directory("scheduler")
+        types = [m[0] for m in matches]
+        assert IntegrationType.SCHEDULING in types
+
+    def test_classify_jobs_directory(self) -> None:
+        """Should classify 'jobs' as SCHEDULING."""
+        matches = classify_directory("jobs")
+        types = [m[0] for m in matches]
+        assert IntegrationType.SCHEDULING in types
+
+
+class TestNewFrameworkPatterns:
+    """Tests for newly added framework pattern files."""
+
+    def test_sanic_http_rest(self) -> None:
+        """Should detect Sanic HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("from sanic import Sanic\napp = Sanic('app')\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Sanic"]))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_litestar_http_rest(self) -> None:
+        """Should detect Litestar HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("from litestar import Litestar, get\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Litestar"])
+            )
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_helidon_http_rest(self) -> None:
+        """Should detect Helidon HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("import io.helidon.webserver.WebServer;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Helidon"]))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_hono_http_rest(self) -> None:
+        """Should detect Hono HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("import { Hono } from 'hono';\nconst app = new Hono();\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Hono"]))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_koa_http_rest(self) -> None:
+        """Should detect Koa HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".js", mode="w", delete=False) as f:
+            f.write("const Koa = require('koa');\nconst app = new Koa();\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Koa"]))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_hapi_http_rest(self) -> None:
+        """Should detect Hapi HTTP/REST patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".js", mode="w", delete=False) as f:
+            f.write(
+                "const Hapi = require('@hapi/hapi');\nconst server = Hapi.server({port: 3000});\n"
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Hapi"]))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_connect_grpc(self) -> None:
+        """Should detect Connect gRPC patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
+            f.write('"connectrpc.com/connect"\npath, handler := connect.NewHandler()\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Connect"]))
+            grpc_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.GRPC
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(grpc_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestAugmentedExistingPatterns:
+    """Tests for cloud service patterns added to existing integration types."""
+
+    def test_java_sqs_client(self) -> None:
+        """Should detect SqsClient as MESSAGING in Java."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("SqsClient sqsClient = SqsClient.builder().build();\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            msg_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.MESSAGING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(msg_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_java_dynamodb_client(self) -> None:
+        """Should detect DynamoDbClient as DATABASE in Java."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("DynamoDbClient ddb = DynamoDbClient.create();\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            db_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.DATABASE
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(db_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_csharp_azure_cosmos(self) -> None:
+        """Should detect Microsoft.Azure.Cosmos as DATABASE in C#."""
+        with tempfile.NamedTemporaryFile(suffix=".cs", mode="w", delete=False) as f:
+            f.write("using Microsoft.Azure.Cosmos;\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            db_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.DATABASE
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(db_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_typescript_aws_sqs(self) -> None:
+        """Should detect @aws-sdk/client-sqs as MESSAGING in TypeScript."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("import { SQSClient } from '@aws-sdk/client-sqs';\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            msg_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.MESSAGING
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(msg_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_python_google_cloud_storage(self) -> None:
+        """Should detect google.cloud storage as FILE_IO in Python."""
+        with tempfile.NamedTemporaryFile(suffix=".py", mode="w", delete=False) as f:
+            f.write("from google.cloud import storage\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            file_io_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.FILE_IO
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(file_io_points) > 0
+        finally:
+            file_path.unlink()

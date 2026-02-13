@@ -98,5 +98,57 @@ COMMON = BasePatternSpec(
                 r"(?i)^protobuf$",
             ],
         },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"(?i)\bgraphql\b", Confidence.LOW),
+            ],
+            PatternKey.DIRECTORY_PATTERNS: [
+                r"(?i)^graphql$",
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"(?i)\bsmtp\b", Confidence.MEDIUM),
+                (r"(?i)\bemail\b", Confidence.LOW),
+            ],
+            PatternKey.DIRECTORY_PATTERNS: [
+                r"(?i)^email$",
+                r"(?i)^mail$",
+                r"(?i)^notifications?$",
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"(?i)\bcache\b", Confidence.LOW),
+                (r"(?i)\bredis\b", Confidence.HIGH),
+                (r"(?i)\bmemcached\b", Confidence.HIGH),
+            ],
+            PatternKey.DIRECTORY_PATTERNS: [
+                r"(?i)^cache$",
+                r"(?i)^caching$",
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"(?i)\bserver.sent.events?\b", Confidence.MEDIUM),
+                (r"(?i)\bsse\b", Confidence.LOW),
+            ],
+            PatternKey.DIRECTORY_PATTERNS: [
+                r"(?i)^streaming$",
+                r"(?i)^sse$",
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"(?i)\bcron\b", Confidence.MEDIUM),
+                (r"(?i)\bscheduler?\b", Confidence.LOW),
+            ],
+            PatternKey.DIRECTORY_PATTERNS: [
+                r"(?i)^scheduler$",
+                r"(?i)^jobs$",
+                r"(?i)^cron$",
+                r"(?i)^tasks$",
+            ],
+        },
     },
 )

@@ -14,5 +14,16 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"from fastapi import", Confidence.HIGH),
             ],
         },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"from strawberry\.fastapi", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"EventSourceResponse", Confidence.HIGH),
+                (r"StreamingResponse", Confidence.HIGH),
+            ],
+        },
     },
 )

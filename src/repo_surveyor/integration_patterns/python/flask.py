@@ -11,5 +11,15 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"from flask import", Confidence.HIGH),
             ],
         },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"Flask-Caching", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"Flask-APScheduler", Confidence.HIGH),
+            ],
+        },
     },
 )

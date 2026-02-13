@@ -35,6 +35,9 @@ BASE = BasePatternSpec(
                 (r"IConsumer<", Confidence.HIGH),
                 (r"IMessageHandler", Confidence.HIGH),
                 (r"IBus\b", Confidence.MEDIUM),
+                (r"Amazon\.SQS", Confidence.HIGH),
+                (r"Amazon\.SimpleNotificationService", Confidence.HIGH),
+                (r"Azure\.Messaging\.ServiceBus", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {
@@ -56,6 +59,8 @@ BASE = BasePatternSpec(
                 (r"\[Column\(", Confidence.MEDIUM),
                 (r"SqlConnection", Confidence.HIGH),
                 (r"using Dapper", Confidence.HIGH),
+                (r"Amazon\.DynamoDBv2", Confidence.HIGH),
+                (r"Microsoft\.Azure\.Cosmos", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {
@@ -66,6 +71,8 @@ BASE = BasePatternSpec(
                 (r"StreamWriter", Confidence.HIGH),
                 (r"AWSSDK\.S3", Confidence.HIGH),
                 (r"FtpWebRequest", Confidence.HIGH),
+                (r"Azure\.Storage\.Blobs", Confidence.HIGH),
+                (r"Google\.Cloud\.Storage", Confidence.HIGH),
             ],
         },
         IntegrationType.GRPC: {
@@ -73,6 +80,40 @@ BASE = BasePatternSpec(
                 (r"Grpc\.Core", Confidence.HIGH),
                 (r"Grpc\.Net\.Client", Confidence.HIGH),
                 (r"ServerServiceDefinition", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"HotChocolate", Confidence.HIGH),
+                (r"GraphQL\.Server", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"System\.Net\.Mail", Confidence.HIGH),
+                (r"SmtpClient", Confidence.HIGH),
+                (r"MailKit", Confidence.HIGH),
+                (r"MimeKit", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"IDistributedCache", Confidence.HIGH),
+                (r"IMemoryCache", Confidence.HIGH),
+                (r"StackExchange\.Redis", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"IAsyncEnumerable", Confidence.MEDIUM),
+                (r"text/event-stream", Confidence.MEDIUM),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"Hangfire", Confidence.HIGH),
+                (r"Quartz", Confidence.HIGH),
+                (r"IHostedService", Confidence.MEDIUM),
             ],
         },
     },

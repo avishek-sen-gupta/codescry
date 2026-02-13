@@ -12,5 +12,10 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"\.route\(", Confidence.MEDIUM),
             ],
         },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"axum::response::sse", Confidence.HIGH),
+            ],
+        },
     },
 )

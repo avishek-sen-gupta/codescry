@@ -24,6 +24,9 @@ BASE = BasePatternSpec(
                 (r"require\(['\"]bull['\"]\)", Confidence.HIGH),
                 (r"consumer\.run\(", Confidence.HIGH),
                 (r"producer\.send\(", Confidence.HIGH),
+                (r"require\(['\"]@aws-sdk/client-sqs['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]@aws-sdk/client-sns['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]@google-cloud/pubsub['\"]\)", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {
@@ -44,6 +47,8 @@ BASE = BasePatternSpec(
                 (r"mongoose\.Schema", Confidence.HIGH),
                 (r"mongoose\.model\(", Confidence.HIGH),
                 (r"Sequelize\.define\(", Confidence.HIGH),
+                (r"require\(['\"]@aws-sdk/client-dynamodb['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]firebase-admin['\"]\)", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {
@@ -52,12 +57,47 @@ BASE = BasePatternSpec(
                 (r"fs\.readFileSync", Confidence.HIGH),
                 (r"require\(['\"]aws-sdk['\"]\)", Confidence.MEDIUM),
                 (r"require\(['\"]multer['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]@azure/storage-blob['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]@google-cloud/storage['\"]\)", Confidence.HIGH),
             ],
         },
         IntegrationType.GRPC: {
             PatternKey.PATTERNS: [
                 (r"require\(['\"]@grpc/grpc-js['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]@grpc/proto-loader['\"]\)", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"require\(['\"]apollo-server['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]type-graphql['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]@graphql-tools/", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"require\(['\"]nodemailer['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]@sendgrid/mail['\"]\)", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"require\(['\"]ioredis['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]redis['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]memcached['\"]\)", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"EventSource", Confidence.MEDIUM),
+                (r"text/event-stream", Confidence.MEDIUM),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"require\(['\"]node-cron['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]cron['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]agenda['\"]\)", Confidence.HIGH),
             ],
         },
     },

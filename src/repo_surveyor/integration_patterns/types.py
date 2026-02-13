@@ -47,6 +47,11 @@ class IntegrationType(Enum):
     DATABASE = "database"
     FILE_IO = "file_io"
     GRPC = "grpc"
+    GRAPHQL = "graphql"
+    EMAIL = "email"
+    CACHING = "caching"
+    SSE_STREAMING = "sse_streaming"
+    SCHEDULING = "scheduling"
 
 
 class Confidence(Enum):

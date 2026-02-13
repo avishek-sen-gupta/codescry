@@ -28,6 +28,8 @@ BASE = BasePatternSpec(
                 (r"FutureProducer", Confidence.HIGH),
                 (r"BaseConsumer", Confidence.MEDIUM),
                 (r"BaseProducer", Confidence.MEDIUM),
+                (r"aws-sdk-sqs", Confidence.HIGH),
+                (r"aws-sdk-sns", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {
@@ -58,6 +60,7 @@ BASE = BasePatternSpec(
                 (r"sqlx::query", Confidence.HIGH),
                 (r"query_as!", Confidence.HIGH),
                 (r"query!", Confidence.HIGH),
+                (r"aws-sdk-dynamodb", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {
@@ -65,12 +68,43 @@ BASE = BasePatternSpec(
                 (r"std::fs", Confidence.HIGH),
                 (r"tokio::fs", Confidence.HIGH),
                 (r"aws-sdk-s3", Confidence.HIGH),
+                (r"azure_storage_blobs", Confidence.HIGH),
             ],
         },
         IntegrationType.GRPC: {
             PatternKey.PATTERNS: [
                 (r"tonic::", Confidence.HIGH),
                 (r"#\[tonic::async_trait\]", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.GRAPHQL: {
+            PatternKey.PATTERNS: [
+                (r"use juniper::", Confidence.HIGH),
+                (r"use async_graphql::", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.EMAIL: {
+            PatternKey.PATTERNS: [
+                (r"use lettre::", Confidence.HIGH),
+                (r"SmtpTransport", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.CACHING: {
+            PatternKey.PATTERNS: [
+                (r"use redis::", Confidence.HIGH),
+                (r"use deadpool_redis::", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SSE_STREAMING: {
+            PatternKey.PATTERNS: [
+                (r"use eventsource::", Confidence.HIGH),
+                (r"Sse<", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.SCHEDULING: {
+            PatternKey.PATTERNS: [
+                (r"use tokio_cron_scheduler::", Confidence.HIGH),
+                (r"use cron::", Confidence.HIGH),
             ],
         },
     },
