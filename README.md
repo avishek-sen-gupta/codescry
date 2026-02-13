@@ -223,19 +223,7 @@ This means:
 | `sse_streaming` | Server-sent events and streaming | `SseEmitter`, `StreamingResponse`, `EventSource`, `Sse<` |
 | `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron` |
 
-#### Supported Languages and Frameworks
-
-| Language | File Extensions | Base Patterns | Framework-Specific Patterns |
-|----------|-----------------|---------------|----------------------------|
-| Java | `.java` | JPA, JDBC, JMS, servlet, SOAP, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Spring WS, JAX-WS, Helidon |
-| Python | `.py` | requests, SQLAlchemy, Celery, websockets, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Flask, FastAPI, Django, Starlette, aiohttp, Tornado, Pyramid, Sanic, Litestar |
-| TypeScript | `.ts`, `.tsx` | axios, TypeORM, Prisma, kafkajs, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | NestJS, Express, Angular, Next.js, Hono |
-| JavaScript | `.js`, `.jsx` | axios, Mongoose, Sequelize, kafkajs, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Express, Next.js, Koa, Hapi |
-| Rust | `.rs` | Diesel, SQLx, rdkafka, tungstenite, SOAP, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Actix, Axum, Rocket, Warp |
-| Go | `.go` | net/http, GORM, sarama, gorilla/websocket, SOAP, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | Gin, Echo, Fiber, Chi, Gorilla, Connect |
-| C# | `.cs` | ASP.NET, Entity Framework, SignalR, file I/O, gRPC, GraphQL, email, caching, SSE, scheduling | ASP.NET Core, WCF, CoreWCF, ServiceStack, Nancy, Carter |
-| COBOL | `.cbl`, `.cob`, `.cpy` | CICS, DB2, IMS DB, IDMS, IBM MQ, file I/O | _(no framework detection yet)_ |
-| PL/I | `.pli`, `.pl1`, `.plinc` | CICS, DB2, IMS DB, IDMS, IBM MQ, file I/O | _(no framework detection yet)_ |
+All 12 integration types are detected across Java, Python, TypeScript, JavaScript, Rust, Go, and C# (COBOL and PL/I cover database, messaging, HTTP, and file I/O). See [Supported Languages](#supported-languages) for the full language/framework matrix.
 
 ### LSP Bridge Client
 
@@ -312,59 +300,26 @@ This creates a graph with:
 - `Language`, `PackageManager`, `Framework`, `Infrastructure` nodes
 - `CodeSymbol` nodes with parent-child relationships based on scope
 
-## Detected Technologies
+## Supported Languages
 
-| Category | Indicator Files | Technologies |
-|----------|-----------------|--------------|
-| Python | `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile` | Python, Poetry, pip, Pipenv |
-| JavaScript/Node | `package.json`, `yarn.lock`, `pnpm-lock.yaml` | Node.js, npm, Yarn, pnpm |
-| TypeScript | `tsconfig.json` | TypeScript |
-| Java | `pom.xml`, `build.gradle`, `build.gradle.kts` | Java, Maven, Gradle |
-| Go | `go.mod` | Go |
-| Rust | `Cargo.toml` | Rust, Cargo |
-| Ruby | `Gemfile` | Ruby, Bundler |
-| COBOL | `.cbl`, `.cob`, `.cpy` | COBOL |
-| .NET | `*.csproj`, `*.sln`, `packages.config` | C#, .NET, NuGet |
-| Docker | `Dockerfile`, `docker-compose.yml` | Docker, Docker Compose |
-| Terraform | `*.tf` | Terraform |
-| Kubernetes | `*.yaml` with k8s markers | Kubernetes |
+| Language | Extensions | Indicator Files | Package Managers | Detected Frameworks |
+|----------|-----------|-----------------|------------------|---------------------|
+| Java | `.java` | `pom.xml`, `build.gradle`, `build.gradle.kts` | Maven, Gradle | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS, Helidon |
+| Python | `.py` | `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile` | Poetry, pip, Pipenv | FastAPI, Django, Flask, Starlette, Tornado, Pyramid, aiohttp, Sanic, Litestar |
+| TypeScript | `.ts`, `.tsx` | `tsconfig.json` | _(shared with JS)_ | _(shared with JS)_ |
+| JavaScript | `.js`, `.jsx` | `package.json`, `yarn.lock`, `pnpm-lock.yaml` | npm, Yarn, pnpm | React, Vue.js, Angular, Next.js, Nuxt.js, Express, NestJS, Svelte, Gatsby, Fastify, Hono, Koa, Hapi |
+| Go | `.go` | `go.mod` | — | Gin, Echo, Fiber, Chi, Gorilla, Connect |
+| Rust | `.rs` | `Cargo.toml` | Cargo | Actix, Axum, Rocket, Warp |
+| C# | `.cs` | `*.csproj`, `*.sln`, `packages.config` | NuGet | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
+| COBOL | `.cbl`, `.cob`, `.cpy` | — | — | — |
+| PL/I | `.pli`, `.pl1`, `.plinc` | — | — | — |
+| Ruby | `.rb` | `Gemfile` | Bundler | — |
+
+Infrastructure detection: Docker (`Dockerfile`, `docker-compose.yml`), Terraform (`*.tf`), Kubernetes (`*.yaml` with k8s markers).
 
 ## Framework Detection
 
-Framework detection uses structured parsing of config files rather than naive substring matching. Each file format has a dedicated parser that extracts actual dependency names:
-
-| File | Parser | Technique |
-|------|--------|-----------|
-| `pyproject.toml` | tomllib | PEP 621 `[project.dependencies]`, Poetry `[tool.poetry.dependencies]` |
-| `requirements.txt` | line parsing | PEP 508 name extraction |
-| `Pipfile` | tomllib | `[packages]`, `[dev-packages]` |
-| `setup.py` | regex | `install_requires=[...]` |
-| `package.json` | json | `dependencies`, `devDependencies`, `peerDependencies` |
-| `pom.xml` | xml.etree | `<artifactId>` from `<dependency>` elements |
-| `build.gradle` / `.kts` | regex | `implementation`, `api`, `compile` declarations |
-| `go.mod` | line parsing | `require` block module paths |
-| `Cargo.toml` | tomllib | `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` |
-| `*.csproj` | xml.etree | `<PackageReference Include="...">` |
-| `packages.config` | xml.etree | `<package id="...">` |
-
-Parsed dependency names are matched against framework patterns using smart matching rules:
-- **Exact match**: `"fastapi"` == `"fastapi"`
-- **Prefix-separator**: `"spring-boot-starter-web"` matches `"spring-boot"` (hyphen), `"microsoft.aspnetcore.mvc"` matches `"microsoft.aspnetcore"` (dot)
-- **Path subsequence**: `"github.com/gin-gonic/gin"` matches `"gin-gonic/gin"`
-- **npm scoped**: `"@nestjs/core"` matches `"nestjs"`
-
-This prevents false positives like `"reactive-streams"` matching `"react"` or `"expression"` matching `"express"`.
-
-### Detected Frameworks
-
-| Ecosystem | Frameworks |
-|-----------|-----------|
-| Python | FastAPI, Django, Flask, Starlette, Tornado, Pyramid, aiohttp, Sanic, Litestar |
-| JavaScript/Node | React, Vue.js, Angular, Next.js, Nuxt.js, Express, NestJS, Svelte, Gatsby, Fastify, Hono, Koa, Hapi |
-| Java | Spring, JAX-RS, Micronaut, Quarkus, Javalin, Dropwizard, Vert.x, Play, Apache CXF, Apache Axis2, Spring WS, JAX-WS, Helidon |
-| Go | Gin, Echo, Fiber, Chi, Gorilla, Connect |
-| Rust | Actix, Axum, Rocket, Warp |
-| .NET | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
+Framework detection uses structured parsing of config files rather than naive substring matching — see [Package Parser Subsystem](#package-parser-subsystem) for parser details. This prevents false positives like `"reactive-streams"` matching `"react"` or `"expression"` matching `"express"`.
 
 ## Technical Documentation
 
