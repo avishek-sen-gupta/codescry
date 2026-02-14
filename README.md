@@ -170,7 +170,15 @@ print(f"Symbols: {len(structure_result.entries)}")
 print(f"Integration points: {len(integration_result.integration_points)}")
 ```
 
-The `survey()` function automatically wires detected frameworks from `tech_stacks()` into `detect_integrations()` via the `directory_frameworks` mapping, so framework-specific patterns are applied in the right directories. For Neo4j persistence, use `survey_and_persist()` instead.
+Skip additional directories (e.g. test directories) from both tech stack and integration scanning:
+
+```python
+tech_report, structure_result, integration_result = survey(
+    "/path/to/repo", extra_skip_dirs=["test", "tests"]
+)
+```
+
+The `survey()` function automatically wires detected frameworks from `tech_stacks()` into `detect_integrations()` via the `directory_frameworks` mapping, so framework-specific patterns are applied in the right directories. The `extra_skip_dirs` parameter is propagated to both `tech_stacks()` and `detect_integrations()`. For Neo4j persistence, use `survey_and_persist()` instead.
 
 ### Code Structure Analysis with CTags
 
@@ -206,7 +214,7 @@ Detect system integration points in source code using pattern matching:
 ```python
 from repo_surveyor import detect_integrations, Language
 
-result = detect_integrations("/path/to/repo", languages=[Language.JAVA])
+result = detect_integrations("/path/to/repo", languages=[Language.JAVA], extra_skip_dirs=["test"])
 
 for point in result.integration_points:
     print(f"{point.integration_type.value}: {point.match.file_path}:{point.match.line_number}")

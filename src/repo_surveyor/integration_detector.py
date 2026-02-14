@@ -20,6 +20,22 @@ from .integration_patterns import (
     get_directory_patterns,
 )
 
+DEFAULT_SKIP_DIRS = frozenset({
+    ".git",
+    ".idea",
+    ".vscode",
+    "node_modules",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "target",
+    "build",
+    "dist",
+    ".tox",
+    ".pytest_cache",
+    ".mypy_cache",
+})
+
 
 class EntityType(Enum):
     """Type of entity where integration was detected."""
@@ -197,32 +213,20 @@ def classify_directory(
 def _get_source_files(
     repo_path: Path,
     languages: list[Language] = [],
+    extra_skip_dirs: list[str] = [],
 ) -> Iterator[Path]:
     """Get source files from a repository.
 
     Args:
         repo_path: Path to the repository.
         languages: List of Language enums to filter by. Empty means all.
+        extra_skip_dirs: Additional directory names to skip, appended to
+                         DEFAULT_SKIP_DIRS.
 
     Yields:
         Paths to source files.
     """
-    # Directories to skip
-    skip_dirs = {
-        ".git",
-        ".idea",
-        ".vscode",
-        "node_modules",
-        "__pycache__",
-        ".venv",
-        "venv",
-        "target",
-        "build",
-        "dist",
-        ".tox",
-        ".pytest_cache",
-        ".mypy_cache",
-    }
+    skip_dirs = DEFAULT_SKIP_DIRS | set(extra_skip_dirs)
 
     # Get allowed extensions based on languages
     if languages:
@@ -248,6 +252,7 @@ def detect_integrations(
     repo_path: str | Path,
     languages: list[Language] = [],
     directory_frameworks: dict[str, list[str]] = {},
+    extra_skip_dirs: list[str] = [],
 ) -> IntegrationDetectorResult:
     """Detect integration points from repository file contents.
 
@@ -263,6 +268,8 @@ def detect_integrations(
                               e.g., "." or "backend") to their detected framework names
                               (e.g., ["FastAPI", "Django"]). Files in those
                               directories will be scanned with framework-specific patterns.
+        extra_skip_dirs: Additional directory names to skip, appended to
+                         DEFAULT_SKIP_DIRS.
 
     Returns:
         IntegrationDetectorResult with detected integration points.
@@ -279,7 +286,7 @@ def detect_integrations(
     files_scanned = 0
 
     # Scan source files
-    for file_path in _get_source_files(repo_path, languages):
+    for file_path in _get_source_files(repo_path, languages, extra_skip_dirs):
         files_scanned += 1
         frameworks = _find_frameworks_for_file(
             file_path, repo_path, directory_frameworks
@@ -288,7 +295,7 @@ def detect_integrations(
 
     # Scan directory names
     scanned_dirs: set[str] = set()
-    for file_path in _get_source_files(repo_path, languages):
+    for file_path in _get_source_files(repo_path, languages, extra_skip_dirs):
         for parent in file_path.relative_to(repo_path).parents:
             dir_name = parent.name
             if dir_name and dir_name not in scanned_dirs:

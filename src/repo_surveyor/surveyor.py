@@ -162,6 +162,7 @@ class RepoSurveyor:
 def survey(
     repo_path: str,
     languages: list[str] = [],
+    extra_skip_dirs: list[str] = [],
 ) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult]:
     """Run tech_stacks(), coarse_structure(), and detect_integrations().
 
@@ -172,13 +173,15 @@ def survey(
         repo_path: Path to the repository to analyze.
         languages: Languages to pass to coarse_structure()
                    (e.g., ["Java", "Python"]). Defaults to all.
+        extra_skip_dirs: Additional directory names to skip during scanning,
+                         appended to the default skip list.
 
     Returns:
         Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult).
     """
     surveyor = RepoSurveyor(repo_path)
 
-    tech_report = surveyor.tech_stacks()
+    tech_report = surveyor.tech_stacks(extra_skip_dirs=extra_skip_dirs)
     logger.info("Tech stacks completed")
 
     structure_result = surveyor.coarse_structure(languages=languages)
@@ -190,7 +193,9 @@ def survey(
         if m.frameworks
     }
     integration_result = detect_integrations(
-        repo_path, directory_frameworks=directory_frameworks
+        repo_path,
+        directory_frameworks=directory_frameworks,
+        extra_skip_dirs=extra_skip_dirs,
     )
     logger.info(
         "Integration detection completed: %d points in %d files",
