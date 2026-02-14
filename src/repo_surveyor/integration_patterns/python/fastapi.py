@@ -14,6 +14,15 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"from fastapi import", Confidence.HIGH),
             ],
         },
+        IntegrationType.DATABASE: {
+            PatternKey.PATTERNS: [
+                (r"from sqlmodel import", Confidence.HIGH),
+                (r"import sqlmodel", Confidence.HIGH),
+                (r"SQLModel", Confidence.HIGH),
+                (r"from databases import", Confidence.HIGH),
+                (r"import databases", Confidence.HIGH),
+            ],
+        },
         IntegrationType.GRAPHQL: {
             PatternKey.PATTERNS: [
                 (r"from strawberry\.fastapi", Confidence.HIGH),

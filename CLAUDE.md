@@ -2,7 +2,8 @@
 
 ## Build
 
-Before committing anything, run all tests, fixing them if necessary. If test assertions are being removed, ask me to review them.
+- Before committing anything, update the README based on the diffs. I should not have to repeat this in my instructions.
+- Before committing anything, run all tests, fixing them if necessary. If test assertions are being removed, ask me to review them.
 
 ## Testing Patterns
 

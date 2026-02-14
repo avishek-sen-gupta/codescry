@@ -34,7 +34,7 @@ poetry install
 | C# | `.cs` | `*.csproj`, `*.sln`, `packages.config` | NuGet | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
 | COBOL | `.cbl`, `.cob`, `.cpy` | — | — | — |
 | PL/I | `.pli`, `.pl1`, `.plinc` | — | — | — |
-| Ruby | `.rb` | `Gemfile` | Bundler | — |
+| Ruby | `.rb` | `Gemfile` | Bundler | Rails, Sinatra, Hanami |
 
 Infrastructure detection: Docker (`Dockerfile`, `docker-compose.yml`), Terraform (`*.tf`), Kubernetes (`*.yaml` with k8s markers).
 
@@ -48,7 +48,7 @@ Framework detection uses structured parsing of config files rather than naive su
 | `soap` | SOAP/XML web services | `@WebService`, `SOAPMessage`, `XML PARSE` |
 | `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `SqsClient` |
 | `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener` |
-| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `DynamoDbClient` |
+| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `DynamoDbClient`, `ActiveRecord::Base`, `has_many`, `PanacheEntity`, `db.Model`, `SQLModel`, `TypeOrmModule`, `AddDbContext`, `OrmLite` |
 | `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `Azure.Storage.Blobs` |
 | `grpc` | gRPC services and clients | `io.grpc`, `import grpc`, `tonic::`, `Grpc.Core` |
 | `graphql` | GraphQL APIs and schemas | `@QueryMapping`, `apollo-server`, `graphene`, `HotChocolate` |
@@ -59,22 +59,22 @@ Framework detection uses structured parsing of config files rather than naive su
 
 ### Integration Pattern Coverage by Language
 
-| Integration Type | Java | Python | TypeScript | JavaScript | Go | Rust | C# | COBOL | PL/I |
-|------------------|:----:|:------:|:----------:|:----------:|:--:|:----:|:--:|:-----:|:----:|
-| `http_rest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `soap` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `messaging` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `socket` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `database` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `file_io` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `grpc` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `graphql` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| Integration Type | Java | Python | TypeScript | JavaScript | Go | Rust | C# | Ruby | COBOL | PL/I |
+|------------------|:----:|:------:|:----------:|:----------:|:--:|:----:|:--:|:----:|:-----:|:----:|
+| `http_rest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `soap` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `messaging` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `socket` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `database` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `file_io` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `grpc` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `graphql` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 
-All 12 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, and C#. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
+All 12 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, and Ruby. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
 
 ## Usage
 

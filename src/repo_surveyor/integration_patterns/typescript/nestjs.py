@@ -19,6 +19,21 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"from ['\"]@nestjs/common['\"]", Confidence.HIGH),
             ],
         },
+        IntegrationType.DATABASE: {
+            PatternKey.PATTERNS: [
+                (r"from ['\"]@nestjs/typeorm['\"]", Confidence.HIGH),
+                (r"from ['\"]@nestjs/mongoose['\"]", Confidence.HIGH),
+                (r"from ['\"]@nestjs/sequelize['\"]", Confidence.HIGH),
+                (r"TypeOrmModule", Confidence.HIGH),
+                (r"MongooseModule", Confidence.HIGH),
+                (r"SequelizeModule", Confidence.HIGH),
+                (r"PrismaService", Confidence.HIGH),
+                (r"PrismaClient", Confidence.HIGH),
+                (r"InjectRepository\(", Confidence.HIGH),
+                (r"InjectModel\(", Confidence.HIGH),
+                (r"@nestjs/prisma", Confidence.HIGH),
+            ],
+        },
         IntegrationType.MESSAGING: {
             PatternKey.PATTERNS: [
                 (r"@MessagePattern\(", Confidence.HIGH),

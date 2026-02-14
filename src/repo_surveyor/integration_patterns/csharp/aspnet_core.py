@@ -14,6 +14,18 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"MinimalApi", Confidence.HIGH),
             ],
         },
+        IntegrationType.DATABASE: {
+            PatternKey.PATTERNS: [
+                (r"AddDbContext", Confidence.HIGH),
+                (r"DbContextOptions", Confidence.HIGH),
+                (r"UseNpgsql\(", Confidence.HIGH),
+                (r"UseSqlServer\(", Confidence.HIGH),
+                (r"UseSqlite\(", Confidence.HIGH),
+                (r"UseMySql\(", Confidence.HIGH),
+                (r"UseInMemoryDatabase\(", Confidence.HIGH),
+                (r"AddEntityFrameworkStores", Confidence.HIGH),
+            ],
+        },
         IntegrationType.GRPC: {
             PatternKey.PATTERNS: [
                 (r"MapGrpcService", Confidence.HIGH),
