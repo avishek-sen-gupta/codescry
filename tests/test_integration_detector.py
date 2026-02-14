@@ -1,13 +1,10 @@
 """Tests for integration point detection from file contents."""
 
 import json
-import sys
 import tempfile
 from pathlib import Path
 
 import pytest
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repo_surveyor.integration_detector import (
     Confidence,

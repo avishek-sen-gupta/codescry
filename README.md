@@ -622,6 +622,14 @@ The codebase uses several consistent patterns:
 poetry run pytest
 ```
 
+Every test run automatically measures code coverage and prints a per-file summary with missing line numbers. An HTML report is also generated:
+
+```bash
+open htmlcov/index.html   # browse detailed coverage report
+```
+
+Coverage is configured in `pyproject.toml` (`[tool.coverage.*]` sections). The `call_flow/`, `lsp_bridge/`, and `ml_classifier/` packages are excluded because they depend on external services.
+
 ## License
 
 This project is licensed under the MIT License — see [LICENSE.md](LICENSE.md) for details.

@@ -1,10 +1,7 @@
 """Example: classify code snippets using Qwen via Ollama."""
 
-import sys
-from pathlib import Path
 import tempfile
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from pathlib import Path
 
 from repo_surveyor.ml_classifier import classify_file
 from repo_surveyor.ml_classifier.qwen_model import QwenClassifierModel

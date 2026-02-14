@@ -1,10 +1,5 @@
 """Tests for structured package file parsing and framework matching."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
 from repo_surveyor.package_parsers import (
     ParsedDependency,
     _dep_matches_pattern,

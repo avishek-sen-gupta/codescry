@@ -20,7 +20,7 @@ ml = [
 ]
 
 [tool.poetry]
-package-mode = false
+packages = [{include = "repo_surveyor", from = "src"}]
 
 [tool.poetry.group.dev.dependencies]
 black = "^26.1.0"
@@ -30,6 +30,32 @@ coverage = "^7.13.2"
 neo4j = "6.1.0"
 python-dotenv = "1.2.1"
 tree-sitter-language-pack = "0.13.0"
+pytest-cov = "^7.0.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "--cov=repo_surveyor --cov-report=term-missing --cov-report=html:htmlcov"
+
+[tool.coverage.run]
+source = ["src/repo_surveyor"]
+omit = [
+    "src/repo_surveyor/call_flow/*",
+    "src/repo_surveyor/lsp_bridge/*",
+    "src/repo_surveyor/ml_classifier/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.",
+    "if TYPE_CHECKING:",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

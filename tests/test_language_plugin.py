@@ -1,10 +1,5 @@
 """Tests for the plugin registry and languages.json configuration."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
 from repo_surveyor.language_plugin import PluginRegistry
 from repo_surveyor.integration_patterns.types import Language
 

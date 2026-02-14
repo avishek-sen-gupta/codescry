@@ -8,4 +8,4 @@ fileignoreconfig:
 - filename: src/repo_surveyor/language_plugin.py
   checksum: b470bb3111f5f3efac9ab62c94e17c61da912fa82c0f65274188e27000045f43
 - filename: poetry.lock
-  checksum: e7f840d7337720f7148c0ba6c09eba1cecd9c3fb1bf103f7f72da43238659cf3
+  checksum: bf8526a9216477b855ebcde14e5a1f11a7d0796236a4c1a91b5dfa7b946a8f28

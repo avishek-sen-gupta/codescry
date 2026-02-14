@@ -10,11 +10,8 @@ Prerequisites:
        poetry run python examples/goto_definition.py
 """
 
-import sys
 import time
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repo_surveyor.lsp_bridge import RequestsLspBridgeClient
 

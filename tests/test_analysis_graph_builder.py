@@ -1,13 +1,9 @@
 """Tests for AnalysisGraphBuilder class."""
 
-import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-
-# Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repo_surveyor.analysis_graph_builder import AnalysisGraphBuilder
 from repo_surveyor.report import DirectoryMarker, SurveyReport

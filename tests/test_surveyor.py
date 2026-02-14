@@ -2,13 +2,9 @@
 
 import json
 import os
-import sys
 from pathlib import Path
 
 import pytest
-
-# Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from repo_surveyor import CTagsConfig, CTagsEntry, RepoSurveyor
 from repo_surveyor.ctags import _build_ctags_command, _parse_ctags_json_output
