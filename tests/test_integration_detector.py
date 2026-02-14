@@ -648,6 +648,7 @@ class TestIntegrationSignalDataclass:
             confidence=Confidence.HIGH,
             matched_pattern="@RestController",
             entity_type=EntityType.FILE_CONTENT,
+            source="Spring",
         )
 
         with pytest.raises(Exception):  # FrozenInstanceError
@@ -1847,6 +1848,7 @@ class TestIntegrationDetectorResultJson:
             confidence=Confidence.HIGH,
             matched_pattern="@RestController",
             entity_type=EntityType.FILE_CONTENT,
+            source="Java",
         )
         result = IntegrationDetectorResult(
             integration_points=[signal],
@@ -1859,6 +1861,7 @@ class TestIntegrationDetectorResultJson:
         assert point["confidence"] == "high"
         assert point["matched_pattern"] == "@RestController"
         assert point["entity_type"] == "file_content"
+        assert point["source"] == "Java"
         assert point["match"]["file_path"] == "/test.java"
         assert point["match"]["line_number"] == 5
         assert point["match"]["line_content"] == "@RestController"
@@ -1901,6 +1904,7 @@ class TestIntegrationDetectorResultJson:
             confidence=Confidence.LOW,
             matched_pattern="(?i)\\bhttp\\b",
             entity_type=EntityType.FILE_CONTENT,
+            source="common",
         )
         result = IntegrationDetectorResult(
             integration_points=[signal],
@@ -3004,10 +3008,19 @@ class TestCppBasePatterns:
         assert results[".c"] == results[".cpp"]
 
     def test_c_cpp_patterns_are_shared(self) -> None:
-        """get_patterns_for_language should return the same patterns for C and C++."""
+        """get_patterns_for_language should return the same patterns for C and C++ (ignoring source label)."""
         c_patterns = get_patterns_for_language(Language.C)
         cpp_patterns = get_patterns_for_language(Language.CPP)
-        assert c_patterns == cpp_patterns
+
+        def strip_source(
+            patterns: dict,
+        ) -> dict:
+            return {
+                k: [(p, c) for p, c, _s in v]
+                for k, v in patterns.items()
+            }
+
+        assert strip_source(c_patterns) == strip_source(cpp_patterns)
 
 
 class TestCppFrameworkPatterns:

@@ -222,6 +222,7 @@ for point in result.integration_points:
     print(f"{point.integration_type.value}: {point.match.file_path}:{point.match.line_number}")
     print(f"  Pattern: {point.matched_pattern}")
     print(f"  Confidence: {point.confidence.value}")
+    print(f"  Source: {point.source}")
 ```
 
 Example output:
@@ -230,12 +231,15 @@ Example output:
 http_rest: /path/to/repo/src/UserController.java:15
   Pattern: @RestController
   Confidence: high
+  Source: Spring
 database: /path/to/repo/src/UserRepository.java:8
   Pattern: @Repository
   Confidence: high
+  Source: Spring
 messaging: /path/to/repo/src/OrderListener.java:12
   Pattern: @KafkaListener
   Confidence: high
+  Source: Spring
 ```
 
 Results are also available as JSON via `to_json()`:
@@ -256,6 +260,7 @@ Example output:
       "confidence": "high",
       "matched_pattern": "@RestController",
       "entity_type": "file_content",
+      "source": "Spring",
       "match": {
         "file_path": "/path/to/repo/src/UserController.java",
         "line_number": 15,
@@ -541,7 +546,7 @@ For each IntegrationType:
      e.g. @RestController (Spring), @app.get (FastAPI)
 ```
 
-Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIUM, or LOW. The `BasePatternSpec` and `FrameworkPatternSpec` frozen dataclasses (defined in `types.py`) enforce an explicit type contract and immutability for all pattern definitions.
+Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIUM, or LOW. The `BasePatternSpec` and `FrameworkPatternSpec` frozen dataclasses (defined in `types.py`) enforce an explicit type contract and immutability for all pattern definitions. When `get_patterns_for_language()` merges the three layers, each tuple is extended to `(regex, Confidence, source)` where `source` is `"common"`, the language display name (e.g. `"Java"`), or the framework name (e.g. `"Spring"`). This source label is propagated into the `IntegrationSignal.source` field and included in the JSON output.
 
 #### File scanning flow
 
@@ -549,7 +554,7 @@ Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIU
 
 2. **Framework resolution** (`_find_frameworks_for_file()`): For each file, walks up the directory hierarchy looking up entries in the `directory_frameworks` mapping. This allows a file in `backend/api/routes.py` to inherit frameworks declared for `"backend"` or `"."`.
 
-3. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, calls `get_patterns_for_language(language, frameworks)` to get the merged pattern set, then tests each line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, and entity type.
+3. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, calls `get_patterns_for_language(language, frameworks)` to get the merged pattern set, then tests each line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, entity type, and source (which layer contributed the pattern).
 
 4. **Directory classification** (`classify_directory()`): After scanning files, directory names themselves are matched against the directory patterns from `common.py` (e.g. `controllers` → HTTP_REST, `proto` → GRPC). These produce directory-level `IntegrationSignal` entries.
 

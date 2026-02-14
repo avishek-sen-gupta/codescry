@@ -63,6 +63,7 @@ class IntegrationSignal:
     confidence: Confidence
     matched_pattern: str
     entity_type: EntityType
+    source: str
 
 
 @dataclass(frozen=True)
@@ -83,6 +84,7 @@ class IntegrationDetectorResult:
                         "confidence": point.confidence.value,
                         "matched_pattern": point.matched_pattern,
                         "entity_type": point.entity_type.value,
+                        "source": point.source,
                         "match": {
                             "file_path": point.match.file_path,
                             "line_number": point.match.line_number,
@@ -168,7 +170,7 @@ def scan_file_for_integrations(
 
     for line_num, line in enumerate(lines, start=1):
         for integration_type, type_patterns in patterns.items():
-            for pattern, confidence in type_patterns:
+            for pattern, confidence, source in type_patterns:
                 if re.search(pattern, line):
                     match = FileMatch(
                         file_path=str(file_path),
@@ -182,6 +184,7 @@ def scan_file_for_integrations(
                         confidence=confidence,
                         matched_pattern=pattern,
                         entity_type=EntityType.FILE_CONTENT,
+                        source=source,
                     )
 
 
@@ -315,6 +318,7 @@ def detect_integrations(
                             confidence=confidence,
                             matched_pattern=pattern,
                             entity_type=EntityType.DIRECTORY,
+                            source="common",
                         )
                     )
 

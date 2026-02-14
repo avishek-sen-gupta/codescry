@@ -19,7 +19,7 @@ LANGUAGE_MODULES = _registry.language_to_integration_module()
 def get_patterns_for_language(
     language: Language | None,
     frameworks: list[str] = [],
-) -> dict[IntegrationType, list[tuple[str, Confidence]]]:
+) -> dict[IntegrationType, list[tuple[str, Confidence, str]]]:
     """Get integration patterns for a specific language and active frameworks.
 
     Combines common patterns with language-specific base patterns and
@@ -32,29 +32,39 @@ def get_patterns_for_language(
                     are included alongside base patterns.
 
     Returns:
-        Dict mapping IntegrationType to list of (pattern, confidence) tuples.
+        Dict mapping IntegrationType to list of (pattern, confidence, source) tuples.
     """
-    result: dict[IntegrationType, list[tuple[str, Confidence]]] = {}
+    result: dict[IntegrationType, list[tuple[str, Confidence, str]]] = {}
 
     for integration_type in IntegrationType:
-        patterns: list[tuple[str, Confidence]] = []
+        patterns: list[tuple[str, Confidence, str]] = []
 
         # Add common patterns
         common_type_patterns = common.COMMON.patterns.get(integration_type, {})
-        patterns.extend(common_type_patterns.get(PatternKey.PATTERNS, []))
+        patterns.extend(
+            (p, c, "common")
+            for p, c in common_type_patterns.get(PatternKey.PATTERNS, [])
+        )
 
         # Add language-specific base patterns
         if language is not None:
             lang_module = LANGUAGE_MODULES.get(language)
             if lang_module is not None:
+                lang_source = language.value
                 lang_type_patterns = lang_module.BASE_PATTERNS.get(integration_type, {})
-                patterns.extend(lang_type_patterns.get(PatternKey.PATTERNS, []))
+                patterns.extend(
+                    (p, c, lang_source)
+                    for p, c in lang_type_patterns.get(PatternKey.PATTERNS, [])
+                )
 
                 # Add framework-specific patterns for active frameworks
                 for framework in frameworks:
                     fw_patterns = lang_module.FRAMEWORK_PATTERNS.get(framework, {})
                     fw_type_patterns = fw_patterns.get(integration_type, {})
-                    patterns.extend(fw_type_patterns.get(PatternKey.PATTERNS, []))
+                    patterns.extend(
+                        (p, c, framework)
+                        for p, c in fw_type_patterns.get(PatternKey.PATTERNS, [])
+                    )
 
         result[integration_type] = patterns
 
