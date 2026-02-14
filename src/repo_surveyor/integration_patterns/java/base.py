@@ -68,7 +68,6 @@ BASE = BasePatternSpec(
                 (r"Files\.write", Confidence.HIGH),
                 (r"Files\.copy", Confidence.HIGH),
                 (r"AmazonS3Client", Confidence.HIGH),
-                (r"FTPClient", Confidence.HIGH),
                 (r"import com\.azure\.storage\.blob", Confidence.HIGH),
                 (r"import com\.google\.cloud\.storage", Confidence.HIGH),
             ],
@@ -105,6 +104,14 @@ BASE = BasePatternSpec(
                 (r"SseEmitter", Confidence.HIGH),
                 (r"text/event-stream", Confidence.MEDIUM),
                 (r"Flux<", Confidence.MEDIUM),
+            ],
+        },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"FTPClient", Confidence.HIGH),
+                (r"JSch", Confidence.HIGH),
+                (r"ChannelSftp", Confidence.HIGH),
+                (r"SFTPClient", Confidence.HIGH),
             ],
         },
         IntegrationType.SCHEDULING: {

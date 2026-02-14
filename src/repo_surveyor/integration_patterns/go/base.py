@@ -61,7 +61,6 @@ BASE = BasePatternSpec(
                 (r"os\.Create\(", Confidence.HIGH),
                 (r"io\.Copy\(", Confidence.MEDIUM),
                 (r"s3manager", Confidence.HIGH),
-                (r'"github\.com/pkg/sftp"', Confidence.HIGH),
                 (r'"cloud\.google\.com/go/storage"', Confidence.HIGH),
             ],
         },
@@ -93,6 +92,12 @@ BASE = BasePatternSpec(
             PatternKey.PATTERNS: [
                 (r"text/event-stream", Confidence.MEDIUM),
                 (r"http\.Flusher", Confidence.HIGH),
+            ],
+        },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r'"github\.com/pkg/sftp"', Confidence.HIGH),
+                (r'"github\.com/jlaffaye/ftp"', Confidence.HIGH),
             ],
         },
         IntegrationType.SCHEDULING: {

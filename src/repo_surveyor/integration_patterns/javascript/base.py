@@ -93,6 +93,15 @@ BASE = BasePatternSpec(
                 (r"text/event-stream", Confidence.MEDIUM),
             ],
         },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"require\(['\"]ssh2-sftp-client['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]basic-ftp['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]ftp['\"]\)", Confidence.HIGH),
+                (r"SFTPWrapper", Confidence.HIGH),
+                (r"new Client\(\).*sftp", Confidence.MEDIUM),
+            ],
+        },
         IntegrationType.SCHEDULING: {
             PatternKey.PATTERNS: [
                 (r"require\(['\"]node-cron['\"]\)", Confidence.HIGH),

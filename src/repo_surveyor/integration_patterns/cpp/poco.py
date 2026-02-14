@@ -31,6 +31,12 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"\bSMTPClientSession\b", Confidence.HIGH),
             ],
         },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"\bFTPClientSession\b", Confidence.HIGH),
+                (r"\bSFTPClientSession\b", Confidence.HIGH),
+            ],
+        },
         IntegrationType.FILE_IO: {
             PatternKey.PATTERNS: [
                 (r"Poco::File\b", Confidence.HIGH),

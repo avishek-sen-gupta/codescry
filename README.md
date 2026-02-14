@@ -10,7 +10,7 @@ A Python library for experiments in analysing repository technology stacks and c
 - Structured parsing of config files (package.json, pyproject.toml, pom.xml, .csproj, etc.) for accurate framework detection — no false positives from substring matching
 - Associates technologies with their containing directories (useful for monorepos)
 - Extracts code symbols using Universal CTags
-- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases, GraphQL, email, caching, SSE/streaming, scheduling) with framework-aware pattern matching
+- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases, FTP/SFTP, GraphQL, email, caching, SSE/streaming, scheduling) with framework-aware pattern matching
 - Extracts method call trees via [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) LSP bridge and tree-sitter
 - Persists analysis results to Neo4j graph database
 - Generates plain text and JSON reports
@@ -57,6 +57,7 @@ Framework detection uses structured parsing of config files rather than naive su
 | `email` | Email and SMTP services | `javax.mail`, `smtplib`, `nodemailer`, `MailKit`, `SMTPClientSession`, `mailio::smtp`, `vmime::net::smtp` |
 | `caching` | Cache stores and distributed caching | `@Cacheable`, `RedisTemplate`, `ioredis`, `IDistributedCache`, `hiredis` |
 | `sse_streaming` | Server-sent events and streaming | `SseEmitter`, `StreamingResponse`, `EventSource`, `Sse<` |
+| `ftp_sftp` | FTP/SFTP file transfer connections | `import ftplib`, `import paramiko`, `ssh2-sftp-client`, `FTPClient`, `JSch`, `SftpClient`, `Net::SFTP` |
 | `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron`, `timer_create` |
 
 ### Integration Pattern Coverage by Language
@@ -74,9 +75,10 @@ Framework detection uses structured parsing of config files rather than naive su
 | `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 | `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 | `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — |
+| `ftp_sftp` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 | `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 
-All 12 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, and Ruby. C and C++ share a common pattern module covering 10 base types (database, HTTP, messaging, sockets, gRPC, file I/O, caching, SOAP, scheduling, email) with framework-specific patterns for Qt, Boost, POCO, Crow, and Drogon. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
+All 13 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, and Ruby. C and C++ share a common pattern module covering 11 base types (database, HTTP, messaging, sockets, gRPC, file I/O, FTP/SFTP, caching, SOAP, scheduling, email) with framework-specific patterns for Qt, Boost, POCO, Crow, and Drogon. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
 
 ## Usage
 
@@ -523,7 +525,7 @@ The result is a `CTagsResult` containing a list of `CTagsEntry` objects (each wi
 
 **Entry point:** `integration_detector.py` → `detect_integrations()`
 
-This subsystem scans source files for regex patterns that indicate system integration points (HTTP/REST, SOAP, messaging, sockets, databases, file I/O, gRPC, GraphQL, email, caching, SSE/streaming, scheduling).
+This subsystem scans source files for regex patterns that indicate system integration points (HTTP/REST, SOAP, messaging, sockets, databases, file I/O, FTP/SFTP, gRPC, GraphQL, email, caching, SSE/streaming, scheduling).
 
 #### Pattern organisation
 

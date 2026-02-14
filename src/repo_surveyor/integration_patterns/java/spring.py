@@ -74,6 +74,13 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"@Tailable", Confidence.HIGH),
             ],
         },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"FtpInboundFileSynchronizer", Confidence.HIGH),
+                (r"SftpInboundFileSynchronizer", Confidence.HIGH),
+                (r"@ServiceActivator.*ftp", Confidence.HIGH),
+            ],
+        },
         IntegrationType.SCHEDULING: {
             PatternKey.PATTERNS: [
                 (r"@Scheduled", Confidence.HIGH),

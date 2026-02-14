@@ -64,8 +64,6 @@ BASE = BasePatternSpec(
                 (r"pathlib\.Path", Confidence.MEDIUM),
                 (r"import shutil", Confidence.HIGH),
                 (r"import boto3", Confidence.HIGH),
-                (r"import ftplib", Confidence.HIGH),
-                (r"import paramiko", Confidence.HIGH),
                 (r"from google\.cloud import storage", Confidence.HIGH),
                 (r"from azure\.storage\.blob", Confidence.HIGH),
             ],
@@ -102,6 +100,13 @@ BASE = BasePatternSpec(
             PatternKey.PATTERNS: [
                 (r"sse_starlette", Confidence.HIGH),
                 (r"asyncio\.Queue", Confidence.MEDIUM),
+            ],
+        },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"import ftplib", Confidence.HIGH),
+                (r"import paramiko", Confidence.HIGH),
+                (r"import pysftp", Confidence.HIGH),
             ],
         },
         IntegrationType.SCHEDULING: {

@@ -54,6 +54,7 @@ class IntegrationType(Enum):
     CACHING = "caching"
     SSE_STREAMING = "sse_streaming"
     SCHEDULING = "scheduling"
+    FTP_SFTP = "ftp_sftp"
 
 
 class Confidence(Enum):

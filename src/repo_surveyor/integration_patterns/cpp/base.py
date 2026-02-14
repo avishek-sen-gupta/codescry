@@ -92,6 +92,13 @@ BASE = BasePatternSpec(
                 (r"\bsoap_call_\w+", Confidence.HIGH),
             ],
         },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r'#include\s*[<"]libssh2_sftp\.h[">]', Confidence.HIGH),
+                (r"libssh2_sftp_", Confidence.HIGH),
+                (r"curl_easy_setopt.*CURLPROTO_FTP", Confidence.HIGH),
+            ],
+        },
         IntegrationType.SCHEDULING: {
             PatternKey.PATTERNS: [
                 (r"\btimer_create\b", Confidence.HIGH),

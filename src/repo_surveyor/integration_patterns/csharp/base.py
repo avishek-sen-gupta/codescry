@@ -70,7 +70,6 @@ BASE = BasePatternSpec(
                 (r"StreamReader", Confidence.HIGH),
                 (r"StreamWriter", Confidence.HIGH),
                 (r"AWSSDK\.S3", Confidence.HIGH),
-                (r"FtpWebRequest", Confidence.HIGH),
                 (r"Azure\.Storage\.Blobs", Confidence.HIGH),
                 (r"Google\.Cloud\.Storage", Confidence.HIGH),
             ],
@@ -107,6 +106,13 @@ BASE = BasePatternSpec(
             PatternKey.PATTERNS: [
                 (r"IAsyncEnumerable", Confidence.MEDIUM),
                 (r"text/event-stream", Confidence.MEDIUM),
+            ],
+        },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"FtpWebRequest", Confidence.HIGH),
+                (r"SftpClient", Confidence.HIGH),
+                (r"FluentFTP", Confidence.HIGH),
             ],
         },
         IntegrationType.SCHEDULING: {

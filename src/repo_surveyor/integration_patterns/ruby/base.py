@@ -125,6 +125,14 @@ BASE = BasePatternSpec(
                 (r"text/event-stream", Confidence.MEDIUM),
             ],
         },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"require ['\"]net/ftp['\"]", Confidence.HIGH),
+                (r"require ['\"]net/sftp['\"]", Confidence.HIGH),
+                (r"Net::FTP", Confidence.HIGH),
+                (r"Net::SFTP", Confidence.HIGH),
+            ],
+        },
         IntegrationType.SCHEDULING: {
             PatternKey.PATTERNS: [
                 (r"require ['\"]whenever['\"]", Confidence.HIGH),

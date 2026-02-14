@@ -150,5 +150,15 @@ COMMON = BasePatternSpec(
                 r"(?i)^tasks$",
             ],
         },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"(?i)\bftp\b", Confidence.LOW),
+                (r"(?i)\bsftp\b", Confidence.LOW),
+            ],
+            PatternKey.DIRECTORY_PATTERNS: [
+                r"(?i)^ftp$",
+                r"(?i)^sftp$",
+            ],
+        },
     },
 )

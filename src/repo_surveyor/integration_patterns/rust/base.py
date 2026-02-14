@@ -101,6 +101,14 @@ BASE = BasePatternSpec(
                 (r"Sse<", Confidence.HIGH),
             ],
         },
+        IntegrationType.FTP_SFTP: {
+            PatternKey.PATTERNS: [
+                (r"use ssh2::", Confidence.HIGH),
+                (r"Sftp::", Confidence.HIGH),
+                (r"use suppaftp::", Confidence.HIGH),
+                (r"FtpStream::", Confidence.HIGH),
+            ],
+        },
         IntegrationType.SCHEDULING: {
             PatternKey.PATTERNS: [
                 (r"use tokio_cron_scheduler::", Confidence.HIGH),
