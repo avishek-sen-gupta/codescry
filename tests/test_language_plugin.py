@@ -358,9 +358,10 @@ class TestPluginSpecificBehavior:
         assert shell is not None
         assert shell.integration_module_name == ""
 
+    def test_cpp_has_integration_module(self):
         cpp = self.registry.get_plugin("C++")
         assert cpp is not None
-        assert cpp.integration_module_name == ""
+        assert cpp.integration_module_name == "cpp"
 
 
 class TestIntegrationPatternLayer:
@@ -394,12 +395,17 @@ class TestIntegrationPatternLayer:
         assert ext_map[".pl1"] == Language.PLI
         assert ext_map[".plinc"] == Language.PLI
 
+    def test_extension_to_language_enum_includes_c_cpp(self):
+        ext_map = self.registry.extension_to_language_enum()
+        assert ext_map[".cpp"] == Language.CPP
+        assert ext_map[".hpp"] == Language.CPP
+        assert ext_map[".c"] == Language.C
+        assert ext_map[".h"] == Language.C
+
     def test_extension_to_language_enum_excludes_languages_without_enum(self):
         ext_map = self.registry.extension_to_language_enum()
-        # Shell, C++, C, etc. don't have Language enum entries
+        # Shell, etc. don't have Language enum entries
         assert ".sh" not in ext_map
-        assert ".cpp" not in ext_map
-        assert ".c" not in ext_map
 
     def test_language_modules_loads_all_expected_modules(self):
         modules = self.registry.language_to_integration_module()
@@ -410,6 +416,8 @@ class TestIntegrationPatternLayer:
         assert Language.JAVASCRIPT in modules
         assert Language.GO in modules
         assert Language.CSHARP in modules
+        assert Language.C in modules
+        assert Language.CPP in modules
         assert Language.COBOL in modules
         assert Language.PLI in modules
         assert Language.RUBY in modules

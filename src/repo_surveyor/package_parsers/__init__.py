@@ -8,6 +8,7 @@ from .types import ParsedDependency
 from . import (
     build_gradle,
     cargo_toml,
+    conanfile_txt,
     csproj,
     go_mod,
     package_json,
@@ -17,6 +18,7 @@ from . import (
     pyproject_toml,
     requirements_txt,
     setup_py,
+    vcpkg_json,
 )
 
 _PARSERS: dict[str, callable] = {
@@ -31,6 +33,8 @@ _PARSERS: dict[str, callable] = {
     "go.mod": go_mod.parse,
     "Cargo.toml": cargo_toml.parse,
     "packages.config": packages_config.parse,
+    "vcpkg.json": vcpkg_json.parse,
+    "conanfile.txt": conanfile_txt.parse,
 }
 
 # Extension-based fallback for files with variable names (e.g. MyApp.csproj)

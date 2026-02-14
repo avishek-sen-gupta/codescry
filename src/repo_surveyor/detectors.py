@@ -190,6 +190,8 @@ def detect_frameworks_from_packages(repo_path: Path) -> set[str]:
         "build.gradle.kts",
         "go.mod",
         "Cargo.toml",
+        "vcpkg.json",
+        "conanfile.txt",
     ]
 
     for filename in config_files:

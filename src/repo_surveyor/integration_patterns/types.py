@@ -18,6 +18,8 @@ class Language(Enum):
     SCALA = "Scala"
     RUBY = "Ruby"
     PHP = "PHP"
+    C = "C"
+    CPP = "C++"
     COBOL = "COBOL"
     PLI = "PL/I"
 

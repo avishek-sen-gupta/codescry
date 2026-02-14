@@ -22,6 +22,8 @@ from repo_surveyor.package_parsers import go_mod
 from repo_surveyor.package_parsers import cargo_toml
 from repo_surveyor.package_parsers import csproj
 from repo_surveyor.package_parsers import packages_config
+from repo_surveyor.package_parsers import vcpkg_json
+from repo_surveyor.package_parsers import conanfile_txt
 from repo_surveyor.detectors import FRAMEWORK_PATTERNS
 
 
@@ -659,3 +661,130 @@ class TestParseDependencies:
         deps = parse_dependencies("packages.config", content)
         assert len(deps) == 1
         assert deps[0].name == "nancy"
+
+    def test_vcpkg_json_dispatches(self):
+        content = '{"dependencies": ["boost-asio", "qt5-base"]}'
+        deps = parse_dependencies("vcpkg.json", content)
+        names = [d.name for d in deps]
+        assert "boost-asio" in names
+        assert "qt5-base" in names
+
+    def test_conanfile_txt_dispatches(self):
+        content = "[requires]\nboost/1.83.0\npoco/1.12.4\n"
+        deps = parse_dependencies("conanfile.txt", content)
+        names = [d.name for d in deps]
+        assert "boost" in names
+        assert "poco" in names
+
+
+# ---------------------------------------------------------------------------
+# vcpkg.json parser
+# ---------------------------------------------------------------------------
+class TestVcpkgJson:
+    def test_string_dependencies(self):
+        content = '{"dependencies": ["boost-asio", "sqlite3", "curl"]}'
+        deps = vcpkg_json.parse(content)
+        names = [d.name for d in deps]
+        assert "boost-asio" in names
+        assert "sqlite3" in names
+        assert "curl" in names
+
+    def test_object_dependencies(self):
+        content = """\
+{
+  "dependencies": [
+    {"name": "qt5-base", "features": ["widgets"]},
+    {"name": "poco", "version>=": "1.12"}
+  ]
+}
+"""
+        deps = vcpkg_json.parse(content)
+        names = [d.name for d in deps]
+        assert "qt5-base" in names
+        assert "poco" in names
+
+    def test_mixed_string_and_object_dependencies(self):
+        content = """\
+{
+  "dependencies": [
+    "curl",
+    {"name": "boost-asio"}
+  ]
+}
+"""
+        deps = vcpkg_json.parse(content)
+        names = [d.name for d in deps]
+        assert "curl" in names
+        assert "boost-asio" in names
+
+    def test_malformed_json_returns_empty(self):
+        assert vcpkg_json.parse("not json {{{") == []
+
+    def test_source_field(self):
+        content = '{"dependencies": ["curl"]}'
+        deps = vcpkg_json.parse(content)
+        assert deps[0].source == "vcpkg.json"
+
+    def test_no_dependencies_key(self):
+        content = '{"name": "myproject"}'
+        deps = vcpkg_json.parse(content)
+        assert deps == []
+
+
+# ---------------------------------------------------------------------------
+# conanfile.txt parser
+# ---------------------------------------------------------------------------
+class TestConanfileTxt:
+    def test_requires_section(self):
+        content = """\
+[requires]
+boost/1.83.0
+poco/1.12.4
+"""
+        deps = conanfile_txt.parse(content)
+        names = [d.name for d in deps]
+        assert "boost" in names
+        assert "poco" in names
+
+    def test_ignores_other_sections(self):
+        content = """\
+[requires]
+boost/1.83.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[options]
+boost:shared=True
+"""
+        deps = conanfile_txt.parse(content)
+        names = [d.name for d in deps]
+        assert "boost" in names
+        assert len(deps) == 1
+
+    def test_no_requires_returns_empty(self):
+        content = """\
+[generators]
+CMakeDeps
+"""
+        assert conanfile_txt.parse(content) == []
+
+    def test_source_field(self):
+        content = "[requires]\nboost/1.83.0\n"
+        deps = conanfile_txt.parse(content)
+        assert deps[0].source == "conanfile.txt"
+
+    def test_skips_comments_and_blanks(self):
+        content = """\
+[requires]
+# A comment
+boost/1.83.0
+
+poco/1.12.4
+"""
+        deps = conanfile_txt.parse(content)
+        names = [d.name for d in deps]
+        assert "boost" in names
+        assert "poco" in names
+        assert len(deps) == 2

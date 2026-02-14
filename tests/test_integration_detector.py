@@ -2918,3 +2918,247 @@ class TestAugmentedExistingPatterns:
             assert len(file_io_points) > 0
         finally:
             file_path.unlink()
+
+
+class TestCppExtensionMapping:
+    """Tests for C and C++ language detection from file extensions."""
+
+    def test_c_extension(self) -> None:
+        """Should detect C from .c extension."""
+        assert get_language_from_extension("main.c") == Language.C
+
+    def test_h_extension(self) -> None:
+        """Should detect C from .h extension."""
+        assert get_language_from_extension("header.h") == Language.C
+
+    def test_cpp_extension(self) -> None:
+        """Should detect C++ from .cpp extension."""
+        assert get_language_from_extension("main.cpp") == Language.CPP
+
+    def test_hpp_extension(self) -> None:
+        """Should detect C++ from .hpp extension."""
+        assert get_language_from_extension("header.hpp") == Language.CPP
+
+
+class TestCppBasePatterns:
+    """Tests for C/C++ base integration pattern scanning."""
+
+    def test_cpp_sqlite3_database(self) -> None:
+        """Should detect sqlite3 includes as DATABASE in C++ files."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write('#include <sqlite3.h>\nsqlite3_open("test.db", &db);\n')
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            db_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.DATABASE
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(db_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_cpp_curl_http_rest(self) -> None:
+        """Should detect curl includes as HTTP_REST in C++ files."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write(
+                '#include <curl/curl.h>\nCURL *curl = curl_easy_init();\n'
+                "curl_easy_perform(curl);\n"
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_c_and_cpp_share_patterns(self) -> None:
+        """Same content in .c and .cpp should produce the same integration types."""
+        content = '#include <sqlite3.h>\nsqlite3_open("test.db", &db);\n'
+        results = {}
+
+        for suffix in (".c", ".cpp"):
+            with tempfile.NamedTemporaryFile(
+                suffix=suffix, mode="w", delete=False
+            ) as f:
+                f.write(content)
+                f.flush()
+                file_path = Path(f.name)
+
+            try:
+                points = list(scan_file_for_integrations(file_path))
+                results[suffix] = {p.integration_type for p in points}
+            finally:
+                file_path.unlink()
+
+        assert IntegrationType.DATABASE in results[".c"]
+        assert results[".c"] == results[".cpp"]
+
+    def test_c_cpp_patterns_are_shared(self) -> None:
+        """get_patterns_for_language should return the same patterns for C and C++."""
+        c_patterns = get_patterns_for_language(Language.C)
+        cpp_patterns = get_patterns_for_language(Language.CPP)
+        assert c_patterns == cpp_patterns
+
+
+class TestCppFrameworkPatterns:
+    """Tests for C++ framework-specific pattern matching."""
+
+    def test_qt_patterns_only_with_qt_framework(self) -> None:
+        """Qt-specific patterns should only match when Qt framework is active."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write("QSqlDatabase db = QSqlDatabase::addDatabase(\"QSQLITE\");\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            # Without Qt framework
+            points_without = list(scan_file_for_integrations(file_path))
+            qt_points = [
+                p
+                for p in points_without
+                if "QSqlDatabase" in p.matched_pattern
+            ]
+            assert len(qt_points) == 0
+
+            # With Qt framework
+            points_with = list(
+                scan_file_for_integrations(file_path, frameworks=["Qt"])
+            )
+            qt_points = [
+                p
+                for p in points_with
+                if "QSqlDatabase" in p.matched_pattern
+            ]
+            assert len(qt_points) > 0
+            assert qt_points[0].confidence == Confidence.HIGH
+        finally:
+            file_path.unlink()
+
+    def test_boost_socket_patterns(self) -> None:
+        """Boost socket patterns should match with Boost framework."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write("boost::asio::ip::tcp::socket s(io);\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Boost"])
+            )
+            socket_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOCKET
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(socket_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_crow_http_rest_patterns(self) -> None:
+        """Crow HTTP/REST patterns should match with Crow framework."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write(
+                'crow::SimpleApp app;\n'
+                'CROW_ROUTE(app, "/hello")([]{ return "Hello"; });\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Crow"])
+            )
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_drogon_http_rest_patterns(self) -> None:
+        """Drogon HTTP/REST patterns should match with Drogon framework."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write("class MyCtrl : public HttpController<MyCtrl> {};\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Drogon"])
+            )
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(http_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_poco_email_patterns(self) -> None:
+        """POCO email patterns should match with POCO framework."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write("SMTPClientSession session(\"smtp.example.com\");\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["POCO"])
+            )
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_cpp_base_patterns_with_framework(self) -> None:
+        """Base C++ patterns should still match alongside framework patterns."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write(
+                '#include <curl/curl.h>\n'
+                'QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(
+                scan_file_for_integrations(file_path, frameworks=["Qt"])
+            )
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+            ]
+            db_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.DATABASE
+            ]
+            assert len(http_points) > 0
+            assert len(db_points) > 0
+        finally:
+            file_path.unlink()

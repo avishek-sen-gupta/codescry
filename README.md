@@ -32,6 +32,8 @@ poetry install
 | Go | `.go` | `go.mod` | — | Gin, Echo, Fiber, Chi, Gorilla, Connect |
 | Rust | `.rs` | `Cargo.toml` | Cargo | Actix, Axum, Rocket, Warp |
 | C# | `.cs` | `*.csproj`, `*.sln`, `packages.config` | NuGet | ASP.NET Core, ASP.NET Web API, ServiceStack, Nancy, Carter, WCF, CoreWCF |
+| C++ | `.cpp`, `.hpp` | `CMakeLists.txt`, `vcpkg.json`, `conanfile.txt` | CMake, vcpkg, Conan | Qt, Boost, Crow, Drogon, POCO |
+| C | `.c`, `.h` | _(shared with C++)_ | _(shared with C++)_ | _(shared with C++)_ |
 | COBOL | `.cbl`, `.cob`, `.cpy` | — | — | — |
 | PL/I | `.pli`, `.pl1`, `.plinc` | — | — | — |
 | Ruby | `.rb` | `Gemfile` | Bundler | Rails, Sinatra, Hanami |
@@ -44,37 +46,37 @@ Framework detection uses structured parsing of config files rather than naive su
 
 | Type | Description | Example Patterns |
 |------|-------------|------------------|
-| `http_rest` | HTTP/REST endpoints and clients | `@RestController`, `@GetMapping`, `app.get(`, `use actix_web::` |
-| `soap` | SOAP/XML web services | `@WebService`, `SOAPMessage`, `XML PARSE` |
-| `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `SqsClient` |
-| `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener` |
-| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `DynamoDbClient`, `ActiveRecord::Base`, `has_many`, `PanacheEntity`, `db.Model`, `SQLModel`, `TypeOrmModule`, `AddDbContext`, `OrmLite` |
-| `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `Azure.Storage.Blobs` |
-| `grpc` | gRPC services and clients | `io.grpc`, `import grpc`, `tonic::`, `Grpc.Core` |
+| `http_rest` | HTTP/REST endpoints and clients | `@RestController`, `@GetMapping`, `app.get(`, `use actix_web::`, `curl_easy_init` |
+| `soap` | SOAP/XML web services | `@WebService`, `SOAPMessage`, `XML PARSE`, `soap_init` |
+| `messaging` | Message queues and event buses | `@KafkaListener`, `@RabbitListener`, `MQPUT`, `SqsClient`, `rd_kafka_new` |
+| `socket` | Raw sockets and WebSockets | `@ServerEndpoint`, `WebSocket`, `TcpListener`, `sys/socket.h` |
+| `database` | Database connections and ORMs | `@Repository`, `@Entity`, `EXEC SQL`, `DynamoDbClient`, `ActiveRecord::Base`, `has_many`, `PanacheEntity`, `db.Model`, `SQLModel`, `TypeOrmModule`, `AddDbContext`, `OrmLite`, `sqlite3_open` |
+| `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `Azure.Storage.Blobs`, `std::fstream` |
+| `grpc` | gRPC services and clients | `io.grpc`, `import grpc`, `tonic::`, `Grpc.Core`, `grpc::ServerBuilder` |
 | `graphql` | GraphQL APIs and schemas | `@QueryMapping`, `apollo-server`, `graphene`, `HotChocolate` |
-| `email` | Email and SMTP services | `javax.mail`, `smtplib`, `nodemailer`, `MailKit` |
-| `caching` | Cache stores and distributed caching | `@Cacheable`, `RedisTemplate`, `ioredis`, `IDistributedCache` |
+| `email` | Email and SMTP services | `javax.mail`, `smtplib`, `nodemailer`, `MailKit`, `SMTPClientSession` |
+| `caching` | Cache stores and distributed caching | `@Cacheable`, `RedisTemplate`, `ioredis`, `IDistributedCache`, `hiredis` |
 | `sse_streaming` | Server-sent events and streaming | `SseEmitter`, `StreamingResponse`, `EventSource`, `Sse<` |
-| `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron` |
+| `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron`, `timer_create` |
 
 ### Integration Pattern Coverage by Language
 
-| Integration Type | Java | Python | TypeScript | JavaScript | Go | Rust | C# | Ruby | COBOL | PL/I |
-|------------------|:----:|:------:|:----------:|:----------:|:--:|:----:|:--:|:----:|:-----:|:----:|
-| `http_rest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `soap` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `messaging` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `socket` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `database` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `file_io` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `grpc` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `graphql` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| Integration Type | Java | Python | TypeScript | JavaScript | Go | Rust | C# | C/C++ | Ruby | COBOL | PL/I |
+|------------------|:----:|:------:|:----------:|:----------:|:--:|:----:|:--:|:-----:|:----:|:-----:|:----:|
+| `http_rest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `soap` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `messaging` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `socket` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `database` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `file_io` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `grpc` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `graphql` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — |
+| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — |
+| `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — |
+| `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 
-All 12 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, and Ruby. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
+All 12 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, and Ruby. C and C++ share a common pattern module covering 9 base types (database, HTTP, messaging, sockets, gRPC, file I/O, caching, SOAP, scheduling) with framework-specific patterns for Qt, Boost, POCO, Crow, and Drogon. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
 
 ## Usage
 
@@ -462,6 +464,8 @@ The parser dispatcher maps exact filenames (e.g. `"pom.xml"`, `"package.json"`) 
 | `cargo_toml` | `Cargo.toml` | `tomllib` — reads `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` |
 | `csproj` | `*.csproj` | `xml.etree` — extracts `<PackageReference Include="...">` attributes |
 | `packages_config` | `packages.config` | `xml.etree` — extracts `<package id="...">` attributes |
+| `vcpkg_json` | `vcpkg.json` | `json` — reads `dependencies` array (string or object entries) |
+| `conanfile_txt` | `conanfile.txt` | Line parsing — extracts package names from `[requires]` section |
 
 **Framework matching** (`_dep_matches_pattern()` + `match_frameworks()`): Parsed dependency names are matched against the `FRAMEWORK_PATTERNS` dict using four rules tried in order:
 

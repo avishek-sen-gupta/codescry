@@ -151,10 +151,24 @@
       "integration_module": "csharp"
     },
     "C++": {
-      "extensions": [".cpp", ".hpp"]
+      "extensions": [".cpp", ".hpp"],
+      "indicator_files": {
+        "CMakeLists.txt": { "package_managers": ["CMake"], "additional_languages": ["C"] },
+        "vcpkg.json": { "package_managers": ["vcpkg"], "parser": "vcpkg_json", "additional_languages": ["C"] },
+        "conanfile.txt": { "package_managers": ["Conan"], "parser": "conanfile_txt", "additional_languages": ["C"] }
+      },
+      "framework_patterns": {
+        "qt": "Qt", "qt5-base": "Qt", "qt6-base": "Qt",
+        "boost": "Boost",
+        "crow": "Crow",
+        "drogon": "Drogon",
+        "poco": "POCO", "poco-net": "POCO", "poco-data": "POCO"
+      },
+      "integration_module": "cpp"
     },
     "C": {
-      "extensions": [".c", ".h"]
+      "extensions": [".c", ".h"],
+      "integration_module": "cpp"
     },
     "Swift": {
       "extensions": [".swift"]
