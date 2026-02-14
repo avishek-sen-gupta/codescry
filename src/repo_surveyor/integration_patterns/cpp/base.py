@@ -99,7 +99,19 @@ BASE = BasePatternSpec(
             ],
         },
         IntegrationType.EMAIL: {
-            PatternKey.PATTERNS: [],
+            PatternKey.PATTERNS: [
+                (r'#include\s*[<"]mailio/', Confidence.HIGH),
+                (r"\bmailio::message\b", Confidence.HIGH),
+                (r"\bmailio::smtp\b", Confidence.HIGH),
+                (r"\bmailio::smtps\b", Confidence.HIGH),
+                (r"\bmailio::imap\b", Confidence.HIGH),
+                (r"\bmailio::imaps\b", Confidence.HIGH),
+                (r"\bmailio::pop3\b", Confidence.HIGH),
+                (r'#include\s*[<"]vmime/', Confidence.HIGH),
+                (r"\bvmime::net::smtp\b", Confidence.HIGH),
+                (r"\bvmime::net::imap\b", Confidence.HIGH),
+                (r"\bvmime::messageBuilder\b", Confidence.HIGH),
+            ],
         },
         IntegrationType.SSE_STREAMING: {
             PatternKey.PATTERNS: [],

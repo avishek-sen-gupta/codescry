@@ -54,7 +54,7 @@ Framework detection uses structured parsing of config files rather than naive su
 | `file_io` | File I/O, uploads, and cloud storage | `FileInputStream`, `open(`, `os.Open`, `Azure.Storage.Blobs`, `std::fstream` |
 | `grpc` | gRPC services and clients | `io.grpc`, `import grpc`, `tonic::`, `Grpc.Core`, `grpc::ServerBuilder` |
 | `graphql` | GraphQL APIs and schemas | `@QueryMapping`, `apollo-server`, `graphene`, `HotChocolate` |
-| `email` | Email and SMTP services | `javax.mail`, `smtplib`, `nodemailer`, `MailKit`, `SMTPClientSession` |
+| `email` | Email and SMTP services | `javax.mail`, `smtplib`, `nodemailer`, `MailKit`, `SMTPClientSession`, `mailio::smtp`, `vmime::net::smtp` |
 | `caching` | Cache stores and distributed caching | `@Cacheable`, `RedisTemplate`, `ioredis`, `IDistributedCache`, `hiredis` |
 | `sse_streaming` | Server-sent events and streaming | `SseEmitter`, `StreamingResponse`, `EventSource`, `Sse<` |
 | `scheduling` | Scheduled tasks and cron jobs | `@Scheduled`, `node-cron`, `Hangfire`, `robfig/cron`, `timer_create` |
@@ -71,12 +71,12 @@ Framework detection uses structured parsing of config files rather than naive su
 | `file_io` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `grpc` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 | `graphql` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — |
-| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — |
+| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 | `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 | `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | — | — |
 | `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 
-All 12 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, and Ruby. C and C++ share a common pattern module covering 9 base types (database, HTTP, messaging, sockets, gRPC, file I/O, caching, SOAP, scheduling) with framework-specific patterns for Qt, Boost, POCO, Crow, and Drogon. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
+All 12 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, and Ruby. C and C++ share a common pattern module covering 10 base types (database, HTTP, messaging, sockets, gRPC, file I/O, caching, SOAP, scheduling, email) with framework-specific patterns for Qt, Boost, POCO, Crow, and Drogon. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
 
 ## Usage
 

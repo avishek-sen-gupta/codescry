@@ -3110,6 +3110,52 @@ class TestCppFrameworkPatterns:
         finally:
             file_path.unlink()
 
+    def test_cpp_mailio_email(self) -> None:
+        """Should detect mailio includes and types as EMAIL in C++ files."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write(
+                '#include <mailio/message.hpp>\n'
+                'mailio::message msg;\n'
+                'mailio::smtps conn("smtp.example.com", 587);\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_cpp_vmime_email(self) -> None:
+        """Should detect VMime includes and types as EMAIL in C++ files."""
+        with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
+            f.write(
+                '#include <vmime/vmime.hpp>\n'
+                'vmime::net::smtp::SMTPTransport transport;\n'
+                'vmime::messageBuilder mb;\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            email_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.EMAIL
+                and p.confidence == Confidence.HIGH
+            ]
+            assert len(email_points) > 0
+        finally:
+            file_path.unlink()
+
     def test_poco_email_patterns(self) -> None:
         """POCO email patterns should match with POCO framework."""
         with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
