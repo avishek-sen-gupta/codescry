@@ -1,19 +1,6 @@
 """C# integration patterns."""
 
-import importlib
-import pkgutil
-from pathlib import Path
-
 from .base import BASE
+from ..loader import load_language_patterns
 
-BASE_PATTERNS = BASE.patterns
-
-FRAMEWORK_PATTERNS: dict = {}
-
-_pkg_path = str(Path(__file__).parent)
-for _importer, _modname, _ispkg in pkgutil.iter_modules([_pkg_path]):
-    if _modname == "base":
-        continue
-    _module = importlib.import_module(f".{_modname}", package=__name__)
-    if hasattr(_module, "FRAMEWORK"):
-        FRAMEWORK_PATTERNS[_module.FRAMEWORK.name] = _module.FRAMEWORK.patterns
+BASE_PATTERNS, FRAMEWORK_PATTERNS = load_language_patterns(__name__, __file__, BASE)
