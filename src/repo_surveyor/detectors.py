@@ -15,6 +15,23 @@ FRAMEWORK_PATTERNS = _registry.all_framework_patterns()
 GLOB_PATTERNS = _registry.glob_patterns()
 K8S_MARKERS = _registry.k8s_markers()
 
+DEFAULT_SKIP_DIRS = frozenset({
+    ".git",
+    "node_modules",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "env",
+    ".env",
+    "dist",
+    "build",
+    "target",
+    ".tox",
+    ".pytest_cache",
+    ".mypy_cache",
+    "vendor",
+})
+
 
 def detect_from_indicator_files(repo_path: Path) -> dict[str, set[str]]:
     """Detect technologies from indicator files in root only."""
@@ -35,30 +52,20 @@ def detect_from_indicator_files(repo_path: Path) -> dict[str, set[str]]:
 
 def detect_indicator_files_with_directories(
     repo_path: Path,
+    extra_skip_dirs: list[str] = [],
 ) -> list[dict]:
     """Detect indicator files and associate them with their directories.
+
+    Args:
+        repo_path: Path to the repository root.
+        extra_skip_dirs: Additional directory names to skip during scanning,
+                         appended to DEFAULT_SKIP_DIRS.
 
     Returns a list of dicts with directory, marker_file, and detected technologies.
     """
     results: list[dict] = []
 
-    # Skip directories that shouldn't be scanned
-    skip_dirs = {
-        ".git",
-        "node_modules",
-        "__pycache__",
-        ".venv",
-        "venv",
-        "env",
-        ".env",
-        "dist",
-        "build",
-        "target",
-        ".tox",
-        ".pytest_cache",
-        ".mypy_cache",
-        "vendor",
-    }
+    skip_dirs = DEFAULT_SKIP_DIRS | set(extra_skip_dirs)
 
     for root, dirs, files in os.walk(repo_path):
         # Skip excluded directories

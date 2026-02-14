@@ -21,7 +21,7 @@ from .ml_classifier import (
     classify_repository,
 )
 from .report import DirectoryMarker, SurveyReport
-from .surveyor import RepoSurveyor
+from .surveyor import RepoSurveyor, survey
 
 __all__ = [
     "AnalysisGraphBuilder",
@@ -47,5 +47,6 @@ __all__ = [
     "classify_file",
     "classify_repository",
     "detect_integrations",
+    "survey",
     "survey_and_persist",
 ]

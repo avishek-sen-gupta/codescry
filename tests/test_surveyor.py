@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from repo_surveyor import CTagsConfig, CTagsEntry, RepoSurveyor
+from repo_surveyor import CTagsConfig, CTagsEntry, RepoSurveyor, survey
 from repo_surveyor.ctags import _build_ctags_command, _parse_ctags_json_output
 from repo_surveyor.report import DirectoryMarker, SurveyReport
 
@@ -157,6 +157,41 @@ class TestSurveyReportJson:
 
         assert "\n" not in compact
         assert "\n" in indented
+
+
+class TestSurvey:
+    """Test the survey() convenience function."""
+
+    def test_survey_returns_all_three_results(self) -> None:
+        """survey() should return tech report, ctags result, and integration result."""
+        tech_report, structure_result, integration_result = survey(
+            "/Users/asgupta/code/mojo-lsp"
+        )
+
+        assert len(tech_report.languages) > 0
+        assert "TypeScript" in tech_report.languages
+        assert structure_result.success
+        assert integration_result.files_scanned > 0
+
+    def test_survey_passes_languages_to_coarse_structure(self) -> None:
+        """survey() should pass languages filter to coarse_structure()."""
+        _, structure_result, _ = survey(
+            "/Users/asgupta/code/mojo-lsp", languages=["TypeScript"]
+        )
+
+        assert structure_result.success
+        ts_entries = [e for e in structure_result.entries if e.language == "TypeScript"]
+        assert len(ts_entries) > 0
+
+    def test_survey_wires_framework_detection_to_integration_scan(self) -> None:
+        """survey() should pass detected frameworks to integration detection."""
+        tech_report, _, integration_result = survey(
+            "/Users/asgupta/code/mojo-lsp"
+        )
+
+        assert "Fastify" in tech_report.frameworks
+        assert integration_result.files_scanned > 0
+        assert len(integration_result.integration_points) > 0
 
 
 class TestCTagsCommandBuilding:

@@ -156,6 +156,22 @@ Example output:
 }
 ```
 
+### Full Analysis Pipeline (without Neo4j)
+
+Run tech stack detection, code structure extraction, and integration point detection in a single call:
+
+```python
+from repo_surveyor import survey
+
+tech_report, structure_result, integration_result = survey("/path/to/repo", languages=["Java"])
+
+print(tech_report.to_text())
+print(f"Symbols: {len(structure_result.entries)}")
+print(f"Integration points: {len(integration_result.integration_points)}")
+```
+
+The `survey()` function automatically wires detected frameworks from `tech_stacks()` into `detect_integrations()` via the `directory_frameworks` mapping, so framework-specific patterns are applied in the right directories. For Neo4j persistence, use `survey_and_persist()` instead.
+
 ### Code Structure Analysis with CTags
 
 Extract code symbols (classes, methods, fields, etc.) using Universal CTags:
@@ -356,7 +372,10 @@ PluginRegistry  (loads JSON, builds lookup tables, resolves shared patterns)
       └──► integration_patterns/__init__.py  (EXTENSION_TO_LANGUAGE, LANGUAGE_MODULES
                                                derived from registry)
 
-survey_and_persist()  (full analysis pipeline)
+survey()             (full analysis pipeline, no persistence)
+├── (same stages as survey_and_persist, without Neo4j writes)
+
+survey_and_persist()  (full analysis pipeline with Neo4j)
 ├── RepoSurveyor.tech_stacks()
 │   ├── detectors.detect_indicator_files_with_directories()
 │   │   └── package_parsers.parse_dependencies() → match_frameworks()
