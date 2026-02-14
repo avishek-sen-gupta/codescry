@@ -354,10 +354,6 @@ class TestPluginSpecificBehavior:
         assert ".NET" in csproj_globs[0].frameworks
 
     def test_language_without_integration_module(self):
-        ruby = self.registry.get_plugin("Ruby")
-        assert ruby is not None
-        assert ruby.integration_module_name == ""
-
         shell = self.registry.get_plugin("Shell")
         assert shell is not None
         assert shell.integration_module_name == ""
@@ -416,6 +412,7 @@ class TestIntegrationPatternLayer:
         assert Language.CSHARP in modules
         assert Language.COBOL in modules
         assert Language.PLI in modules
+        assert Language.RUBY in modules
 
     def test_language_modules_have_base_patterns(self):
         modules = self.registry.language_to_integration_module()

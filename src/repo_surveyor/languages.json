@@ -121,8 +121,14 @@
     "Ruby": {
       "extensions": [".rb"],
       "indicator_files": {
-        "Gemfile": { "package_managers": ["Bundler"] }
-      }
+        "Gemfile": { "package_managers": ["Bundler"], "parser": "gemfile" }
+      },
+      "framework_patterns": {
+        "rails": "Rails",
+        "sinatra": "Sinatra",
+        "hanami": "Hanami"
+      },
+      "integration_module": "ruby"
     },
     "C#": {
       "extensions": [".cs"],
