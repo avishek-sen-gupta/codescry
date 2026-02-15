@@ -20,6 +20,10 @@ from .integration_patterns import (
     get_patterns_for_language,
     get_directory_patterns,
 )
+from .pipeline_timer import NullPipelineTimer, PipelineTimer
+from .syntax_zone import SyntaxRangeMap, SyntaxZone, classify_line, parse_file_zones
+
+_SKIP_ZONES = frozenset({SyntaxZone.COMMENT, SyntaxZone.STRING_LITERAL})
 
 DEFAULT_SKIP_DIRS = frozenset({
     ".git",
@@ -167,9 +171,17 @@ def scan_file_for_integrations(
     language = get_language_from_extension(str(file_path))
     patterns = get_patterns_for_language(language, frameworks)
 
+    range_map = (
+        parse_file_zones(content.encode("utf-8"), language)
+        if language is not None
+        else SyntaxRangeMap(ranges=())
+    )
+
     lines = content.splitlines()
 
     for line_num, line in enumerate(lines, start=1):
+        if classify_line(range_map, line_num) in _SKIP_ZONES:
+            continue
         for integration_type, type_patterns in patterns.items():
             for pattern, confidence, source in type_patterns:
                 if re.search(pattern, line):
@@ -257,6 +269,7 @@ def detect_integrations(
     languages: list[Language] = [],
     directory_frameworks: dict[str, list[str]] = {},
     extra_skip_dirs: list[str] = [],
+    timer: PipelineTimer = NullPipelineTimer(),
 ) -> IntegrationDetectorResult:
     """Detect integration points from repository file contents.
 
@@ -274,6 +287,7 @@ def detect_integrations(
                               directories will be scanned with framework-specific patterns.
         extra_skip_dirs: Additional directory names to skip, appended to
                          DEFAULT_SKIP_DIRS.
+        timer: Pipeline timing observer for recording sub-stage durations.
 
     Returns:
         IntegrationDetectorResult with detected integration points.
@@ -290,14 +304,17 @@ def detect_integrations(
     files_scanned = 0
 
     # Scan source files
+    timer.stage_started("integration_detection.file_scanning")
     for file_path in _get_source_files(repo_path, languages, extra_skip_dirs):
         files_scanned += 1
         frameworks = _find_frameworks_for_file(
             file_path, repo_path, directory_frameworks
         )
         integration_points.extend(scan_file_for_integrations(file_path, frameworks))
+    timer.stage_completed("integration_detection.file_scanning")
 
     # Scan directory names
+    timer.stage_started("integration_detection.directory_classification")
     scanned_dirs: set[str] = set()
     for file_path in _get_source_files(repo_path, languages, extra_skip_dirs):
         for parent in file_path.relative_to(repo_path).parents:
@@ -322,6 +339,7 @@ def detect_integrations(
                             source="common",
                         )
                     )
+    timer.stage_completed("integration_detection.directory_classification")
 
     return IntegrationDetectorResult(
         integration_points=integration_points,

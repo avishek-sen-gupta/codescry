@@ -14,6 +14,7 @@ from .graph_builder import (
     build_tech_stack_graph,
 )
 from .integration_detector import IntegrationDetectorResult, detect_integrations
+from .pipeline_timer import NullPipelineTimer, PipelineTimer
 from .report import SurveyReport
 from .surveyor import RepoSurveyor
 
@@ -255,6 +256,7 @@ def survey_and_persist(
     neo4j_username: str,
     neo4j_password: str,
     languages: list[str],
+    timer: PipelineTimer = NullPipelineTimer(),
 ) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult]:
     """Run tech_stacks(), coarse_structure(), and detect_integrations(), persisting results to Neo4j.
 
@@ -264,15 +266,19 @@ def survey_and_persist(
         neo4j_username: Neo4j username
         neo4j_password: Neo4j password
         languages: Optional list of languages for coarse_structure()
+        timer: Pipeline timing observer for recording stage durations.
 
     Returns:
         Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult)
     """
     surveyor = RepoSurveyor(repo_path)
 
+    timer.stage_started("tech_stacks")
     tech_report = surveyor.tech_stacks()
+    timer.stage_completed("tech_stacks")
     logger.info("Tech stacks completed")
 
+    timer.stage_started("coarse_structure")
     structure_result = surveyor.coarse_structure(
         languages=["Java"],
         exclude_patterns=[
@@ -285,14 +291,17 @@ def survey_and_persist(
             "gen",
         ],
     )
+    timer.stage_completed("coarse_structure")
     logger.info("Coarse structure completed")
 
     directory_frameworks = {
         m.directory: m.frameworks for m in tech_report.directory_markers if m.frameworks
     }
+    timer.stage_started("integration_detection")
     integration_result = detect_integrations(
-        repo_path, directory_frameworks=directory_frameworks
+        repo_path, directory_frameworks=directory_frameworks, timer=timer
     )
+    timer.stage_completed("integration_detection")
     logger.info(
         "Integration detection completed: %d points in %d files",
         len(integration_result.integration_points),
@@ -302,8 +311,13 @@ def survey_and_persist(
     with create_analysis_graph_builder(
         neo4j_uri, neo4j_username, neo4j_password
     ) as builder:
+        timer.stage_started("persist_tech_stacks")
         builder.persist_tech_stacks(tech_report)
+        timer.stage_completed("persist_tech_stacks")
+
+        timer.stage_started("persist_coarse_structure")
         builder.persist_coarse_structure(structure_result, repo_path)
+        timer.stage_completed("persist_coarse_structure")
 
     return tech_report, structure_result, integration_result
 

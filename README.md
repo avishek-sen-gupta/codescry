@@ -10,10 +10,11 @@ A Python library for experiments in analysing repository technology stacks and c
 - Structured parsing of config files (package.json, pyproject.toml, pom.xml, .csproj, etc.) for accurate framework detection — no false positives from substring matching
 - Associates technologies with their containing directories (useful for monorepos)
 - Extracts code symbols using Universal CTags
-- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases, FTP/SFTP, GraphQL, email, caching, SSE/streaming, scheduling) with framework-aware pattern matching
+- Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases, FTP/SFTP, GraphQL, email, caching, SSE/streaming, scheduling) with framework-aware pattern matching and tree-sitter syntax zone filtering (skips comments and string literals to reduce false positives)
 - Extracts method call trees via [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) LSP bridge and tree-sitter
 - Persists analysis results to Neo4j graph database
 - Generates plain text and JSON reports
+- Pipeline timing observer for measuring stage durations as JSON
 
 ## Installation
 
@@ -181,6 +182,36 @@ tech_report, structure_result, integration_result = survey(
 ```
 
 The `survey()` function automatically wires detected frameworks from `tech_stacks()` into `detect_integrations()` via the `directory_frameworks` mapping, so framework-specific patterns are applied in the right directories. The `extra_skip_dirs` parameter is propagated to both `tech_stacks()` and `detect_integrations()`. For Neo4j persistence, use `survey_and_persist()` instead.
+
+### Pipeline Timing
+
+Pass a `PipelineTimingObserver` to `survey()` or `survey_and_persist()` to measure how long each stage takes:
+
+```python
+from repo_surveyor import survey, PipelineTimingObserver
+
+timer = PipelineTimingObserver()
+tech_report, structure_result, integration_result = survey("/path/to/repo", timer=timer)
+
+print(timer.to_json())
+```
+
+Example output:
+
+```json
+{
+  "stages": [
+    {"stage": "tech_stacks", "start_time": "2026-02-16T02:53:09.338835+05:30", "end_time": "2026-02-16T02:53:09.475769+05:30", "duration_seconds": 0.137},
+    {"stage": "coarse_structure", "start_time": "2026-02-16T02:53:09.475807+05:30", "end_time": "2026-02-16T02:53:47.705246+05:30", "duration_seconds": 38.229},
+    {"stage": "integration_detection.file_scanning", "start_time": "2026-02-16T02:53:47.705356+05:30", "end_time": "2026-02-16T02:53:48.484939+05:30", "duration_seconds": 0.780},
+    {"stage": "integration_detection.directory_classification", "start_time": "2026-02-16T02:53:48.484950+05:30", "end_time": "2026-02-16T02:53:48.527112+05:30", "duration_seconds": 0.042},
+    {"stage": "integration_detection", "start_time": "2026-02-16T02:53:47.705280+05:30", "end_time": "2026-02-16T02:53:48.527123+05:30", "duration_seconds": 0.822}
+  ],
+  "total_seconds": 39.188
+}
+```
+
+Sub-stages use dot-notation (e.g. `integration_detection.file_scanning`). The `total_seconds` field sums only top-level stages to avoid double-counting. A `NullPipelineTimer` no-op is used by default when no observer is provided.
 
 ### Code Structure Analysis with CTags
 
@@ -388,6 +419,7 @@ PluginRegistry  (loads JSON, builds lookup tables, resolves shared patterns)
                                                derived from registry)
 
 survey()             (full analysis pipeline, no persistence)
+├── PipelineTimer (observer, optional — records stage durations)
 ├── (same stages as survey_and_persist, without Neo4j writes)
 
 survey_and_persist()  (full analysis pipeline with Neo4j)
@@ -409,6 +441,7 @@ survey_and_persist()  (full analysis pipeline with Neo4j)
 │   ├── integration_patterns.get_patterns_for_language()
 │   │   └── common + language base + framework-specific patterns
 │   ├── scan_file_for_integrations()
+│   │   └── syntax_zone.parse_file_zones()  (tree-sitter comment/string filtering)
 │   └── classify_directory()
 │
 ├── AnalysisGraphBuilder.persist_tech_stacks()
@@ -554,9 +587,11 @@ Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIU
 
 2. **Framework resolution** (`_find_frameworks_for_file()`): For each file, walks up the directory hierarchy looking up entries in the `directory_frameworks` mapping. This allows a file in `backend/api/routes.py` to inherit frameworks declared for `"backend"` or `"."`.
 
-3. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, calls `get_patterns_for_language(language, frameworks)` to get the merged pattern set, then tests each line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, entity type, and source (which layer contributed the pattern).
+3. **Syntax zone filtering** (`syntax_zone.py` → `parse_file_zones()`): Before regex matching, each file is parsed with tree-sitter to build a `SyntaxRangeMap` identifying which lines belong to comments, string literals, or import statements. Lines classified as comments or string literals are skipped entirely, eliminating false positives from patterns appearing in `// Use HttpClient for API calls` or `"""import requests"""`. Mixed-zone lines (code + trailing comment) are conservatively kept as CODE. Languages without tree-sitter support (PL/I) gracefully fall back to scanning all lines via a null-object empty range map.
 
-4. **Directory classification** (`classify_directory()`): After scanning files, directory names themselves are matched against the directory patterns from `common.py` (e.g. `controllers` → HTTP_REST, `proto` → GRPC). These produce directory-level `IntegrationSignal` entries.
+4. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, calls `get_patterns_for_language(language, frameworks)` to get the merged pattern set, then tests each non-comment/non-string line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, entity type, and source (which layer contributed the pattern).
+
+5. **Directory classification** (`classify_directory()`): After scanning files, directory names themselves are matched against the directory patterns from `common.py` (e.g. `controllers` → HTTP_REST, `proto` → GRPC). These produce directory-level `IntegrationSignal` entries.
 
 The result is an `IntegrationDetectorResult` containing all `IntegrationSignal` instances and the count of files scanned.
 

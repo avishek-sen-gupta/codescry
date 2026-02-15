@@ -694,7 +694,7 @@ class TestConfidenceLevels:
     def test_low_confidence_for_generic_terms(self) -> None:
         """Generic terms should have low confidence."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
-            f.write("// This is an API endpoint")
+            f.write("callExternalApi(\"http://example.com/api\");\n")
             f.flush()
             file_path = Path(f.name)
 
@@ -1380,7 +1380,7 @@ class TestGrpcPatterns:
     def test_go_grpc_import(self) -> None:
         """Should detect google.golang.org/grpc as GRPC in Go."""
         with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
-            f.write('"google.golang.org/grpc"\n')
+            f.write('import "google.golang.org/grpc"\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -1707,7 +1707,7 @@ class TestGoSoapPatterns:
     def test_go_gowsdl(self) -> None:
         """Should detect gowsdl import as SOAP in Go."""
         with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
-            f.write('"github.com/hooklift/gowsdl"\n')
+            f.write('import "github.com/hooklift/gowsdl"\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -1726,7 +1726,7 @@ class TestGoSoapPatterns:
     def test_go_encoding_xml(self) -> None:
         """Should detect encoding/xml as SOAP in Go."""
         with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
-            f.write('"encoding/xml"\n')
+            f.write('import "encoding/xml"\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -1978,7 +1978,7 @@ class TestGraphqlPatterns:
     def test_go_gqlgen(self) -> None:
         """Should detect gqlgen as GRAPHQL in Go."""
         with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
-            f.write('"github.com/99designs/gqlgen"\n')
+            f.write('import "github.com/99designs/gqlgen"\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -2134,7 +2134,7 @@ class TestEmailPatterns:
     def test_go_net_smtp(self) -> None:
         """Should detect net/smtp as EMAIL in Go."""
         with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
-            f.write('"net/smtp"\n')
+            f.write('import "net/smtp"\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -2271,7 +2271,7 @@ class TestCachingPatterns:
     def test_go_redis(self) -> None:
         """Should detect go-redis as CACHING in Go."""
         with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
-            f.write('"github.com/go-redis/redis"\n')
+            f.write('import "github.com/go-redis/redis"\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -2528,7 +2528,7 @@ class TestSchedulingPatterns:
     def test_go_robfig_cron(self) -> None:
         """Should detect robfig/cron as SCHEDULING in Go."""
         with tempfile.NamedTemporaryFile(suffix=".go", mode="w", delete=False) as f:
-            f.write('"github.com/robfig/cron"\n')
+            f.write('import "github.com/robfig/cron"\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -3218,3 +3218,85 @@ class TestCppFrameworkPatterns:
             assert len(db_points) > 0
         finally:
             file_path.unlink()
+
+
+class TestSyntaxZoneFiltering:
+    """End-to-end tests for tree-sitter zone filtering in scan_file_for_integrations."""
+
+    def test_java_comment_filtered_code_kept(self, tmp_path: Path) -> None:
+        """Java comment mentioning @Entity should be filtered; code line kept."""
+        java_file = tmp_path / "Service.java"
+        java_file.write_text(
+            "// @Entity annotation marks JPA entities\n"
+            "@Entity\n"
+            "class Service {}\n"
+        )
+        points = list(scan_file_for_integrations(java_file))
+        db_points = [
+            p for p in points
+            if p.integration_type == IntegrationType.DATABASE
+        ]
+        # The code line (@Entity on line 2) should be detected
+        assert any(p.match.line_number == 2 for p in db_points)
+        # The comment line (line 1) should NOT be detected
+        assert not any(p.match.line_number == 1 for p in db_points)
+
+    def test_python_docstring_filtered_code_kept(self, tmp_path: Path) -> None:
+        """Python docstring mentioning import requests should be filtered; real import kept."""
+        py_file = tmp_path / "client.py"
+        py_file.write_text(
+            'import requests\n'
+            '\n'
+            'def fetch(url):\n'
+            '    """import requests is used here."""\n'
+            '    return requests.get(url)\n'
+        )
+        points = list(scan_file_for_integrations(py_file))
+        http_points = [
+            p for p in points
+            if p.integration_type == IntegrationType.HTTP_REST
+        ]
+        # Line 1 (import, classified as IMPORT zone) should still be scanned
+        assert any(p.match.line_number == 1 for p in http_points)
+        # Line 4 (docstring) should NOT be detected
+        assert not any(p.match.line_number == 4 for p in http_points)
+
+    def test_pli_no_filtering(self, tmp_path: Path) -> None:
+        """PL/I has no tree-sitter support; all lines should be scanned."""
+        pli_file = tmp_path / "program.pli"
+        pli_file.write_text(
+            "/* EXEC SQL SELECT */\n"
+            "EXEC SQL SELECT * FROM TABLE;\n"
+        )
+        points = list(scan_file_for_integrations(pli_file))
+        db_points = [
+            p for p in points
+            if p.integration_type == IntegrationType.DATABASE
+        ]
+        # Both lines should be scanned (no filtering for PL/I)
+        assert any(p.match.line_number == 1 for p in db_points)
+        assert any(p.match.line_number == 2 for p in db_points)
+
+    def test_java_multiline_block_comment_filtered(self, tmp_path: Path) -> None:
+        """Java multi-line block comment with patterns should be fully filtered."""
+        java_file = tmp_path / "Example.java"
+        java_file.write_text(
+            "/*\n"
+            " * @Entity\n"
+            " * @KafkaListener\n"
+            " * @Repository\n"
+            " */\n"
+            "@Entity\n"
+            "class Example {}\n"
+        )
+        points = list(scan_file_for_integrations(java_file))
+        # Lines 1-5 are in a block comment and should be filtered
+        comment_line_points = [
+            p for p in points if p.match.line_number <= 5
+        ]
+        assert len(comment_line_points) == 0
+        # Line 6 (@Entity in code) should be detected
+        code_points = [
+            p for p in points if p.match.line_number == 6
+        ]
+        assert len(code_points) > 0

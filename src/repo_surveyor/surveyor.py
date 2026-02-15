@@ -13,6 +13,7 @@ from .detectors import (
     detect_languages_from_extensions,
 )
 from .integration_detector import IntegrationDetectorResult, detect_integrations
+from .pipeline_timer import NullPipelineTimer, PipelineTimer
 from .report import DirectoryMarker, SurveyReport
 
 logger = logging.getLogger(__name__)
@@ -163,6 +164,7 @@ def survey(
     repo_path: str,
     languages: list[str] = [],
     extra_skip_dirs: list[str] = [],
+    timer: PipelineTimer = NullPipelineTimer(),
 ) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult]:
     """Run tech_stacks(), coarse_structure(), and detect_integrations().
 
@@ -175,16 +177,21 @@ def survey(
                    (e.g., ["Java", "Python"]). Defaults to all.
         extra_skip_dirs: Additional directory names to skip during scanning,
                          appended to the default skip list.
+        timer: Pipeline timing observer for recording stage durations.
 
     Returns:
         Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult).
     """
     surveyor = RepoSurveyor(repo_path)
 
+    timer.stage_started("tech_stacks")
     tech_report = surveyor.tech_stacks(extra_skip_dirs=extra_skip_dirs)
+    timer.stage_completed("tech_stacks")
     logger.info("Tech stacks completed")
 
+    timer.stage_started("coarse_structure")
     structure_result = surveyor.coarse_structure(languages=languages)
+    timer.stage_completed("coarse_structure")
     logger.info("Coarse structure completed")
 
     directory_frameworks = {
@@ -192,11 +199,14 @@ def survey(
         for m in tech_report.directory_markers
         if m.frameworks
     }
+    timer.stage_started("integration_detection")
     integration_result = detect_integrations(
         repo_path,
         directory_frameworks=directory_frameworks,
         extra_skip_dirs=extra_skip_dirs,
+        timer=timer,
     )
+    timer.stage_completed("integration_detection")
     logger.info(
         "Integration detection completed: %d points in %d files",
         len(integration_result.integration_points),

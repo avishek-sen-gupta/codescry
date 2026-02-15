@@ -20,6 +20,7 @@ from .ml_classifier import (
     classify_file,
     classify_repository,
 )
+from .pipeline_timer import Clock, NullPipelineTimer, PipelineTimer, PipelineTimingObserver, SystemClock
 from .report import DirectoryMarker, SurveyReport
 from .surveyor import RepoSurveyor, survey
 
@@ -28,6 +29,7 @@ __all__ = [
     "ClassifiedLine",
     "CompletionResult",
     "Confidence",
+    "Clock",
     "CTagsConfig",
     "CTagsEntry",
     "CTagsResult",
@@ -40,10 +42,14 @@ __all__ = [
     "IntegrationType",
     "Language",
     "LineClassifierModel",
+    "NullPipelineTimer",
+    "PipelineTimer",
+    "PipelineTimingObserver",
     "MLIntegrationType",
     "RepoSurveyor",
     "RepositoryClassification",
     "SurveyReport",
+    "SystemClock",
     "classify_file",
     "classify_repository",
     "detect_integrations",
