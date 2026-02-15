@@ -587,7 +587,18 @@ Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIU
 
 2. **Framework resolution** (`_find_frameworks_for_file()`): For each file, walks up the directory hierarchy looking up entries in the `directory_frameworks` mapping. This allows a file in `backend/api/routes.py` to inherit frameworks declared for `"backend"` or `"."`.
 
-3. **Syntax zone filtering** (`syntax_zone.py` → `parse_file_zones()`): Before regex matching, each file is parsed with tree-sitter to build a `SyntaxRangeMap` identifying which lines belong to comments, string literals, or import statements. Lines classified as comments or string literals are skipped entirely, eliminating false positives from patterns appearing in `// Use HttpClient for API calls` or `"""import requests"""`. Mixed-zone lines (code + trailing comment) are conservatively kept as CODE. Languages without tree-sitter support (PL/I) gracefully fall back to scanning all lines via a null-object empty range map.
+3. **Syntax zone filtering** (`syntax_zone.py` → `parse_file_zones()`): Before regex matching, each file is parsed with tree-sitter to build a `SyntaxRangeMap` identifying which lines belong to one of four syntax zones:
+
+   | Zone | Description | Filtered? |
+   |------|-------------|-----------|
+   | `CODE` | Default — executable source lines | No (scanned for patterns) |
+   | `COMMENT` | Line comments, block comments | Yes (skipped) |
+   | `STRING_LITERAL` | String literals, raw strings, template strings, heredocs | Yes (skipped) |
+   | `IMPORT` | Import/use/using declarations | No (scanned for patterns) |
+
+   Only `COMMENT` and `STRING_LITERAL` zones are filtered out. `IMPORT` lines are kept because import statements are a valuable signal for integration detection (e.g. `import requests`, `use actix_web`). Mixed-zone lines (code + trailing comment on the same line) are conservatively kept as `CODE`. Languages without tree-sitter support gracefully fall back to scanning all lines via a null-object empty range map (`SyntaxRangeMap(ranges=())`).
+
+   Tree-sitter zone classification is supported for: Java, Python, TypeScript, JavaScript, Go, Rust, C#, Kotlin, Scala, Ruby, PHP, C, C++, and COBOL. Languages without tree-sitter support (PL/I) scan all lines without filtering.
 
 4. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, calls `get_patterns_for_language(language, frameworks)` to get the merged pattern set, then tests each non-comment/non-string line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, entity type, and source (which layer contributed the pattern).
 
