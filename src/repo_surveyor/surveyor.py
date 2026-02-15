@@ -195,9 +195,7 @@ def survey(
     logger.info("Coarse structure completed")
 
     directory_frameworks = {
-        m.directory: m.frameworks
-        for m in tech_report.directory_markers
-        if m.frameworks
+        m.directory: m.frameworks for m in tech_report.directory_markers if m.frameworks
     }
     timer.stage_started("integration_detection")
     integration_result = detect_integrations(

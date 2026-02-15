@@ -25,4 +25,7 @@ def parse(content: str) -> list[ParsedDependency]:
     # Single-line require statements
     single_modules = [m.group(1).lower() for m in _REQUIRE_SINGLE.finditer(content)]
 
-    return [ParsedDependency(name=mod, source=SOURCE) for mod in block_modules + single_modules]
+    return [
+        ParsedDependency(name=mod, source=SOURCE)
+        for mod in block_modules + single_modules
+    ]

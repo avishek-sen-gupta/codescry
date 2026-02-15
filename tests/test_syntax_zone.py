@@ -57,11 +57,11 @@ class TestBuildSyntaxRangeMap:
     def test_python_docstring(self) -> None:
         """Should classify a Python docstring spanning multiple lines."""
         source = (
-            b'def foo():\n'
+            b"def foo():\n"
             b'    """This is a docstring\n'
-            b'    that spans multiple lines.\n'
+            b"    that spans multiple lines.\n"
             b'    """\n'
-            b'    return 1\n'
+            b"    return 1\n"
         )
         range_map = parse_file_zones(source, Language.PYTHON)
         assert classify_line(range_map, 1) == SyntaxZone.CODE
@@ -113,23 +113,23 @@ class TestClassifyLine:
 
     def test_line_before_any_range(self) -> None:
         """Lines before all ranges classify as CODE."""
-        range_map = SyntaxRangeMap(ranges=(
-            SyntaxRange(start_row=5, end_row=5, zone=SyntaxZone.COMMENT),
-        ))
+        range_map = SyntaxRangeMap(
+            ranges=(SyntaxRange(start_row=5, end_row=5, zone=SyntaxZone.COMMENT),)
+        )
         assert classify_line(range_map, 1) == SyntaxZone.CODE
 
     def test_line_after_all_ranges(self) -> None:
         """Lines after all ranges classify as CODE."""
-        range_map = SyntaxRangeMap(ranges=(
-            SyntaxRange(start_row=0, end_row=0, zone=SyntaxZone.COMMENT),
-        ))
+        range_map = SyntaxRangeMap(
+            ranges=(SyntaxRange(start_row=0, end_row=0, zone=SyntaxZone.COMMENT),)
+        )
         assert classify_line(range_map, 5) == SyntaxZone.CODE
 
     def test_line_within_range(self) -> None:
         """Lines within a range get the range's zone."""
-        range_map = SyntaxRangeMap(ranges=(
-            SyntaxRange(start_row=2, end_row=4, zone=SyntaxZone.COMMENT),
-        ))
+        range_map = SyntaxRangeMap(
+            ranges=(SyntaxRange(start_row=2, end_row=4, zone=SyntaxZone.COMMENT),)
+        )
         # 1-indexed line 3 = 0-indexed row 2
         assert classify_line(range_map, 3) == SyntaxZone.COMMENT
         assert classify_line(range_map, 4) == SyntaxZone.COMMENT
@@ -144,11 +144,13 @@ class TestClassifyLine:
 
     def test_multiple_ranges(self) -> None:
         """Should correctly classify lines across multiple ranges."""
-        range_map = SyntaxRangeMap(ranges=(
-            SyntaxRange(start_row=0, end_row=0, zone=SyntaxZone.COMMENT),
-            SyntaxRange(start_row=2, end_row=2, zone=SyntaxZone.IMPORT),
-            SyntaxRange(start_row=4, end_row=6, zone=SyntaxZone.STRING_LITERAL),
-        ))
+        range_map = SyntaxRangeMap(
+            ranges=(
+                SyntaxRange(start_row=0, end_row=0, zone=SyntaxZone.COMMENT),
+                SyntaxRange(start_row=2, end_row=2, zone=SyntaxZone.IMPORT),
+                SyntaxRange(start_row=4, end_row=6, zone=SyntaxZone.STRING_LITERAL),
+            )
+        )
         assert classify_line(range_map, 1) == SyntaxZone.COMMENT
         assert classify_line(range_map, 2) == SyntaxZone.CODE
         assert classify_line(range_map, 3) == SyntaxZone.IMPORT
@@ -217,11 +219,7 @@ class TestMultiLineBlocks:
     def test_python_triple_quote_string(self) -> None:
         """Should classify a triple-quoted string as STRING_LITERAL."""
         source = (
-            b"x = '''\n"
-            b"import requests\n"
-            b"requests.get(url)\n"
-            b"'''\n"
-            b"y = 1\n"
+            b"x = '''\n" b"import requests\n" b"requests.get(url)\n" b"'''\n" b"y = 1\n"
         )
         range_map = parse_file_zones(source, Language.PYTHON)
         # The triple-quote string spans lines 1-4, but line 1 has code too

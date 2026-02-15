@@ -15,22 +15,24 @@ FRAMEWORK_PATTERNS = _registry.all_framework_patterns()
 GLOB_PATTERNS = _registry.glob_patterns()
 K8S_MARKERS = _registry.k8s_markers()
 
-DEFAULT_SKIP_DIRS = frozenset({
-    ".git",
-    "node_modules",
-    "__pycache__",
-    ".venv",
-    "venv",
-    "env",
-    ".env",
-    "dist",
-    "build",
-    "target",
-    ".tox",
-    ".pytest_cache",
-    ".mypy_cache",
-    "vendor",
-})
+DEFAULT_SKIP_DIRS = frozenset(
+    {
+        ".git",
+        "node_modules",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "env",
+        ".env",
+        "dist",
+        "build",
+        "target",
+        ".tox",
+        ".pytest_cache",
+        ".mypy_cache",
+        "vendor",
+    }
+)
 
 
 def detect_from_indicator_files(repo_path: Path) -> dict[str, set[str]]:

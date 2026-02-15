@@ -10,9 +10,7 @@ from repo_surveyor.surveyor import RepoSurveyor, survey
 
 def _create_python_repo(tmp_path: Path) -> Path:
     """Create a minimal Python repo with indicator files and source."""
-    (tmp_path / "pyproject.toml").write_text(
-        '[project]\ndependencies = ["fastapi"]\n'
-    )
+    (tmp_path / "pyproject.toml").write_text('[project]\ndependencies = ["fastapi"]\n')
     src = tmp_path / "src"
     src.mkdir()
     (src / "app.py").write_text(
@@ -31,9 +29,7 @@ def _create_monorepo(tmp_path: Path) -> Path:
     """Create a monorepo with Python backend and JS frontend."""
     backend = tmp_path / "backend"
     backend.mkdir()
-    (backend / "pyproject.toml").write_text(
-        '[project]\ndependencies = ["django"]\n'
-    )
+    (backend / "pyproject.toml").write_text('[project]\ndependencies = ["django"]\n')
     (backend / "views.py").write_text(
         "from django.http import HttpResponse\n"
         "\n"
@@ -43,12 +39,8 @@ def _create_monorepo(tmp_path: Path) -> Path:
 
     frontend = tmp_path / "frontend"
     frontend.mkdir()
-    (frontend / "package.json").write_text(
-        '{"dependencies": {"react": "^18.0.0"}}\n'
-    )
-    (frontend / "index.js").write_text(
-        "import React from 'react';\n"
-    )
+    (frontend / "package.json").write_text('{"dependencies": {"react": "^18.0.0"}}\n')
+    (frontend / "index.js").write_text("import React from 'react';\n")
     return tmp_path
 
 
@@ -137,9 +129,7 @@ class TestTechStacks:
 
     def test_kubernetes_detection(self, tmp_path: Path) -> None:
         """Should detect Kubernetes from yaml manifests."""
-        (tmp_path / "deploy.yaml").write_text(
-            "apiVersion: apps/v1\nkind: Deployment\n"
-        )
+        (tmp_path / "deploy.yaml").write_text("apiVersion: apps/v1\nkind: Deployment\n")
         report = RepoSurveyor(str(tmp_path)).tech_stacks()
 
         assert "Kubernetes" in report.infrastructure
@@ -218,8 +208,7 @@ class TestSurveyFunction:
 
         assert "FastAPI" in tech_report.frameworks
         fastapi_points = [
-            p for p in integration_result.integration_points
-            if p.source == "FastAPI"
+            p for p in integration_result.integration_points if p.source == "FastAPI"
         ]
         assert len(fastapi_points) > 0
 

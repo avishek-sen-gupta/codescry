@@ -187,9 +187,9 @@ class TestDetectFromGlobPatterns:
     def test_parses_frameworks_from_matched_files(self, tmp_path: Path) -> None:
         """Should parse matched files for framework dependencies."""
         (tmp_path / "MyApp.csproj").write_text(
-            '<Project><ItemGroup>'
+            "<Project><ItemGroup>"
             '<PackageReference Include="Microsoft.AspNetCore.App" />'
-            '</ItemGroup></Project>'
+            "</ItemGroup></Project>"
         )
         result = detect_from_glob_patterns(tmp_path)
 
@@ -201,16 +201,12 @@ class TestDetectKubernetes:
 
     def test_detects_k8s_deployment(self, tmp_path: Path) -> None:
         """Should detect Kubernetes from a deployment manifest."""
-        (tmp_path / "deploy.yaml").write_text(
-            "apiVersion: apps/v1\nkind: Deployment\n"
-        )
+        (tmp_path / "deploy.yaml").write_text("apiVersion: apps/v1\nkind: Deployment\n")
         assert detect_kubernetes(tmp_path) is True
 
     def test_detects_k8s_in_yml(self, tmp_path: Path) -> None:
         """Should detect Kubernetes from .yml files too."""
-        (tmp_path / "service.yml").write_text(
-            "apiVersion: v1\nkind: Service\n"
-        )
+        (tmp_path / "service.yml").write_text("apiVersion: v1\nkind: Service\n")
         assert detect_kubernetes(tmp_path) is True
 
     def test_no_k8s_in_regular_yaml(self, tmp_path: Path) -> None:

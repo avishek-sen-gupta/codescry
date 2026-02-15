@@ -45,7 +45,9 @@ class TestStageTimingRecord:
 
     def test_is_frozen(self) -> None:
         """StageTimingRecord should be immutable."""
-        record = StageTimingRecord(stage="test", start_time=100.0, end_time=101.0, duration_seconds=1.0)
+        record = StageTimingRecord(
+            stage="test", start_time=100.0, end_time=101.0, duration_seconds=1.0
+        )
         assert record.stage == "test"
         assert record.start_time == 100.0
         assert record.end_time == 101.0
@@ -55,7 +57,9 @@ class TestStageTimingRecord:
 class TestPipelineTimingObserver:
     """Tests for the concrete PipelineTimingObserver."""
 
-    def test_records_stage_with_expected_duration(self, observer: PipelineTimingObserver) -> None:
+    def test_records_stage_with_expected_duration(
+        self, observer: PipelineTimingObserver
+    ) -> None:
         """Completed stages should have deterministic durations from the stub clock."""
         # stage_started: monotonic() -> 1000, wall() -> 1000
         observer.stage_started("test_stage")
@@ -70,7 +74,9 @@ class TestPipelineTimingObserver:
         assert record.end_time == 1001.0
         assert record.duration_seconds == 1.0
 
-    def test_records_multiple_stages_in_order(self, observer: PipelineTimingObserver) -> None:
+    def test_records_multiple_stages_in_order(
+        self, observer: PipelineTimingObserver
+    ) -> None:
         """Stages should be recorded in completion order."""
         observer.stage_started("first")
         observer.stage_completed("first")
@@ -82,7 +88,9 @@ class TestPipelineTimingObserver:
         stages = [r.stage for r in observer.completed]
         assert stages == ["first", "second", "third"]
 
-    def test_end_time_of_prior_stage_precedes_start_of_next(self, observer: PipelineTimingObserver) -> None:
+    def test_end_time_of_prior_stage_precedes_start_of_next(
+        self, observer: PipelineTimingObserver
+    ) -> None:
         """Sequential stages should have non-overlapping time ranges."""
         observer.stage_started("first")
         observer.stage_completed("first")
@@ -121,7 +129,9 @@ class TestPipelineTimingObserver:
         assert isinstance(result["stages"][0]["end_time"], str)
         assert result["total_seconds"] > 0
 
-    def test_total_seconds_excludes_sub_stages(self, observer: PipelineTimingObserver) -> None:
+    def test_total_seconds_excludes_sub_stages(
+        self, observer: PipelineTimingObserver
+    ) -> None:
         """total_seconds should only sum top-level stages (no dots in name)."""
         observer.stage_started("parent")
         observer.stage_started("parent.child")
@@ -131,9 +141,7 @@ class TestPipelineTimingObserver:
         result = json.loads(observer.to_json())
 
         parent_duration = next(
-            s["duration_seconds"]
-            for s in result["stages"]
-            if s["stage"] == "parent"
+            s["duration_seconds"] for s in result["stages"] if s["stage"] == "parent"
         )
         assert result["total_seconds"] == parent_duration
 
@@ -154,7 +162,11 @@ class TestPipelineTimingObserver:
         observer.stage_completed("s")
 
         copy1 = observer.completed
-        copy1.append(StageTimingRecord(stage="fake", start_time=0.0, end_time=0.0, duration_seconds=0.0))
+        copy1.append(
+            StageTimingRecord(
+                stage="fake", start_time=0.0, end_time=0.0, duration_seconds=0.0
+            )
+        )
         assert len(observer.completed) == 1
 
 

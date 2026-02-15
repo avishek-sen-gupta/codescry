@@ -20,7 +20,13 @@ from .ml_classifier import (
     classify_file,
     classify_repository,
 )
-from .pipeline_timer import Clock, NullPipelineTimer, PipelineTimer, PipelineTimingObserver, SystemClock
+from .pipeline_timer import (
+    Clock,
+    NullPipelineTimer,
+    PipelineTimer,
+    PipelineTimingObserver,
+    SystemClock,
+)
 from .report import DirectoryMarker, SurveyReport
 from .surveyor import RepoSurveyor, survey
 

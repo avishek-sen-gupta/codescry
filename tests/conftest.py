@@ -5,7 +5,9 @@ import os
 import pytest
 
 
-def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item]
+) -> None:
     """Skip tests marked with local_repo when running in CI."""
     if not os.environ.get("CI"):
         return

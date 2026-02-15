@@ -69,12 +69,14 @@ class PipelineTimingObserver:
         mono_start, wall_start = self._pending.pop(stage)
         wall_end = self._clock.wall()
         duration = self._clock.monotonic() - mono_start
-        self._completed.append(StageTimingRecord(
-            stage=stage,
-            start_time=wall_start,
-            end_time=wall_end,
-            duration_seconds=duration,
-        ))
+        self._completed.append(
+            StageTimingRecord(
+                stage=stage,
+                start_time=wall_start,
+                end_time=wall_end,
+                duration_seconds=duration,
+            )
+        )
 
     def to_json(self, indent: int | None = 2) -> str:
         """Serialise timing results as JSON."""

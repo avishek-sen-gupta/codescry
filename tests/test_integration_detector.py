@@ -694,7 +694,7 @@ class TestConfidenceLevels:
     def test_low_confidence_for_generic_terms(self) -> None:
         """Generic terms should have low confidence."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
-            f.write("callExternalApi(\"http://example.com/api\");\n")
+            f.write('callExternalApi("http://example.com/api");\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -2967,7 +2967,7 @@ class TestCppBasePatterns:
         """Should detect curl includes as HTTP_REST in C++ files."""
         with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
             f.write(
-                '#include <curl/curl.h>\nCURL *curl = curl_easy_init();\n'
+                "#include <curl/curl.h>\nCURL *curl = curl_easy_init();\n"
                 "curl_easy_perform(curl);\n"
             )
             f.flush()
@@ -3015,10 +3015,7 @@ class TestCppBasePatterns:
         def strip_source(
             patterns: dict,
         ) -> dict:
-            return {
-                k: [(p, c) for p, c, _s in v]
-                for k, v in patterns.items()
-            }
+            return {k: [(p, c) for p, c, _s in v] for k, v in patterns.items()}
 
         assert strip_source(c_patterns) == strip_source(cpp_patterns)
 
@@ -3029,7 +3026,7 @@ class TestCppFrameworkPatterns:
     def test_qt_patterns_only_with_qt_framework(self) -> None:
         """Qt-specific patterns should only match when Qt framework is active."""
         with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
-            f.write("QSqlDatabase db = QSqlDatabase::addDatabase(\"QSQLITE\");\n")
+            f.write('QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -3037,21 +3034,13 @@ class TestCppFrameworkPatterns:
             # Without Qt framework
             points_without = list(scan_file_for_integrations(file_path))
             qt_points = [
-                p
-                for p in points_without
-                if "QSqlDatabase" in p.matched_pattern
+                p for p in points_without if "QSqlDatabase" in p.matched_pattern
             ]
             assert len(qt_points) == 0
 
             # With Qt framework
-            points_with = list(
-                scan_file_for_integrations(file_path, frameworks=["Qt"])
-            )
-            qt_points = [
-                p
-                for p in points_with
-                if "QSqlDatabase" in p.matched_pattern
-            ]
+            points_with = list(scan_file_for_integrations(file_path, frameworks=["Qt"]))
+            qt_points = [p for p in points_with if "QSqlDatabase" in p.matched_pattern]
             assert len(qt_points) > 0
             assert qt_points[0].confidence == Confidence.HIGH
         finally:
@@ -3065,9 +3054,7 @@ class TestCppFrameworkPatterns:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Boost"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Boost"]))
             socket_points = [
                 p
                 for p in points
@@ -3082,16 +3069,14 @@ class TestCppFrameworkPatterns:
         """Crow HTTP/REST patterns should match with Crow framework."""
         with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
             f.write(
-                'crow::SimpleApp app;\n'
+                "crow::SimpleApp app;\n"
                 'CROW_ROUTE(app, "/hello")([]{ return "Hello"; });\n'
             )
             f.flush()
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Crow"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Crow"]))
             http_points = [
                 p
                 for p in points
@@ -3110,9 +3095,7 @@ class TestCppFrameworkPatterns:
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Drogon"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Drogon"]))
             http_points = [
                 p
                 for p in points
@@ -3127,8 +3110,8 @@ class TestCppFrameworkPatterns:
         """Should detect mailio includes and types as EMAIL in C++ files."""
         with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
             f.write(
-                '#include <mailio/message.hpp>\n'
-                'mailio::message msg;\n'
+                "#include <mailio/message.hpp>\n"
+                "mailio::message msg;\n"
                 'mailio::smtps conn("smtp.example.com", 587);\n'
             )
             f.flush()
@@ -3150,9 +3133,9 @@ class TestCppFrameworkPatterns:
         """Should detect VMime includes and types as EMAIL in C++ files."""
         with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
             f.write(
-                '#include <vmime/vmime.hpp>\n'
-                'vmime::net::smtp::SMTPTransport transport;\n'
-                'vmime::messageBuilder mb;\n'
+                "#include <vmime/vmime.hpp>\n"
+                "vmime::net::smtp::SMTPTransport transport;\n"
+                "vmime::messageBuilder mb;\n"
             )
             f.flush()
             file_path = Path(f.name)
@@ -3172,14 +3155,12 @@ class TestCppFrameworkPatterns:
     def test_poco_email_patterns(self) -> None:
         """POCO email patterns should match with POCO framework."""
         with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
-            f.write("SMTPClientSession session(\"smtp.example.com\");\n")
+            f.write('SMTPClientSession session("smtp.example.com");\n')
             f.flush()
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["POCO"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["POCO"]))
             email_points = [
                 p
                 for p in points
@@ -3194,25 +3175,19 @@ class TestCppFrameworkPatterns:
         """Base C++ patterns should still match alongside framework patterns."""
         with tempfile.NamedTemporaryFile(suffix=".cpp", mode="w", delete=False) as f:
             f.write(
-                '#include <curl/curl.h>\n'
+                "#include <curl/curl.h>\n"
                 'QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");\n'
             )
             f.flush()
             file_path = Path(f.name)
 
         try:
-            points = list(
-                scan_file_for_integrations(file_path, frameworks=["Qt"])
-            )
+            points = list(scan_file_for_integrations(file_path, frameworks=["Qt"]))
             http_points = [
-                p
-                for p in points
-                if p.integration_type == IntegrationType.HTTP_REST
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
             ]
             db_points = [
-                p
-                for p in points
-                if p.integration_type == IntegrationType.DATABASE
+                p for p in points if p.integration_type == IntegrationType.DATABASE
             ]
             assert len(http_points) > 0
             assert len(db_points) > 0
@@ -3233,8 +3208,7 @@ class TestSyntaxZoneFiltering:
         )
         points = list(scan_file_for_integrations(java_file))
         db_points = [
-            p for p in points
-            if p.integration_type == IntegrationType.DATABASE
+            p for p in points if p.integration_type == IntegrationType.DATABASE
         ]
         # The code line (@Entity on line 2) should be detected
         assert any(p.match.line_number == 2 for p in db_points)
@@ -3245,16 +3219,15 @@ class TestSyntaxZoneFiltering:
         """Python docstring mentioning import requests should be filtered; real import kept."""
         py_file = tmp_path / "client.py"
         py_file.write_text(
-            'import requests\n'
-            '\n'
-            'def fetch(url):\n'
+            "import requests\n"
+            "\n"
+            "def fetch(url):\n"
             '    """import requests is used here."""\n'
-            '    return requests.get(url)\n'
+            "    return requests.get(url)\n"
         )
         points = list(scan_file_for_integrations(py_file))
         http_points = [
-            p for p in points
-            if p.integration_type == IntegrationType.HTTP_REST
+            p for p in points if p.integration_type == IntegrationType.HTTP_REST
         ]
         # Line 1 (import, classified as IMPORT zone) should still be scanned
         assert any(p.match.line_number == 1 for p in http_points)
@@ -3264,14 +3237,10 @@ class TestSyntaxZoneFiltering:
     def test_pli_no_filtering(self, tmp_path: Path) -> None:
         """PL/I has no tree-sitter support; all lines should be scanned."""
         pli_file = tmp_path / "program.pli"
-        pli_file.write_text(
-            "/* EXEC SQL SELECT */\n"
-            "EXEC SQL SELECT * FROM TABLE;\n"
-        )
+        pli_file.write_text("/* EXEC SQL SELECT */\n" "EXEC SQL SELECT * FROM TABLE;\n")
         points = list(scan_file_for_integrations(pli_file))
         db_points = [
-            p for p in points
-            if p.integration_type == IntegrationType.DATABASE
+            p for p in points if p.integration_type == IntegrationType.DATABASE
         ]
         # Both lines should be scanned (no filtering for PL/I)
         assert any(p.match.line_number == 1 for p in db_points)
@@ -3291,12 +3260,8 @@ class TestSyntaxZoneFiltering:
         )
         points = list(scan_file_for_integrations(java_file))
         # Lines 1-5 are in a block comment and should be filtered
-        comment_line_points = [
-            p for p in points if p.match.line_number <= 5
-        ]
+        comment_line_points = [p for p in points if p.match.line_number <= 5]
         assert len(comment_line_points) == 0
         # Line 6 (@Entity in code) should be detected
-        code_points = [
-            p for p in points if p.match.line_number == 6
-        ]
+        code_points = [p for p in points if p.match.line_number == 6]
         assert len(code_points) > 0

@@ -187,9 +187,7 @@ class TestSurvey:
 
     def test_survey_wires_framework_detection_to_integration_scan(self) -> None:
         """survey() should pass detected frameworks to integration detection."""
-        tech_report, _, integration_result = survey(
-            "/Users/asgupta/code/mojo-lsp"
-        )
+        tech_report, _, integration_result = survey("/Users/asgupta/code/mojo-lsp")
 
         assert "Fastify" in tech_report.frameworks
         assert integration_result.files_scanned > 0

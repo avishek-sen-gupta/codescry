@@ -53,16 +53,27 @@ class _NodeTypes:
 
     COMMENT = frozenset({"comment", "line_comment", "block_comment"})
 
-    STRING = frozenset({
-        "string", "string_literal", "raw_string_literal",
-        "interpreted_string_literal", "template_string",
-        "heredoc_body", "verbatim_string_literal",
-    })
+    STRING = frozenset(
+        {
+            "string",
+            "string_literal",
+            "raw_string_literal",
+            "interpreted_string_literal",
+            "template_string",
+            "heredoc_body",
+            "verbatim_string_literal",
+        }
+    )
 
-    IMPORT = frozenset({
-        "import_declaration", "import_statement", "import_from_statement",
-        "use_declaration", "using_directive",
-    })
+    IMPORT = frozenset(
+        {
+            "import_declaration",
+            "import_statement",
+            "import_from_statement",
+            "use_declaration",
+            "using_directive",
+        }
+    )
 
 
 class _TreeSitterLanguages:

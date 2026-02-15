@@ -25,21 +25,23 @@ from .syntax_zone import SyntaxRangeMap, SyntaxZone, classify_line, parse_file_z
 
 _SKIP_ZONES = frozenset({SyntaxZone.COMMENT, SyntaxZone.STRING_LITERAL})
 
-DEFAULT_SKIP_DIRS = frozenset({
-    ".git",
-    ".idea",
-    ".vscode",
-    "node_modules",
-    "__pycache__",
-    ".venv",
-    "venv",
-    "target",
-    "build",
-    "dist",
-    ".tox",
-    ".pytest_cache",
-    ".mypy_cache",
-})
+DEFAULT_SKIP_DIRS = frozenset(
+    {
+        ".git",
+        ".idea",
+        ".vscode",
+        "node_modules",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "target",
+        "build",
+        "dist",
+        ".tox",
+        ".pytest_cache",
+        ".mypy_cache",
+    }
+)
 
 
 class EntityType(Enum):
@@ -141,12 +143,12 @@ def _find_frameworks_for_file(
         List of framework names applicable to this file.
     """
     rel_path = file_path.relative_to(repo_path)
-    return list(chain.from_iterable(
-        directory_frameworks.get(
-            "." if parent == Path(".") else str(parent), []
+    return list(
+        chain.from_iterable(
+            directory_frameworks.get("." if parent == Path(".") else str(parent), [])
+            for parent in [rel_path.parent, *rel_path.parent.parents]
         )
-        for parent in [rel_path.parent, *rel_path.parent.parents]
-    ))
+    )
 
 
 def scan_file_for_integrations(
