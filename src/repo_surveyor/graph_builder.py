@@ -6,7 +6,13 @@ These are independent of any specific graph database.
 
 from .constants import TechLabel, TechRelType
 from .ctags import CTagsResult
+from .integration_detector import (
+    EntityType,
+    IntegrationDetectorResult,
+    IntegrationSignal,
+)
 from .report import SurveyReport
+from .symbol_resolver import ResolutionResult
 
 
 class _DirNode:
@@ -320,3 +326,85 @@ def _resolve_relationships(
             symbols_with_parents.add(symbol[_SymbolNode.ID])
 
     return relationships, symbols_with_parents
+
+
+class _ResolvedIntegrationDict:
+    SYMBOL_ID = "symbol_id"
+    INTEGRATION_TYPE = "integration_type"
+    CONFIDENCE = "confidence"
+    MATCHED_PATTERN = "matched_pattern"
+    SOURCE = "source"
+    LINE_NUMBER = "line_number"
+    FILE_PATH = "file_path"
+
+
+class _UnresolvedIntegrationDict:
+    INTEGRATION_TYPE = "integration_type"
+    CONFIDENCE = "confidence"
+    MATCHED_PATTERN = "matched_pattern"
+    ENTITY_TYPE = "entity_type"
+    FILE_PATH = "file_path"
+    LINE_NUMBER = "line_number"
+    LINE_CONTENT = "line_content"
+    SOURCE = "source"
+
+
+def build_integration_graph(
+    resolution: ResolutionResult,
+    integration_result: IntegrationDetectorResult,
+) -> tuple[list[str], list[dict], list[dict]]:
+    """Build integration graph data from resolution and detection results.
+
+    Args:
+        resolution: The ResolutionResult from resolve_integration_signals()
+        integration_result: The IntegrationDetectorResult from detect_integrations()
+
+    Returns:
+        Tuple of:
+        - integration_type_names: Unique integration type value strings
+        - resolved_integrations: List of dicts for resolved symbol integrations
+        - unresolved_integrations: List of dicts for unresolved signals
+    """
+    all_signals = [si.signal for si in resolution.resolved] + list(
+        resolution.unresolved
+    )
+    integration_type_names = sorted(
+        {signal.integration_type.value for signal in all_signals}
+    )
+
+    resolved_integrations = [
+        _build_resolved_dict(si.symbol_id, si.signal) for si in resolution.resolved
+    ]
+
+    unresolved_integrations = [
+        _build_unresolved_dict(signal) for signal in resolution.unresolved
+    ]
+
+    return integration_type_names, resolved_integrations, unresolved_integrations
+
+
+def _build_resolved_dict(symbol_id: str, signal: IntegrationSignal) -> dict:
+    """Build a dict for a resolved symbol integration."""
+    return {
+        _ResolvedIntegrationDict.SYMBOL_ID: symbol_id,
+        _ResolvedIntegrationDict.INTEGRATION_TYPE: signal.integration_type.value,
+        _ResolvedIntegrationDict.CONFIDENCE: signal.confidence.value,
+        _ResolvedIntegrationDict.MATCHED_PATTERN: signal.matched_pattern,
+        _ResolvedIntegrationDict.SOURCE: signal.source,
+        _ResolvedIntegrationDict.LINE_NUMBER: signal.match.line_number,
+        _ResolvedIntegrationDict.FILE_PATH: signal.match.file_path,
+    }
+
+
+def _build_unresolved_dict(signal: IntegrationSignal) -> dict:
+    """Build a dict for an unresolved integration signal."""
+    return {
+        _UnresolvedIntegrationDict.INTEGRATION_TYPE: signal.integration_type.value,
+        _UnresolvedIntegrationDict.CONFIDENCE: signal.confidence.value,
+        _UnresolvedIntegrationDict.MATCHED_PATTERN: signal.matched_pattern,
+        _UnresolvedIntegrationDict.ENTITY_TYPE: signal.entity_type.value,
+        _UnresolvedIntegrationDict.FILE_PATH: signal.match.file_path,
+        _UnresolvedIntegrationDict.LINE_NUMBER: signal.match.line_number,
+        _UnresolvedIntegrationDict.LINE_CONTENT: signal.match.line_content,
+        _UnresolvedIntegrationDict.SOURCE: signal.source,
+    }

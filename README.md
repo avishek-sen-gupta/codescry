@@ -437,6 +437,8 @@ This creates a graph with:
 - `Directory` nodes with hierarchy relationships
 - `Language`, `PackageManager`, `Framework`, `Infrastructure` nodes
 - `CodeSymbol` nodes with parent-child relationships based on scope
+- `IntegrationType` nodes (e.g. `http_rest`, `database`) linked from `CodeSymbol` via `HAS_INTEGRATION` relationships carrying confidence, matched pattern, source, line number, and file path
+- `UnresolvedIntegration` nodes for signals not resolved to any symbol, linked from `Repository` via `HAS_UNRESOLVED_INTEGRATION`
 
 ## Technical Documentation
 
@@ -489,8 +491,11 @@ survey_and_persist()  (full analysis pipeline with Neo4j)
 ├── AnalysisGraphBuilder.persist_tech_stacks()
 │   └── graph_builder.build_tech_stack_graph()
 │
-└── AnalysisGraphBuilder.persist_coarse_structure()
-    └── graph_builder.build_coarse_structure_graph()
+├── AnalysisGraphBuilder.persist_coarse_structure()
+│   └── graph_builder.build_coarse_structure_graph()
+│
+└── AnalysisGraphBuilder.persist_integrations()
+    └── graph_builder.build_integration_graph()
 
 (standalone — not part of survey_and_persist)
 ├── call_flow.extract_call_tree()
@@ -749,7 +754,16 @@ This subsystem persists tech stack and code structure analysis results into a Ne
 2. `UNWIND $relationships ... CREATE (parent)-[:CONTAINS]->(child)`
 3. `UNWIND $top_level ... CREATE (r:Repository)-[:CONTAINS]->(s:CodeSymbol)`
 
-A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()`, `coarse_structure()`, `detect_integrations()` (using the per-directory framework mappings from tech stack detection), and `resolve_integration_signals()`, then persists tech stacks and code structure to Neo4j. Like `survey()`, its `languages` parameter filters both CTags and integration detection and accepts both `str` and `Language` enum values.
+#### Integration persistence: `persist_integrations(resolution, integration_result, repo_path)`
+
+**Step 1 — Build graph data** (`graph_builder.py` → `build_integration_graph()`): Extracts unique integration type names, builds resolved integration dicts (symbol_id, integration_type, confidence, matched_pattern, source, line_number, file_path), and unresolved integration dicts (integration_type, confidence, matched_pattern, entity_type, file_path, line_number, line_content, source).
+
+**Step 2 — Execute Cypher**: Creates nodes and relationships in up to three batched queries:
+1. `UNWIND $names ... MERGE (t:IntegrationType {name})` — idempotent creation of integration type nodes
+2. `UNWIND $integrations ... MATCH (CodeSymbol) MATCH (IntegrationType) CREATE (s)-[:HAS_INTEGRATION {confidence, matched_pattern, source, line_number, file_path}]->(t)` — links resolved signals to their symbols
+3. `UNWIND $signals ... MATCH (Repository) CREATE (u:UnresolvedIntegration {...}) CREATE (r)-[:HAS_UNRESOLVED_INTEGRATION]->(u)` — persists signals not resolved to any symbol
+
+A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()`, `coarse_structure()`, `detect_integrations()` (using the per-directory framework mappings from tech stack detection), and `resolve_integration_signals()`, then persists tech stacks, code structure, and integration results to Neo4j. Like `survey()`, its `languages` parameter filters both CTags and integration detection and accepts both `str` and `Language` enum values.
 
 ### Design Patterns
 

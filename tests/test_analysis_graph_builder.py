@@ -8,10 +8,23 @@ import pytest
 from repo_surveyor.analysis_graph_builder import AnalysisGraphBuilder
 from repo_surveyor.report import DirectoryMarker, SurveyReport
 from repo_surveyor.ctags import CTagsEntry, CTagsResult
+from repo_surveyor.integration_detector import (
+    EntityType,
+    FileMatch,
+    IntegrationDetectorResult,
+    IntegrationSignal,
+)
+from repo_surveyor.integration_patterns.types import Confidence, IntegrationType
 from repo_surveyor.surveyor import RepoSurveyor
+from repo_surveyor.symbol_resolver import (
+    ResolutionResult,
+    SymbolIntegration,
+    SymbolIntegrationProfile,
+)
 from repo_surveyor.graph_builder import (
     build_tech_stack_graph,
     build_coarse_structure_graph,
+    build_integration_graph,
     extract_package,
 )
 
@@ -748,3 +761,280 @@ class TestRepoSurveyorAdditional:
             assert result is not None
         except FileNotFoundError:
             pytest.skip("ctags not installed")
+
+
+def _make_signal(
+    integration_type: IntegrationType = IntegrationType.HTTP_REST,
+    confidence: Confidence = Confidence.HIGH,
+    matched_pattern: str = "@RestController",
+    entity_type: EntityType = EntityType.FILE_CONTENT,
+    source: str = "Spring",
+    file_path: str = "/repo/src/Controller.java",
+    line_number: int = 10,
+    line_content: str = "@RestController",
+    language=None,
+) -> IntegrationSignal:
+    """Helper to build an IntegrationSignal with sensible defaults."""
+    return IntegrationSignal(
+        match=FileMatch(
+            file_path=file_path,
+            line_number=line_number,
+            line_content=line_content,
+            language=language,
+        ),
+        integration_type=integration_type,
+        confidence=confidence,
+        matched_pattern=matched_pattern,
+        entity_type=entity_type,
+        source=source,
+    )
+
+
+def _empty_resolution() -> ResolutionResult:
+    return ResolutionResult(resolved=(), unresolved=(), profiles=())
+
+
+def _empty_integration_result() -> IntegrationDetectorResult:
+    return IntegrationDetectorResult(integration_points=[], files_scanned=0)
+
+
+class TestBuildIntegrationGraph:
+    """Test build_integration_graph pure function."""
+
+    def test_extracts_unique_integration_types(self) -> None:
+        """Should extract sorted unique integration type names."""
+        sig_http = _make_signal(integration_type=IntegrationType.HTTP_REST)
+        sig_db = _make_signal(integration_type=IntegrationType.DATABASE)
+        sig_http2 = _make_signal(
+            integration_type=IntegrationType.HTTP_REST, line_number=20
+        )
+
+        resolution = ResolutionResult(
+            resolved=(
+                SymbolIntegration(
+                    symbol_id="a:b:c:1",
+                    symbol_name="b",
+                    symbol_kind="c",
+                    signal=sig_http,
+                ),
+                SymbolIntegration(
+                    symbol_id="a:b:c:1",
+                    symbol_name="b",
+                    symbol_kind="c",
+                    signal=sig_http2,
+                ),
+            ),
+            unresolved=(sig_db,),
+            profiles=(),
+        )
+
+        type_names, _, _ = build_integration_graph(
+            resolution, _empty_integration_result()
+        )
+
+        assert type_names == ["database", "http_rest"]
+
+    def test_builds_resolved_dicts(self) -> None:
+        """Should build resolved integration dicts with correct keys."""
+        signal = _make_signal(
+            integration_type=IntegrationType.DATABASE,
+            confidence=Confidence.MEDIUM,
+            matched_pattern="@Entity",
+            source="Spring",
+            file_path="/repo/src/User.java",
+            line_number=5,
+        )
+        resolution = ResolutionResult(
+            resolved=(
+                SymbolIntegration(
+                    symbol_id="src/User.java:User:class:1",
+                    symbol_name="User",
+                    symbol_kind="class",
+                    signal=signal,
+                ),
+            ),
+            unresolved=(),
+            profiles=(),
+        )
+
+        _, resolved, _ = build_integration_graph(
+            resolution, _empty_integration_result()
+        )
+
+        assert len(resolved) == 1
+        r = resolved[0]
+        assert r["symbol_id"] == "src/User.java:User:class:1"
+        assert r["integration_type"] == "database"
+        assert r["confidence"] == "medium"
+        assert r["matched_pattern"] == "@Entity"
+        assert r["source"] == "Spring"
+        assert r["line_number"] == 5
+        assert r["file_path"] == "/repo/src/User.java"
+
+    def test_builds_unresolved_dicts(self) -> None:
+        """Should build unresolved integration dicts with correct keys."""
+        signal = _make_signal(
+            integration_type=IntegrationType.MESSAGING,
+            entity_type=EntityType.DIRECTORY,
+            matched_pattern="messaging",
+            source="common",
+            file_path="/repo/messaging",
+            line_number=0,
+            line_content="",
+        )
+        resolution = ResolutionResult(resolved=(), unresolved=(signal,), profiles=())
+
+        _, _, unresolved = build_integration_graph(
+            resolution, _empty_integration_result()
+        )
+
+        assert len(unresolved) == 1
+        u = unresolved[0]
+        assert u["integration_type"] == "messaging"
+        assert u["entity_type"] == "directory"
+        assert u["source"] == "common"
+
+    def test_handles_empty_input(self) -> None:
+        """Should return empty lists for empty resolution."""
+        type_names, resolved, unresolved = build_integration_graph(
+            _empty_resolution(), _empty_integration_result()
+        )
+
+        assert type_names == []
+        assert resolved == []
+        assert unresolved == []
+
+
+class TestPersistIntegrations:
+    """Test persist_integrations method on AnalysisGraphBuilder."""
+
+    def test_creates_integration_type_nodes(self) -> None:
+        """Should MERGE IntegrationType nodes for each unique type."""
+        mock_driver, mock_session = create_mock_driver_with_session()
+        builder = AnalysisGraphBuilder(mock_driver)
+
+        signal = _make_signal(integration_type=IntegrationType.HTTP_REST)
+        resolution = ResolutionResult(
+            resolved=(
+                SymbolIntegration(
+                    symbol_id="a:b:c:1",
+                    symbol_name="b",
+                    symbol_kind="c",
+                    signal=signal,
+                ),
+            ),
+            unresolved=(),
+            profiles=(),
+        )
+
+        builder.persist_integrations(
+            resolution, _empty_integration_result(), "/test/repo"
+        )
+
+        calls = mock_session.run.call_args_list
+        merge_calls = [
+            c for c in calls if "MERGE" in str(c) and "IntegrationType" in str(c)
+        ]
+        assert len(merge_calls) == 1
+
+    def test_creates_has_integration_relationships(self) -> None:
+        """Should create HAS_INTEGRATION relationships for resolved signals."""
+        mock_driver, mock_session = create_mock_driver_with_session()
+        builder = AnalysisGraphBuilder(mock_driver)
+
+        signal = _make_signal()
+        resolution = ResolutionResult(
+            resolved=(
+                SymbolIntegration(
+                    symbol_id="src/C.java:C:class:1",
+                    symbol_name="C",
+                    symbol_kind="class",
+                    signal=signal,
+                ),
+            ),
+            unresolved=(),
+            profiles=(),
+        )
+
+        builder.persist_integrations(
+            resolution, _empty_integration_result(), "/test/repo"
+        )
+
+        calls = mock_session.run.call_args_list
+        rel_calls = [c for c in calls if "HAS_INTEGRATION" in str(c)]
+        assert len(rel_calls) >= 1
+
+    def test_creates_unresolved_integration_nodes(self) -> None:
+        """Should create UnresolvedIntegration nodes for unresolved signals."""
+        mock_driver, mock_session = create_mock_driver_with_session()
+        builder = AnalysisGraphBuilder(mock_driver)
+
+        signal = _make_signal(
+            entity_type=EntityType.DIRECTORY,
+            file_path="/repo/controllers",
+            line_number=0,
+            line_content="",
+        )
+        resolution = ResolutionResult(resolved=(), unresolved=(signal,), profiles=())
+
+        builder.persist_integrations(
+            resolution, _empty_integration_result(), "/test/repo"
+        )
+
+        calls = mock_session.run.call_args_list
+        unresolved_calls = [c for c in calls if "UnresolvedIntegration" in str(c)]
+        assert len(unresolved_calls) >= 1
+
+    def test_handles_empty_resolution(self) -> None:
+        """Should not error when no signals exist."""
+        mock_driver, mock_session = create_mock_driver_with_session()
+        builder = AnalysisGraphBuilder(mock_driver)
+
+        builder.persist_integrations(
+            _empty_resolution(), _empty_integration_result(), "/test/repo"
+        )
+
+        mock_session.run.assert_not_called()
+
+    def test_integration_relationship_properties(self) -> None:
+        """Should pass confidence, pattern, source, line on relationship."""
+        mock_driver, mock_session = create_mock_driver_with_session()
+        builder = AnalysisGraphBuilder(mock_driver)
+
+        signal = _make_signal(
+            confidence=Confidence.MEDIUM,
+            matched_pattern="@Entity",
+            source="Spring",
+            line_number=42,
+            file_path="/repo/src/User.java",
+        )
+        resolution = ResolutionResult(
+            resolved=(
+                SymbolIntegration(
+                    symbol_id="src/User.java:User:class:1",
+                    symbol_name="User",
+                    symbol_kind="class",
+                    signal=signal,
+                ),
+            ),
+            unresolved=(),
+            profiles=(),
+        )
+
+        builder.persist_integrations(
+            resolution, _empty_integration_result(), "/test/repo"
+        )
+
+        calls = mock_session.run.call_args_list
+        rel_calls = [c for c in calls if "HAS_INTEGRATION" in str(c)]
+        assert len(rel_calls) == 1
+
+        call_kwargs = rel_calls[0][1]
+        integrations = call_kwargs["integrations"]
+        assert len(integrations) == 1
+        i = integrations[0]
+        assert i["confidence"] == "medium"
+        assert i["matched_pattern"] == "@Entity"
+        assert i["source"] == "Spring"
+        assert i["line_number"] == 42
+        assert i["file_path"] == "/repo/src/User.java"

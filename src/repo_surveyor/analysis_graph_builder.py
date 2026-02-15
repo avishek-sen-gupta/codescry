@@ -6,11 +6,12 @@ from typing import Protocol
 
 from dotenv import load_dotenv
 
-from .constants import TechLabel
+from .constants import IntegrationLabel, IntegrationRelType, TechLabel
 from .ctags import CTagsResult
 from .graph_builder import (
     _TechNode,
     build_coarse_structure_graph,
+    build_integration_graph,
     build_tech_stack_graph,
 )
 from .integration_detector import IntegrationDetectorResult, detect_integrations
@@ -232,6 +233,96 @@ class AnalysisGraphBuilder:
 
         logger.info("Coarse structure persistence complete")
 
+    def persist_integrations(
+        self,
+        resolution: ResolutionResult,
+        integration_result: IntegrationDetectorResult,
+        repo_path: str,
+    ) -> None:
+        """Persist integration detection and symbol resolution results to Neo4j.
+
+        Creates IntegrationType nodes (one per unique type) and links CodeSymbol
+        nodes to them via HAS_INTEGRATION relationships. Unresolved signals are
+        persisted as UnresolvedIntegration nodes linked to the Repository.
+
+        Args:
+            resolution: The ResolutionResult from resolve_integration_signals()
+            integration_result: The IntegrationDetectorResult from detect_integrations()
+            repo_path: The repository path for matching existing nodes
+        """
+        integration_type_names, resolved_integrations, unresolved_integrations = (
+            build_integration_graph(resolution, integration_result)
+        )
+
+        if not integration_type_names:
+            logger.info("No integration types to persist")
+            return
+
+        logger.info(
+            f"Persisting {len(integration_type_names)} integration types, "
+            f"{len(resolved_integrations)} resolved, "
+            f"{len(unresolved_integrations)} unresolved"
+        )
+
+        with self.driver.session() as session:
+            session.run(
+                f"""
+                UNWIND $names AS name
+                MERGE (t:{IntegrationLabel.INTEGRATION_TYPE} {{name: name}})
+                """,
+                names=integration_type_names,
+            )
+        logger.info(f"Created {len(integration_type_names)} IntegrationType nodes")
+
+        if resolved_integrations:
+            with self.driver.session() as session:
+                session.run(
+                    f"""
+                    UNWIND $integrations AS i
+                    MATCH (s:CodeSymbol {{id: i.symbol_id, repo_path: $repo_path}})
+                    MATCH (t:{IntegrationLabel.INTEGRATION_TYPE} {{name: i.integration_type}})
+                    CREATE (s)-[:{IntegrationRelType.HAS_INTEGRATION} {{
+                        confidence: i.confidence,
+                        matched_pattern: i.matched_pattern,
+                        source: i.source,
+                        line_number: i.line_number,
+                        file_path: i.file_path
+                    }}]->(t)
+                    """,
+                    repo_path=repo_path,
+                    integrations=resolved_integrations,
+                )
+            logger.info(
+                f"Created {len(resolved_integrations)} HAS_INTEGRATION relationships"
+            )
+
+        if unresolved_integrations:
+            with self.driver.session() as session:
+                session.run(
+                    f"""
+                    UNWIND $signals AS s
+                    MATCH (r:Repository {{path: $repo_path}})
+                    CREATE (u:{IntegrationLabel.UNRESOLVED_INTEGRATION} {{
+                        integration_type: s.integration_type,
+                        confidence: s.confidence,
+                        matched_pattern: s.matched_pattern,
+                        entity_type: s.entity_type,
+                        file_path: s.file_path,
+                        line_number: s.line_number,
+                        line_content: s.line_content,
+                        source: s.source
+                    }})
+                    CREATE (r)-[:{IntegrationRelType.HAS_UNRESOLVED_INTEGRATION}]->(u)
+                    """,
+                    repo_path=repo_path,
+                    signals=unresolved_integrations,
+                )
+            logger.info(
+                f"Created {len(unresolved_integrations)} UnresolvedIntegration nodes"
+            )
+
+        logger.info("Integration persistence complete")
+
 
 def create_analysis_graph_builder(
     uri: str, username: str, password: str
@@ -338,6 +429,10 @@ def survey_and_persist(
         timer.stage_started("persist_coarse_structure")
         builder.persist_coarse_structure(structure_result, repo_path)
         timer.stage_completed("persist_coarse_structure")
+
+        timer.stage_started("persist_integrations")
+        builder.persist_integrations(resolution, integration_result, repo_path)
+        timer.stage_completed("persist_integrations")
 
     return tech_report, structure_result, integration_result, resolution
 
