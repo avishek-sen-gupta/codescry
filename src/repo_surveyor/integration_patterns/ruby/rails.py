@@ -48,6 +48,8 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"\bthrough:", Confidence.MEDIUM),
                 (r"\.arel_table", Confidence.HIGH),
                 (r"Arel\.", Confidence.HIGH),
+                (r"ActiveGraph::Node", Confidence.HIGH),
+                (r"ActiveGraph::Relationship", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {

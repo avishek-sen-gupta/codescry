@@ -20,6 +20,7 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"io\.quarkus\.hibernate", Confidence.HIGH),
                 (r"io\.quarkus\.panache", Confidence.HIGH),
                 (r"@NamedQuery", Confidence.HIGH),
+                (r"import io\.quarkus\.neo4j", Confidence.HIGH),
             ],
         },
         IntegrationType.MESSAGING: {

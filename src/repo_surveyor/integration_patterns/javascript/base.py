@@ -49,6 +49,8 @@ BASE = BasePatternSpec(
                 (r"Sequelize\.define\(", Confidence.HIGH),
                 (r"require\(['\"]@aws-sdk/client-dynamodb['\"]\)", Confidence.HIGH),
                 (r"require\(['\"]firebase-admin['\"]\)", Confidence.HIGH),
+                (r"require\(['\"]neo4j-driver['\"]\)", Confidence.HIGH),
+                (r"neo4j\.driver\(", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {

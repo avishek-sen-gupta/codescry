@@ -53,6 +53,8 @@ BASE = BasePatternSpec(
                 (r"sql\.Open\(", Confidence.HIGH),
                 (r'"github\.com/gocql/gocql"', Confidence.HIGH),
                 (r'"cloud\.google\.com/go/firestore"', Confidence.HIGH),
+                (r'"github\.com/neo4j/neo4j-go-driver"', Confidence.HIGH),
+                (r"neo4j\.NewDriverWithContext", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {

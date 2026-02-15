@@ -50,6 +50,8 @@ BASE = BasePatternSpec(
                 (r"prisma\.", Confidence.HIGH),
                 (r"from ['\"]@aws-sdk/client-dynamodb['\"]", Confidence.HIGH),
                 (r"from ['\"]firebase-admin['\"]", Confidence.HIGH),
+                (r"from ['\"]neo4j-driver['\"]", Confidence.HIGH),
+                (r"neo4j\.driver\(", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {

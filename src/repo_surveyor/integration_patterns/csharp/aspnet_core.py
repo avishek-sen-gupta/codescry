@@ -24,6 +24,8 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"UseMySql\(", Confidence.HIGH),
                 (r"UseInMemoryDatabase\(", Confidence.HIGH),
                 (r"AddEntityFrameworkStores", Confidence.HIGH),
+                (r"AddNeo4j\(", Confidence.HIGH),
+                (r"services\.AddSingleton<IDriver>", Confidence.HIGH),
             ],
         },
         IntegrationType.GRPC: {

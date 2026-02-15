@@ -21,6 +21,8 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"from django\.db import", Confidence.HIGH),
                 (r"models\.Model", Confidence.HIGH),
                 (r"ForeignKey\(", Confidence.MEDIUM),
+                (r"from neomodel import.*StructuredNode", Confidence.HIGH),
+                (r"neomodel\.db\.cypher_query", Confidence.HIGH),
             ],
         },
         IntegrationType.GRAPHQL: {

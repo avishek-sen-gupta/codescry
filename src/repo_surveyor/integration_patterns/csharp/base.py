@@ -61,6 +61,9 @@ BASE = BasePatternSpec(
                 (r"using Dapper", Confidence.HIGH),
                 (r"Amazon\.DynamoDBv2", Confidence.HIGH),
                 (r"Microsoft\.Azure\.Cosmos", Confidence.HIGH),
+                (r"using Neo4j\.Driver", Confidence.HIGH),
+                (r"IDriver", Confidence.HIGH),
+                (r"GraphDatabase\.Driver", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {

@@ -74,6 +74,9 @@ BASE = BasePatternSpec(
                 (r"require ['\"]mongo['\"]", Confidence.HIGH),
                 (r"Mongo::Client", Confidence.HIGH),
                 (r"Mongoid::Document", Confidence.HIGH),
+                (r"require ['\"]neo4j['\"]", Confidence.HIGH),
+                (r"Neo4j::Driver", Confidence.HIGH),
+                (r"require ['\"]activegraph['\"]", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {

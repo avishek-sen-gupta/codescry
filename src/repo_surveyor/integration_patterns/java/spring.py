@@ -39,6 +39,12 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"@Query", Confidence.HIGH),
                 (r"JdbcTemplate", Confidence.HIGH),
                 (r"SessionFactory", Confidence.HIGH),
+                (r"@Node", Confidence.HIGH),
+                (r"@Relationship", Confidence.HIGH),
+                (r"Neo4jRepository", Confidence.HIGH),
+                (r"ReactiveNeo4jRepository", Confidence.HIGH),
+                (r"Neo4jTemplate", Confidence.HIGH),
+                (r"@EnableNeo4jRepositories", Confidence.HIGH),
             ],
         },
         IntegrationType.SOCKET: {

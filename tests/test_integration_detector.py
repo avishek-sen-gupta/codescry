@@ -3265,3 +3265,245 @@ class TestSyntaxZoneFiltering:
         # Line 6 (@Entity in code) should be detected
         code_points = [p for p in points if p.match.line_number == 6]
         assert len(code_points) > 0
+
+
+class TestNeo4jIntegrationPatterns:
+    """Tests for Neo4j database integration detection across languages."""
+
+    def test_java_neo4j_driver_import(self, tmp_path: Path) -> None:
+        """Should detect Neo4j driver import in Java files."""
+        java_file = tmp_path / "Neo4jService.java"
+        java_file.write_text(
+            "import org.neo4j.driver.GraphDatabase;\n"
+            "import org.neo4j.driver.Driver;\n"
+            "public class Neo4jService {\n"
+            '    Driver driver = GraphDatabase.driver("bolt://localhost");\n'
+            "}\n"
+        )
+        points = list(scan_file_for_integrations(java_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+        assert all(p.confidence == Confidence.HIGH for p in db_points)
+
+    def test_java_spring_data_neo4j(self, tmp_path: Path) -> None:
+        """Should detect Spring Data Neo4j patterns."""
+        java_file = tmp_path / "PersonNode.java"
+        java_file.write_text(
+            "@Node\n"
+            "public class Person {\n"
+            "    @Relationship\n"
+            "    private List<Person> friends;\n"
+            "}\n"
+        )
+        points = list(scan_file_for_integrations(java_file, frameworks=["Spring"]))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        patterns = [p.matched_pattern for p in db_points]
+        assert any("@Node" in pat for pat in patterns)
+        assert any("@Relationship" in pat for pat in patterns)
+
+    def test_java_spring_neo4j_repository(self, tmp_path: Path) -> None:
+        """Should detect Neo4jRepository in Spring."""
+        java_file = tmp_path / "PersonRepository.java"
+        java_file.write_text(
+            "public interface PersonRepository extends Neo4jRepository<Person, Long> {}\n"
+        )
+        points = list(scan_file_for_integrations(java_file, frameworks=["Spring"]))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        patterns = [p.matched_pattern for p in db_points]
+        assert any("Neo4jRepository" in pat for pat in patterns)
+
+    def test_java_quarkus_neo4j(self, tmp_path: Path) -> None:
+        """Should detect Quarkus Neo4j extension."""
+        java_file = tmp_path / "QuarkusNeo4j.java"
+        java_file.write_text("import io.quarkus.neo4j.runtime.Neo4jConfiguration;\n")
+        points = list(scan_file_for_integrations(java_file, frameworks=["Quarkus"]))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+
+    def test_python_neo4j_driver(self, tmp_path: Path) -> None:
+        """Should detect neo4j Python driver."""
+        py_file = tmp_path / "graph_service.py"
+        py_file.write_text(
+            "from neo4j import GraphDatabase\n"
+            'driver = GraphDatabase.driver("bolt://localhost")\n'
+        )
+        points = list(scan_file_for_integrations(py_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+        assert all(p.confidence == Confidence.HIGH for p in db_points)
+
+    def test_python_py2neo(self, tmp_path: Path) -> None:
+        """Should detect py2neo library."""
+        py_file = tmp_path / "graph.py"
+        py_file.write_text("from py2neo import Graph\n")
+        points = list(scan_file_for_integrations(py_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+
+    def test_python_neomodel(self, tmp_path: Path) -> None:
+        """Should detect neomodel library."""
+        py_file = tmp_path / "models.py"
+        py_file.write_text("from neomodel import StructuredNode, StringProperty\n")
+        points = list(scan_file_for_integrations(py_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+
+    def test_python_django_neomodel(self, tmp_path: Path) -> None:
+        """Should detect neomodel Django integration."""
+        py_file = tmp_path / "models.py"
+        py_file.write_text(
+            "from neomodel import StructuredNode, StringProperty\n"
+            "class Person(StructuredNode):\n"
+            "    name = StringProperty()\n"
+        )
+        points = list(scan_file_for_integrations(py_file, frameworks=["Django"]))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        patterns = [p.matched_pattern for p in db_points]
+        assert any("neomodel" in pat for pat in patterns)
+
+    def test_typescript_neo4j_driver(self, tmp_path: Path) -> None:
+        """Should detect neo4j-driver in TypeScript."""
+        ts_file = tmp_path / "neo4j.ts"
+        ts_file.write_text(
+            "import neo4j from 'neo4j-driver';\n"
+            "const driver = neo4j.driver('bolt://localhost');\n"
+        )
+        points = list(scan_file_for_integrations(ts_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+        assert all(p.confidence == Confidence.HIGH for p in db_points)
+
+    def test_typescript_nestjs_neo4j(self, tmp_path: Path) -> None:
+        """Should detect NestJS Neo4j integration."""
+        ts_file = tmp_path / "neo4j.module.ts"
+        ts_file.write_text("import { Neo4jService } from 'nest-neo4j';\n")
+        points = list(scan_file_for_integrations(ts_file, frameworks=["NestJS"]))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+
+    def test_javascript_neo4j_driver(self, tmp_path: Path) -> None:
+        """Should detect neo4j-driver in JavaScript."""
+        js_file = tmp_path / "db.js"
+        js_file.write_text(
+            "const neo4j = require('neo4j-driver');\n"
+            "const driver = neo4j.driver('bolt://localhost');\n"
+        )
+        points = list(scan_file_for_integrations(js_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+
+    def test_go_neo4j_driver(self, tmp_path: Path) -> None:
+        """Should detect neo4j-go-driver in Go."""
+        go_file = tmp_path / "main.go"
+        go_file.write_text(
+            'import "github.com/neo4j/neo4j-go-driver/v5/neo4j"\n'
+            "func main() {\n"
+            '    driver, _ := neo4j.NewDriverWithContext("bolt://localhost")\n'
+            "}\n"
+        )
+        points = list(scan_file_for_integrations(go_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+        assert all(p.confidence == Confidence.HIGH for p in db_points)
+
+    def test_rust_neo4rs(self, tmp_path: Path) -> None:
+        """Should detect neo4rs crate in Rust."""
+        rs_file = tmp_path / "main.rs"
+        rs_file.write_text(
+            "use neo4rs::Graph;\n"
+            'let graph = neo4rs::Graph::new("bolt://localhost").await;\n'
+        )
+        points = list(scan_file_for_integrations(rs_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+
+    def test_csharp_neo4j_driver(self, tmp_path: Path) -> None:
+        """Should detect Neo4j.Driver in C#."""
+        cs_file = tmp_path / "Neo4jService.cs"
+        cs_file.write_text(
+            "using Neo4j.Driver;\n"
+            "public class Neo4jService {\n"
+            '    IDriver driver = GraphDatabase.Driver("bolt://localhost");\n'
+            "}\n"
+        )
+        points = list(scan_file_for_integrations(cs_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+        assert all(p.confidence == Confidence.HIGH for p in db_points)
+
+    def test_csharp_aspnet_neo4j(self, tmp_path: Path) -> None:
+        """Should detect Neo4j DI in ASP.NET Core."""
+        cs_file = tmp_path / "Startup.cs"
+        cs_file.write_text("services.AddNeo4j(configuration);\n")
+        points = list(scan_file_for_integrations(cs_file, frameworks=["ASP.NET Core"]))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        patterns = [p.matched_pattern for p in db_points]
+        assert any("AddNeo4j" in pat for pat in patterns)
+
+    def test_ruby_neo4j_driver(self, tmp_path: Path) -> None:
+        """Should detect neo4j gem in Ruby."""
+        rb_file = tmp_path / "graph.rb"
+        rb_file.write_text(
+            "require 'neo4j'\n" "driver = Neo4j::Driver.new('bolt://localhost')\n"
+        )
+        points = list(scan_file_for_integrations(rb_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+
+    def test_ruby_activegraph(self, tmp_path: Path) -> None:
+        """Should detect activegraph gem in Ruby."""
+        rb_file = tmp_path / "person.rb"
+        rb_file.write_text("require 'activegraph'\n")
+        points = list(scan_file_for_integrations(rb_file))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        assert len(db_points) > 0
+
+    def test_ruby_rails_activegraph(self, tmp_path: Path) -> None:
+        """Should detect ActiveGraph in Rails."""
+        rb_file = tmp_path / "person.rb"
+        rb_file.write_text(
+            "class Person\n"
+            "  include ActiveGraph::Node\n"
+            "  include ActiveGraph::Relationship\n"
+            "end\n"
+        )
+        points = list(scan_file_for_integrations(rb_file, frameworks=["Rails"]))
+        db_points = [
+            p for p in points if p.integration_type == IntegrationType.DATABASE
+        ]
+        patterns = [p.matched_pattern for p in db_points]
+        assert any("ActiveGraph::Node" in pat for pat in patterns)

@@ -61,6 +61,8 @@ BASE = BasePatternSpec(
                 (r"query_as!", Confidence.HIGH),
                 (r"query!", Confidence.HIGH),
                 (r"aws-sdk-dynamodb", Confidence.HIGH),
+                (r"use neo4rs::", Confidence.HIGH),
+                (r"neo4rs::Graph::new", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {

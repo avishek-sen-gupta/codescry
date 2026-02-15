@@ -32,6 +32,8 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"InjectRepository\(", Confidence.HIGH),
                 (r"InjectModel\(", Confidence.HIGH),
                 (r"@nestjs/prisma", Confidence.HIGH),
+                (r"from ['\"]nest-neo4j['\"]", Confidence.HIGH),
+                (r"Neo4jService", Confidence.HIGH),
             ],
         },
         IntegrationType.MESSAGING: {

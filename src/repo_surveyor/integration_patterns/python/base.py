@@ -56,6 +56,10 @@ BASE = BasePatternSpec(
                 (r"relationship\(", Confidence.MEDIUM),
                 (r"from google\.cloud import firestore", Confidence.HIGH),
                 (r"from cassandra\.cluster", Confidence.HIGH),
+                (r"from neo4j import", Confidence.HIGH),
+                (r"import neo4j", Confidence.HIGH),
+                (r"from py2neo import", Confidence.HIGH),
+                (r"from neomodel import", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {
