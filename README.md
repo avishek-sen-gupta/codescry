@@ -710,6 +710,15 @@ open htmlcov/index.html   # browse detailed coverage report
 
 Coverage is configured in `pyproject.toml` (`[tool.coverage.*]` sections). The `call_flow/`, `lsp_bridge/`, and `ml_classifier/` packages are excluded because they depend on external services.
 
+## CI
+
+A GitHub Actions workflow is defined in `.github/workflows/ci.yml` with two jobs:
+
+- **lint** — runs `black --check` on `src/` and `tests/`
+- **test** — installs Universal CTags and runs `pytest` with coverage (excluding integration tests that depend on local repos)
+
+The pipeline is currently set to `workflow_dispatch` only (manual trigger). To activate on push/PR, uncomment the `on: push/pull_request` triggers in the workflow file.
+
 ## License
 
 This project is licensed under the MIT License — see [LICENSE.md](LICENSE.md) for details.

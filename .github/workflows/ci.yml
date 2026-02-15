@@ -1,0 +1,43 @@
+name: CI
+
+# Not activated yet — uncomment the triggers below to enable
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+
+on: workflow_dispatch
+
+jobs:
+  lint:
+    name: Black formatting check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install --only dev
+      - name: Run Black
+        run: poetry run black --check src tests
+
+  test:
+    name: Tests with coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y universal-ctags
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run pytest --ignore=tests/test_surveyor.py --ignore=tests/test_lsp_bridge.py --ignore=tests/test_call_flow.py
