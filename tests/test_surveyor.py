@@ -11,6 +11,7 @@ from repo_surveyor.ctags import _build_ctags_command, _parse_ctags_json_output
 from repo_surveyor.report import DirectoryMarker, SurveyReport
 
 
+@pytest.mark.local_repo
 class TestMojoLspDetection:
     """Test framework detection on ~/code/mojo-lsp."""
 
@@ -159,6 +160,7 @@ class TestSurveyReportJson:
         assert "\n" in indented
 
 
+@pytest.mark.local_repo
 class TestSurvey:
     """Test the survey() convenience function."""
 
@@ -340,6 +342,7 @@ class TestCTagsEntry:
         assert entry.language == "Java"
 
 
+@pytest.mark.local_repo
 class TestRepoSurveyorCTags:
     """Test RepoSurveyor CTags integration."""
 

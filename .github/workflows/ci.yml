@@ -1,13 +1,11 @@
 name: CI
 
-# Not activated yet — uncomment the triggers below to enable
-# on:
-#   push:
-#     branches: [main]
-#   pull_request:
-#     branches: [main]
-
-on: workflow_dispatch
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -40,4 +38,4 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run tests
-        run: poetry run pytest --ignore=tests/test_surveyor.py --ignore=tests/test_lsp_bridge.py --ignore=tests/test_call_flow.py
+        run: poetry run pytest --ignore=tests/test_lsp_bridge.py --ignore=tests/test_call_flow.py
