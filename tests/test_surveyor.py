@@ -164,9 +164,9 @@ class TestSurveyReportJson:
 class TestSurvey:
     """Test the survey() convenience function."""
 
-    def test_survey_returns_all_three_results(self) -> None:
-        """survey() should return tech report, ctags result, and integration result."""
-        tech_report, structure_result, integration_result = survey(
+    def test_survey_returns_all_four_results(self) -> None:
+        """survey() should return tech report, ctags result, integration result, and resolution."""
+        tech_report, structure_result, integration_result, resolution = survey(
             "/Users/asgupta/code/mojo-lsp"
         )
 
@@ -174,10 +174,11 @@ class TestSurvey:
         assert "TypeScript" in tech_report.languages
         assert structure_result.success
         assert integration_result.files_scanned > 0
+        assert resolution is not None
 
     def test_survey_passes_languages_to_coarse_structure(self) -> None:
         """survey() should pass languages filter to coarse_structure()."""
-        _, structure_result, _ = survey(
+        _, structure_result, integration_result, _ = survey(
             "/Users/asgupta/code/mojo-lsp", languages=["TypeScript"]
         )
 
@@ -185,9 +186,18 @@ class TestSurvey:
         ts_entries = [e for e in structure_result.entries if e.language == "TypeScript"]
         assert len(ts_entries) > 0
 
+        # Integration detection should also be filtered to TypeScript
+        scanned_languages = {
+            p.match.language.value
+            for p in integration_result.integration_points
+            if p.match.language
+        }
+        assert "TypeScript" in scanned_languages
+        assert "Python" not in scanned_languages
+
     def test_survey_wires_framework_detection_to_integration_scan(self) -> None:
         """survey() should pass detected frameworks to integration detection."""
-        tech_report, _, integration_result = survey("/Users/asgupta/code/mojo-lsp")
+        tech_report, _, integration_result, _ = survey("/Users/asgupta/code/mojo-lsp")
 
         assert "Fastify" in tech_report.frameworks
         assert integration_result.files_scanned > 0

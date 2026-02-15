@@ -13,10 +13,41 @@ from .detectors import (
     detect_languages_from_extensions,
 )
 from .integration_detector import IntegrationDetectorResult, detect_integrations
+from .integration_patterns import Language
 from .pipeline_timer import NullPipelineTimer, PipelineTimer
 from .report import DirectoryMarker, SurveyReport
+from .symbol_resolver import ResolutionResult, resolve_integration_signals
 
 logger = logging.getLogger(__name__)
+
+
+def _normalise_languages(
+    languages: list[str | Language],
+) -> tuple[list[str], list[Language]]:
+    """Split a mixed language list into CTags strings and Language enums.
+
+    str values are kept as-is for CTags and looked up via Language.from_name()
+    for integration detection (gracefully skipped if no matching enum member).
+    Language values use .value for CTags and are kept as-is for integration detection.
+
+    Args:
+        languages: Mixed list of language name strings and Language enum members.
+
+    Returns:
+        Tuple of (ctags_languages, integration_languages).
+    """
+    ctags_languages: list[str] = []
+    integration_languages: list[Language] = []
+    for lang in languages:
+        if isinstance(lang, Language):
+            ctags_languages.append(lang.value)
+            integration_languages.append(lang)
+        else:
+            ctags_languages.append(lang)
+            resolved = Language.from_name(lang)
+            if resolved is not None:
+                integration_languages.append(resolved)
+    return ctags_languages, integration_languages
 
 
 class RepoSurveyor:
@@ -162,26 +193,28 @@ class RepoSurveyor:
 
 def survey(
     repo_path: str,
-    languages: list[str] = [],
+    languages: list[str | Language] = [],
     extra_skip_dirs: list[str] = [],
     timer: PipelineTimer = NullPipelineTimer(),
-) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult]:
-    """Run tech_stacks(), coarse_structure(), and detect_integrations().
+) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult, ResolutionResult]:
+    """Run tech_stacks(), coarse_structure(), detect_integrations(), and symbol resolution.
 
     Convenience function that orchestrates the full analysis pipeline
     without requiring a Neo4j connection.
 
     Args:
         repo_path: Path to the repository to analyze.
-        languages: Languages to pass to coarse_structure()
-                   (e.g., ["Java", "Python"]). Defaults to all.
+        languages: Languages to filter both coarse_structure() and
+                   detect_integrations(). Accepts CTags language name strings
+                   (e.g., "Java") and/or Language enum members. Defaults to all.
         extra_skip_dirs: Additional directory names to skip during scanning,
                          appended to the default skip list.
         timer: Pipeline timing observer for recording stage durations.
 
     Returns:
-        Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult).
+        Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult, ResolutionResult).
     """
+    ctags_languages, integration_languages = _normalise_languages(languages)
     surveyor = RepoSurveyor(repo_path)
 
     timer.stage_started("tech_stacks")
@@ -190,7 +223,7 @@ def survey(
     logger.info("Tech stacks completed")
 
     timer.stage_started("coarse_structure")
-    structure_result = surveyor.coarse_structure(languages=languages)
+    structure_result = surveyor.coarse_structure(languages=ctags_languages)
     timer.stage_completed("coarse_structure")
     logger.info("Coarse structure completed")
 
@@ -200,6 +233,7 @@ def survey(
     timer.stage_started("integration_detection")
     integration_result = detect_integrations(
         repo_path,
+        languages=integration_languages,
         directory_frameworks=directory_frameworks,
         extra_skip_dirs=extra_skip_dirs,
         timer=timer,
@@ -211,4 +245,16 @@ def survey(
         integration_result.files_scanned,
     )
 
-    return tech_report, structure_result, integration_result
+    timer.stage_started("symbol_resolution")
+    resolution = resolve_integration_signals(
+        structure_result, integration_result, repo_path
+    )
+    timer.stage_completed("symbol_resolution")
+    logger.info(
+        "Symbol resolution completed: %d resolved, %d unresolved, %d profiles",
+        len(resolution.resolved),
+        len(resolution.unresolved),
+        len(resolution.profiles),
+    )
+
+    return tech_report, structure_result, integration_result, resolution

@@ -11,6 +11,7 @@ A Python library for experiments in analysing repository technology stacks and c
 - Associates technologies with their containing directories (useful for monorepos)
 - Extracts code symbols using Universal CTags
 - Detects system integration points (HTTP/REST, SOAP, messaging, sockets, databases, FTP/SFTP, GraphQL, email, caching, SSE/streaming, scheduling) with framework-aware pattern matching and tree-sitter syntax zone filtering (skips comments and string literals to reduce false positives)
+- Resolves integration signals to their containing code symbols (via CTags line ranges), producing per-symbol integration profiles
 - Extracts method call trees via [mojo-lsp](https://github.com/avishek-sen-gupta/mojo-lsp) LSP bridge and tree-sitter
 - Persists analysis results to Neo4j graph database
 - Generates plain text and JSON reports
@@ -161,27 +162,31 @@ Example output:
 
 ### Full Analysis Pipeline (without Neo4j)
 
-Run tech stack detection, code structure extraction, and integration point detection in a single call:
+Run tech stack detection, code structure extraction, integration point detection, and symbol resolution in a single call:
 
 ```python
 from repo_surveyor import survey
 
-tech_report, structure_result, integration_result = survey("/path/to/repo", languages=["Java"])
+tech_report, structure_result, integration_result, resolution = survey("/path/to/repo", languages=["Java"])
 
 print(tech_report.to_text())
 print(f"Symbols: {len(structure_result.entries)}")
 print(f"Integration points: {len(integration_result.integration_points)}")
+print(f"Resolved to symbols: {len(resolution.resolved)}")
+print(f"Symbol profiles: {len(resolution.profiles)}")
 ```
 
 Skip additional directories (e.g. test directories) from both tech stack and integration scanning:
 
 ```python
-tech_report, structure_result, integration_result = survey(
+tech_report, structure_result, integration_result, resolution = survey(
     "/path/to/repo", extra_skip_dirs=["test", "tests"]
 )
 ```
 
-The `survey()` function automatically wires detected frameworks from `tech_stacks()` into `detect_integrations()` via the `directory_frameworks` mapping, so framework-specific patterns are applied in the right directories. The `extra_skip_dirs` parameter is propagated to both `tech_stacks()` and `detect_integrations()`. For Neo4j persistence, use `survey_and_persist()` instead.
+The `languages` parameter filters both CTags symbol extraction and integration detection, so only files of the requested languages are scanned across the entire pipeline. It accepts CTags language name strings (e.g., `"Java"`) and/or `Language` enum members (e.g., `Language.JAVA`) — they can be mixed freely. Strings that match a `Language` enum value are normalised automatically; strings without a matching enum (e.g., `"Awk"`) are passed to CTags only and silently skipped by integration detection.
+
+The `survey()` function automatically wires detected frameworks from `tech_stacks()` into `detect_integrations()` via the `directory_frameworks` mapping, so framework-specific patterns are applied in the right directories. The `extra_skip_dirs` parameter is propagated to both `tech_stacks()` and `detect_integrations()`. After integration detection, `resolve_integration_signals()` joins each signal to its containing code symbol using CTags line ranges, producing per-symbol integration profiles. For Neo4j persistence, use `survey_and_persist()` instead.
 
 ### Pipeline Timing
 
@@ -191,7 +196,7 @@ Pass a `PipelineTimingObserver` to `survey()` or `survey_and_persist()` to measu
 from repo_surveyor import survey, PipelineTimingObserver
 
 timer = PipelineTimingObserver()
-tech_report, structure_result, integration_result = survey("/path/to/repo", timer=timer)
+tech_report, structure_result, integration_result, resolution = survey("/path/to/repo", timer=timer)
 
 print(timer.to_json())
 ```
@@ -205,9 +210,10 @@ Example output:
     {"stage": "coarse_structure", "start_time": "2026-02-16T02:53:09.475807+05:30", "end_time": "2026-02-16T02:53:47.705246+05:30", "duration_seconds": 38.229},
     {"stage": "integration_detection.file_scanning", "start_time": "2026-02-16T02:53:47.705356+05:30", "end_time": "2026-02-16T02:53:48.484939+05:30", "duration_seconds": 0.780},
     {"stage": "integration_detection.directory_classification", "start_time": "2026-02-16T02:53:48.484950+05:30", "end_time": "2026-02-16T02:53:48.527112+05:30", "duration_seconds": 0.042},
-    {"stage": "integration_detection", "start_time": "2026-02-16T02:53:47.705280+05:30", "end_time": "2026-02-16T02:53:48.527123+05:30", "duration_seconds": 0.822}
+    {"stage": "integration_detection", "start_time": "2026-02-16T02:53:47.705280+05:30", "end_time": "2026-02-16T02:53:48.527123+05:30", "duration_seconds": 0.822},
+    {"stage": "symbol_resolution", "start_time": "2026-02-16T02:53:48.527200+05:30", "end_time": "2026-02-16T02:53:48.528100+05:30", "duration_seconds": 0.001}
   ],
-  "total_seconds": 39.188
+  "total_seconds": 39.189
 }
 ```
 
@@ -233,7 +239,7 @@ Options:
 - `verbose`: Enable verbose CTags output
 
 Each `CTagsEntry` contains:
-- `name`, `path`, `kind`, `line`
+- `name`, `path`, `kind`, `line`, `end` (end line of the symbol, if available)
 - `scope`, `scope_kind` (containing class/function)
 - `signature` (for methods)
 - `language`
@@ -324,6 +330,38 @@ This means:
 - A Python file in `backend/` will match FastAPI patterns (`@app.get`, `from fastapi import`) alongside base Python patterns (`import requests`, `from sqlalchemy import`)
 - A JS file in `frontend/` will match Express patterns (`app.get(`, `require('express')`) alongside base JavaScript patterns (`require('kafkajs')`, `fetch(`)
 - Files in directories without a framework mapping only match common and base language patterns
+
+### Symbol Resolution
+
+After running the full pipeline, each integration signal is resolved to its containing code symbol using CTags line ranges. This produces per-symbol integration profiles showing which symbols expose endpoints, make database calls, etc.
+
+```python
+from repo_surveyor import survey
+
+_, _, _, resolution = survey("/path/to/repo", languages=["Java"])
+
+for profile in resolution.profiles:
+    print(f"{profile.symbol_kind} {profile.symbol_name} in {profile.symbol_path}:")
+    for si in profile.integrations:
+        print(f"  {si.signal.integration_type.value} (line {si.signal.match.line_number})")
+
+# Unresolved signals (directory-level or outside any symbol range)
+print(f"Unresolved: {len(resolution.unresolved)}")
+```
+
+Results are also available as JSON via `to_json()`:
+
+```python
+print(resolution.to_json())
+```
+
+The resolver can also be called standalone with pre-computed results:
+
+```python
+from repo_surveyor import resolve_integration_signals
+
+resolution = resolve_integration_signals(ctags_result, integration_result, "/path/to/repo")
+```
 
 ### LSP Bridge Client
 
@@ -444,6 +482,10 @@ survey_and_persist()  (full analysis pipeline with Neo4j)
 │   │   └── syntax_zone.parse_file_zones()  (tree-sitter comment/string filtering)
 │   └── classify_directory()
 │
+├── symbol_resolver.resolve_integration_signals()
+│   ├── _SymbolLineIndex (spatial index from CTags entries)
+│   └── joins signals to symbols by file path + line containment
+│
 ├── AnalysisGraphBuilder.persist_tech_stacks()
 │   └── graph_builder.build_tech_stack_graph()
 │
@@ -557,7 +599,7 @@ ctags --output-format=json --fields=* --extras=+q -R
 
 **Step 3 — Parse** (`ctags.py` → `_parse_ctags_json_output()`): Reads the JSON Lines output line by line. Each line with `"_type": "tag"` is converted into a `CTagsEntry` via `CTagsEntry.from_json()`. Metadata lines are skipped.
 
-The result is a `CTagsResult` containing a list of `CTagsEntry` objects (each with `name`, `path`, `kind`, `line`, `scope`, `scope_kind`, `signature`, `language`), the raw output, the return code, and a `success` property.
+The result is a `CTagsResult` containing a list of `CTagsEntry` objects (each with `name`, `path`, `kind`, `line`, `end`, `scope`, `scope_kind`, `signature`, `language`), the raw output, the return code, and a `success` property. The `end` field captures the symbol's end line when CTags provides it (via `--fields=*`); it is `None` when not available.
 
 ### Integration Point Detection: `detect_integrations()`
 
@@ -605,6 +647,28 @@ Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIU
 5. **Directory classification** (`classify_directory()`): After scanning files, directory names themselves are matched against the directory patterns from `common.py` (e.g. `controllers` → HTTP_REST, `proto` → GRPC). These produce directory-level `IntegrationSignal` entries.
 
 The result is an `IntegrationDetectorResult` containing all `IntegrationSignal` instances and the count of files scanned.
+
+### Symbol Resolution: `resolve_integration_signals()`
+
+**Entry point:** `symbol_resolver.py` → `resolve_integration_signals()`
+
+This subsystem joins integration signals to their containing code symbols, producing per-symbol integration profiles. It is a pure function module with no side effects or I/O.
+
+**Step 1 — Build spatial index** (`_SymbolLineIndex`): Groups `CTagsEntry` objects by file path and builds a list of `_SymbolSpan` (start line, end line, symbol ID, name, kind) per file. Symbols with an explicit `end` field (from CTags `--fields=*`) use it directly; symbols without `end` use the next symbol's start line minus one as a heuristic boundary.
+
+**Step 2 — Resolve signals**: For each `IntegrationSignal`:
+- Signals with `entity_type == DIRECTORY` go directly to `unresolved` (directory-level, not symbol-level)
+- For `FILE_CONTENT` signals, the absolute file path is normalised to a relative path by stripping the `repo_path` prefix
+- The `(relative_path, line_number)` pair is looked up in the spatial index
+- The **most specific** (narrowest span) containing symbol is selected
+- If found → `SymbolIntegration`; if no symbol contains the line → `unresolved`
+
+**Step 3 — Group into profiles**: Resolved integrations are grouped by `symbol_id` into `SymbolIntegrationProfile` objects, each listing all integration signals for that symbol.
+
+The result is a `ResolutionResult` containing:
+- `resolved`: tuple of `SymbolIntegration` instances
+- `unresolved`: tuple of `IntegrationSignal` instances (directory-level or outside any symbol range)
+- `profiles`: tuple of `SymbolIntegrationProfile` instances (grouped by symbol)
 
 ### Call Flow Extraction: `extract_call_tree()`
 
@@ -685,7 +749,7 @@ This subsystem persists tech stack and code structure analysis results into a Ne
 2. `UNWIND $relationships ... CREATE (parent)-[:CONTAINS]->(child)`
 3. `UNWIND $top_level ... CREATE (r:Repository)-[:CONTAINS]->(s:CodeSymbol)`
 
-A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()`, `coarse_structure()`, and `detect_integrations()` (using the per-directory framework mappings from tech stack detection), then persists tech stacks and code structure to Neo4j.
+A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()`, `coarse_structure()`, `detect_integrations()` (using the per-directory framework mappings from tech stack detection), and `resolve_integration_signals()`, then persists tech stacks and code structure to Neo4j. Like `survey()`, its `languages` parameter filters both CTags and integration detection and accepts both `str` and `Language` enum values.
 
 ### Design Patterns
 

@@ -4,8 +4,9 @@ from pathlib import Path
 
 import pytest
 
+from repo_surveyor.integration_patterns import Language
 from repo_surveyor.pipeline_timer import PipelineTimingObserver
-from repo_surveyor.surveyor import RepoSurveyor, survey
+from repo_surveyor.surveyor import RepoSurveyor, _normalise_languages, survey
 
 
 def _create_python_repo(tmp_path: Path) -> Path:
@@ -192,19 +193,22 @@ class TestCoarseStructure:
 class TestSurveyFunction:
     """Tests for the survey() convenience function with synthetic repos."""
 
-    def test_returns_three_results(self, tmp_path: Path) -> None:
-        """survey() should return a SurveyReport, CTagsResult, and IntegrationDetectorResult."""
+    def test_returns_four_results(self, tmp_path: Path) -> None:
+        """survey() should return a SurveyReport, CTagsResult, IntegrationDetectorResult, and ResolutionResult."""
         repo = _create_python_repo(tmp_path)
-        tech_report, structure_result, integration_result = survey(str(repo))
+        tech_report, structure_result, integration_result, resolution = survey(
+            str(repo)
+        )
 
         assert "Python" in tech_report.languages
         assert structure_result.success
         assert integration_result.files_scanned > 0
+        assert resolution is not None
 
     def test_wires_frameworks_to_integration_detection(self, tmp_path: Path) -> None:
         """survey() should pass detected frameworks to integration detection."""
         repo = _create_python_repo(tmp_path)
-        tech_report, _, integration_result = survey(str(repo))
+        tech_report, _, integration_result, _ = survey(str(repo))
 
         assert "FastAPI" in tech_report.frameworks
         fastapi_points = [
@@ -215,7 +219,7 @@ class TestSurveyFunction:
     def test_extra_skip_dirs_propagated(self, tmp_path: Path) -> None:
         """survey() should propagate extra_skip_dirs to both stacks and integration detection."""
         repo = _create_monorepo(tmp_path)
-        tech_report, _, integration_result = survey(
+        tech_report, _, integration_result, _ = survey(
             str(repo), extra_skip_dirs=["frontend"]
         )
 
@@ -235,12 +239,83 @@ class TestSurveyFunction:
         assert "integration_detection" in stage_names
         assert "integration_detection.file_scanning" in stage_names
         assert "integration_detection.directory_classification" in stage_names
+        assert "symbol_resolution" in stage_names
 
     def test_languages_filter_passed_to_ctags(self, tmp_path: Path) -> None:
         """survey() should pass languages to coarse_structure()."""
         repo = _create_monorepo(tmp_path)
-        _, structure_result, _ = survey(str(repo), languages=["Python"])
+        _, structure_result, _, _ = survey(str(repo), languages=["Python"])
 
         assert structure_result.success
         languages = {e.language for e in structure_result.entries if e.language}
         assert "JavaScript" not in languages
+
+    def test_languages_filter_passed_to_integration_detection(
+        self, tmp_path: Path
+    ) -> None:
+        """survey() should pass languages to detect_integrations(), filtering integration signals."""
+        repo = _create_monorepo(tmp_path)
+        _, _, integration_result, _ = survey(str(repo), languages=["Python"])
+
+        scanned_languages = {
+            p.match.language.value
+            for p in integration_result.integration_points
+            if p.match.language
+        }
+        assert "JavaScript" not in scanned_languages
+
+    def test_language_enum_accepted_by_survey(self, tmp_path: Path) -> None:
+        """survey() should accept Language enum members directly."""
+        repo = _create_python_repo(tmp_path)
+        _, structure_result, integration_result, _ = survey(
+            str(repo), languages=[Language.PYTHON]
+        )
+
+        assert structure_result.success
+        ctags_languages = {e.language for e in structure_result.entries if e.language}
+        assert ctags_languages <= {"Python"}
+        scanned_languages = {
+            p.match.language.value
+            for p in integration_result.integration_points
+            if p.match.language
+        }
+        assert scanned_languages <= {"Python"}
+
+
+class TestNormaliseLanguages:
+    """Tests for _normalise_languages() helper."""
+
+    def test_string_with_matching_enum(self) -> None:
+        """String values matching a Language enum should appear in both lists."""
+        ctags, integration = _normalise_languages(["Java"])
+
+        assert ctags == ["Java"]
+        assert integration == [Language.JAVA]
+
+    def test_string_without_matching_enum(self) -> None:
+        """String values without a Language enum should appear only in ctags list."""
+        ctags, integration = _normalise_languages(["Awk"])
+
+        assert ctags == ["Awk"]
+        assert integration == []
+
+    def test_language_enum(self) -> None:
+        """Language enum members should appear in both lists."""
+        ctags, integration = _normalise_languages([Language.PYTHON])
+
+        assert ctags == ["Python"]
+        assert integration == [Language.PYTHON]
+
+    def test_mixed_input(self) -> None:
+        """Mixed str and Language inputs should be normalised correctly."""
+        ctags, integration = _normalise_languages(["Awk", Language.JAVA, "Python"])
+
+        assert ctags == ["Awk", "Java", "Python"]
+        assert integration == [Language.JAVA, Language.PYTHON]
+
+    def test_empty_input(self) -> None:
+        """Empty input should produce empty outputs."""
+        ctags, integration = _normalise_languages([])
+
+        assert ctags == []
+        assert integration == []

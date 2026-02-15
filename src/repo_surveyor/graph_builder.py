@@ -33,6 +33,7 @@ class _SymbolNode:
     PATH = "path"
     KIND = "kind"
     LINE = "line"
+    END = "end"
     SIGNATURE = "signature"
     LANGUAGE = "language"
     SCOPE = "scope"
@@ -267,6 +268,7 @@ def _index_symbols(
             _SymbolNode.PATH: entry.path,
             _SymbolNode.KIND: entry.kind,
             _SymbolNode.LINE: entry.line,
+            _SymbolNode.END: entry.end,
             _SymbolNode.SIGNATURE: entry.signature,
             _SymbolNode.LANGUAGE: entry.language,
             _SymbolNode.SCOPE: entry.scope,

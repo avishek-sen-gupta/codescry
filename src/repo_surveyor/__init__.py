@@ -29,6 +29,12 @@ from .pipeline_timer import (
 )
 from .report import DirectoryMarker, SurveyReport
 from .surveyor import RepoSurveyor, survey
+from .symbol_resolver import (
+    ResolutionResult,
+    SymbolIntegration,
+    SymbolIntegrationProfile,
+    resolve_integration_signals,
+)
 
 __all__ = [
     "AnalysisGraphBuilder",
@@ -54,11 +60,15 @@ __all__ = [
     "MLIntegrationType",
     "RepoSurveyor",
     "RepositoryClassification",
+    "ResolutionResult",
     "SurveyReport",
+    "SymbolIntegration",
+    "SymbolIntegrationProfile",
     "SystemClock",
     "classify_file",
     "classify_repository",
     "detect_integrations",
+    "resolve_integration_signals",
     "survey",
     "survey_and_persist",
 ]

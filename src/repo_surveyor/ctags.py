@@ -36,6 +36,7 @@ class CTagsEntry:
     path: str
     kind: str
     line: int
+    end: int | None
     scope: str
     scope_kind: str
     signature: str
@@ -49,6 +50,7 @@ class CTagsEntry:
             path=data.get("path", ""),
             kind=data.get("kind", ""),
             line=data.get("line"),
+            end=data.get("end"),
             scope=data.get("scope"),
             scope_kind=data.get("scopeKind"),
             signature=data.get("signature"),

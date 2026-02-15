@@ -14,9 +14,11 @@ from .graph_builder import (
     build_tech_stack_graph,
 )
 from .integration_detector import IntegrationDetectorResult, detect_integrations
+from .integration_patterns import Language
 from .pipeline_timer import NullPipelineTimer, PipelineTimer
 from .report import SurveyReport
-from .surveyor import RepoSurveyor
+from .surveyor import RepoSurveyor, _normalise_languages
+from .symbol_resolver import ResolutionResult, resolve_integration_signals
 
 load_dotenv("../.env")
 
@@ -255,22 +257,25 @@ def survey_and_persist(
     neo4j_uri: str,
     neo4j_username: str,
     neo4j_password: str,
-    languages: list[str],
+    languages: list[str | Language] = [],
     timer: PipelineTimer = NullPipelineTimer(),
-) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult]:
-    """Run tech_stacks(), coarse_structure(), and detect_integrations(), persisting results to Neo4j.
+) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult, ResolutionResult]:
+    """Run tech_stacks(), coarse_structure(), detect_integrations(), and symbol resolution, persisting results to Neo4j.
 
     Args:
         repo_path: Path to the repository to analyze
         neo4j_uri: Neo4j connection URI
         neo4j_username: Neo4j username
         neo4j_password: Neo4j password
-        languages: Optional list of languages for coarse_structure()
+        languages: Languages to filter both coarse_structure() and
+                   detect_integrations(). Accepts CTags language name strings
+                   (e.g., "Java") and/or Language enum members. Defaults to all.
         timer: Pipeline timing observer for recording stage durations.
 
     Returns:
-        Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult)
+        Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult, ResolutionResult)
     """
+    ctags_languages, integration_languages = _normalise_languages(languages)
     surveyor = RepoSurveyor(repo_path)
 
     timer.stage_started("tech_stacks")
@@ -280,7 +285,7 @@ def survey_and_persist(
 
     timer.stage_started("coarse_structure")
     structure_result = surveyor.coarse_structure(
-        languages=["Java"],
+        languages=ctags_languages,
         exclude_patterns=[
             "target",
             "resources",
@@ -299,13 +304,28 @@ def survey_and_persist(
     }
     timer.stage_started("integration_detection")
     integration_result = detect_integrations(
-        repo_path, directory_frameworks=directory_frameworks, timer=timer
+        repo_path,
+        languages=integration_languages,
+        directory_frameworks=directory_frameworks,
+        timer=timer,
     )
     timer.stage_completed("integration_detection")
     logger.info(
         "Integration detection completed: %d points in %d files",
         len(integration_result.integration_points),
         integration_result.files_scanned,
+    )
+
+    timer.stage_started("symbol_resolution")
+    resolution = resolve_integration_signals(
+        structure_result, integration_result, repo_path
+    )
+    timer.stage_completed("symbol_resolution")
+    logger.info(
+        "Symbol resolution completed: %d resolved, %d unresolved, %d profiles",
+        len(resolution.resolved),
+        len(resolution.unresolved),
+        len(resolution.profiles),
     )
 
     with create_analysis_graph_builder(
@@ -319,7 +339,7 @@ def survey_and_persist(
         builder.persist_coarse_structure(structure_result, repo_path)
         timer.stage_completed("persist_coarse_structure")
 
-    return tech_report, structure_result, integration_result
+    return tech_report, structure_result, integration_result, resolution
 
 
 def main_fn():
@@ -329,7 +349,7 @@ def main_fn():
     password = os.environ.get("NEO4J_PASSWORD")
     print(f"Analyzing repository: {repo}")
     print(f"Connecting to Neo4j at: {uri}")
-    tech_report, structure_result, integration_result = survey_and_persist(
+    tech_report, structure_result, integration_result, resolution = survey_and_persist(
         repo, uri, username, password
     )
     print(f"\nTech Stack Report:")
