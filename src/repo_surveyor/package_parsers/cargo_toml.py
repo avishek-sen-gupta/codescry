@@ -14,10 +14,10 @@ def parse(content: str) -> list[ParsedDependency]:
     except Exception:
         return []
 
-    names: list[str] = []
-
-    for section in ("dependencies", "dev-dependencies", "build-dependencies"):
-        for key in data.get(section, {}):
-            names.append(key.lower())
+    names = [
+        key.lower()
+        for section in ("dependencies", "dev-dependencies", "build-dependencies")
+        for key in data.get(section, {})
+    ]
 
     return [ParsedDependency(name=n, source=SOURCE) for n in names]

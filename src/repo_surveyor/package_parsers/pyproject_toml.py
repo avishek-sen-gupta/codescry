@@ -23,32 +23,37 @@ def parse(content: str) -> list[ParsedDependency]:
     except Exception:
         return []
 
-    names: list[str] = []
-
     # [project.dependencies] - PEP 621
-    for spec in data.get("project", {}).get("dependencies", []):
-        name = _extract_name(spec)
-        if name:
-            names.append(name)
+    pep621_deps = [
+        name
+        for spec in data.get("project", {}).get("dependencies", [])
+        if (name := _extract_name(spec))
+    ]
 
     # [project.optional-dependencies]
-    for deps in data.get("project", {}).get("optional-dependencies", {}).values():
-        for spec in deps:
-            name = _extract_name(spec)
-            if name:
-                names.append(name)
+    optional_deps = [
+        name
+        for deps in data.get("project", {}).get("optional-dependencies", {}).values()
+        for spec in deps
+        if (name := _extract_name(spec))
+    ]
 
-    # [tool.poetry.dependencies]
-    for key in data.get("tool", {}).get("poetry", {}).get("dependencies", {}):
-        names.append(key.lower())
+    poetry = data.get("tool", {}).get("poetry", {})
 
-    # [tool.poetry.dev-dependencies]
-    for key in data.get("tool", {}).get("poetry", {}).get("dev-dependencies", {}):
-        names.append(key.lower())
+    # [tool.poetry.dependencies] + [tool.poetry.dev-dependencies]
+    poetry_deps = [
+        key.lower()
+        for section in ("dependencies", "dev-dependencies")
+        for key in poetry.get(section, {})
+    ]
 
     # [tool.poetry.group.*.dependencies]
-    for group in data.get("tool", {}).get("poetry", {}).get("group", {}).values():
-        for key in group.get("dependencies", {}):
-            names.append(key.lower())
+    poetry_group_deps = [
+        key.lower()
+        for group in poetry.get("group", {}).values()
+        for key in group.get("dependencies", {})
+    ]
+
+    names = pep621_deps + optional_deps + poetry_deps + poetry_group_deps
 
     return [ParsedDependency(name=n, source=SOURCE) for n in names]

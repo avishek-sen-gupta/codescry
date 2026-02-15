@@ -33,10 +33,7 @@ class Language(Enum):
         Returns:
             The matching Language member, or None if not found.
         """
-        for member in cls:
-            if member.value == name:
-                return member
-        return None
+        return next((member for member in cls if member.value == name), None)
 
 
 class IntegrationType(Enum):

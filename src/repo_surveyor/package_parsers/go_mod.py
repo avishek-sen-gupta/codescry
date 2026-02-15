@@ -14,17 +14,15 @@ _MODULE_LINE = re.compile(r"^\s*(\S+)\s+\S+", re.MULTILINE)
 
 def parse(content: str) -> list[ParsedDependency]:
     """Parse dependencies from go.mod content."""
-    modules: list[str] = []
-
     # Multi-line require blocks
-    for block in _REQUIRE_BLOCK.finditer(content):
-        for line_match in _MODULE_LINE.finditer(block.group(1)):
-            path = line_match.group(1)
-            if not path.startswith("//"):
-                modules.append(path.lower())
+    block_modules = [
+        line_match.group(1).lower()
+        for block in _REQUIRE_BLOCK.finditer(content)
+        for line_match in _MODULE_LINE.finditer(block.group(1))
+        if not line_match.group(1).startswith("//")
+    ]
 
     # Single-line require statements
-    for m in _REQUIRE_SINGLE.finditer(content):
-        modules.append(m.group(1).lower())
+    single_modules = [m.group(1).lower() for m in _REQUIRE_SINGLE.finditer(content)]
 
-    return [ParsedDependency(name=mod, source=SOURCE) for mod in modules]
+    return [ParsedDependency(name=mod, source=SOURCE) for mod in block_modules + single_modules]

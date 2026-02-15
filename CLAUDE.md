@@ -16,7 +16,7 @@
 
 - Use proper dependency injection for interfaces to external systems like Neo4J, OS, and File I/O. Do not hardcode importing the concrete modules in these cases.
 - Minimise and/or avoid mutation
-- Write your code in the Functional Programming style, but balance it with readability
+- Write your code in the Functional Programming style, but balance it with readability. Avoid for loops where list comprehensions, filter, reduce, etc. can be used.
 - Minimise magic strings and numbers by refactoring them into constants
 - Don't expose raw global variables in files indiscriminately; wrap them as constants in classes, etc.
 - Parameters in functions, if they must have default values, must have those values as empty structures corresponding to the non-empty types (empty dictionaries, lists, etc.). Categorically, do not use None.

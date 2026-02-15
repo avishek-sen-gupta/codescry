@@ -131,8 +131,7 @@ def _build_ctags_command(config: CTagsConfig) -> list[str]:
     if config.languages:
         cmd.append(f"--languages={','.join(config.languages)}")
 
-    for pattern in config.exclude_patterns:
-        cmd.append(f"--exclude={pattern}")
+    cmd.extend(f"--exclude={pattern}" for pattern in config.exclude_patterns)
 
     if config.verbose:
         cmd.append("--verbose=yes")
@@ -140,19 +139,21 @@ def _build_ctags_command(config: CTagsConfig) -> list[str]:
     return cmd
 
 
+def _try_parse_json(line: str) -> dict | None:
+    """Attempt to parse a JSON line, returning None on failure."""
+    try:
+        return json.loads(line)
+    except json.JSONDecodeError:
+        return None
+
+
 def _parse_ctags_json_output(output: str) -> list[CTagsEntry]:
     """Parse CTags JSON output into CTagsEntry objects.
 
     CTags JSON output is one JSON object per line (JSON Lines format).
     """
-    entries = []
-    for line in output.strip().split("\n"):
-        if not line:
-            continue
-        try:
-            data = json.loads(line)
-            if data.get("_type") == "tag":
-                entries.append(CTagsEntry.from_json(data))
-        except json.JSONDecodeError:
-            continue
-    return entries
+    return [
+        CTagsEntry.from_json(data)
+        for line in output.strip().split("\n")
+        if line and (data := _try_parse_json(line)) and data.get("_type") == "tag"
+    ]

@@ -217,18 +217,16 @@ def _collect_tech_nodes(tech_nodes: list[dict], path: str, marker) -> list[dict]
         ),
     ]
 
-    for items, tech_type, rel_type in tech_mappings:
-        for item in items:
-            new_nodes.append(
-                {
-                    _TechNode.DIRECTORY: path,
-                    _TechNode.TYPE: tech_type,
-                    _TechNode.NAME: item,
-                    _TechNode.REL_TYPE: rel_type,
-                }
-            )
-
-    return new_nodes
+    return new_nodes + [
+        {
+            _TechNode.DIRECTORY: path,
+            _TechNode.TYPE: tech_type,
+            _TechNode.NAME: item,
+            _TechNode.REL_TYPE: rel_type,
+        }
+        for items, tech_type, rel_type in tech_mappings
+        for item in items
+    ]
 
 
 def build_coarse_structure_graph(

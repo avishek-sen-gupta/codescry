@@ -99,31 +99,27 @@ class PluginRegistry:
             extensions = tuple(lang_data.get(_EXTENSIONS, []))
 
             # Build indicator file configs
-            indicator_files: list[IndicatorFileConfig] = []
-            for filename, file_cfg in lang_data.get(_INDICATOR_FILES, {}).items():
-                additional = file_cfg.get(_ADDITIONAL_LANGUAGES, [])
-                all_languages = (lang_name, *additional)
-                indicator_files.append(
-                    IndicatorFileConfig(
-                        filename=filename,
-                        languages=all_languages,
-                        package_managers=tuple(file_cfg.get(_PACKAGE_MANAGERS, [])),
-                        parser_module_name=file_cfg.get(_PARSER, ""),
-                    )
+            indicator_files = [
+                IndicatorFileConfig(
+                    filename=filename,
+                    languages=(lang_name, *file_cfg.get(_ADDITIONAL_LANGUAGES, [])),
+                    package_managers=tuple(file_cfg.get(_PACKAGE_MANAGERS, [])),
+                    parser_module_name=file_cfg.get(_PARSER, ""),
                 )
+                for filename, file_cfg in lang_data.get(_INDICATOR_FILES, {}).items()
+            ]
 
             # Build glob indicator configs
-            glob_indicators: list[GlobIndicatorConfig] = []
-            for pattern, glob_cfg in lang_data.get(_GLOB_INDICATORS, {}).items():
-                glob_indicators.append(
-                    GlobIndicatorConfig(
-                        pattern=pattern,
-                        languages=(lang_name,),
-                        package_managers=tuple(glob_cfg.get(_PACKAGE_MANAGERS, [])),
-                        frameworks=tuple(glob_cfg.get(_FRAMEWORKS, [])),
-                        parser_module_name=glob_cfg.get(_PARSER, ""),
-                    )
+            glob_indicators = [
+                GlobIndicatorConfig(
+                    pattern=pattern,
+                    languages=(lang_name,),
+                    package_managers=tuple(glob_cfg.get(_PACKAGE_MANAGERS, [])),
+                    frameworks=tuple(glob_cfg.get(_FRAMEWORKS, [])),
+                    parser_module_name=glob_cfg.get(_PARSER, ""),
                 )
+                for pattern, glob_cfg in lang_data.get(_GLOB_INDICATORS, {}).items()
+            ]
 
             pm_indicators = lang_data.get(_PACKAGE_MANAGER_INDICATORS, {})
             framework_patterns = lang_data.get(_FRAMEWORK_PATTERNS, {})
@@ -157,82 +153,112 @@ class PluginRegistry:
                 )
 
     def _load_infrastructure(self, infra_raw: dict[str, Any]) -> None:
-        for name, cfg in infra_raw.items():
-            self._infra[name] = InfrastructureConfig(
+        self._infra = {
+            name: InfrastructureConfig(
                 name=name,
                 indicator_files=tuple(cfg.get(_INDICATOR_FILES, [])),
                 glob_indicators=tuple(cfg.get(_GLOB_INDICATORS, [])),
                 yaml_content_markers=tuple(cfg.get(_YAML_CONTENT_MARKERS, [])),
             )
+            for name, cfg in infra_raw.items()
+        }
 
     # --- Backward-compatible query APIs ---
 
     def indicator_files(self) -> dict[str, dict[str, list[str]]]:
         """Produce the same shape as the old INDICATOR_FILES dict in detectors.py."""
-        result: dict[str, dict[str, list[str]]] = {}
+
+        def _build_indicator_entry(ind: IndicatorFileConfig) -> dict[str, list[str]]:
+            return {
+                **(
+                    {TechCategory.LANGUAGES: list(ind.languages)}
+                    if ind.languages
+                    else {}
+                ),
+                **(
+                    {TechCategory.PACKAGE_MANAGERS: list(ind.package_managers)}
+                    if ind.package_managers
+                    else {}
+                ),
+            }
 
         # Language indicator files
-        for plugin in self._plugins.values():
-            for ind in plugin.indicator_files:
-                entry: dict[str, list[str]] = {}
-                if ind.languages:
-                    entry[TechCategory.LANGUAGES] = list(ind.languages)
-                if ind.package_managers:
-                    entry[TechCategory.PACKAGE_MANAGERS] = list(ind.package_managers)
-                result[ind.filename] = entry
+        result: dict[str, dict[str, list[str]]] = {
+            ind.filename: _build_indicator_entry(ind)
+            for plugin in self._plugins.values()
+            for ind in plugin.indicator_files
+        }
 
-            # Package manager indicators (no language, just PM)
-            for filename, pm_name in plugin.package_manager_indicators.items():
-                result[filename] = {TechCategory.PACKAGE_MANAGERS: [pm_name]}
+        # Package manager indicators (no language, just PM)
+        result |= {
+            filename: {TechCategory.PACKAGE_MANAGERS: [pm_name]}
+            for plugin in self._plugins.values()
+            for filename, pm_name in plugin.package_manager_indicators.items()
+        }
 
         # Infrastructure indicator files
-        for infra in self._infra.values():
-            for filename in infra.indicator_files:
-                result[filename] = {TechCategory.INFRASTRUCTURE: [infra.name]}
+        result |= {
+            filename: {TechCategory.INFRASTRUCTURE: [infra.name]}
+            for infra in self._infra.values()
+            for filename in infra.indicator_files
+        }
 
         return result
 
     def extension_languages(self) -> dict[str, str]:
         """Produce the same shape as the old EXTENSION_LANGUAGES dict."""
-        result: dict[str, str] = {}
-        for plugin in self._plugins.values():
-            for ext in plugin.extensions:
-                result[ext] = plugin.name
-        return result
+        return {
+            ext: plugin.name
+            for plugin in self._plugins.values()
+            for ext in plugin.extensions
+        }
 
     def all_framework_patterns(self) -> dict[str, dict[str, str]]:
         """Produce the same shape as the old FRAMEWORK_PATTERNS dict.
 
         Merges framework_patterns from all languages into a single flat dict.
         """
-        result: dict[str, dict[str, str]] = {}
-        for plugin in self._plugins.values():
-            for dep_pattern, framework_name in plugin.framework_patterns.items():
-                result[dep_pattern] = {TechCategory.FRAMEWORKS: framework_name}
-        return result
+        return {
+            dep_pattern: {TechCategory.FRAMEWORKS: framework_name}
+            for plugin in self._plugins.values()
+            for dep_pattern, framework_name in plugin.framework_patterns.items()
+        }
 
     def glob_patterns(self) -> dict[str, dict[str, list[str]]]:
         """Produce the same shape as the old GLOB_PATTERNS dict."""
-        result: dict[str, dict[str, list[str]]] = {}
+
+        def _build_glob_entry(glob_ind: GlobIndicatorConfig) -> dict[str, list[str]]:
+            return {
+                **(
+                    {TechCategory.LANGUAGES: list(glob_ind.languages)}
+                    if glob_ind.languages
+                    else {}
+                ),
+                **(
+                    {TechCategory.PACKAGE_MANAGERS: list(glob_ind.package_managers)}
+                    if glob_ind.package_managers
+                    else {}
+                ),
+                **(
+                    {TechCategory.FRAMEWORKS: list(glob_ind.frameworks)}
+                    if glob_ind.frameworks
+                    else {}
+                ),
+            }
 
         # Language glob indicators
-        for plugin in self._plugins.values():
-            for glob_ind in plugin.glob_indicators:
-                entry: dict[str, list[str]] = {}
-                if glob_ind.languages:
-                    entry[TechCategory.LANGUAGES] = list(glob_ind.languages)
-                if glob_ind.package_managers:
-                    entry[TechCategory.PACKAGE_MANAGERS] = list(
-                        glob_ind.package_managers
-                    )
-                if glob_ind.frameworks:
-                    entry[TechCategory.FRAMEWORKS] = list(glob_ind.frameworks)
-                result[glob_ind.pattern] = entry
+        result: dict[str, dict[str, list[str]]] = {
+            glob_ind.pattern: _build_glob_entry(glob_ind)
+            for plugin in self._plugins.values()
+            for glob_ind in plugin.glob_indicators
+        }
 
         # Infrastructure glob indicators
-        for infra in self._infra.values():
-            for pattern in infra.glob_indicators:
-                result[pattern] = {TechCategory.INFRASTRUCTURE: [infra.name]}
+        result |= {
+            pattern: {TechCategory.INFRASTRUCTURE: [infra.name]}
+            for infra in self._infra.values()
+            for pattern in infra.glob_indicators
+        }
 
         return result
 
@@ -249,13 +275,12 @@ class PluginRegistry:
         """Produce the same shape as EXTENSION_TO_LANGUAGE in integration_patterns."""
         from .integration_patterns.types import Language as Lang
 
-        result: dict[str, Lang] = {}
-        for plugin in self._plugins.values():
-            lang_enum = Lang.from_name(plugin.name)
-            if lang_enum is not None:
-                for ext in plugin.extensions:
-                    result[ext] = lang_enum
-        return result
+        return {
+            ext: lang_enum
+            for plugin in self._plugins.values()
+            if (lang_enum := Lang.from_name(plugin.name)) is not None
+            for ext in plugin.extensions
+        }
 
     def language_to_integration_module(self) -> dict[Language, Any]:
         """Produce the same shape as LANGUAGE_MODULES in integration_patterns.
@@ -264,19 +289,15 @@ class PluginRegistry:
         """
         from .integration_patterns.types import Language as Lang
 
-        result: dict[str, Lang] = {}
-        for plugin in self._plugins.values():
-            if not plugin.integration_module_name:
-                continue
-            lang_enum = Lang.from_name(plugin.name)
-            if lang_enum is None:
-                continue
-            module = importlib.import_module(
+        return {
+            lang_enum: importlib.import_module(
                 f".integration_patterns.{plugin.integration_module_name}",
                 package="repo_surveyor",
             )
-            result[lang_enum] = module
-        return result
+            for plugin in self._plugins.values()
+            if plugin.integration_module_name
+            and (lang_enum := Lang.from_name(plugin.name)) is not None
+        }
 
     # --- Direct plugin access ---
 

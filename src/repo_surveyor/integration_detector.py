@@ -8,6 +8,7 @@ import json
 import re
 from dataclasses import dataclass
 from enum import Enum
+from itertools import chain
 from pathlib import Path
 from typing import Iterator
 
@@ -136,12 +137,12 @@ def _find_frameworks_for_file(
         List of framework names applicable to this file.
     """
     rel_path = file_path.relative_to(repo_path)
-    frameworks: list[str] = []
-    for parent in [rel_path.parent, *rel_path.parent.parents]:
-        dir_key = "." if parent == Path(".") else str(parent)
-        if dir_key in directory_frameworks:
-            frameworks.extend(directory_frameworks[dir_key])
-    return frameworks
+    return list(chain.from_iterable(
+        directory_frameworks.get(
+            "." if parent == Path(".") else str(parent), []
+        )
+        for parent in [rel_path.parent, *rel_path.parent.parents]
+    ))
 
 
 def scan_file_for_integrations(
