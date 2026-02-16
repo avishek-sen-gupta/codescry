@@ -42,6 +42,7 @@ class IntegrationLabel:
 
     INTEGRATION_TYPE = "IntegrationType"
     INTEGRATION_SIGNAL = "IntegrationSignal"
+    PATTERN_MATCH = "PatternMatch"
     UNRESOLVED_INTEGRATION = "UnresolvedIntegration"
 
 
@@ -50,4 +51,5 @@ class IntegrationRelType:
 
     HAS_INTEGRATION = "HAS_INTEGRATION"
     OF_TYPE = "OF_TYPE"
+    MATCHED_BY = "MATCHED_BY"
     HAS_UNRESOLVED_INTEGRATION = "HAS_UNRESOLVED_INTEGRATION"

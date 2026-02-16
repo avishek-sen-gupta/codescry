@@ -437,7 +437,7 @@ This creates a graph with:
 - `Directory` nodes with hierarchy relationships
 - `Language`, `PackageManager`, `Framework`, `Infrastructure` nodes
 - `CodeSymbol` nodes with parent-child relationships based on scope (each node has a `qualified_name` field combining scope and name, e.g. `MyClass.myMethod`)
-- `IntegrationSignal` nodes (carrying confidence, matched pattern, matched line content, source, line number, and file path) linked from `CodeSymbol` via `HAS_INTEGRATION` and to `IntegrationType` nodes (e.g. `http_rest`, `database`) via `OF_TYPE`
+- `IntegrationSignal` nodes (carrying confidence, matched line content, line number, and file path) linked from `CodeSymbol` via `HAS_INTEGRATION` and to `IntegrationType` nodes (e.g. `http_rest`, `database`) via `OF_TYPE`. Each signal has one or more `PatternMatch` child nodes (carrying matched pattern, confidence, and source) linked via `MATCHED_BY` — multiple matches for the same line/type/symbol are consolidated into a single signal with reinforcing pattern matches, and the signal's confidence is the highest among its contributing matches
 - `UnresolvedIntegration` nodes for signals not resolved to any symbol, linked from `Repository` via `HAS_UNRESOLVED_INTEGRATION`
 
 ## Technical Documentation
@@ -756,11 +756,11 @@ This subsystem persists tech stack and code structure analysis results into a Ne
 
 #### Integration persistence: `persist_integrations(resolution, integration_result, repo_path)`
 
-**Step 1 — Build graph data** (`graph_builder.py` → `build_integration_graph()`): Extracts unique integration type names, builds resolved integration dicts (symbol_id, integration_type, confidence, matched_pattern, source, line_number, file_path), and unresolved integration dicts (integration_type, confidence, matched_pattern, entity_type, file_path, line_number, line_content, source).
+**Step 1 — Build graph data** (`graph_builder.py` → `build_integration_graph()`): Extracts unique integration type names, builds flat resolved dicts from each signal, then consolidates them by `(symbol_id, file_path, line_number, integration_type)`. Each consolidated dict contains a `pattern_matches` list and a `confidence` set to the highest among contributing matches. Unresolved integration dicts are built separately (integration_type, confidence, matched_pattern, entity_type, file_path, line_number, line_content, source).
 
 **Step 2 — Execute Cypher**: Creates nodes and relationships in up to three batched queries:
 1. `UNWIND $names ... MERGE (t:IntegrationType {name})` — idempotent creation of integration type nodes
-2. `UNWIND $integrations ... MATCH (CodeSymbol) MATCH (IntegrationType) CREATE (sig:IntegrationSignal {...}) CREATE (s)-[:HAS_INTEGRATION]->(sig) CREATE (sig)-[:OF_TYPE]->(t)` — creates IntegrationSignal nodes with confidence, matched pattern, line content, source, line number, and file path, linked from symbols and to their integration types
+2. `UNWIND $integrations ... MATCH (CodeSymbol) MATCH (IntegrationType) CREATE (sig:IntegrationSignal {...}) CREATE (s)-[:HAS_INTEGRATION]->(sig) CREATE (sig)-[:OF_TYPE]->(t) WITH sig, i UNWIND i.pattern_matches AS pm CREATE (m:PatternMatch {...}) CREATE (sig)-[:MATCHED_BY]->(m)` — creates IntegrationSignal nodes with confidence, line content, line number, and file path, linked from symbols and to their integration types, with child PatternMatch nodes (matched_pattern, confidence, source) linked via MATCHED_BY
 3. `UNWIND $signals ... MATCH (Repository) CREATE (u:UnresolvedIntegration {...}) CREATE (r)-[:HAS_UNRESOLVED_INTEGRATION]->(u)` — persists signals not resolved to any symbol
 
 A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()`, `coarse_structure()`, `detect_integrations()` (using the per-directory framework mappings from tech stack detection), and `resolve_integration_signals()`, then persists tech stacks, code structure, and integration results to Neo4j. Like `survey()`, its `languages` parameter filters both CTags and integration detection and accepts both `str` and `Language` enum values.

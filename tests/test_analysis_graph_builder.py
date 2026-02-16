@@ -841,7 +841,7 @@ class TestBuildIntegrationGraph:
         assert type_names == ["database", "http_rest"]
 
     def test_builds_resolved_dicts(self) -> None:
-        """Should build resolved integration dicts with correct keys."""
+        """Should build consolidated resolved dicts with pattern_matches list."""
         signal = _make_signal(
             integration_type=IntegrationType.DATABASE,
             confidence=Confidence.MEDIUM,
@@ -873,11 +873,16 @@ class TestBuildIntegrationGraph:
         assert r["symbol_id"] == "src/User.java:User:class:1"
         assert r["integration_type"] == "database"
         assert r["confidence"] == "medium"
-        assert r["matched_pattern"] == "@Entity"
         assert r["line_content"] == "@Entity"
-        assert r["source"] == "Spring"
         assert r["line_number"] == 5
         assert r["file_path"] == "/repo/src/User.java"
+        assert "matched_pattern" not in r
+        assert "source" not in r
+        assert len(r["pattern_matches"]) == 1
+        pm = r["pattern_matches"][0]
+        assert pm["matched_pattern"] == "@Entity"
+        assert pm["confidence"] == "medium"
+        assert pm["source"] == "Spring"
 
     def test_builds_unresolved_dicts(self) -> None:
         """Should build unresolved integration dicts with correct keys."""
@@ -911,6 +916,100 @@ class TestBuildIntegrationGraph:
         assert type_names == []
         assert resolved == []
         assert unresolved == []
+
+    def test_consolidates_multiple_patterns_same_line(self) -> None:
+        """Two signals same line/type/symbol should consolidate into one dict with 2 pattern matches."""
+        sig_spring = _make_signal(
+            integration_type=IntegrationType.HTTP_REST,
+            confidence=Confidence.HIGH,
+            matched_pattern="@RestController",
+            source="Spring",
+            file_path="/repo/src/Controller.java",
+            line_number=10,
+            line_content="@RestController",
+        )
+        sig_base = _make_signal(
+            integration_type=IntegrationType.HTTP_REST,
+            confidence=Confidence.MEDIUM,
+            matched_pattern="@RestController",
+            source="Java",
+            file_path="/repo/src/Controller.java",
+            line_number=10,
+            line_content="@RestController",
+        )
+        symbol_id = "src/Controller.java:Controller:class:1"
+        resolution = ResolutionResult(
+            resolved=(
+                SymbolIntegration(
+                    symbol_id=symbol_id,
+                    symbol_name="Controller",
+                    symbol_kind="class",
+                    signal=sig_spring,
+                ),
+                SymbolIntegration(
+                    symbol_id=symbol_id,
+                    symbol_name="Controller",
+                    symbol_kind="class",
+                    signal=sig_base,
+                ),
+            ),
+            unresolved=(),
+            profiles=(),
+        )
+
+        _, resolved, _ = build_integration_graph(
+            resolution, _empty_integration_result()
+        )
+
+        assert len(resolved) == 1
+        r = resolved[0]
+        assert r["confidence"] == "high"
+        assert len(r["pattern_matches"]) == 2
+        sources = {pm["source"] for pm in r["pattern_matches"]}
+        assert sources == {"Spring", "Java"}
+
+    def test_preserves_different_integration_types_same_line(self) -> None:
+        """Two signals same line but different types should remain separate."""
+        sig_http = _make_signal(
+            integration_type=IntegrationType.HTTP_REST,
+            file_path="/repo/src/Controller.java",
+            line_number=10,
+            line_content="@RestController",
+        )
+        sig_db = _make_signal(
+            integration_type=IntegrationType.DATABASE,
+            matched_pattern="@Entity",
+            file_path="/repo/src/Controller.java",
+            line_number=10,
+            line_content="@RestController",
+        )
+        symbol_id = "src/Controller.java:Controller:class:1"
+        resolution = ResolutionResult(
+            resolved=(
+                SymbolIntegration(
+                    symbol_id=symbol_id,
+                    symbol_name="Controller",
+                    symbol_kind="class",
+                    signal=sig_http,
+                ),
+                SymbolIntegration(
+                    symbol_id=symbol_id,
+                    symbol_name="Controller",
+                    symbol_kind="class",
+                    signal=sig_db,
+                ),
+            ),
+            unresolved=(),
+            profiles=(),
+        )
+
+        _, resolved, _ = build_integration_graph(
+            resolution, _empty_integration_result()
+        )
+
+        assert len(resolved) == 2
+        types = {r["integration_type"] for r in resolved}
+        assert types == {"http_rest", "database"}
 
 
 class TestPersistIntegrations:
@@ -946,7 +1045,7 @@ class TestPersistIntegrations:
         assert len(merge_calls) == 1
 
     def test_creates_integration_signal_nodes(self) -> None:
-        """Should create IntegrationSignal nodes linked to CodeSymbol and IntegrationType."""
+        """Should create IntegrationSignal and PatternMatch nodes with MATCHED_BY."""
         mock_driver, mock_session = create_mock_driver_with_session()
         builder = AnalysisGraphBuilder(mock_driver)
 
@@ -972,10 +1071,11 @@ class TestPersistIntegrations:
         signal_calls = [c for c in calls if "IntegrationSignal" in str(c)]
         assert len(signal_calls) >= 1
 
-        # Should contain both HAS_INTEGRATION and OF_TYPE relationships
         cypher = str(signal_calls[0])
         assert "HAS_INTEGRATION" in cypher
         assert "OF_TYPE" in cypher
+        assert "MATCHED_BY" in cypher
+        assert "PatternMatch" in cypher
 
     def test_creates_unresolved_integration_nodes(self) -> None:
         """Should create UnresolvedIntegration nodes for unresolved signals."""
@@ -1010,7 +1110,7 @@ class TestPersistIntegrations:
         mock_session.run.assert_not_called()
 
     def test_integration_signal_node_properties(self) -> None:
-        """Should pass confidence, pattern, line_content, source, line on IntegrationSignal node."""
+        """Should pass confidence, line_content, line_number, file_path, and pattern_matches."""
         mock_driver, mock_session = create_mock_driver_with_session()
         builder = AnalysisGraphBuilder(mock_driver)
 
@@ -1048,8 +1148,11 @@ class TestPersistIntegrations:
         assert len(integrations) == 1
         i = integrations[0]
         assert i["confidence"] == "medium"
-        assert i["matched_pattern"] == "@Entity"
         assert i["line_content"] == "@Entity"
-        assert i["source"] == "Spring"
         assert i["line_number"] == 42
         assert i["file_path"] == "/repo/src/User.java"
+        assert len(i["pattern_matches"]) == 1
+        pm = i["pattern_matches"][0]
+        assert pm["matched_pattern"] == "@Entity"
+        assert pm["confidence"] == "medium"
+        assert pm["source"] == "Spring"

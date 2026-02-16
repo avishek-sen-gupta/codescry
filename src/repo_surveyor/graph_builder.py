@@ -4,6 +4,8 @@ Pure functions that transform survey data into graph representations.
 These are independent of any specific graph database.
 """
 
+import itertools
+
 from .constants import TechLabel, TechRelType
 from .ctags import CTagsResult
 from .integration_detector import (
@@ -332,15 +334,20 @@ def _resolve_relationships(
     return relationships, symbols_with_parents
 
 
+class _PatternMatchDict:
+    MATCHED_PATTERN = "matched_pattern"
+    CONFIDENCE = "confidence"
+    SOURCE = "source"
+
+
 class _ResolvedIntegrationDict:
     SYMBOL_ID = "symbol_id"
     INTEGRATION_TYPE = "integration_type"
     CONFIDENCE = "confidence"
-    MATCHED_PATTERN = "matched_pattern"
     LINE_CONTENT = "line_content"
-    SOURCE = "source"
     LINE_NUMBER = "line_number"
     FILE_PATH = "file_path"
+    PATTERN_MATCHES = "pattern_matches"
 
 
 class _UnresolvedIntegrationDict:
@@ -352,6 +359,73 @@ class _UnresolvedIntegrationDict:
     LINE_NUMBER = "line_number"
     LINE_CONTENT = "line_content"
     SOURCE = "source"
+
+
+_CONFIDENCE_RANK = {"high": 2, "medium": 1, "low": 0}
+
+
+def _make_grouping_key(d: dict) -> tuple:
+    """Extract the grouping key for consolidation."""
+    return (
+        d[_FlatResolvedDict.SYMBOL_ID],
+        d[_FlatResolvedDict.FILE_PATH],
+        d[_FlatResolvedDict.LINE_NUMBER],
+        d[_FlatResolvedDict.INTEGRATION_TYPE],
+    )
+
+
+def _extract_pattern_match(d: dict) -> dict:
+    """Extract pattern match fields from a flat resolved dict."""
+    return {
+        _PatternMatchDict.MATCHED_PATTERN: d[_FlatResolvedDict.MATCHED_PATTERN],
+        _PatternMatchDict.CONFIDENCE: d[_FlatResolvedDict.CONFIDENCE],
+        _PatternMatchDict.SOURCE: d[_FlatResolvedDict.SOURCE],
+    }
+
+
+def _highest_confidence(values: list[str]) -> str:
+    """Return the highest confidence from a list of confidence strings."""
+    return max(values, key=lambda v: _CONFIDENCE_RANK.get(v, -1))
+
+
+def _consolidate_resolved_integrations(flat_dicts: list[dict]) -> list[dict]:
+    """Group flat resolved dicts by (symbol_id, file_path, line_number, integration_type).
+
+    Produces consolidated dicts with a pattern_matches list and highest confidence.
+    """
+    sorted_dicts = sorted(flat_dicts, key=_make_grouping_key)
+    return [
+        {
+            _ResolvedIntegrationDict.SYMBOL_ID: key[0],
+            _ResolvedIntegrationDict.FILE_PATH: key[1],
+            _ResolvedIntegrationDict.LINE_NUMBER: key[2],
+            _ResolvedIntegrationDict.INTEGRATION_TYPE: key[3],
+            _ResolvedIntegrationDict.LINE_CONTENT: group_list[0][
+                _FlatResolvedDict.LINE_CONTENT
+            ],
+            _ResolvedIntegrationDict.CONFIDENCE: _highest_confidence(
+                [d[_FlatResolvedDict.CONFIDENCE] for d in group_list]
+            ),
+            _ResolvedIntegrationDict.PATTERN_MATCHES: [
+                _extract_pattern_match(d) for d in group_list
+            ],
+        }
+        for key, group in itertools.groupby(sorted_dicts, key=_make_grouping_key)
+        for group_list in [list(group)]
+    ]
+
+
+class _FlatResolvedDict:
+    """Keys for the intermediate flat resolved dict before consolidation."""
+
+    SYMBOL_ID = "symbol_id"
+    INTEGRATION_TYPE = "integration_type"
+    CONFIDENCE = "confidence"
+    MATCHED_PATTERN = "matched_pattern"
+    LINE_CONTENT = "line_content"
+    SOURCE = "source"
+    LINE_NUMBER = "line_number"
+    FILE_PATH = "file_path"
 
 
 def build_integration_graph(
@@ -367,7 +441,7 @@ def build_integration_graph(
     Returns:
         Tuple of:
         - integration_type_names: Unique integration type value strings
-        - resolved_integrations: List of dicts for resolved symbol integrations
+        - resolved_integrations: List of consolidated dicts for resolved symbol integrations
         - unresolved_integrations: List of dicts for unresolved signals
     """
     all_signals = [si.signal for si in resolution.resolved] + list(
@@ -377,9 +451,10 @@ def build_integration_graph(
         {signal.integration_type.value for signal in all_signals}
     )
 
-    resolved_integrations = [
-        _build_resolved_dict(si.symbol_id, si.signal) for si in resolution.resolved
+    flat_resolved = [
+        _build_flat_resolved_dict(si.symbol_id, si.signal) for si in resolution.resolved
     ]
+    resolved_integrations = _consolidate_resolved_integrations(flat_resolved)
 
     unresolved_integrations = [
         _build_unresolved_dict(signal) for signal in resolution.unresolved
@@ -388,17 +463,17 @@ def build_integration_graph(
     return integration_type_names, resolved_integrations, unresolved_integrations
 
 
-def _build_resolved_dict(symbol_id: str, signal: IntegrationSignal) -> dict:
-    """Build a dict for a resolved symbol integration."""
+def _build_flat_resolved_dict(symbol_id: str, signal: IntegrationSignal) -> dict:
+    """Build a flat dict for a resolved symbol integration (before consolidation)."""
     return {
-        _ResolvedIntegrationDict.SYMBOL_ID: symbol_id,
-        _ResolvedIntegrationDict.INTEGRATION_TYPE: signal.integration_type.value,
-        _ResolvedIntegrationDict.CONFIDENCE: signal.confidence.value,
-        _ResolvedIntegrationDict.MATCHED_PATTERN: signal.matched_pattern,
-        _ResolvedIntegrationDict.LINE_CONTENT: signal.match.line_content,
-        _ResolvedIntegrationDict.SOURCE: signal.source,
-        _ResolvedIntegrationDict.LINE_NUMBER: signal.match.line_number,
-        _ResolvedIntegrationDict.FILE_PATH: signal.match.file_path,
+        _FlatResolvedDict.SYMBOL_ID: symbol_id,
+        _FlatResolvedDict.INTEGRATION_TYPE: signal.integration_type.value,
+        _FlatResolvedDict.CONFIDENCE: signal.confidence.value,
+        _FlatResolvedDict.MATCHED_PATTERN: signal.matched_pattern,
+        _FlatResolvedDict.LINE_CONTENT: signal.match.line_content,
+        _FlatResolvedDict.SOURCE: signal.source,
+        _FlatResolvedDict.LINE_NUMBER: signal.match.line_number,
+        _FlatResolvedDict.FILE_PATH: signal.match.file_path,
     }
 
 

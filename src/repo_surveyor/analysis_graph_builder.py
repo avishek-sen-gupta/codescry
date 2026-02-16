@@ -284,14 +284,20 @@ class AnalysisGraphBuilder:
                     MATCH (t:{IntegrationLabel.INTEGRATION_TYPE} {{name: i.integration_type}})
                     CREATE (sig:{IntegrationLabel.INTEGRATION_SIGNAL} {{
                         confidence: i.confidence,
-                        matched_pattern: i.matched_pattern,
                         line_content: i.line_content,
-                        source: i.source,
                         line_number: i.line_number,
                         file_path: i.file_path
                     }})
                     CREATE (s)-[:{IntegrationRelType.HAS_INTEGRATION}]->(sig)
                     CREATE (sig)-[:{IntegrationRelType.OF_TYPE}]->(t)
+                    WITH sig, i
+                    UNWIND i.pattern_matches AS pm
+                    CREATE (m:{IntegrationLabel.PATTERN_MATCH} {{
+                        matched_pattern: pm.matched_pattern,
+                        confidence: pm.confidence,
+                        source: pm.source
+                    }})
+                    CREATE (sig)-[:{IntegrationRelType.MATCHED_BY}]->(m)
                     """,
                     repo_path=repo_path,
                     integrations=resolved_integrations,
