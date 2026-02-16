@@ -786,6 +786,43 @@ This subsystem persists tech stack and code structure analysis results into a Ne
 
 A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()`, `coarse_structure()`, `detect_integrations()` (using the per-directory framework mappings from tech stack detection), and `resolve_integration_signals()`, then persists tech stacks, code structure, and integration results to Neo4j. Like `survey()`, its `languages` parameter filters both CTags and integration detection and accepts both `str` and `Language` enum values.
 
+### CFG Constructor: Role Schema
+
+The `cfg_constructor` module provides a language-independent foundation for building control flow graphs (CFGs) from tree-sitter parse trees. Rather than writing a CFG builder per language, the approach uses a **control flow role schema** — a small enum of structural roles that map to CFG construction rules.
+
+For each language, an LLM classifies tree-sitter node types into these roles, producing a static mapping. The CFG builder (not yet implemented) will dispatch on roles, not node type names.
+
+#### Role Schema
+
+| Role | CFG Semantics | Examples |
+|------|--------------|----------|
+| `SEQUENCE` | Ordered children execute one after another | `block`, `program`, `statement_list` |
+| `BRANCH` | Condition selects one of N bodies | `if_statement`, `ternary_expression` |
+| `SWITCH` | Multi-arm dispatch, possible fallthrough | `switch_statement`, `match_expression` |
+| `LOOP` | Body may re-execute based on condition | `while_statement`, `for_statement` |
+| `LOOP_POST_CONDITION` | Body executes at least once, then condition checked | `do_statement` |
+| `RETURN` | Terminates function, transfers to caller | `return_statement` |
+| `BREAK` | Exits enclosing loop/switch | `break_statement` |
+| `CONTINUE` | Skips to next loop iteration | `continue_statement` |
+| `THROW` | Transfers to nearest exception handler | `throw_statement`, `raise` |
+| `TRY` | Introduces exception-handling boundary with body + handlers + optional finally | `try_statement` |
+| `CALL` | Function/method invocation (sequential for now; hook point for inter-procedural edges) | `method_invocation`, `call_expression` |
+| `LEAF` | No control flow effect (default for unmapped nodes) | expressions, assignments, declarations |
+
+#### Types
+
+- **`ControlFlowRole`** — enum with 12 members as listed above
+- **`LanguageCFGSpec`** — frozen dataclass pairing a `Language` with a `dict[str, ControlFlowRole]` mapping tree-sitter node type strings to roles. Includes a `role_for(node_type)` helper that returns `LEAF` for unmapped types
+
+#### Design Decisions
+
+- `BREAK`/`CONTINUE`/`RETURN`/`THROW` are separate roles (not a single `EXIT`) because they target different scopes and produce different CFG edges
+- `SWITCH` is separate from `BRANCH` — fallthrough semantics (C/Java `switch` vs Rust `match`) change edge structure
+- `LOOP_POST_CONDITION` is separate from `LOOP` — `do...while` guarantees at least one body execution, changing the entry edge
+- `CALL` is treated as sequential for now, marking call sites for future inter-procedural expansion
+- `LEAF` is the safe default — unclassified nodes produce sequential edges
+- No field hints in the spec — the CFG builder will discover child field names dynamically from the tree-sitter node at runtime
+
 ### Design Patterns
 
 The codebase uses several consistent patterns:
