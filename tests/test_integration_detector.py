@@ -14,6 +14,7 @@ from repo_surveyor.integration_detector import (
     IntegrationSignal,
     IntegrationType,
     Language,
+    _build_import_gated_framework_map,
     _file_has_framework_import,
     _filter_frameworks_by_imports,
     classify_directory,
@@ -1257,7 +1258,11 @@ class TestImportGating:
     """Tests for import-based gating of framework patterns."""
 
     def test_javalin_patterns_gated_without_import(self) -> None:
-        """Java file with map.get() but no Javalin import should not produce Javalin matches."""
+        """Java file with map.get() but no Javalin import should not produce Javalin matches.
+
+        Import gating is now a separate pipeline stage; scan_file_for_integrations
+        receives pre-gated frameworks (empty list when gated out).
+        """
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
                 "import java.util.Map;\n"
@@ -1268,7 +1273,8 @@ class TestImportGating:
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
+            # Pre-gated: Javalin filtered out by import gating stage
+            points = list(scan_file_for_integrations(file_path, frameworks=[]))
             javalin_sourced = [p for p in points if p.source == "Javalin"]
             assert len(javalin_sourced) == 0
         finally:
@@ -1306,21 +1312,30 @@ class TestImportGating:
             file_path.unlink()
 
     def test_express_ts_gated_without_import(self) -> None:
-        """TS file with obj.get() but no Express import should not produce Express matches."""
+        """TS file with obj.get() but no Express import should not produce Express matches.
+
+        Import gating is now a separate pipeline stage; scan_file_for_integrations
+        receives pre-gated frameworks (empty list when gated out).
+        """
         with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
             f.write("const val = obj.get('key');\n")
             f.flush()
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path, frameworks=["Express"]))
+            # Pre-gated: Express filtered out by import gating stage
+            points = list(scan_file_for_integrations(file_path, frameworks=[]))
             express_sourced = [p for p in points if p.source == "Express"]
             assert len(express_sourced) == 0
         finally:
             file_path.unlink()
 
     def test_base_and_common_patterns_always_apply(self) -> None:
-        """Base and common patterns should still fire even when framework is gated out."""
+        """Base and common patterns should still fire even when framework is gated out.
+
+        Import gating is now a separate pipeline stage; scan_file_for_integrations
+        receives pre-gated frameworks (empty list when gated out).
+        """
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
                 "import javax.persistence.Entity;\n"
@@ -1332,8 +1347,9 @@ class TestImportGating:
             file_path = Path(f.name)
 
         try:
-            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
-            # Javalin patterns should be gated out (no Javalin import)
+            # Pre-gated: Javalin filtered out by import gating stage
+            points = list(scan_file_for_integrations(file_path, frameworks=[]))
+            # No Javalin patterns since frameworks list is pre-gated
             javalin_sourced = [p for p in points if p.source == "Javalin"]
             assert len(javalin_sourced) == 0
             # But base Java patterns (@Entity) should still match
@@ -1369,6 +1385,55 @@ class TestImportGating:
         assert not _file_has_framework_import(
             "public class App {}", (r"import io\.javalin",)
         )
+
+    def test_build_import_gated_framework_map(self, tmp_path: Path) -> None:
+        """_build_import_gated_framework_map gates frameworks by file imports."""
+        repo = tmp_path / "repo"
+        repo.mkdir()
+
+        # File with Javalin import — Javalin should survive gating
+        gated_file = repo / "WithJavalin.java"
+        gated_file.write_text(
+            "import io.javalin.Javalin;\n"
+            'app.get("/hello", ctx -> ctx.result("Hello"));\n'
+        )
+
+        # File without Javalin import — Javalin should be gated out
+        ungated_file = repo / "WithoutJavalin.java"
+        ungated_file.write_text("import java.util.Map;\n" 'm.get("key");\n')
+
+        directory_frameworks = {".": ["Javalin", "Spring"]}
+
+        result = _build_import_gated_framework_map(
+            iter([gated_file, ungated_file]),
+            repo,
+            directory_frameworks,
+        )
+
+        # Javalin + Spring both survive for file with Javalin import
+        assert "Javalin" in result[gated_file]
+        assert "Spring" in result[gated_file]
+
+        # Only Spring survives for file without Javalin import
+        assert "Javalin" not in result[ungated_file]
+        assert "Spring" in result[ungated_file]
+
+    def test_build_import_gated_framework_map_unreadable_file(
+        self, tmp_path: Path
+    ) -> None:
+        """Files that cannot be read are excluded from the map."""
+        repo = tmp_path / "repo"
+        repo.mkdir()
+
+        missing_file = repo / "Missing.java"
+
+        result = _build_import_gated_framework_map(
+            iter([missing_file]),
+            repo,
+            {".": ["Spring"]},
+        )
+
+        assert missing_file not in result
 
 
 class TestExpressMethodChainPatterns:

@@ -201,7 +201,8 @@ def scan_file_for_integrations(
     Args:
         file_path: Path to the file to scan.
         frameworks: List of active framework names for this file's context.
-                    Framework-specific patterns are included for these frameworks.
+                    These should already be import-gated by the caller;
+                    this function applies them directly without further filtering.
 
     Yields:
         IntegrationSignal instances for each match found.
@@ -212,8 +213,7 @@ def scan_file_for_integrations(
         return
 
     language = get_language_from_extension(str(file_path))
-    active_frameworks = _filter_frameworks_by_imports(content, language, frameworks)
-    patterns = get_patterns_for_language(language, active_frameworks)
+    patterns = get_patterns_for_language(language, frameworks)
 
     range_map = (
         parse_file_zones(content.encode("utf-8"), language)
@@ -308,6 +308,52 @@ def _get_source_files(
                 yield path
 
 
+def _build_import_gated_framework_map(
+    source_files: Iterator[Path],
+    repo_path: Path,
+    directory_frameworks: dict[str, list[str]],
+) -> dict[Path, list[str]]:
+    """Build a mapping from each source file to its import-gated frameworks.
+
+    For each file, determines the candidate frameworks from its directory
+    hierarchy, reads the file content, and filters frameworks by checking
+    for matching import statements.
+
+    Args:
+        source_files: Iterator of source file paths.
+        repo_path: Absolute path to the repository root.
+        directory_frameworks: Mapping of directory paths (relative to repo root)
+                              to their detected frameworks.
+
+    Returns:
+        Dict mapping each file path to its import-gated framework list.
+    """
+    return {
+        file_path: _filter_frameworks_by_imports(
+            content,
+            get_language_from_extension(str(file_path)),
+            _find_frameworks_for_file(file_path, repo_path, directory_frameworks),
+        )
+        for file_path in source_files
+        if (content := _read_file_content(file_path)) is not None
+    }
+
+
+def _read_file_content(file_path: Path) -> str | None:
+    """Read file content, returning None on I/O errors.
+
+    Args:
+        file_path: Path to the file to read.
+
+    Returns:
+        File content as a string, or None if the file could not be read.
+    """
+    try:
+        return file_path.read_text(encoding="utf-8", errors="ignore")
+    except (OSError, IOError):
+        return None
+
+
 def detect_integrations(
     repo_path: str | Path,
     languages: list[Language] = [],
@@ -345,15 +391,22 @@ def detect_integrations(
         )
 
     integration_points: list[IntegrationSignal] = []
-    files_scanned = 0
+
+    # Build import-gated framework map
+    timer.stage_started("integration_detection.import_gating")
+    file_frameworks = _build_import_gated_framework_map(
+        _get_source_files(repo_path, languages, extra_skip_dirs),
+        repo_path,
+        directory_frameworks,
+    )
+    timer.stage_completed("integration_detection.import_gating")
 
     # Scan source files
+    files_scanned = 0
     timer.stage_started("integration_detection.file_scanning")
     for file_path in _get_source_files(repo_path, languages, extra_skip_dirs):
         files_scanned += 1
-        frameworks = _find_frameworks_for_file(
-            file_path, repo_path, directory_frameworks
-        )
+        frameworks = file_frameworks.get(file_path, [])
         integration_points.extend(scan_file_for_integrations(file_path, frameworks))
     timer.stage_completed("integration_detection.file_scanning")
 

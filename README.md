@@ -208,7 +208,8 @@ Example output:
   "stages": [
     {"stage": "tech_stacks", "start_time": "2026-02-16T02:53:09.338835+05:30", "end_time": "2026-02-16T02:53:09.475769+05:30", "duration_seconds": 0.137},
     {"stage": "coarse_structure", "start_time": "2026-02-16T02:53:09.475807+05:30", "end_time": "2026-02-16T02:53:47.705246+05:30", "duration_seconds": 38.229},
-    {"stage": "integration_detection.file_scanning", "start_time": "2026-02-16T02:53:47.705356+05:30", "end_time": "2026-02-16T02:53:48.484939+05:30", "duration_seconds": 0.780},
+    {"stage": "integration_detection.import_gating", "start_time": "2026-02-16T02:53:47.705356+05:30", "end_time": "2026-02-16T02:53:47.950000+05:30", "duration_seconds": 0.245},
+    {"stage": "integration_detection.file_scanning", "start_time": "2026-02-16T02:53:47.950010+05:30", "end_time": "2026-02-16T02:53:48.484939+05:30", "duration_seconds": 0.535},
     {"stage": "integration_detection.directory_classification", "start_time": "2026-02-16T02:53:48.484950+05:30", "end_time": "2026-02-16T02:53:48.527112+05:30", "duration_seconds": 0.042},
     {"stage": "integration_detection", "start_time": "2026-02-16T02:53:47.705280+05:30", "end_time": "2026-02-16T02:53:48.527123+05:30", "duration_seconds": 0.822},
     {"stage": "symbol_resolution", "start_time": "2026-02-16T02:53:48.527200+05:30", "end_time": "2026-02-16T02:53:48.528100+05:30", "duration_seconds": 0.001}
@@ -494,9 +495,11 @@ survey_and_persist()  (full analysis pipeline with Neo4j)
 │
 ├── integration_detector.detect_integrations()
 │   │   (directory_frameworks built from tech_stacks() DirectoryMarkers)
+│   ├── _build_import_gated_framework_map()  (import gating sub-stage)
+│   │   └── _filter_frameworks_by_imports() per file
 │   ├── integration_patterns.get_patterns_for_language()
 │   │   └── common + language base + framework-specific patterns
-│   ├── scan_file_for_integrations()
+│   ├── scan_file_for_integrations()  (receives pre-gated frameworks)
 │   │   └── syntax_zone.parse_file_zones()  (tree-sitter comment/string filtering)
 │   └── classify_directory()
 │
@@ -650,7 +653,9 @@ Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIU
 
 2. **Framework resolution** (`_find_frameworks_for_file()`): For each file, walks up the directory hierarchy looking up entries in the `directory_frameworks` mapping. This allows a file in `backend/api/routes.py` to inherit frameworks declared for `"backend"` or `"."`.
 
-3. **Syntax zone filtering** (`syntax_zone.py` → `parse_file_zones()`): Before regex matching, each file is parsed with tree-sitter to build a `SyntaxRangeMap` identifying which lines belong to one of four syntax zones:
+3. **Import gating** (`_build_import_gated_framework_map()`): A separate timed sub-stage (`integration_detection.import_gating`) that runs before file scanning. For each source file, reads the file content and filters the candidate framework list by checking whether the file contains an import for each gated framework (`_filter_frameworks_by_imports()`). Frameworks with empty `import_patterns` (ungated) pass through unconditionally. This prevents false positives like `Map.get()` matching as a Javalin HTTP route in files that don't import Javalin. The result is a `dict[Path, list[str]]` mapping each file to its import-gated frameworks.
+
+4. **Syntax zone filtering** (`syntax_zone.py` → `parse_file_zones()`): Before regex matching, each file is parsed with tree-sitter to build a `SyntaxRangeMap` identifying which lines belong to one of four syntax zones:
 
    | Zone | Description | Filtered? |
    |------|-------------|-----------|
@@ -663,9 +668,7 @@ Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIU
 
    Tree-sitter zone classification is supported for: Java, Python, TypeScript, JavaScript, Go, Rust, C#, Kotlin, Scala, Ruby, PHP, C, C++, and COBOL. Languages without tree-sitter support (PL/I) scan all lines without filtering.
 
-4. **Import gating** (`_filter_frameworks_by_imports()`): Before pattern matching, the candidate framework list is filtered by checking whether the file contains an import for each gated framework. Frameworks with empty `import_patterns` (ungated) pass through unconditionally. This prevents false positives like `Map.get()` matching as a Javalin HTTP route in files that don't import Javalin.
-
-5. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, filters frameworks via import gating, calls `get_patterns_for_language(language, active_frameworks)` to get the merged pattern set, then tests each non-comment/non-string line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, entity type, and source (which layer contributed the pattern).
+5. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, calls `get_patterns_for_language(language, frameworks)` with the pre-gated framework list to get the merged pattern set, then tests each non-comment/non-string line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, entity type, and source (which layer contributed the pattern).
 
 6. **Directory classification** (`classify_directory()`): After scanning files, directory names themselves are matched against the directory patterns from `common.py` (e.g. `controllers` → HTTP_REST, `proto` → GRPC). These produce directory-level `IntegrationSignal` entries.
 
