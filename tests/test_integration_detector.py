@@ -1178,6 +1178,55 @@ class TestJavalinFrameworkPatterns:
         finally:
             file_path.unlink()
 
+    def test_javalin_method_chain_route_patterns(self) -> None:
+        """Method-chain continuations (.get(, .post(, etc.) should match without receiver."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                "Javalin.create(config -> {})\n"
+                '    .get("/api/users", ctx -> {})\n'
+                '    .post("/api/users", ctx -> {})\n'
+                '    .delete("/api/users/{id}", ctx -> {});\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            matched_patterns = {p.matched_pattern for p in http_points}
+            assert r"\w*\.get\(" in matched_patterns
+            assert r"\w*\.post\(" in matched_patterns
+            assert r"\w*\.delete\(" in matched_patterns
+        finally:
+            file_path.unlink()
+
+    def test_javalin_method_chain_websocket(self) -> None:
+        """Method-chain .ws( should match without receiver."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                "Javalin.create(config -> {})\n"
+                '    .ws("/websocket", ws -> {});\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
+            ws_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.SOCKET
+                and r"\w*\.ws\(" in p.matched_pattern
+            ]
+            assert len(ws_points) > 0
+        finally:
+            file_path.unlink()
+
     def test_javalin_base_patterns_still_match(self) -> None:
         """Base Java patterns should still match alongside Javalin patterns."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
@@ -1195,6 +1244,60 @@ class TestJavalinFrameworkPatterns:
             entity_points = [p for p in points if "@Entity" in p.matched_pattern]
             assert len(javalin_points) > 0
             assert len(entity_points) > 0
+        finally:
+            file_path.unlink()
+
+
+class TestExpressMethodChainPatterns:
+    """Tests for Express method-chain continuation matching."""
+
+    def test_js_express_method_chain(self) -> None:
+        """JS Express method-chain .get(, .post( should match without receiver."""
+        with tempfile.NamedTemporaryFile(suffix=".js", mode="w", delete=False) as f:
+            f.write(
+                "const app = express()\n"
+                '    .get("/users", handler)\n'
+                '    .post("/users", handler);\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Express"]))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            matched_patterns = {p.matched_pattern for p in http_points}
+            assert r"\w*\.get\(" in matched_patterns
+            assert r"\w*\.post\(" in matched_patterns
+        finally:
+            file_path.unlink()
+
+    def test_ts_express_method_chain(self) -> None:
+        """TS Express method-chain .get(, .put( should match without receiver."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write(
+                "const app = express()\n"
+                '    .get("/users", handler)\n'
+                '    .put("/users", handler);\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Express"]))
+            http_points = [
+                p
+                for p in points
+                if p.integration_type == IntegrationType.HTTP_REST
+                and p.confidence == Confidence.HIGH
+            ]
+            matched_patterns = {p.matched_pattern for p in http_points}
+            assert r"\w*\.get\(" in matched_patterns
+            assert r"\w*\.put\(" in matched_patterns
         finally:
             file_path.unlink()
 
