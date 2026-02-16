@@ -17,12 +17,6 @@ A Python library for experiments in analysing repository technology stacks and c
 - Generates plain text and JSON reports
 - Pipeline timing observer for measuring stage durations as JSON
 
-## Installation
-
-```bash
-poetry install
-```
-
 ## Supported Languages
 
 | Language | Extensions | Indicator Files | Package Managers | Detected Frameworks |
@@ -81,6 +75,12 @@ Framework detection uses structured parsing of config files rather than naive su
 | `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
 
 All 13 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, and Ruby. C and C++ share a common pattern module covering 11 base types (database, HTTP, messaging, sockets, gRPC, file I/O, FTP/SFTP, caching, SOAP, scheduling, email) with framework-specific patterns for Qt, Boost, POCO, Crow, and Drogon. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
+
+## Installation
+
+```bash
+poetry install
+```
 
 ## Usage
 
