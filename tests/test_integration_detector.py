@@ -1209,8 +1209,7 @@ class TestJavalinFrameworkPatterns:
         """Method-chain .ws( should match without receiver."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
-                "Javalin.create(config -> {})\n"
-                '    .ws("/websocket", ws -> {});\n'
+                "Javalin.create(config -> {})\n" '    .ws("/websocket", ws -> {});\n'
             )
             f.flush()
             file_path = Path(f.name)
