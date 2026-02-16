@@ -181,6 +181,7 @@ class AnalysisGraphBuilder:
                 CREATE (s:CodeSymbol {
                     id: sym.id,
                     name: sym.name,
+                    qualified_name: sym.qualified_name,
                     path: sym.path,
                     kind: sym.kind,
                     line: sym.line,
@@ -281,20 +282,21 @@ class AnalysisGraphBuilder:
                     UNWIND $integrations AS i
                     MATCH (s:CodeSymbol {{id: i.symbol_id, repo_path: $repo_path}})
                     MATCH (t:{IntegrationLabel.INTEGRATION_TYPE} {{name: i.integration_type}})
-                    CREATE (s)-[:{IntegrationRelType.HAS_INTEGRATION} {{
+                    CREATE (sig:{IntegrationLabel.INTEGRATION_SIGNAL} {{
                         confidence: i.confidence,
                         matched_pattern: i.matched_pattern,
+                        line_content: i.line_content,
                         source: i.source,
                         line_number: i.line_number,
                         file_path: i.file_path
-                    }}]->(t)
+                    }})
+                    CREATE (s)-[:{IntegrationRelType.HAS_INTEGRATION}]->(sig)
+                    CREATE (sig)-[:{IntegrationRelType.OF_TYPE}]->(t)
                     """,
                     repo_path=repo_path,
                     integrations=resolved_integrations,
                 )
-            logger.info(
-                f"Created {len(resolved_integrations)} HAS_INTEGRATION relationships"
-            )
+            logger.info(f"Created {len(resolved_integrations)} IntegrationSignal nodes")
 
         if unresolved_integrations:
             with self.driver.session() as session:

@@ -414,6 +414,7 @@ class TestBuildCoarseStructureGraph:
 
         assert len(symbols) == 1
         assert symbols[0]["name"] == "MyClass"
+        assert symbols[0]["qualified_name"] == "MyClass"
         assert symbols[0]["kind"] == "class"
         assert symbols[0]["package"] == "com.example"
         assert len(top_level) == 1  # Class is top-level (no parent)
@@ -454,6 +455,11 @@ class TestBuildCoarseStructureGraph:
         assert len(symbols) == 2
         assert len(relationships) == 1
         assert len(top_level) == 1  # Only class is top-level
+
+        # Verify qualified names
+        by_name = {s["name"]: s for s in symbols}
+        assert by_name["MyClass"]["qualified_name"] == "MyClass"
+        assert by_name["myMethod"]["qualified_name"] == "MyClass.myMethod"
 
         # Verify relationship
         rel = relationships[0]
@@ -843,6 +849,7 @@ class TestBuildIntegrationGraph:
             source="Spring",
             file_path="/repo/src/User.java",
             line_number=5,
+            line_content="@Entity",
         )
         resolution = ResolutionResult(
             resolved=(
@@ -867,6 +874,7 @@ class TestBuildIntegrationGraph:
         assert r["integration_type"] == "database"
         assert r["confidence"] == "medium"
         assert r["matched_pattern"] == "@Entity"
+        assert r["line_content"] == "@Entity"
         assert r["source"] == "Spring"
         assert r["line_number"] == 5
         assert r["file_path"] == "/repo/src/User.java"
@@ -937,8 +945,8 @@ class TestPersistIntegrations:
         ]
         assert len(merge_calls) == 1
 
-    def test_creates_has_integration_relationships(self) -> None:
-        """Should create HAS_INTEGRATION relationships for resolved signals."""
+    def test_creates_integration_signal_nodes(self) -> None:
+        """Should create IntegrationSignal nodes linked to CodeSymbol and IntegrationType."""
         mock_driver, mock_session = create_mock_driver_with_session()
         builder = AnalysisGraphBuilder(mock_driver)
 
@@ -961,8 +969,13 @@ class TestPersistIntegrations:
         )
 
         calls = mock_session.run.call_args_list
-        rel_calls = [c for c in calls if "HAS_INTEGRATION" in str(c)]
-        assert len(rel_calls) >= 1
+        signal_calls = [c for c in calls if "IntegrationSignal" in str(c)]
+        assert len(signal_calls) >= 1
+
+        # Should contain both HAS_INTEGRATION and OF_TYPE relationships
+        cypher = str(signal_calls[0])
+        assert "HAS_INTEGRATION" in cypher
+        assert "OF_TYPE" in cypher
 
     def test_creates_unresolved_integration_nodes(self) -> None:
         """Should create UnresolvedIntegration nodes for unresolved signals."""
@@ -996,14 +1009,15 @@ class TestPersistIntegrations:
 
         mock_session.run.assert_not_called()
 
-    def test_integration_relationship_properties(self) -> None:
-        """Should pass confidence, pattern, source, line on relationship."""
+    def test_integration_signal_node_properties(self) -> None:
+        """Should pass confidence, pattern, line_content, source, line on IntegrationSignal node."""
         mock_driver, mock_session = create_mock_driver_with_session()
         builder = AnalysisGraphBuilder(mock_driver)
 
         signal = _make_signal(
             confidence=Confidence.MEDIUM,
             matched_pattern="@Entity",
+            line_content="@Entity",
             source="Spring",
             line_number=42,
             file_path="/repo/src/User.java",
@@ -1026,15 +1040,16 @@ class TestPersistIntegrations:
         )
 
         calls = mock_session.run.call_args_list
-        rel_calls = [c for c in calls if "HAS_INTEGRATION" in str(c)]
-        assert len(rel_calls) == 1
+        signal_calls = [c for c in calls if "IntegrationSignal" in str(c)]
+        assert len(signal_calls) == 1
 
-        call_kwargs = rel_calls[0][1]
+        call_kwargs = signal_calls[0][1]
         integrations = call_kwargs["integrations"]
         assert len(integrations) == 1
         i = integrations[0]
         assert i["confidence"] == "medium"
         assert i["matched_pattern"] == "@Entity"
+        assert i["line_content"] == "@Entity"
         assert i["source"] == "Spring"
         assert i["line_number"] == 42
         assert i["file_path"] == "/repo/src/User.java"

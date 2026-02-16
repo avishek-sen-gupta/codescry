@@ -436,8 +436,8 @@ This creates a graph with:
 - `Repository` nodes
 - `Directory` nodes with hierarchy relationships
 - `Language`, `PackageManager`, `Framework`, `Infrastructure` nodes
-- `CodeSymbol` nodes with parent-child relationships based on scope
-- `IntegrationType` nodes (e.g. `http_rest`, `database`) linked from `CodeSymbol` via `HAS_INTEGRATION` relationships carrying confidence, matched pattern, source, line number, and file path
+- `CodeSymbol` nodes with parent-child relationships based on scope (each node has a `qualified_name` field combining scope and name, e.g. `MyClass.myMethod`)
+- `IntegrationSignal` nodes (carrying confidence, matched pattern, matched line content, source, line number, and file path) linked from `CodeSymbol` via `HAS_INTEGRATION` and to `IntegrationType` nodes (e.g. `http_rest`, `database`) via `OF_TYPE`
 - `UnresolvedIntegration` nodes for signals not resolved to any symbol, linked from `Repository` via `HAS_UNRESOLVED_INTEGRATION`
 
 ## Technical Documentation
@@ -745,7 +745,7 @@ This subsystem persists tech stack and code structure analysis results into a Ne
 #### Code structure persistence: `persist_coarse_structure(result, repo_path)`
 
 **Step 1 — Build graph data** (`graph_builder.py` → `build_coarse_structure_graph()`):
-- `_index_symbols()`: Creates a unique ID for each symbol (`{path}:{name}:{kind}:{line}`) and extracts the package name using language-aware heuristics (e.g. Java `src/main/java/com/example/` → `com.example`). Builds a `(path, name)` index for parent lookup.
+- `_index_symbols()`: Creates a unique ID for each symbol (`{path}:{name}:{kind}:{line}`), computes a `qualified_name` by prepending the scope (e.g. `MyClass.myMethod`, or just `MyClass` for top-level symbols), and extracts the package name using language-aware heuristics (e.g. Java `src/main/java/com/example/` → `com.example`). Builds a `(path, name)` index for parent lookup.
 - `_resolve_relationships()`: For each symbol with a `scope`, looks up the parent symbol by matching `(path, scope_name)` and optionally `scope_kind`. Records `{child_id, parent_id}` relationships.
 - Symbols with no resolved parent become `top_level_symbols`.
 
@@ -760,7 +760,7 @@ This subsystem persists tech stack and code structure analysis results into a Ne
 
 **Step 2 — Execute Cypher**: Creates nodes and relationships in up to three batched queries:
 1. `UNWIND $names ... MERGE (t:IntegrationType {name})` — idempotent creation of integration type nodes
-2. `UNWIND $integrations ... MATCH (CodeSymbol) MATCH (IntegrationType) CREATE (s)-[:HAS_INTEGRATION {confidence, matched_pattern, source, line_number, file_path}]->(t)` — links resolved signals to their symbols
+2. `UNWIND $integrations ... MATCH (CodeSymbol) MATCH (IntegrationType) CREATE (sig:IntegrationSignal {...}) CREATE (s)-[:HAS_INTEGRATION]->(sig) CREATE (sig)-[:OF_TYPE]->(t)` — creates IntegrationSignal nodes with confidence, matched pattern, line content, source, line number, and file path, linked from symbols and to their integration types
 3. `UNWIND $signals ... MATCH (Repository) CREATE (u:UnresolvedIntegration {...}) CREATE (r)-[:HAS_UNRESOLVED_INTEGRATION]->(u)` — persists signals not resolved to any symbol
 
 A convenience function `survey_and_persist()` orchestrates the full pipeline: runs `tech_stacks()`, `coarse_structure()`, `detect_integrations()` (using the per-directory framework mappings from tech stack detection), and `resolve_integration_signals()`, then persists tech stacks, code structure, and integration results to Neo4j. Like `survey()`, its `languages` parameter filters both CTags and integration detection and accepts both `str` and `Language` enum values.

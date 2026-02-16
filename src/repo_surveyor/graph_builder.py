@@ -36,6 +36,7 @@ class _DirRel:
 class _SymbolNode:
     ID = "id"
     NAME = "name"
+    QUALIFIED_NAME = "qualified_name"
     PATH = "path"
     KIND = "kind"
     LINE = "line"
@@ -271,6 +272,9 @@ def _index_symbols(
         symbol = {
             _SymbolNode.ID: symbol_id,
             _SymbolNode.NAME: entry.name,
+            _SymbolNode.QUALIFIED_NAME: (
+                f"{entry.scope}.{entry.name}" if entry.scope else entry.name
+            ),
             _SymbolNode.PATH: entry.path,
             _SymbolNode.KIND: entry.kind,
             _SymbolNode.LINE: entry.line,
@@ -333,6 +337,7 @@ class _ResolvedIntegrationDict:
     INTEGRATION_TYPE = "integration_type"
     CONFIDENCE = "confidence"
     MATCHED_PATTERN = "matched_pattern"
+    LINE_CONTENT = "line_content"
     SOURCE = "source"
     LINE_NUMBER = "line_number"
     FILE_PATH = "file_path"
@@ -390,6 +395,7 @@ def _build_resolved_dict(symbol_id: str, signal: IntegrationSignal) -> dict:
         _ResolvedIntegrationDict.INTEGRATION_TYPE: signal.integration_type.value,
         _ResolvedIntegrationDict.CONFIDENCE: signal.confidence.value,
         _ResolvedIntegrationDict.MATCHED_PATTERN: signal.matched_pattern,
+        _ResolvedIntegrationDict.LINE_CONTENT: signal.match.line_content,
         _ResolvedIntegrationDict.SOURCE: signal.source,
         _ResolvedIntegrationDict.LINE_NUMBER: signal.match.line_number,
         _ResolvedIntegrationDict.FILE_PATH: signal.match.file_path,

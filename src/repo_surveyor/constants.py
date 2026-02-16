@@ -41,6 +41,7 @@ class IntegrationLabel:
     """Neo4j node labels for integration nodes."""
 
     INTEGRATION_TYPE = "IntegrationType"
+    INTEGRATION_SIGNAL = "IntegrationSignal"
     UNRESOLVED_INTEGRATION = "UnresolvedIntegration"
 
 
@@ -48,4 +49,5 @@ class IntegrationRelType:
     """Neo4j relationship types for integration edges."""
 
     HAS_INTEGRATION = "HAS_INTEGRATION"
+    OF_TYPE = "OF_TYPE"
     HAS_UNRESOLVED_INTEGRATION = "HAS_UNRESOLVED_INTEGRATION"
