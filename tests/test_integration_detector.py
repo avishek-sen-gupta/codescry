@@ -1153,9 +1153,9 @@ class TestJavalinFrameworkPatterns:
                 and p.confidence == Confidence.HIGH
             ]
             matched_patterns = {p.matched_pattern for p in http_points}
-            assert r"\w+\.get\(" in matched_patterns
-            assert r"\w+\.post\(" in matched_patterns
-            assert r"\w+\.delete\(" in matched_patterns
+            assert r"\w*\.get\(" in matched_patterns
+            assert r"\w*\.post\(" in matched_patterns
+            assert r"\w*\.delete\(" in matched_patterns
         finally:
             file_path.unlink()
 
@@ -1172,7 +1172,7 @@ class TestJavalinFrameworkPatterns:
                 p
                 for p in points
                 if p.integration_type == IntegrationType.SOCKET
-                and r"\w+\.ws\(" in p.matched_pattern
+                and r"\w*\.ws\(" in p.matched_pattern
             ]
             assert len(ws_points) > 0
         finally:

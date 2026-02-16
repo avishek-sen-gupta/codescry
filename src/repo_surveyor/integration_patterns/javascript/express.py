@@ -8,10 +8,10 @@ FRAMEWORK = FrameworkPatternSpec(
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
                 (r"require\(['\"]express['\"]\)", Confidence.HIGH),
-                (r"\w+\.get\(", Confidence.HIGH),
-                (r"\w+\.post\(", Confidence.HIGH),
-                (r"\w+\.put\(", Confidence.HIGH),
-                (r"\w+\.delete\(", Confidence.HIGH),
+                (r"\w*\.get\(", Confidence.HIGH),
+                (r"\w*\.post\(", Confidence.HIGH),
+                (r"\w*\.put\(", Confidence.HIGH),
+                (r"\w*\.delete\(", Confidence.HIGH),
             ],
         },
         IntegrationType.GRAPHQL: {
