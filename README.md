@@ -331,6 +331,22 @@ This means:
 - A JS file in `frontend/` will match Express patterns (`app.get(`, `require('express')`) alongside base JavaScript patterns (`require('kafkajs')`, `fetch(`)
 - Files in directories without a framework mapping only match common and base language patterns
 
+#### Import Gating
+
+Some frameworks have generic patterns (e.g. `\w*\.get\(`) that could match non-framework code like `Map.get()` or `List.get()`. To avoid false positives, these frameworks are **import-gated**: their patterns are only applied to files that contain a matching import statement. Frameworks with highly distinctive patterns (Spring annotations, Rails DSL, etc.) are ungated and apply to all files in the directory.
+
+Import-gated frameworks:
+
+| Framework | Required Import |
+|-----------|----------------|
+| Javalin | `import io.javalin` |
+| Express (JS) | `require('express')` |
+| Express (TS) | `from 'express'` |
+| Sanic | `from sanic import` or `import sanic` |
+| Hono | `from 'hono'` |
+
+Base language patterns and common patterns always apply regardless of import gating.
+
 ### Symbol Resolution
 
 After running the full pipeline, each integration signal is resolved to its containing code symbol using CTags line ranges. This produces per-symbol integration profiles showing which symbols expose endpoints, make database calls, etc.
@@ -538,7 +554,7 @@ To add support for a new language, edit `languages.json`:
 
 Then:
 1. If the language has a config file parser, add a module in `package_parsers/` and register it in `package_parsers/__init__.py`
-2. If the language needs integration pattern detection, add a package directory in `integration_patterns/` with a `base.py` exporting a `BASE = BasePatternSpec(patterns={...})` instance for base patterns, and optional per-framework files (e.g. `spring.py`) each exporting a `FRAMEWORK = FrameworkPatternSpec(name="...", patterns={...})` instance. The language's `__init__.py` auto-discovers framework files via `pkgutil`. Also add a `Language` enum member in `integration_patterns/types.py`
+2. If the language needs integration pattern detection, add a package directory in `integration_patterns/` with a `base.py` exporting a `BASE = BasePatternSpec(patterns={...})` instance for base patterns, and optional per-framework files (e.g. `spring.py`) each exporting a `FRAMEWORK = FrameworkPatternSpec(name="...", patterns={...})` instance. For frameworks with generic patterns that could cause false positives (e.g. `\w*\.get\(`), add `import_patterns=(r"import pattern",)` to gate those patterns on file-level imports. The language's `__init__.py` auto-discovers framework files via `pkgutil`. Also add a `Language` enum member in `integration_patterns/types.py`
 3. Run `poetry run pytest` to verify
 
 ### Tech Stack Analysis: `RepoSurveyor.tech_stacks()`
@@ -626,7 +642,7 @@ For each IntegrationType:
      e.g. @RestController (Spring), @app.get (FastAPI)
 ```
 
-Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIUM, or LOW. The `BasePatternSpec` and `FrameworkPatternSpec` frozen dataclasses (defined in `types.py`) enforce an explicit type contract and immutability for all pattern definitions. When `get_patterns_for_language()` merges the three layers, each tuple is extended to `(regex, Confidence, source)` where `source` is `"common"`, the language display name (e.g. `"Java"`), or the framework name (e.g. `"Spring"`). This source label is propagated into the `IntegrationSignal.source` field and included in the JSON output.
+Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIUM, or LOW. The `BasePatternSpec` and `FrameworkPatternSpec` frozen dataclasses (defined in `types.py`) enforce an explicit type contract and immutability for all pattern definitions. `FrameworkPatternSpec` also carries an optional `import_patterns` tuple of regex strings; when non-empty, the framework's patterns are only applied to files whose content matches at least one import pattern (see [Import Gating](#import-gating)). When `get_patterns_for_language()` merges the three layers, each tuple is extended to `(regex, Confidence, source)` where `source` is `"common"`, the language display name (e.g. `"Java"`), or the framework name (e.g. `"Spring"`). This source label is propagated into the `IntegrationSignal.source` field and included in the JSON output.
 
 #### File scanning flow
 
@@ -647,9 +663,11 @@ Each pattern is a tuple of `(regex, Confidence)` where Confidence is HIGH, MEDIU
 
    Tree-sitter zone classification is supported for: Java, Python, TypeScript, JavaScript, Go, Rust, C#, Kotlin, Scala, Ruby, PHP, C, C++, and COBOL. Languages without tree-sitter support (PL/I) scan all lines without filtering.
 
-4. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, calls `get_patterns_for_language(language, frameworks)` to get the merged pattern set, then tests each non-comment/non-string line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, entity type, and source (which layer contributed the pattern).
+4. **Import gating** (`_filter_frameworks_by_imports()`): Before pattern matching, the candidate framework list is filtered by checking whether the file contains an import for each gated framework. Frameworks with empty `import_patterns` (ungated) pass through unconditionally. This prevents false positives like `Map.get()` matching as a Javalin HTTP route in files that don't import Javalin.
 
-5. **Directory classification** (`classify_directory()`): After scanning files, directory names themselves are matched against the directory patterns from `common.py` (e.g. `controllers` → HTTP_REST, `proto` → GRPC). These produce directory-level `IntegrationSignal` entries.
+5. **Line-by-line scanning** (`scan_file_for_integrations()`): Reads the file, determines the language from the extension, filters frameworks via import gating, calls `get_patterns_for_language(language, active_frameworks)` to get the merged pattern set, then tests each non-comment/non-string line against each regex. Every match yields an `IntegrationSignal` with the match location, integration type, confidence, matched pattern, entity type, and source (which layer contributed the pattern).
+
+6. **Directory classification** (`classify_directory()`): After scanning files, directory names themselves are matched against the directory patterns from `common.py` (e.g. `controllers` → HTTP_REST, `proto` → GRPC). These produce directory-level `IntegrationSignal` entries.
 
 The result is an `IntegrationDetectorResult` containing all `IntegrationSignal` instances and the count of files scanned.
 

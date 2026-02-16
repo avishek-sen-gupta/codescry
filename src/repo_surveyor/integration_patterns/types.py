@@ -75,6 +75,7 @@ class FrameworkPatternSpec:
 
     name: str
     patterns: dict
+    import_patterns: tuple[str, ...] = ()
 
 
 class PatternKey:

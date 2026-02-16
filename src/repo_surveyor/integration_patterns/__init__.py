@@ -71,6 +71,27 @@ def get_patterns_for_language(
     return result
 
 
+def get_import_patterns_for_framework(
+    language: Language | None, framework: str
+) -> tuple[str, ...]:
+    """Retrieve import-gating patterns for a framework in a given language.
+
+    Args:
+        language: The programming language, or None.
+        framework: The framework name (e.g., "Javalin", "Express").
+
+    Returns:
+        Tuple of regex patterns the file must match for the framework's patterns
+        to apply. An empty tuple means the framework is ungated.
+    """
+    if language is None:
+        return ()
+    lang_module = LANGUAGE_MODULES.get(language)
+    if lang_module is None:
+        return ()
+    return lang_module.FRAMEWORK_IMPORT_PATTERNS.get(framework, ())
+
+
 def get_directory_patterns() -> dict[IntegrationType, list[str]]:
     """Get directory patterns for all integration types.
 
@@ -90,6 +111,7 @@ __all__ = [
     "EXTENSION_TO_LANGUAGE",
     "LANGUAGE_MODULES",
     "get_patterns_for_language",
+    "get_import_patterns_for_framework",
     "get_directory_patterns",
     "common",
 ]

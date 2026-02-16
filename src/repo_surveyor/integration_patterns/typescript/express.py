@@ -4,6 +4,7 @@ from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKe
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Express",
+    import_patterns=(r"from ['\"]express['\"]",),
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [

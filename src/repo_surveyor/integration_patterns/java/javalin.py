@@ -4,6 +4,7 @@ from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKe
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Javalin",
+    import_patterns=(r"import io\.javalin",),
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [

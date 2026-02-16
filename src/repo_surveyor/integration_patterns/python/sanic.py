@@ -4,6 +4,7 @@ from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKe
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Sanic",
+    import_patterns=(r"from sanic import", r"import sanic"),
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [

@@ -4,6 +4,7 @@ from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKe
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Hono",
+    import_patterns=(r"from ['\"]hono['\"]",),
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [

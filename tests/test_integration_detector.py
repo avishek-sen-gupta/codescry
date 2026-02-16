@@ -14,6 +14,8 @@ from repo_surveyor.integration_detector import (
     IntegrationSignal,
     IntegrationType,
     Language,
+    _file_has_framework_import,
+    _filter_frameworks_by_imports,
     classify_directory,
     detect_integrations,
     get_language_from_extension,
@@ -1137,6 +1139,7 @@ class TestJavalinFrameworkPatterns:
         """Javalin route handler patterns should match with Javalin framework."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
+                "import io.javalin.Javalin;\n"
                 'app.get("/users", ctx -> ctx.json(users));\n'
                 'app.post("/users", ctx -> { });\n'
                 'app.delete("/users/{id}", ctx -> { });\n'
@@ -1162,7 +1165,7 @@ class TestJavalinFrameworkPatterns:
     def test_javalin_websocket_patterns(self) -> None:
         """Javalin WebSocket patterns should match with Javalin framework."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
-            f.write('app.ws("/websocket", ws -> { });\n')
+            f.write("import io.javalin.Javalin;\n" 'app.ws("/websocket", ws -> { });\n')
             f.flush()
             file_path = Path(f.name)
 
@@ -1182,6 +1185,7 @@ class TestJavalinFrameworkPatterns:
         """Method-chain continuations (.get(, .post(, etc.) should match without receiver."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
+                "import io.javalin.Javalin;\n"
                 "Javalin.create(config -> {})\n"
                 '    .get("/api/users", ctx -> {})\n'
                 '    .post("/api/users", ctx -> {})\n'
@@ -1209,7 +1213,9 @@ class TestJavalinFrameworkPatterns:
         """Method-chain .ws( should match without receiver."""
         with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
             f.write(
-                "Javalin.create(config -> {})\n" '    .ws("/websocket", ws -> {});\n'
+                "import io.javalin.Javalin;\n"
+                "Javalin.create(config -> {})\n"
+                '    .ws("/websocket", ws -> {});\n'
             )
             f.flush()
             file_path = Path(f.name)
@@ -1247,6 +1253,124 @@ class TestJavalinFrameworkPatterns:
             file_path.unlink()
 
 
+class TestImportGating:
+    """Tests for import-based gating of framework patterns."""
+
+    def test_javalin_patterns_gated_without_import(self) -> None:
+        """Java file with map.get() but no Javalin import should not produce Javalin matches."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                "import java.util.Map;\n"
+                "Map<String, String> m = new HashMap<>();\n"
+                'm.get("key");\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
+            javalin_sourced = [p for p in points if p.source == "Javalin"]
+            assert len(javalin_sourced) == 0
+        finally:
+            file_path.unlink()
+
+    def test_javalin_patterns_applied_with_import(self) -> None:
+        """Java file with Javalin import + app.get( should produce Javalin matches."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                "import io.javalin.Javalin;\n"
+                'app.get("/hello", ctx -> ctx.result("Hello"));\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
+            javalin_sourced = [p for p in points if p.source == "Javalin"]
+            assert len(javalin_sourced) > 0
+        finally:
+            file_path.unlink()
+
+    def test_spring_ungated_without_import_patterns(self) -> None:
+        """Spring patterns should apply regardless of imports (empty import_patterns)."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write("@RestController\npublic class MyController { }\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Spring"]))
+            spring_sourced = [p for p in points if p.source == "Spring"]
+            assert len(spring_sourced) > 0
+        finally:
+            file_path.unlink()
+
+    def test_express_ts_gated_without_import(self) -> None:
+        """TS file with obj.get() but no Express import should not produce Express matches."""
+        with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
+            f.write("const val = obj.get('key');\n")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Express"]))
+            express_sourced = [p for p in points if p.source == "Express"]
+            assert len(express_sourced) == 0
+        finally:
+            file_path.unlink()
+
+    def test_base_and_common_patterns_always_apply(self) -> None:
+        """Base and common patterns should still fire even when framework is gated out."""
+        with tempfile.NamedTemporaryFile(suffix=".java", mode="w", delete=False) as f:
+            f.write(
+                "import javax.persistence.Entity;\n"
+                "@Entity\n"
+                "public class User { }\n"
+                'm.get("key");\n'
+            )
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path, frameworks=["Javalin"]))
+            # Javalin patterns should be gated out (no Javalin import)
+            javalin_sourced = [p for p in points if p.source == "Javalin"]
+            assert len(javalin_sourced) == 0
+            # But base Java patterns (@Entity) should still match
+            entity_points = [p for p in points if "@Entity" in p.matched_pattern]
+            assert len(entity_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_filter_frameworks_by_imports(self) -> None:
+        """Unit test for _filter_frameworks_by_imports."""
+        content_with_javalin = 'import io.javalin.Javalin;\napp.get("/hello");\n'
+        content_without_javalin = 'import java.util.Map;\nm.get("key");\n'
+
+        # With Javalin import: Javalin kept
+        result = _filter_frameworks_by_imports(
+            content_with_javalin, Language.JAVA, ["Javalin", "Spring"]
+        )
+        assert "Javalin" in result
+        assert "Spring" in result
+
+        # Without Javalin import: Javalin filtered out, Spring kept (ungated)
+        result = _filter_frameworks_by_imports(
+            content_without_javalin, Language.JAVA, ["Javalin", "Spring"]
+        )
+        assert "Javalin" not in result
+        assert "Spring" in result
+
+    def test_file_has_framework_import(self) -> None:
+        """Unit test for _file_has_framework_import."""
+        content = "import io.javalin.Javalin;\npublic class App {}\n"
+        assert _file_has_framework_import(content, (r"import io\.javalin",))
+        assert not _file_has_framework_import(content, (r"import io\.quarkus",))
+        assert not _file_has_framework_import(
+            "public class App {}", (r"import io\.javalin",)
+        )
+
+
 class TestExpressMethodChainPatterns:
     """Tests for Express method-chain continuation matching."""
 
@@ -1254,6 +1378,7 @@ class TestExpressMethodChainPatterns:
         """JS Express method-chain .get(, .post( should match without receiver."""
         with tempfile.NamedTemporaryFile(suffix=".js", mode="w", delete=False) as f:
             f.write(
+                "const express = require('express');\n"
                 "const app = express()\n"
                 '    .get("/users", handler)\n'
                 '    .post("/users", handler);\n'
@@ -1279,6 +1404,7 @@ class TestExpressMethodChainPatterns:
         """TS Express method-chain .get(, .put( should match without receiver."""
         with tempfile.NamedTemporaryFile(suffix=".ts", mode="w", delete=False) as f:
             f.write(
+                "import express from 'express';\n"
                 "const app = express()\n"
                 '    .get("/users", handler)\n'
                 '    .put("/users", handler);\n'

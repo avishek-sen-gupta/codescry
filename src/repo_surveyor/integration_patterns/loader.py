@@ -9,7 +9,7 @@ from .types import BasePatternSpec
 
 def load_language_patterns(
     package_name: str, package_path: str, base: BasePatternSpec
-) -> tuple[dict, dict]:
+) -> tuple[dict, dict, dict[str, tuple[str, ...]]]:
     """Load base and framework patterns for a language package.
 
     Extracts the base patterns from the given spec and auto-discovers
@@ -22,10 +22,13 @@ def load_language_patterns(
         base: The ``BasePatternSpec`` defined in the language's ``base`` module.
 
     Returns:
-        A ``(base_patterns, framework_patterns)`` tuple.
+        A ``(base_patterns, framework_patterns, framework_import_patterns)`` tuple.
+        ``framework_import_patterns`` maps framework name to its import patterns;
+        an empty tuple means the framework is ungated (patterns always apply).
     """
     base_patterns = base.patterns
     framework_patterns: dict = {}
+    framework_import_patterns: dict[str, tuple[str, ...]] = {}
 
     pkg_dir = str(Path(package_path).parent)
     for _importer, modname, _ispkg in pkgutil.iter_modules([pkg_dir]):
@@ -34,5 +37,8 @@ def load_language_patterns(
         module = importlib.import_module(f".{modname}", package=package_name)
         if hasattr(module, "FRAMEWORK"):
             framework_patterns[module.FRAMEWORK.name] = module.FRAMEWORK.patterns
+            framework_import_patterns[module.FRAMEWORK.name] = (
+                module.FRAMEWORK.import_patterns
+            )
 
-    return base_patterns, framework_patterns
+    return base_patterns, framework_patterns, framework_import_patterns

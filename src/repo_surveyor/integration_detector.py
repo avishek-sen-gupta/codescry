@@ -18,6 +18,7 @@ from .integration_patterns import (
     Language,
     EXTENSION_TO_LANGUAGE,
     get_patterns_for_language,
+    get_import_patterns_for_framework,
     get_directory_patterns,
 )
 from .pipeline_timer import NullPipelineTimer, PipelineTimer
@@ -151,6 +152,46 @@ def _find_frameworks_for_file(
     )
 
 
+def _file_has_framework_import(content: str, import_patterns: tuple[str, ...]) -> bool:
+    """Check whether file content contains at least one framework import.
+
+    Args:
+        content: The full file content.
+        import_patterns: Regex patterns to search for.
+
+    Returns:
+        True if any pattern matches any line in the content.
+    """
+    return any(
+        re.search(pattern, line)
+        for line in content.splitlines()
+        for pattern in import_patterns
+    )
+
+
+def _filter_frameworks_by_imports(
+    content: str, language: Language | None, frameworks: list[str]
+) -> list[str]:
+    """Filter frameworks to only those whose imports are present in the file.
+
+    Frameworks with empty ``import_patterns`` (ungated) are always kept.
+
+    Args:
+        content: The full file content.
+        language: The programming language of the file.
+        frameworks: List of candidate framework names.
+
+    Returns:
+        Filtered list of framework names.
+    """
+    return [
+        fw
+        for fw in frameworks
+        if (import_patterns := get_import_patterns_for_framework(language, fw)) == ()
+        or _file_has_framework_import(content, import_patterns)
+    ]
+
+
 def scan_file_for_integrations(
     file_path: Path,
     frameworks: list[str] = [],
@@ -171,7 +212,8 @@ def scan_file_for_integrations(
         return
 
     language = get_language_from_extension(str(file_path))
-    patterns = get_patterns_for_language(language, frameworks)
+    active_frameworks = _filter_frameworks_by_imports(content, language, frameworks)
+    patterns = get_patterns_for_language(language, active_frameworks)
 
     range_map = (
         parse_file_zones(content.encode("utf-8"), language)
