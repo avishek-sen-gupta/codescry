@@ -1,6 +1,6 @@
 """Parser for conanfile.txt files."""
 
-from .types import ParsedDependency
+from repo_surveyor.package_parsers.types import ParsedDependency
 
 SOURCE = "conanfile.txt"
 

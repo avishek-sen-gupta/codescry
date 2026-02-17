@@ -3,7 +3,7 @@
 import re
 import tomllib
 
-from .types import ParsedDependency
+from repo_surveyor.package_parsers.types import ParsedDependency
 
 SOURCE = "pyproject.toml"
 

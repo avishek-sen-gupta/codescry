@@ -5,21 +5,18 @@ Dispatches to format-specific parsers and provides smart framework matching.
 
 from ..constants import TechCategory
 from .types import ParsedDependency
-from . import (
-    build_gradle,
-    cargo_toml,
-    conanfile_txt,
-    csproj,
-    go_mod,
-    package_json,
-    packages_config,
-    pipfile,
-    pom_xml,
+from ..integration_patterns.python.package_parser import (
     pyproject_toml,
     requirements_txt,
+    pipfile,
     setup_py,
-    vcpkg_json,
 )
+from ..integration_patterns.javascript.package_parser import package_json
+from ..integration_patterns.java.package_parser import pom_xml, build_gradle
+from ..integration_patterns.go.package_parser import go_mod
+from ..integration_patterns.rust.package_parser import cargo_toml
+from ..integration_patterns.csharp.package_parser import csproj, packages_config
+from ..integration_patterns.cpp.package_parser import vcpkg_json, conanfile_txt
 
 _PARSERS: dict[str, callable] = {
     "pyproject.toml": pyproject_toml.parse,

@@ -556,7 +556,7 @@ To add support for a new language, edit `languages.json`:
 ```
 
 Then:
-1. If the language has a config file parser, add a module in `package_parsers/` and register it in `package_parsers/__init__.py`
+1. If the language has a config file parser, add a `package_parser/` sub-package under `integration_patterns/{lang}/` containing the parser module(s), then register the import in `package_parsers/__init__.py`
 2. If the language needs integration pattern detection, add a package directory in `integration_patterns/` with a `base.py` exporting a `BASE = BasePatternSpec(patterns={...})` instance for base patterns, and optional per-framework files (e.g. `spring.py`) each exporting a `FRAMEWORK = FrameworkPatternSpec(name="...", patterns={...})` instance. For frameworks with generic patterns that could cause false positives (e.g. `\w*\.get\(`), add `import_patterns=(r"import pattern",)` to gate those patterns on file-level imports. The language's `__init__.py` auto-discovers framework files via `pkgutil`. Also add a `Language` enum member in `integration_patterns/types.py`
 3. Run `poetry run pytest` to verify
 
@@ -582,23 +582,25 @@ The final `SurveyReport` (defined in `report.py`) contains sorted, deduplicated 
 
 **Entry point:** `package_parsers/__init__.py` → `parse_dependencies(filename, content)`
 
-The parser dispatcher maps exact filenames (e.g. `"pom.xml"`, `"package.json"`) to format-specific parsers, with extension-based fallback for variable names (e.g. `MyApp.csproj`). Each parser returns a list of `ParsedDependency(name, source)` objects. Supported formats:
+The parser dispatcher maps exact filenames (e.g. `"pom.xml"`, `"package.json"`) to format-specific parsers, with extension-based fallback for variable names (e.g. `MyApp.csproj`). Each parser returns a list of `ParsedDependency(name, source)` objects. The shared `ParsedDependency` type lives in `package_parsers/types.py`, while individual parser modules are co-located with their language under `integration_patterns/{lang}/package_parser/`. The central dispatcher in `package_parsers/__init__.py` re-imports from these locations.
 
-| Parser module | File format | Technique |
-|---|---|---|
-| `pyproject_toml` | `pyproject.toml` | `tomllib` — reads PEP 621 `[project.dependencies]` and Poetry `[tool.poetry.dependencies]` |
-| `requirements_txt` | `requirements.txt` | Line parsing — extracts PEP 508 package names |
-| `pipfile` | `Pipfile` | `tomllib` — reads `[packages]` and `[dev-packages]` |
-| `setup_py` | `setup.py` | Regex — extracts `install_requires=[...]` |
-| `package_json` | `package.json` | `json` — reads `dependencies`, `devDependencies`, `peerDependencies` |
-| `pom_xml` | `pom.xml` | `xml.etree` — extracts `<artifactId>` from `<dependency>` elements |
-| `build_gradle` | `build.gradle` / `.kts` | Regex — extracts `implementation`, `api`, `compile` declarations |
-| `go_mod` | `go.mod` | Line parsing — extracts module paths from `require` blocks |
-| `cargo_toml` | `Cargo.toml` | `tomllib` — reads `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` |
-| `csproj` | `*.csproj` | `xml.etree` — extracts `<PackageReference Include="...">` attributes |
-| `packages_config` | `packages.config` | `xml.etree` — extracts `<package id="...">` attributes |
-| `vcpkg_json` | `vcpkg.json` | `json` — reads `dependencies` array (string or object entries) |
-| `conanfile_txt` | `conanfile.txt` | Line parsing — extracts package names from `[requires]` section |
+| Parser module | Location | File format | Technique |
+|---|---|---|---|
+| `pyproject_toml` | `python/package_parser/` | `pyproject.toml` | `tomllib` — reads PEP 621 `[project.dependencies]` and Poetry `[tool.poetry.dependencies]` |
+| `requirements_txt` | `python/package_parser/` | `requirements.txt` | Line parsing — extracts PEP 508 package names |
+| `pipfile` | `python/package_parser/` | `Pipfile` | `tomllib` — reads `[packages]` and `[dev-packages]` |
+| `setup_py` | `python/package_parser/` | `setup.py` | Regex — extracts `install_requires=[...]` |
+| `package_json` | `javascript/package_parser/` | `package.json` | `json` — reads `dependencies`, `devDependencies`, `peerDependencies` |
+| `pom_xml` | `java/package_parser/` | `pom.xml` | `xml.etree` — extracts `<artifactId>` from `<dependency>` elements |
+| `build_gradle` | `java/package_parser/` | `build.gradle` / `.kts` | Regex — extracts `implementation`, `api`, `compile` declarations |
+| `go_mod` | `go/package_parser/` | `go.mod` | Line parsing — extracts module paths from `require` blocks |
+| `cargo_toml` | `rust/package_parser/` | `Cargo.toml` | `tomllib` — reads `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` |
+| `csproj` | `csharp/package_parser/` | `*.csproj` | `xml.etree` — extracts `<PackageReference Include="...">` attributes |
+| `packages_config` | `csharp/package_parser/` | `packages.config` | `xml.etree` — extracts `<package id="...">` attributes |
+| `vcpkg_json` | `cpp/package_parser/` | `vcpkg.json` | `json` — reads `dependencies` array (string or object entries) |
+| `conanfile_txt` | `cpp/package_parser/` | `conanfile.txt` | Line parsing — extracts package names from `[requires]` section |
+
+All location paths are relative to `integration_patterns/`. Shared parsers (JS↔TS, Java↔Kotlin, C++↔C) live in the primary language's directory.
 
 **Framework matching** (`_dep_matches_pattern()` + `match_frameworks()`): Parsed dependency names are matched against the `FRAMEWORK_PATTERNS` dict using four rules tried in order:
 

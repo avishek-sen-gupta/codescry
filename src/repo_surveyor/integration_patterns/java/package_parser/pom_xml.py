@@ -2,7 +2,7 @@
 
 import xml.etree.ElementTree as ET
 
-from .types import ParsedDependency
+from repo_surveyor.package_parsers.types import ParsedDependency
 
 SOURCE = "pom.xml"
 

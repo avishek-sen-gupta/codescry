@@ -31,8 +31,8 @@ def load_language_patterns(
     framework_import_patterns: dict[str, tuple[str, ...]] = {}
 
     pkg_dir = str(Path(package_path).parent)
-    for _importer, modname, _ispkg in pkgutil.iter_modules([pkg_dir]):
-        if modname == "base":
+    for _importer, modname, ispkg in pkgutil.iter_modules([pkg_dir]):
+        if modname == "base" or ispkg:
             continue
         module = importlib.import_module(f".{modname}", package=package_name)
         if hasattr(module, "FRAMEWORK"):

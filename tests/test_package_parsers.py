@@ -6,19 +6,19 @@ from repo_surveyor.package_parsers import (
     match_frameworks,
     parse_dependencies,
 )
-from repo_surveyor.package_parsers import pyproject_toml
-from repo_surveyor.package_parsers import requirements_txt
-from repo_surveyor.package_parsers import pipfile
-from repo_surveyor.package_parsers import setup_py
-from repo_surveyor.package_parsers import package_json
-from repo_surveyor.package_parsers import pom_xml
-from repo_surveyor.package_parsers import build_gradle
-from repo_surveyor.package_parsers import go_mod
-from repo_surveyor.package_parsers import cargo_toml
-from repo_surveyor.package_parsers import csproj
-from repo_surveyor.package_parsers import packages_config
-from repo_surveyor.package_parsers import vcpkg_json
-from repo_surveyor.package_parsers import conanfile_txt
+from repo_surveyor.integration_patterns.python.package_parser import pyproject_toml
+from repo_surveyor.integration_patterns.python.package_parser import requirements_txt
+from repo_surveyor.integration_patterns.python.package_parser import pipfile
+from repo_surveyor.integration_patterns.python.package_parser import setup_py
+from repo_surveyor.integration_patterns.javascript.package_parser import package_json
+from repo_surveyor.integration_patterns.java.package_parser import pom_xml
+from repo_surveyor.integration_patterns.java.package_parser import build_gradle
+from repo_surveyor.integration_patterns.go.package_parser import go_mod
+from repo_surveyor.integration_patterns.rust.package_parser import cargo_toml
+from repo_surveyor.integration_patterns.csharp.package_parser import csproj
+from repo_surveyor.integration_patterns.csharp.package_parser import packages_config
+from repo_surveyor.integration_patterns.cpp.package_parser import vcpkg_json
+from repo_surveyor.integration_patterns.cpp.package_parser import conanfile_txt
 from repo_surveyor.detectors import FRAMEWORK_PATTERNS
 
 
