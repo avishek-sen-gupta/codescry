@@ -322,8 +322,12 @@ def handle_loop(
     if cond_frag.entry != -1 and body_frag.entry != -1:
         all_edges.extend(wire(cond_frag.exits, body_frag.entry, EdgeKind.TRUE))
 
-    # Determine back-edge target: update if present, else condition
-    back_target = update_frag.entry if update_frag.entry != -1 else cond_frag.entry
+    # Determine back-edge target: update if present, else condition, else body
+    back_target = (
+        update_frag.entry
+        if update_frag.entry != -1
+        else (cond_frag.entry if cond_frag.entry != -1 else body_frag.entry)
+    )
 
     # Wire body -> update (or back to condition)
     if body_frag.entry != -1:

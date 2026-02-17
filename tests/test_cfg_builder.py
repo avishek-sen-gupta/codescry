@@ -353,6 +353,19 @@ for i in range(10):
         assert len(graph.nodes) >= 3
         assert any(e.target == graph.exit for e in graph.edges)
 
+    def test_python_for_with_continue(self, python_spec, python_parser):
+        source = b"""
+for i in range(10):
+    if i == 0:
+        continue
+    x = i
+"""
+        graph = build_cfg(source, python_spec, python_parser)
+
+        back_edges = _edges_of_kind(graph, EdgeKind.BACK)
+        assert len(back_edges) >= 1
+        assert all(e.target != -1 for e in graph.edges)
+
     def test_python_if_elif_else(self, python_spec, python_parser):
         source = b"""
 if x > 0:
@@ -783,6 +796,28 @@ func f(x int) int {
 
         return_nodes = _node_by_type(graph, "return_statement")
         assert len(return_nodes) >= 2
+
+    def test_go_for_range_with_continue(self, go_spec, go_parser):
+        source = b"""
+package main
+
+func f() {
+    items := []int{1, 2, 3}
+    for _, v := range items {
+        if v == 0 {
+            continue
+        }
+        x := v
+        _ = x
+    }
+}
+"""
+        graph = build_cfg(source, go_spec, go_parser)
+
+        back_edges = _edges_of_kind(graph, EdgeKind.BACK)
+        assert len(back_edges) >= 1
+        # No edge should target -1 (the sentinel for unresolved)
+        assert all(e.target != -1 for e in graph.edges)
 
     def test_go_for_with_break(self, go_spec, go_parser):
         source = b"""
