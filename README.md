@@ -102,6 +102,29 @@ See the [API Reference](docs/api-reference.md) for detailed usage of each subsys
 - [Poetry](https://python-poetry.org/) for dependency management
 - [Universal CTags](https://github.com/universal-ctags/ctags) for code symbol extraction
 - [Neo4j](https://neo4j.com/) (optional) for graph persistence
+- [Graphviz](https://graphviz.org/) (optional) for DOT diagram export — provides the `dot` CLI used by `scripts/generate_diagrams.py`
+
+## Visual Examples
+
+These diagrams are generated from Cartographer's own codebase by `scripts/generate_diagrams.py`.
+
+### Control Flow Graph
+
+CFG for `_dep_matches_pattern` (package parser pattern matching with early returns):
+
+![CFG Example](docs/images/cfg_example.svg)
+
+### Integration Signal Diagram
+
+Integration signals detected in this repository, resolved to their containing symbols:
+
+![Integration Signals](docs/images/integration_signals.svg)
+
+To regenerate:
+
+```bash
+poetry run python scripts/generate_diagrams.py
+```
 
 ## Documentation
 
