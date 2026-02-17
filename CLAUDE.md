@@ -1,7 +1,22 @@
 # Cartographer - Claude Code Instructions
 
+## Workflow Rules
+
+- After completing implementation tasks, always run the full test suite before committing. Do not commit code that hasn't passed all tests.
+- When implementing plans that span many files, complete each logical unit fully before moving to the next. Do not start a new task until the current one is committed. If the session may end, prefer a committed partial result over an uncommitted complete attempt.
+## Project Context
+- Primary languages: Python (main codebase), TypeScript/JavaScript (tooling/web), Markdown (docs).
+- When editing Python, always run `black` formatting before committing. When test counts are mentioned (e.g., 'all 625 tests passing'), verify that count hasn't regressed.
+
+## Common Mistakes to Avoid
+- When the user asks to run detection/analysis on a specific subdirectory or module (e.g., 'smojol-api'), scope the operation precisely to that directory. Do not run on the parent repo or broader scope unless explicitly asked.
+
+## Interaction Style
+- When a user interrupts or cancels a task, do not ask clarifying questions — immediately proceed with the redirected instruction. Treat interruptions as implicit 'stop what you're doing and do this instead'.
+
 ## Build
 
+- When asked to commit and push, always ask which branch to push to unless it's already clear from context. Never assume 'main' branch.
 - Before committing anything, update the README based on the diffs. I should not have to repeat this in my instructions.
 - Before committing anything, run all tests, fixing them if necessary. If test assertions are being removed, ask me to review them.
 
