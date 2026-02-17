@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ET
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
+from .constants import CsprojAttrs, CsprojElements
+
 SOURCE = ".csproj"
 
 _MSBUILD_NS = "{http://schemas.microsoft.com/developer/msbuild/2003}"
@@ -23,8 +25,8 @@ def parse(content: str) -> list[ParsedDependency]:
     names: list[str] = []
 
     for ns in (_MSBUILD_NS, ""):
-        for ref in root.iter(f"{ns}PackageReference"):
-            include = ref.get("Include") or ref.get("include")
+        for ref in root.iter(f"{ns}{CsprojElements.PACKAGE_REFERENCE}"):
+            include = ref.get(CsprojAttrs.INCLUDE) or ref.get(CsprojAttrs.INCLUDE_LOWER)
             if include:
                 names.append(include.strip().lower())
 

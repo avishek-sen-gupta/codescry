@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ET
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
+from .constants import PomElements
+
 SOURCE = "pom.xml"
 
 _MAVEN_NS = "{http://maven.apache.org/POM/4.0.0}"
@@ -24,8 +26,8 @@ def parse(content: str) -> list[ParsedDependency]:
     names = [
         artifact_id_el.text.strip().lower()
         for ns in (_MAVEN_NS, "")
-        for dep in root.iter(f"{ns}dependency")
-        for artifact_id_el in [dep.find(f"{ns}artifactId")]
+        for dep in root.iter(f"{ns}{PomElements.DEPENDENCY}")
+        for artifact_id_el in [dep.find(f"{ns}{PomElements.ARTIFACT_ID}")]
         if artifact_id_el is not None and artifact_id_el.text
     ]
 

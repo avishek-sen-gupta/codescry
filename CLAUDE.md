@@ -19,6 +19,7 @@
 - Write your code aggressively in the Functional Programming style, but balance it with readability. Avoid for loops where list comprehensions, map, filter, reduce, etc. can be used.
 - Minimise magic strings and numbers by refactoring them into constants
 - Don't expose raw global variables in files indiscriminately; wrap them as constants in classes, etc.
+- When writing `if` conditions, prefer early return. Use `if` conditions for checking and acting on exceptional cases. Minimise or eliminate triggering happy path in `if` conditions.
 - Parameters in functions, if they must have default values, must have those values as empty structures corresponding to the non-empty types (empty dictionaries, lists, etc.). Categorically, do not use None.
 - If a function has a non-None return type, never return None.
 - If a function returns a non-None type in its signature, but cannot return an object of that type because of some condition, use null object pattern. Do not return None.

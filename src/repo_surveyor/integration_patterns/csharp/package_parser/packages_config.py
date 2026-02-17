@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ET
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
+from .constants import PackagesConfigAttrs, PackagesConfigElements
+
 SOURCE = "packages.config"
 
 
@@ -19,8 +21,10 @@ def parse(content: str) -> list[ParsedDependency]:
 
     names: list[str] = []
 
-    for pkg in root.iter("package"):
-        pkg_id = pkg.get("id") or pkg.get("Id")
+    for pkg in root.iter(PackagesConfigElements.PACKAGE):
+        pkg_id = pkg.get(PackagesConfigAttrs.ID) or pkg.get(
+            PackagesConfigAttrs.ID_UPPER
+        )
         if pkg_id:
             names.append(pkg_id.strip().lower())
 

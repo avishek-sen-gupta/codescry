@@ -2,6 +2,8 @@
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
+from .constants import ConanfileMarkers
+
 SOURCE = "conanfile.txt"
 
 
@@ -17,16 +19,22 @@ def parse(content: str) -> list[ParsedDependency]:
     for line in content.splitlines():
         stripped = line.strip()
 
-        if stripped == "[requires]":
+        if stripped == ConanfileMarkers.REQUIRES_SECTION:
             in_requires = True
             continue
 
-        if stripped.startswith("[") and stripped.endswith("]"):
+        if stripped.startswith(ConanfileMarkers.SECTION_OPEN) and stripped.endswith(
+            ConanfileMarkers.SECTION_CLOSE
+        ):
             in_requires = False
             continue
 
-        if in_requires and stripped and not stripped.startswith("#"):
-            name = stripped.split("/")[0].strip().lower()
+        if (
+            in_requires
+            and stripped
+            and not stripped.startswith(ConanfileMarkers.COMMENT)
+        ):
+            name = stripped.split(ConanfileMarkers.VERSION_SEP)[0].strip().lower()
             if name:
                 names.append(name)
 

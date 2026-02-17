@@ -5,6 +5,8 @@ import tomllib
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
+from .constants import PyprojectKeys
+
 SOURCE = "pyproject.toml"
 
 _PEP508_NAME = re.compile(r"^([A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?)")
@@ -23,35 +25,37 @@ def parse(content: str) -> list[ParsedDependency]:
     except Exception:
         return []
 
+    project = data.get(PyprojectKeys.PROJECT, {})
+
     # [project.dependencies] - PEP 621
     pep621_deps = [
         name
-        for spec in data.get("project", {}).get("dependencies", [])
+        for spec in project.get(PyprojectKeys.DEPENDENCIES, [])
         if (name := _extract_name(spec))
     ]
 
     # [project.optional-dependencies]
     optional_deps = [
         name
-        for deps in data.get("project", {}).get("optional-dependencies", {}).values()
+        for deps in project.get(PyprojectKeys.OPTIONAL_DEPENDENCIES, {}).values()
         for spec in deps
         if (name := _extract_name(spec))
     ]
 
-    poetry = data.get("tool", {}).get("poetry", {})
+    poetry = data.get(PyprojectKeys.TOOL, {}).get(PyprojectKeys.POETRY, {})
 
     # [tool.poetry.dependencies] + [tool.poetry.dev-dependencies]
     poetry_deps = [
         key.lower()
-        for section in ("dependencies", "dev-dependencies")
+        for section in (PyprojectKeys.DEPENDENCIES, PyprojectKeys.DEV_DEPENDENCIES)
         for key in poetry.get(section, {})
     ]
 
     # [tool.poetry.group.*.dependencies]
     poetry_group_deps = [
         key.lower()
-        for group in poetry.get("group", {}).values()
-        for key in group.get("dependencies", {})
+        for group in poetry.get(PyprojectKeys.GROUP, {}).values()
+        for key in group.get(PyprojectKeys.DEPENDENCIES, {})
     ]
 
     names = pep621_deps + optional_deps + poetry_deps + poetry_group_deps

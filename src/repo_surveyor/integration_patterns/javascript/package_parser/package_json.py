@@ -4,6 +4,8 @@ import json
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
+from .constants import PackageJsonKeys
+
 SOURCE = "package.json"
 
 
@@ -16,7 +18,7 @@ def parse(content: str) -> list[ParsedDependency]:
 
     names = [
         key.lower()
-        for section in ("dependencies", "devDependencies", "peerDependencies")
+        for section in PackageJsonKeys.ALL_SECTIONS
         for key in data.get(section, {})
     ]
 

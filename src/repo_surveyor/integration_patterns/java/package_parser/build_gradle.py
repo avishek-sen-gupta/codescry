@@ -5,6 +5,7 @@ import re
 from repo_surveyor.package_parsers.types import ParsedDependency
 
 SOURCE = "build.gradle"
+SOURCE_KTS = "build.gradle.kts"
 
 # Matches dependency declarations like:
 #   implementation 'group:artifact:version'

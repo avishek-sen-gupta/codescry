@@ -4,6 +4,7 @@ Dispatches to format-specific parsers and provides smart framework matching.
 """
 
 from ..constants import TechCategory
+from .constants import DepSeparators
 from .types import ParsedDependency
 from ..integration_patterns.python.package_parser import (
     pyproject_toml,
@@ -19,24 +20,24 @@ from ..integration_patterns.csharp.package_parser import csproj, packages_config
 from ..integration_patterns.cpp.package_parser import vcpkg_json, conanfile_txt
 
 _PARSERS: dict[str, callable] = {
-    "pyproject.toml": pyproject_toml.parse,
-    "requirements.txt": requirements_txt.parse,
-    "Pipfile": pipfile.parse,
-    "setup.py": setup_py.parse,
-    "package.json": package_json.parse,
-    "pom.xml": pom_xml.parse,
-    "build.gradle": build_gradle.parse,
-    "build.gradle.kts": build_gradle.parse,
-    "go.mod": go_mod.parse,
-    "Cargo.toml": cargo_toml.parse,
-    "packages.config": packages_config.parse,
-    "vcpkg.json": vcpkg_json.parse,
-    "conanfile.txt": conanfile_txt.parse,
+    pyproject_toml.SOURCE: pyproject_toml.parse,
+    requirements_txt.SOURCE: requirements_txt.parse,
+    pipfile.SOURCE: pipfile.parse,
+    setup_py.SOURCE: setup_py.parse,
+    package_json.SOURCE: package_json.parse,
+    pom_xml.SOURCE: pom_xml.parse,
+    build_gradle.SOURCE: build_gradle.parse,
+    build_gradle.SOURCE_KTS: build_gradle.parse,
+    go_mod.SOURCE: go_mod.parse,
+    cargo_toml.SOURCE: cargo_toml.parse,
+    packages_config.SOURCE: packages_config.parse,
+    vcpkg_json.SOURCE: vcpkg_json.parse,
+    conanfile_txt.SOURCE: conanfile_txt.parse,
 }
 
 # Extension-based fallback for files with variable names (e.g. MyApp.csproj)
 _EXT_PARSERS: dict[str, callable] = {
-    ".csproj": csproj.parse,
+    csproj.SOURCE: csproj.parse,
 }
 
 
@@ -72,17 +73,19 @@ def _dep_matches_pattern(dep_name: str, pattern: str) -> bool:
     """
     if dep_name == pattern:
         return True
-    if dep_name.startswith(pattern + "-") or dep_name.startswith(pattern + "."):
+    if dep_name.startswith(pattern + DepSeparators.HYPHEN) or dep_name.startswith(
+        pattern + DepSeparators.DOT
+    ):
         return True
     # Contiguous path subsequence: /pattern/ within /dep/
-    if "/" in dep_name:
-        padded = "/" + dep_name + "/"
-        if ("/" + pattern + "/") in padded:
+    if DepSeparators.PATH in dep_name:
+        padded = DepSeparators.PATH + dep_name + DepSeparators.PATH
+        if (DepSeparators.PATH + pattern + DepSeparators.PATH) in padded:
             return True
     # npm scoped packages: @scope/name
-    if dep_name.startswith("@") and "/" in dep_name:
-        scope = dep_name[1:].split("/", 1)[0]  # "nestjs" from "@nestjs/core"
-        name = dep_name.split("/", 1)[1]  # "core" from "@nestjs/core"
+    if dep_name.startswith(DepSeparators.NPM_SCOPE) and DepSeparators.PATH in dep_name:
+        scope = dep_name[1:].split(DepSeparators.PATH, 1)[0]
+        name = dep_name.split(DepSeparators.PATH, 1)[1]
         if scope == pattern or name == pattern:
             return True
     return False

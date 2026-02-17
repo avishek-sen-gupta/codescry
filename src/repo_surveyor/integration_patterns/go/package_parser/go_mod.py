@@ -4,6 +4,8 @@ import re
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
+from .constants import GoModMarkers
+
 SOURCE = "go.mod"
 
 # Matches module paths inside require blocks or single-line require
@@ -19,7 +21,7 @@ def parse(content: str) -> list[ParsedDependency]:
         line_match.group(1).lower()
         for block in _REQUIRE_BLOCK.finditer(content)
         for line_match in _MODULE_LINE.finditer(block.group(1))
-        if not line_match.group(1).startswith("//")
+        if not line_match.group(1).startswith(GoModMarkers.COMMENT)
     ]
 
     # Single-line require statements

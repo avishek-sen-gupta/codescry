@@ -4,6 +4,8 @@ import tomllib
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
+from .constants import CargoKeys
+
 SOURCE = "Cargo.toml"
 
 
@@ -16,7 +18,7 @@ def parse(content: str) -> list[ParsedDependency]:
 
     names = [
         key.lower()
-        for section in ("dependencies", "dev-dependencies", "build-dependencies")
+        for section in CargoKeys.ALL_SECTIONS
         for key in data.get(section, {})
     ]
 
