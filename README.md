@@ -6,8 +6,6 @@
   A Python library for analysing repository technology stacks and code structure across 15 programming languages.
 </p>
 
-**Note:** Most of this codebase was vibe-coded.
-
 ## What It Does
 
 - **Tech stack detection** — scans a repository and identifies languages, package managers, frameworks, and infrastructure, associating each with its containing directory (useful for monorepos)
