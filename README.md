@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  A Python library for analysing repository technology stacks and code structure across 15 programming languages.
+  Cartographer is a Python library for analysing technology stacks and code structure across a bunch of programming languages.
 </p>
 
 ## What It Does
