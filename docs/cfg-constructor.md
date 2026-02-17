@@ -197,3 +197,33 @@ The builder works in three phases:
 - **Fragment abstraction**: The recursive builder uses a `Fragment` type as its core abstraction — each subtree produces a mini-CFG with entry, exits, and pending edges. This cleanly separates local construction from scope resolution (e.g. break targets are resolved by the enclosing loop, not by the break node itself).
 - **Funnel model for finally**: In TRY blocks, the finally clause intercepts ALL outgoing paths (normal exits, returns, breaks, continues, throws). Pending edges are wired through the finally entry and re-pended from its exits, ensuring finally always executes.
 - **Language-level fallthrough**: Switch fallthrough is a language-level flag (`switch_fallthrough` in `_meta`), not per-node. Languages either have fallthrough semantics (C, Java) or don't (C#, Python).
+
+## Known Limitations
+
+### COBOL
+
+The CFG builder produces only a flat sequence for COBOL programs — branching (`IF`/`EVALUATE`), loops (`PERFORM UNTIL`), and exception handling (`AT END`/`ON EXCEPTION`) are not represented in the graph. This is because `tree-sitter-cobol` produces a **flat, header-based AST** rather than the hierarchical block structure the builder expects.
+
+Most languages produce nested ASTs where control flow nodes contain their children:
+
+```
+if_statement
+  +-- condition
+  +-- consequence (block with child statements)
+  +-- alternative (block with child statements)
+```
+
+COBOL's grammar instead produces flat sibling sequences with header/end-marker pairs:
+
+```
+procedure_division
+  +-- if_header          (contains condition, but no consequence/alternative fields)
+  +-- display_statement  (then-body — just a sibling, not a child of if_header)
+  +-- else_header        (marker node, no children)
+  +-- display_statement  (else-body — also just a sibling)
+  +-- END_IF             (marker node)
+```
+
+The builder's role handlers expect `condition`, `consequence`, and `alternative` to be resolvable as child fields of an `if_statement` node. Since COBOL's `if_header` has no such children, the branch handler produces no TRUE/FALSE edges. Similarly, `evaluate_header` has no `value`/`body` children, so EVALUATE arms are not wired as switch cases.
+
+Supporting COBOL properly would require a grammar-specific pre-processing pass to reconstruct block structure from the flat header/END marker pairs before feeding the tree to the role-based builder.
