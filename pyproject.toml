@@ -38,7 +38,6 @@ pythonpath = ["src"]
 addopts = "--cov=repo_surveyor --cov-report=term-missing --cov-report=html:htmlcov"
 markers = [
     "local_repo: tests that depend on local repository clones (skipped in CI)",
-    "ollama: tests that require a running Ollama instance with models (skipped in CI)",
 ]
 
 [tool.coverage.run]

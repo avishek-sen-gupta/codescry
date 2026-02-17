@@ -110,7 +110,7 @@ See the [API Reference](docs/api-reference.md) for detailed usage of each subsys
 | [API Reference](docs/api-reference.md) | Usage examples for all subsystems — tech stacks, integration detection, symbol resolution, LSP bridge, call flow, Neo4j, and CFG builder |
 | [Architecture](docs/architecture.md) | Internal code flows, plugin system, subsystem internals, and design patterns |
 | [CFG Constructor](docs/cfg-constructor.md) | Control flow graph construction — role schema, graph types, builder algorithm, and per-language config |
-| [Testing & CI](docs/testing.md) | Running tests, coverage, local-repo tests, Ollama tests, and CI pipeline |
+| [Testing & CI](docs/testing.md) | Running tests, coverage, local-repo tests, and CI pipeline |
 
 ## License
 

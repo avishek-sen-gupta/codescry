@@ -24,14 +24,6 @@ To run only the local-repo tests locally:
 poetry run pytest -m local_repo
 ```
 
-## Ollama LLM Tests
-
-Tests that require a running Ollama instance are marked with `@pytest.mark.ollama`. These are automatically skipped when Ollama is not available (try-import guard) and in CI. To run them locally:
-
-```bash
-poetry run pytest -m ollama
-```
-
 ## CI Pipeline
 
 A GitHub Actions workflow is defined in `.github/workflows/ci.yml` with two jobs:
