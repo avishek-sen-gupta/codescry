@@ -11,7 +11,7 @@
     "consequence": "consequence",
     "alternative": "alternative"
   },
-  "else_clause": "branch",
+  "else_clause": "sequence",
   "conditional_expression": {
     "role": "branch",
     "condition": "condition",

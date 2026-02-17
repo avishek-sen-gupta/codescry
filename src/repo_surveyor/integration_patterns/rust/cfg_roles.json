@@ -14,7 +14,7 @@
     "consequence": "consequence",
     "alternative": "alternative"
   },
-  "else_clause": "branch",
+  "else_clause": "sequence",
   "match_expression": {
     "role": "switch",
     "value": "value",
@@ -75,7 +75,7 @@
   "enum_variant": "leaf",
   "enum_variant_list": "leaf",
   "escape_sequence": "leaf",
-  "expression_statement": "leaf",
+  "expression_statement": "sequence",
   "extern_crate_declaration": "leaf",
   "extern_modifier": "leaf",
   "field_declaration": "leaf",

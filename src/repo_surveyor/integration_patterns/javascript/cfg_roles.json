@@ -14,7 +14,7 @@
     "consequence": "consequence",
     "alternative": "alternative"
   },
-  "else_clause": "branch",
+  "else_clause": "sequence",
   "ternary_expression": {
     "role": "branch",
     "condition": "condition",

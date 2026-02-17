@@ -12,28 +12,26 @@
     "alternative": "alternative"
   },
   "when_expression": {
-    "role": "switch",
-    "value": "subject",
-    "body": "body"
+    "role": "switch"
   },
   "for_statement": {
     "role": "loop",
-    "body": "body"
+    "body": 2
   },
   "while_statement": {
     "role": "loop",
-    "condition": "condition",
-    "body": "body"
+    "condition": 0,
+    "body": 1
   },
   "do_while_statement": {
     "role": "loop_post_condition",
-    "body": "body",
-    "condition": "condition"
+    "body": 0,
+    "condition": 1
   },
   "jump_expression": "return",
   "try_expression": {
     "role": "try",
-    "body": "body"
+    "body": 0
   },
   "catch_block": "try",
   "finally_block": "try",

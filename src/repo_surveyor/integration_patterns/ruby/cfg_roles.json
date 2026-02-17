@@ -16,7 +16,7 @@
     "alternative": "alternative"
   },
   "elsif": "branch",
-  "else": "branch",
+  "else": "sequence",
   "unless": {
     "role": "branch",
     "condition": "condition",

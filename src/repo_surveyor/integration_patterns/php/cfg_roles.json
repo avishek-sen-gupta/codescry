@@ -16,8 +16,8 @@
     "consequence": "body",
     "alternative": "alternative"
   },
-  "else_clause": "branch",
-  "else_if_clause": "branch",
+  "else_clause": "sequence",
+  "else_if_clause": {"role": "branch", "condition": "condition", "consequence": "body"},
   "conditional_expression": {
     "role": "branch",
     "condition": "condition",
@@ -105,7 +105,7 @@
   "enum_case": "leaf",
   "error_suppression_expression": "leaf",
   "expression": "leaf",
-  "expression_statement": "leaf",
+  "expression_statement": "sequence",
   "final_modifier": "leaf",
   "float": "leaf",
   "formal_parameters": "leaf",
