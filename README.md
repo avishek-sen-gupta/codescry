@@ -816,38 +816,17 @@ For each language, an LLM classifies tree-sitter node types into these roles, pr
 - **`ControlFlowRole`** — enum with 12 members as listed above
 - **`LanguageCFGSpec`** — frozen dataclass pairing a `Language` with a `dict[str, ControlFlowRole]` mapping tree-sitter node type strings to roles. Includes a `role_for(node_type)` helper that returns `LEAF` for unmapped types
 
-#### Grammar Classifier (Exploratory)
-
-The `grammar_classifier` module provides an LLM-based approach to classifying tree-sitter grammar node types into `ControlFlowRole` values. Instead of manually writing role mappings per language, it extracts the named node type names from a tree-sitter `grammar.js` file, sends that compact list to a local LLM (Qwen2.5-Coder 7B via Ollama), and parses the `NODE_TYPE|ROLE` response into a `dict[str, ControlFlowRole]`.
-
-Components:
-- **`js/extract_rules.js`** — Node.js stub script that intercepts the `grammar()` call in a tree-sitter `grammar.js` file and outputs the rule names as a JSON array. This is more robust than regex extraction because it executes the actual grammar definition, correctly handling any formatting, comments, or computed rule names
-- **`extract_node_types(grammar_js)`** — writes the grammar content to a temp file, runs `js/extract_rules.js` via Node.js, and returns the sorted list of rule names
-- **`SYSTEM_PROMPT`** — instructs the model to classify named node types into one of the 12 control flow roles, with definitions and examples for each role
-- **`build_user_prompt(node_types)`** — formats a list of node type names as a compact user prompt
-- **`parse_classification_response(text)`** — parses `NODE_TYPE|ROLE` lines from model output, skipping malformed lines and performing case-insensitive role matching
-
-The classifier reuses the existing `LineClassifierModel` protocol and `QwenClassifierModel` from the `ml_classifier` module. Requires Node.js for rule extraction. This is exploratory — results depend on model capability and prompt tuning.
-
 #### Static Config: Per-Language `cfg_roles.json`
 
-The generator script classifies all 220 languages from tree-sitter-language-pack once and produces a monolithic intermediate file. The per-language role mappings are then stored as individual `cfg_roles.json` files inside each language's `integration_patterns/{lang}/` directory. Each file contains a flat mapping from tree-sitter node type to role string:
+The per-language role mappings are stored as individual `cfg_roles.json` files inside each language's `integration_patterns/{lang}/` directory. Each file contains a comprehensive flat mapping from every named tree-sitter node type to its control flow role string:
 
 ```json
-{"if_statement": "branch", "while_statement": "loop", "method_invocation": "call"}
+{"if_statement": "branch", "while_statement": "loop", "method_invocation": "call", "identifier": "leaf"}
 ```
 
-Languages with per-language cfg_roles.json: Java, Python, JavaScript, Go, Ruby, Rust, COBOL.
+Languages with per-language cfg_roles.json: Java, Python, JavaScript, TypeScript, Go, Ruby, Rust, C, C++, C#, Kotlin, Scala, PHP, COBOL.
 
-To regenerate (requires Ollama with the Qwen model running):
-
-```bash
-poetry run python scripts/generate_cfg_roles.py
-poetry run python scripts/generate_cfg_roles.py --model qwen2.5-coder:7b-instruct
-poetry run python scripts/generate_cfg_roles.py --split  # also distribute to per-language dirs
-```
-
-The script is incremental — it skips languages already in `languages` or `failures` and saves after every language for crash safety. The `--split` flag distributes the monolithic output into per-language `cfg_roles.json` files under `integration_patterns/{lang}/`.
+These files were hand-authored by consulting each language's tree-sitter grammar (`src/node-types.json`) from the [tree-sitter-language-pack](https://github.com/Goldziher/tree-sitter-language-pack). Every named node type is explicitly classified — unmapped types default to `leaf` at runtime via `LanguageCFGSpec.role_for()`.
 
 #### Loader API: `cfg_role_registry`
 

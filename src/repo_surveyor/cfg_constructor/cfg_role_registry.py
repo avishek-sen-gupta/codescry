@@ -27,6 +27,10 @@ _LANG_TO_DIR: dict[Language, str] = {
     Language.CSHARP: "csharp",
     Language.CPP: "cpp",
     Language.PLI: "pli",
+    Language.C: "c",
+    Language.KOTLIN: "kotlin",
+    Language.SCALA: "scala",
+    Language.PHP: "php",
 }
 
 _ROLE_LOOKUP: dict[str, ControlFlowRole] = {
