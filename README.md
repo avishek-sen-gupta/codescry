@@ -814,15 +814,47 @@ For each language, an LLM classifies tree-sitter node types into these roles, pr
 #### Types
 
 - **`ControlFlowRole`** — enum with 12 members as listed above
-- **`LanguageCFGSpec`** — frozen dataclass pairing a `Language` with a `dict[str, ControlFlowRole]` mapping tree-sitter node type strings to roles. Includes a `role_for(node_type)` helper that returns `LEAF` for unmapped types
+- **`SemanticSlot`** — constants class with 9 named slot strings: `CONDITION`, `CONSEQUENCE`, `ALTERNATIVE`, `VALUE`, `BODY`, `INITIALIZER`, `UPDATE`, `HANDLER`, `FINALIZER`
+- **`FieldMapping`** — frozen dataclass with `slots: dict[str, ChildRef]` mapping semantic slot names to tree-sitter child field names (strings) or positional indices (integers). Default is empty.
+- **`NodeCFGSpec`** — frozen dataclass pairing a `ControlFlowRole` with an optional `FieldMapping`. Default role is `LEAF` with no field mapping.
+- **`LanguageCFGSpec`** — frozen dataclass pairing a `Language` with a `dict[str, NodeCFGSpec]` mapping tree-sitter node type strings to node specs. Includes `role_for(node_type)` (returns `LEAF` for unmapped types) and `spec_for(node_type)` (returns full `NodeCFGSpec`, null-object for unmapped types)
+- **`VALID_SLOTS`** — dict mapping `ControlFlowRole` to `frozenset[str]` of valid semantic slot names for that role. Only `BRANCH`, `SWITCH`, `LOOP`, `LOOP_POST_CONDITION`, and `TRY` have slots; other roles have none.
 
 #### Static Config: Per-Language `cfg_roles.json`
 
-The per-language role mappings are stored as individual `cfg_roles.json` files inside each language's `integration_patterns/{lang}/` directory. Each file contains a comprehensive flat mapping from every named tree-sitter node type to its control flow role string:
+The per-language role mappings are stored as individual `cfg_roles.json` files inside each language's `integration_patterns/{lang}/` directory. The format supports two forms:
+
+**Simple string form** — maps a node type directly to a role (for nodes that don't need child field disambiguation):
 
 ```json
-{"if_statement": "branch", "while_statement": "loop", "method_invocation": "call", "identifier": "leaf"}
+{"break_statement": "break", "method_invocation": "call", "identifier": "leaf"}
 ```
+
+**Extended object form** — maps a node type to a role plus semantic field mappings that identify which tree-sitter child fields serve which structural purpose:
+
+```json
+{
+  "if_statement": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  }
+}
+```
+
+Slot values are tree-sitter field name strings, or integers for positional (Nth named child) fallback. Both forms can be mixed freely in a single file. Invalid slot names for a given role are silently dropped during loading.
+
+**Semantic slots per role:**
+
+| Role | Required | Optional |
+|------|----------|----------|
+| `BRANCH` | `condition`, `consequence` | `alternative` |
+| `SWITCH` | — | `value`, `body` |
+| `LOOP` | `body` | `condition`, `initializer`, `update` |
+| `LOOP_POST_CONDITION` | `body`, `condition` | — |
+| `TRY` | `body` | `handler`, `finalizer` |
+| `SEQUENCE`, `LEAF`, `RETURN`, `BREAK`, `CONTINUE`, `THROW`, `CALL` | — | — |
 
 Languages with per-language cfg_roles.json: Java, Python, JavaScript, TypeScript, Go, Ruby, Rust, C, C++, C#, Kotlin, Scala, PHP, COBOL.
 
@@ -859,7 +891,7 @@ print(spec.role_for("unknown_node"))   # ControlFlowRole.LEAF
 - `LOOP_POST_CONDITION` is separate from `LOOP` — `do...while` guarantees at least one body execution, changing the entry edge
 - `CALL` is treated as sequential for now, marking call sites for future inter-procedural expansion
 - `LEAF` is the safe default — unclassified nodes produce sequential edges
-- No field hints in the spec — the CFG builder will discover child field names dynamically from the tree-sitter node at runtime
+- Field mappings are optional per node type — the extended object form in `cfg_roles.json` allows specifying which tree-sitter child fields correspond to semantic slots (condition, body, etc.), while the simple string form remains for nodes that don't need child disambiguation
 
 ### Design Patterns
 

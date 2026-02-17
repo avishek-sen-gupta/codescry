@@ -8,7 +8,13 @@ language's ``integration_patterns/{lang}/`` directory and converts them into
 import json
 from pathlib import Path
 
-from repo_surveyor.cfg_constructor.types import ControlFlowRole, LanguageCFGSpec
+from repo_surveyor.cfg_constructor.types import (
+    VALID_SLOTS,
+    ControlFlowRole,
+    FieldMapping,
+    LanguageCFGSpec,
+    NodeCFGSpec,
+)
 from repo_surveyor.integration_patterns.types import Language
 
 _PATTERNS_DIR = Path(__file__).resolve().parents[1] / "integration_patterns"
@@ -39,15 +45,38 @@ _ROLE_LOOKUP: dict[str, ControlFlowRole] = {
 
 _CFG_ROLES_FILENAME = "cfg_roles.json"
 
+_RESERVED_KEYS = frozenset({"role"})
 
-def _parse_node_specs(raw_specs: dict[str, str]) -> dict[str, ControlFlowRole]:
-    """Convert ``{node_type: role_value}`` strings into typed role mappings.
 
+def _parse_field_mapping(raw: dict, role: ControlFlowRole) -> FieldMapping:
+    """Extract valid semantic slots from a raw dict, filtering against ``VALID_SLOTS``."""
+    allowed = VALID_SLOTS.get(role, frozenset())
+    slots = {
+        key: value
+        for key, value in raw.items()
+        if key not in _RESERVED_KEYS and key in allowed
+    }
+    return FieldMapping(slots=slots)
+
+
+def _parse_single_spec(raw_value: str | dict) -> NodeCFGSpec:
+    """Parse a single node spec from either a simple string or extended object form."""
+    if isinstance(raw_value, str):
+        return NodeCFGSpec(role=_ROLE_LOOKUP.get(raw_value, ControlFlowRole.LEAF))
+    role = _ROLE_LOOKUP.get(raw_value.get("role", ""), ControlFlowRole.LEAF)
+    return NodeCFGSpec(role=role, field_mapping=_parse_field_mapping(raw_value, role))
+
+
+def _parse_node_specs(raw_specs: dict[str, str | dict]) -> dict[str, NodeCFGSpec]:
+    """Convert raw JSON entries into typed ``NodeCFGSpec`` mappings.
+
+    Accepts both simple string values (``"branch"``) and extended object values
+    (``{"role": "branch", "condition": "condition"}``).
     Unknown role values are silently mapped to ``ControlFlowRole.LEAF``.
     """
     return {
-        node_type: _ROLE_LOOKUP.get(role_str, ControlFlowRole.LEAF)
-        for node_type, role_str in raw_specs.items()
+        node_type: _parse_single_spec(raw_value)
+        for node_type, raw_value in raw_specs.items()
     }
 
 

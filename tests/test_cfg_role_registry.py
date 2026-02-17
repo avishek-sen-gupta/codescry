@@ -5,7 +5,12 @@ import json
 import pytest
 
 from repo_surveyor.cfg_constructor.cfg_role_registry import get_cfg_spec, load_cfg_roles
-from repo_surveyor.cfg_constructor.types import ControlFlowRole
+from repo_surveyor.cfg_constructor.types import (
+    ControlFlowRole,
+    FieldMapping,
+    NodeCFGSpec,
+    SemanticSlot,
+)
 from repo_surveyor.integration_patterns.types import Language
 
 
@@ -57,10 +62,10 @@ class TestLoadCfgRoles:
         result = load_cfg_roles(sample_patterns_dir)
 
         java_spec = result[Language.JAVA]
-        assert java_spec.node_specs["if_statement"] == ControlFlowRole.BRANCH
-        assert java_spec.node_specs["while_statement"] == ControlFlowRole.LOOP
-        assert java_spec.node_specs["method_invocation"] == ControlFlowRole.CALL
-        assert java_spec.node_specs["return_statement"] == ControlFlowRole.RETURN
+        assert java_spec.node_specs["if_statement"].role == ControlFlowRole.BRANCH
+        assert java_spec.node_specs["while_statement"].role == ControlFlowRole.LOOP
+        assert java_spec.node_specs["method_invocation"].role == ControlFlowRole.CALL
+        assert java_spec.node_specs["return_statement"].role == ControlFlowRole.RETURN
 
     def test_unmapped_node_returns_leaf(self, sample_patterns_dir):
         result = load_cfg_roles(sample_patterns_dir)
@@ -72,7 +77,9 @@ class TestLoadCfgRoles:
         _write_lang_config(tmp_path, "java", {"weird_node": "totally_invalid_role"})
         result = load_cfg_roles(tmp_path)
 
-        assert result[Language.JAVA].node_specs["weird_node"] == ControlFlowRole.LEAF
+        assert (
+            result[Language.JAVA].node_specs["weird_node"].role == ControlFlowRole.LEAF
+        )
 
     def test_empty_patterns_dir_returns_empty_dict(self, tmp_path):
         result = load_cfg_roles(tmp_path)
@@ -110,7 +117,7 @@ class TestGetCfgSpec:
         spec = get_cfg_spec(Language.JAVA, sample_patterns_dir)
 
         assert spec.language == Language.JAVA
-        assert spec.node_specs["if_statement"] == ControlFlowRole.BRANCH
+        assert spec.node_specs["if_statement"].role == ControlFlowRole.BRANCH
         assert len(spec.node_specs) == 4
 
     def test_unknown_language_returns_empty_null_object_spec(self, sample_patterns_dir):
@@ -125,3 +132,134 @@ class TestGetCfgSpec:
 
         assert spec.language == Language.JAVA
         assert spec.node_specs == {}
+
+
+class TestExtendedNodeSpec:
+    """Tests for the extended object form in cfg_roles.json."""
+
+    def test_extended_spec_parses_role_and_fields(self, tmp_path):
+        _write_lang_config(
+            tmp_path,
+            "java",
+            {
+                "if_statement": {
+                    "role": "branch",
+                    "condition": "condition",
+                    "consequence": "consequence",
+                    "alternative": "alternative",
+                }
+            },
+        )
+        spec = get_cfg_spec(Language.JAVA, tmp_path)
+
+        node = spec.node_specs["if_statement"]
+        assert node.role == ControlFlowRole.BRANCH
+        assert node.field_mapping.slots == {
+            "condition": "condition",
+            "consequence": "consequence",
+            "alternative": "alternative",
+        }
+
+    def test_extended_spec_with_positional_int(self, tmp_path):
+        _write_lang_config(
+            tmp_path,
+            "java",
+            {"if_statement": {"role": "branch", "condition": 0, "consequence": 1}},
+        )
+        spec = get_cfg_spec(Language.JAVA, tmp_path)
+
+        node = spec.node_specs["if_statement"]
+        assert node.field_mapping.slots == {"condition": 0, "consequence": 1}
+
+    def test_mixed_simple_and_extended(self, tmp_path):
+        _write_lang_config(
+            tmp_path,
+            "java",
+            {
+                "break_statement": "break",
+                "if_statement": {
+                    "role": "branch",
+                    "condition": "condition",
+                    "consequence": "consequence",
+                },
+            },
+        )
+        spec = get_cfg_spec(Language.JAVA, tmp_path)
+
+        assert spec.node_specs["break_statement"].role == ControlFlowRole.BREAK
+        assert spec.node_specs["break_statement"].field_mapping.slots == {}
+        assert spec.node_specs["if_statement"].role == ControlFlowRole.BRANCH
+        assert "condition" in spec.node_specs["if_statement"].field_mapping.slots
+
+    def test_invalid_slots_silently_dropped(self, tmp_path):
+        _write_lang_config(
+            tmp_path,
+            "java",
+            {
+                "if_statement": {
+                    "role": "branch",
+                    "condition": "condition",
+                    "body": "body_field",
+                }
+            },
+        )
+        spec = get_cfg_spec(Language.JAVA, tmp_path)
+
+        node = spec.node_specs["if_statement"]
+        assert "condition" in node.field_mapping.slots
+        assert "body" not in node.field_mapping.slots
+
+    def test_missing_role_key_defaults_to_leaf(self, tmp_path):
+        _write_lang_config(tmp_path, "java", {"some_node": {"condition": "cond_field"}})
+        spec = get_cfg_spec(Language.JAVA, tmp_path)
+
+        assert spec.node_specs["some_node"].role == ControlFlowRole.LEAF
+        assert spec.node_specs["some_node"].field_mapping.slots == {}
+
+    def test_role_for_with_extended_specs(self, tmp_path):
+        _write_lang_config(
+            tmp_path,
+            "java",
+            {
+                "if_statement": {"role": "branch", "condition": "condition"},
+                "break_statement": "break",
+            },
+        )
+        spec = get_cfg_spec(Language.JAVA, tmp_path)
+
+        assert spec.role_for("if_statement") == ControlFlowRole.BRANCH
+        assert spec.role_for("break_statement") == ControlFlowRole.BREAK
+        assert spec.role_for("nonexistent") == ControlFlowRole.LEAF
+
+
+class TestSpecFor:
+    """Tests for LanguageCFGSpec.spec_for()."""
+
+    def test_mapped_node_returns_full_spec(self, tmp_path):
+        _write_lang_config(
+            tmp_path,
+            "java",
+            {
+                "if_statement": {
+                    "role": "branch",
+                    "condition": "condition",
+                    "consequence": "consequence",
+                }
+            },
+        )
+        spec = get_cfg_spec(Language.JAVA, tmp_path)
+
+        node = spec.spec_for("if_statement")
+        assert node.role == ControlFlowRole.BRANCH
+        assert node.field_mapping.slots == {
+            "condition": "condition",
+            "consequence": "consequence",
+        }
+
+    def test_unmapped_node_returns_null_object(self, tmp_path):
+        _write_lang_config(tmp_path, "java", {"if_statement": "branch"})
+        spec = get_cfg_spec(Language.JAVA, tmp_path)
+
+        node = spec.spec_for("nonexistent_node")
+        assert node.role == ControlFlowRole.LEAF
+        assert node.field_mapping.slots == {}

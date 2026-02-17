@@ -2,7 +2,7 @@
 
 import pytest
 
-from repo_surveyor.cfg_constructor import ControlFlowRole, LanguageCFGSpec
+from repo_surveyor.cfg_constructor import ControlFlowRole, LanguageCFGSpec, NodeCFGSpec
 from repo_surveyor.integration_patterns.types import Language
 
 EXPECTED_ROLES = {
@@ -38,10 +38,10 @@ class TestLanguageCFGSpec:
         return LanguageCFGSpec(
             language=Language.JAVA,
             node_specs={
-                "if_statement": ControlFlowRole.BRANCH,
-                "while_statement": ControlFlowRole.LOOP,
-                "block": ControlFlowRole.SEQUENCE,
-                "return_statement": ControlFlowRole.RETURN,
+                "if_statement": NodeCFGSpec(role=ControlFlowRole.BRANCH),
+                "while_statement": NodeCFGSpec(role=ControlFlowRole.LOOP),
+                "block": NodeCFGSpec(role=ControlFlowRole.SEQUENCE),
+                "return_statement": NodeCFGSpec(role=ControlFlowRole.RETURN),
             },
         )
 
