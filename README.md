@@ -1,6 +1,10 @@
-# Cartographer
+<p align="center">
+  <img src="docs/images/banner.svg" alt="Cartographer" width="900"/>
+</p>
 
-A Python library for analysing repository technology stacks and code structure across 15 programming languages.
+<p align="center">
+  A Python library for analysing repository technology stacks and code structure across 15 programming languages.
+</p>
 
 **Note:** Most of this codebase was vibe-coded.
 
