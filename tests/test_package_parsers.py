@@ -19,6 +19,8 @@ from repo_surveyor.integration_patterns.csharp.package_parser import csproj
 from repo_surveyor.integration_patterns.csharp.package_parser import packages_config
 from repo_surveyor.integration_patterns.cpp.package_parser import vcpkg_json
 from repo_surveyor.integration_patterns.cpp.package_parser import conanfile_txt
+from repo_surveyor.integration_patterns.php.package_parser import composer_json
+from repo_surveyor.integration_patterns.scala.package_parser import build_sbt
 from repo_surveyor.detectors import FRAMEWORK_PATTERNS
 
 
@@ -623,6 +625,46 @@ class TestMatchFrameworks:
         deps = [ParsedDependency("microsoft.aspnetcore.authentication", ".csproj")]
         assert "ASP.NET Core" in match_frameworks(deps, FRAMEWORK_PATTERNS)
 
+    def test_laravel_detected(self):
+        deps = [ParsedDependency("laravel/framework", "composer.json")]
+        assert "Laravel" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_symfony_detected(self):
+        deps = [ParsedDependency("symfony/framework-bundle", "composer.json")]
+        assert "Symfony" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_slim_detected(self):
+        deps = [ParsedDependency("slim/slim", "composer.json")]
+        assert "Slim" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_ktor_detected(self):
+        deps = [ParsedDependency("ktor-server-core", "build.gradle")]
+        assert "Ktor" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_exposed_detected(self):
+        deps = [ParsedDependency("exposed-core", "build.gradle")]
+        assert "Exposed" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_play_scala_detected(self):
+        deps = [ParsedDependency("play-server", "build.sbt")]
+        assert "Play" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_akka_http_detected(self):
+        deps = [ParsedDependency("akka-http", "build.sbt")]
+        assert "Akka HTTP" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_http4s_detected(self):
+        deps = [ParsedDependency("http4s-core", "build.sbt")]
+        assert "http4s" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_zio_detected(self):
+        deps = [ParsedDependency("zio", "build.sbt")]
+        assert "ZIO" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
+    def test_scalatra_detected(self):
+        deps = [ParsedDependency("scalatra", "build.sbt")]
+        assert "Scalatra" in match_frameworks(deps, FRAMEWORK_PATTERNS)
+
 
 # ---------------------------------------------------------------------------
 # parse_dependencies dispatch
@@ -670,6 +712,18 @@ class TestParseDependencies:
         names = [d.name for d in deps]
         assert "boost" in names
         assert "poco" in names
+
+    def test_composer_json_dispatches(self):
+        content = '{"require": {"laravel/framework": "^10.0"}}'
+        deps = parse_dependencies("composer.json", content)
+        assert len(deps) == 1
+        assert deps[0].name == "laravel/framework"
+
+    def test_build_sbt_dispatches(self):
+        content = '"com.typesafe.akka" %% "akka-actor" % "2.8.0"'
+        deps = parse_dependencies("build.sbt", content)
+        assert len(deps) == 1
+        assert deps[0].name == "akka-actor"
 
 
 # ---------------------------------------------------------------------------
@@ -783,3 +837,110 @@ poco/1.12.4
         assert "boost" in names
         assert "poco" in names
         assert len(deps) == 2
+
+
+# ---------------------------------------------------------------------------
+# composer.json parser
+# ---------------------------------------------------------------------------
+class TestComposerJson:
+    def test_require_and_require_dev(self):
+        content = """\
+{
+  "require": {
+    "php": "^8.1",
+    "laravel/framework": "^10.0",
+    "guzzlehttp/guzzle": "^7.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.0",
+    "ext-mbstring": "*"
+  }
+}
+"""
+        deps = composer_json.parse(content)
+        names = [d.name for d in deps]
+        assert "laravel/framework" in names
+        assert "guzzlehttp/guzzle" in names
+        assert "phpunit/phpunit" in names
+
+    def test_skips_platform_packages(self):
+        content = """\
+{
+  "require": {
+    "php": "^8.1",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "slim/slim": "^4.0"
+  }
+}
+"""
+        deps = composer_json.parse(content)
+        names = [d.name for d in deps]
+        assert "slim/slim" in names
+        assert "php" not in names
+        assert "ext-json" not in names
+        assert "ext-mbstring" not in names
+
+    def test_malformed_json_returns_empty(self):
+        assert composer_json.parse("not json {{{") == []
+
+    def test_source_field(self):
+        content = '{"require": {"slim/slim": "^4.0"}}'
+        deps = composer_json.parse(content)
+        assert deps[0].source == "composer.json"
+
+    def test_empty_sections(self):
+        content = '{"name": "my/project"}'
+        deps = composer_json.parse(content)
+        assert deps == []
+
+
+# ---------------------------------------------------------------------------
+# build.sbt parser
+# ---------------------------------------------------------------------------
+class TestBuildSbt:
+    def test_single_dependency(self):
+        content = 'libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.8.0"'
+        deps = build_sbt.parse(content)
+        names = [d.name for d in deps]
+        assert "akka-actor" in names
+
+    def test_multiple_dependencies(self):
+        content = """\
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.8.0"
+libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.0"
+libraryDependencies += "org.http4s" %% "http4s-core" % "0.23.24"
+"""
+        deps = build_sbt.parse(content)
+        names = [d.name for d in deps]
+        assert "akka-actor" in names
+        assert "akka-stream" in names
+        assert "http4s-core" in names
+
+    def test_seq_block(self):
+        content = """\
+libraryDependencies ++= Seq(
+  "org.typelevel" %% "cats-core" % "2.10.0",
+  "org.typelevel" %% "cats-effect" % "3.5.2"
+)
+"""
+        deps = build_sbt.parse(content)
+        names = [d.name for d in deps]
+        assert "cats-core" in names
+        assert "cats-effect" in names
+
+    def test_single_percent(self):
+        content = (
+            'libraryDependencies += "org.scala-lang" % "scala-reflect" % "2.13.12"'
+        )
+        deps = build_sbt.parse(content)
+        names = [d.name for d in deps]
+        assert "scala-reflect" in names
+
+    def test_source_field(self):
+        content = '"org.scalatest" %% "scalatest" % "3.2.17"'
+        deps = build_sbt.parse(content)
+        assert deps[0].source == "build.sbt"
+
+    def test_empty_file(self):
+        assert build_sbt.parse('name := "myproject"\nversion := "1.0"') == []

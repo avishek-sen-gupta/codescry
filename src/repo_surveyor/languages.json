@@ -88,7 +88,16 @@
     },
     "Kotlin": {
       "extensions": [".kt"],
-      "shared_framework_patterns": "Java"
+      "shared_framework_patterns": "Java",
+      "framework_patterns": {
+        "ktor-server": "Ktor",
+        "ktor-client": "Ktor",
+        "ktor-server-core": "Ktor",
+        "exposed-core": "Exposed",
+        "exposed-dao": "Exposed",
+        "exposed-jdbc": "Exposed"
+      },
+      "integration_module": "kotlin"
     },
     "Go": {
       "extensions": [".go"],
@@ -174,10 +183,53 @@
       "extensions": [".swift"]
     },
     "PHP": {
-      "extensions": [".php"]
+      "extensions": [".php"],
+      "indicator_files": {
+        "composer.json": { "package_managers": ["Composer"], "parser": "composer_json" }
+      },
+      "package_manager_indicators": {
+        "composer.lock": "Composer"
+      },
+      "framework_patterns": {
+        "laravel/framework": "Laravel",
+        "symfony/framework-bundle": "Symfony",
+        "symfony/http-kernel": "Symfony",
+        "slim/slim": "Slim",
+        "codeigniter4/framework": "CodeIgniter",
+        "cakephp/cakephp": "CakePHP",
+        "yiisoft/yii2": "Yii",
+        "laminas/laminas-mvc": "Laminas"
+      },
+      "integration_module": "php"
     },
     "Scala": {
-      "extensions": [".scala"]
+      "extensions": [".scala"],
+      "indicator_files": {
+        "build.sbt": { "package_managers": ["sbt"], "parser": "build_sbt" }
+      },
+      "package_manager_indicators": {
+        "project/build.properties": "sbt",
+        "project/plugins.sbt": "sbt"
+      },
+      "framework_patterns": {
+        "play": "Play",
+        "play-server": "Play",
+        "akka-http": "Akka HTTP",
+        "akka-actor": "Akka",
+        "pekko-http": "Pekko HTTP",
+        "pekko-actor": "Pekko",
+        "http4s-core": "http4s",
+        "http4s-dsl": "http4s",
+        "http4s-blaze-server": "http4s",
+        "http4s-ember-server": "http4s",
+        "slick": "Slick",
+        "zio": "ZIO",
+        "zio-http": "ZIO",
+        "scalatra": "Scalatra",
+        "finch-core": "Finch",
+        "finatra-http": "Finatra"
+      },
+      "integration_module": "scala"
     },
     "Clojure": {
       "extensions": [".clj"]

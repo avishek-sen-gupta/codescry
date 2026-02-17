@@ -71,6 +71,18 @@ class TestGetLanguageFromExtension:
         assert get_language_from_extension("program.pl1") == Language.PLI
         assert get_language_from_extension("include.plinc") == Language.PLI
 
+    def test_php_extension(self) -> None:
+        """Should detect PHP from .php extension."""
+        assert get_language_from_extension("index.php") == Language.PHP
+
+    def test_kotlin_extension(self) -> None:
+        """Should detect Kotlin from .kt extension."""
+        assert get_language_from_extension("Main.kt") == Language.KOTLIN
+
+    def test_scala_extension(self) -> None:
+        """Should detect Scala from .scala extension."""
+        assert get_language_from_extension("App.scala") == Language.SCALA
+
     def test_unknown_extension(self) -> None:
         """Should return None for unknown extensions."""
         assert get_language_from_extension("file.xyz") is None
@@ -101,6 +113,78 @@ class TestGetPatternsForLanguage:
         http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
         assert any("actix_web" in p for p in http_patterns)
         assert any("warp" in p for p in http_patterns)
+
+    def test_php_base_patterns_loaded(self) -> None:
+        """Should load PHP base patterns with HTTP and database types."""
+        patterns = get_patterns_for_language(Language.PHP)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("curl_init" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("PDO" in p for p in db_patterns)
+
+    def test_php_laravel_framework_patterns(self) -> None:
+        """Should include Laravel patterns when framework is active."""
+        patterns = get_patterns_for_language(Language.PHP, frameworks=["Laravel"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("Route::get" in p for p in http_patterns)
+
+    def test_php_symfony_framework_patterns(self) -> None:
+        """Should include Symfony patterns when framework is active."""
+        patterns = get_patterns_for_language(Language.PHP, frameworks=["Symfony"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("AbstractController" in p for p in http_patterns)
+
+    def test_php_slim_framework_patterns(self) -> None:
+        """Should include Slim patterns when framework is active."""
+        patterns = get_patterns_for_language(Language.PHP, frameworks=["Slim"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("app->get" in p for p in http_patterns)
+
+    def test_kotlin_base_patterns_loaded(self) -> None:
+        """Should load Kotlin base patterns with HTTP and database types."""
+        patterns = get_patterns_for_language(Language.KOTLIN)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("ktor" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("exposed" in p for p in db_patterns)
+
+    def test_kotlin_ktor_framework_patterns(self) -> None:
+        """Should include Ktor patterns when framework is active."""
+        patterns = get_patterns_for_language(Language.KOTLIN, frameworks=["Ktor"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("embeddedServer" in p for p in http_patterns)
+
+    def test_kotlin_spring_framework_patterns(self) -> None:
+        """Should include Spring patterns when framework is active."""
+        patterns = get_patterns_for_language(Language.KOTLIN, frameworks=["Spring"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("coRouter" in p for p in http_patterns)
+
+    def test_scala_base_patterns_loaded(self) -> None:
+        """Should load Scala base patterns with HTTP and database types."""
+        patterns = get_patterns_for_language(Language.SCALA)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("sttp" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("slick" in p for p in db_patterns)
+
+    def test_scala_play_framework_patterns(self) -> None:
+        """Should include Play patterns when framework is active."""
+        patterns = get_patterns_for_language(Language.SCALA, frameworks=["Play"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("play" in p and "mvc" in p for p in http_patterns)
+
+    def test_scala_akka_http_framework_patterns(self) -> None:
+        """Should include Akka HTTP patterns when framework is active."""
+        patterns = get_patterns_for_language(Language.SCALA, frameworks=["Akka HTTP"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("akka" in p and "scaladsl" in p for p in http_patterns)
+
+    def test_scala_http4s_framework_patterns(self) -> None:
+        """Should include http4s patterns when framework is active."""
+        patterns = get_patterns_for_language(Language.SCALA, frameworks=["http4s"])
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("HttpRoutes" in p for p in http_patterns)
 
 
 class TestClassifyDirectory:

@@ -18,6 +18,8 @@ from ..integration_patterns.go.package_parser import go_mod
 from ..integration_patterns.rust.package_parser import cargo_toml
 from ..integration_patterns.csharp.package_parser import csproj, packages_config
 from ..integration_patterns.cpp.package_parser import vcpkg_json, conanfile_txt
+from ..integration_patterns.php.package_parser import composer_json
+from ..integration_patterns.scala.package_parser import build_sbt
 
 _PARSERS: dict[str, callable] = {
     pyproject_toml.SOURCE: pyproject_toml.parse,
@@ -33,6 +35,8 @@ _PARSERS: dict[str, callable] = {
     packages_config.SOURCE: packages_config.parse,
     vcpkg_json.SOURCE: vcpkg_json.parse,
     conanfile_txt.SOURCE: conanfile_txt.parse,
+    composer_json.SOURCE: composer_json.parse,
+    build_sbt.SOURCE: build_sbt.parse,
 }
 
 # Extension-based fallback for files with variable names (e.g. MyApp.csproj)
