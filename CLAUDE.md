@@ -10,6 +10,7 @@
 
 ## Common Mistakes to Avoid
 - When the user asks to run detection/analysis on a specific subdirectory or module (e.g., 'smojol-api'), scope the operation precisely to that directory. Do not run on the parent repo or broader scope unless explicitly asked.
+- When working with LLM API calls or external APIs, start with small test inputs before processing large datasets. Large inputs (e.g., full grammar files, large symbol sets) can overflow context windows or crash connections.
 
 ## Interaction Style
 - When a user interrupts or cancels a task, do not ask clarifying questions — immediately proceed with the redirected instruction. Treat interruptions as implicit 'stop what you're doing and do this instead'.
