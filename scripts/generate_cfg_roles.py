@@ -11,11 +11,14 @@ Usage::
     poetry run python scripts/generate_cfg_roles.py
     poetry run python scripts/generate_cfg_roles.py --output path/to/cfg_roles.json
     poetry run python scripts/generate_cfg_roles.py --model qwen2.5-coder:7b-instruct
+    poetry run python scripts/generate_cfg_roles.py --split
 
 Features:
 - **Incremental**: skips languages already in ``languages`` or ``failures``
 - **Crash-safe**: saves JSON after every language
 - **Graceful failures**: catches exceptions, records in ``failures``, continues
+- **Split**: ``--split`` distributes per-language ``cfg_roles.json`` files into
+  ``integration_patterns/{lang}/`` directories for languages with a matching directory
 """
 
 import argparse
@@ -39,13 +42,28 @@ _LANG_DEFS_URL = (
     "tree-sitter-language-pack/main/sources/language_definitions.json"
 )
 
-_DEFAULT_OUTPUT = (
+_DEFAULT_OUTPUT = Path(__file__).resolve().parents[1] / "cfg_roles.json"
+
+_PATTERNS_DIR = (
     Path(__file__).resolve().parents[1]
     / "src"
     / "repo_surveyor"
-    / "cfg_constructor"
-    / "cfg_roles.json"
+    / "integration_patterns"
 )
+
+# Languages with integration_patterns directories that can receive per-language files.
+_SPLIT_LANGUAGES: dict[str, str] = {
+    "java": "java",
+    "python": "python",
+    "javascript": "javascript",
+    "go": "go",
+    "ruby": "ruby",
+    "rust": "rust",
+    "cobol": "cobol",
+    "typescript": "typescript",
+    "c_sharp": "csharp",
+    "cpp": "cpp",
+}
 
 _DEFAULT_MODEL = "qwen2.5-coder:7b-instruct"
 
@@ -178,6 +196,42 @@ def generate(
     print(f"Output: {output_path}")
 
 
+def split_to_language_dirs(
+    monolithic_path: Path = _DEFAULT_OUTPUT,
+    patterns_dir: Path = _PATTERNS_DIR,
+) -> None:
+    """Distribute per-language cfg_roles.json from a monolithic file.
+
+    For each language in ``_SPLIT_LANGUAGES`` that has a matching directory under
+    ``patterns_dir``, writes its ``node_specs`` as a standalone JSON file.
+
+    Args:
+        monolithic_path: Path to the monolithic cfg_roles.json.
+        patterns_dir: Root of per-language integration_patterns directories.
+    """
+    raw = json.loads(monolithic_path.read_text())
+    languages_section = raw.get("languages", {})
+    written = 0
+
+    for json_key, dir_name in sorted(_SPLIT_LANGUAGES.items()):
+        entry = languages_section.get(json_key)
+        if entry is None:
+            continue
+
+        lang_dir = patterns_dir / dir_name
+        if not lang_dir.is_dir():
+            print(f"  Skipping {json_key} (no directory {lang_dir})")
+            continue
+
+        node_specs = entry.get("node_specs", {})
+        out_path = lang_dir / "cfg_roles.json"
+        out_path.write_text(json.dumps(node_specs, indent=2) + "\n")
+        written += 1
+        print(f"  Wrote {out_path} ({len(node_specs)} specs)")
+
+    print(f"\nSplit {written} languages into per-language cfg_roles.json files.")
+
+
 def main() -> None:
     """CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -194,8 +248,16 @@ def main() -> None:
         default=_DEFAULT_MODEL,
         help=f"Ollama model ID (default: {_DEFAULT_MODEL})",
     )
+    parser.add_argument(
+        "--split",
+        action="store_true",
+        help="After generation, split into per-language cfg_roles.json files",
+    )
     args = parser.parse_args()
     generate(output_path=args.output, model_id=args.model)
+    if args.split:
+        print("\nSplitting into per-language files...")
+        split_to_language_dirs(monolithic_path=args.output)
 
 
 if __name__ == "__main__":

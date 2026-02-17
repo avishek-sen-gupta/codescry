@@ -9,54 +9,52 @@ from repo_surveyor.cfg_constructor.types import ControlFlowRole
 from repo_surveyor.integration_patterns.types import Language
 
 
-def _write_config(tmp_path, config):
-    """Write a config dict to a temporary cfg_roles.json."""
-    path = tmp_path / "cfg_roles.json"
-    path.write_text(json.dumps(config))
-    return path
+def _write_lang_config(tmp_path, lang_dir, node_specs):
+    """Write a per-language cfg_roles.json under tmp_path/{lang_dir}/."""
+    lang_path = tmp_path / lang_dir
+    lang_path.mkdir(exist_ok=True)
+    cfg_path = lang_path / "cfg_roles.json"
+    cfg_path.write_text(json.dumps(node_specs))
+    return cfg_path
 
 
 @pytest.fixture()
-def sample_config():
-    """A minimal config with two known languages and one unknown."""
-    return {
-        "meta": {"generated_at": "2026-01-01T00:00:00Z", "source": "test"},
-        "languages": {
-            "java": {
-                "node_specs": {
-                    "if_statement": "branch",
-                    "while_statement": "loop",
-                    "method_invocation": "call",
-                    "return_statement": "return",
-                }
-            },
-            "python": {
-                "node_specs": {
-                    "if_statement": "branch",
-                    "for_statement": "loop",
-                    "raise_statement": "throw",
-                }
-            },
-            "zzz_unknown_lang": {"node_specs": {"some_node": "branch"}},
+def sample_patterns_dir(tmp_path):
+    """A minimal patterns dir with java and python cfg_roles.json files."""
+    _write_lang_config(
+        tmp_path,
+        "java",
+        {
+            "if_statement": "branch",
+            "while_statement": "loop",
+            "method_invocation": "call",
+            "return_statement": "return",
         },
-        "failures": {"broken_lang": "some error"},
-    }
+    )
+    _write_lang_config(
+        tmp_path,
+        "python",
+        {
+            "if_statement": "branch",
+            "for_statement": "loop",
+            "raise_statement": "throw",
+        },
+    )
+    return tmp_path
 
 
 class TestLoadCfgRoles:
     """Tests for load_cfg_roles()."""
 
-    def test_loads_only_matching_languages(self, tmp_path, sample_config):
-        path = _write_config(tmp_path, sample_config)
-        result = load_cfg_roles(path)
+    def test_loads_only_matching_languages(self, sample_patterns_dir):
+        result = load_cfg_roles(sample_patterns_dir)
 
         assert Language.JAVA in result
         assert Language.PYTHON in result
         assert len(result) == 2
 
-    def test_parses_role_values_correctly(self, tmp_path, sample_config):
-        path = _write_config(tmp_path, sample_config)
-        result = load_cfg_roles(path)
+    def test_parses_role_values_correctly(self, sample_patterns_dir):
+        result = load_cfg_roles(sample_patterns_dir)
 
         java_spec = result[Language.JAVA]
         assert java_spec.node_specs["if_statement"] == ControlFlowRole.BRANCH
@@ -64,62 +62,43 @@ class TestLoadCfgRoles:
         assert java_spec.node_specs["method_invocation"] == ControlFlowRole.CALL
         assert java_spec.node_specs["return_statement"] == ControlFlowRole.RETURN
 
-    def test_unmapped_node_returns_leaf(self, tmp_path, sample_config):
-        path = _write_config(tmp_path, sample_config)
-        result = load_cfg_roles(path)
+    def test_unmapped_node_returns_leaf(self, sample_patterns_dir):
+        result = load_cfg_roles(sample_patterns_dir)
 
         java_spec = result[Language.JAVA]
         assert java_spec.role_for("nonexistent_node") == ControlFlowRole.LEAF
 
     def test_unknown_role_value_maps_to_leaf(self, tmp_path):
-        config = {
-            "meta": {},
-            "languages": {
-                "java": {"node_specs": {"weird_node": "totally_invalid_role"}}
-            },
-        }
-        path = _write_config(tmp_path, config)
-        result = load_cfg_roles(path)
+        _write_lang_config(tmp_path, "java", {"weird_node": "totally_invalid_role"})
+        result = load_cfg_roles(tmp_path)
 
         assert result[Language.JAVA].node_specs["weird_node"] == ControlFlowRole.LEAF
 
-    def test_empty_config_returns_empty_dict(self, tmp_path):
-        config = {"meta": {}, "languages": {}}
-        path = _write_config(tmp_path, config)
-        result = load_cfg_roles(path)
+    def test_empty_patterns_dir_returns_empty_dict(self, tmp_path):
+        result = load_cfg_roles(tmp_path)
 
         assert result == {}
 
-    def test_missing_file_returns_empty_dict(self, tmp_path):
-        path = tmp_path / "nonexistent.json"
-        result = load_cfg_roles(path)
+    def test_missing_dir_returns_empty_dict(self, tmp_path):
+        result = load_cfg_roles(tmp_path / "nonexistent")
 
         assert result == {}
 
-    def test_language_has_correct_language_field(self, tmp_path, sample_config):
-        path = _write_config(tmp_path, sample_config)
-        result = load_cfg_roles(path)
+    def test_language_has_correct_language_field(self, sample_patterns_dir):
+        result = load_cfg_roles(sample_patterns_dir)
 
         assert result[Language.JAVA].language == Language.JAVA
         assert result[Language.PYTHON].language == Language.PYTHON
 
-    def test_c_sharp_override_mapping(self, tmp_path):
-        config = {
-            "meta": {},
-            "languages": {"c_sharp": {"node_specs": {"if_statement": "branch"}}},
-        }
-        path = _write_config(tmp_path, config)
-        result = load_cfg_roles(path)
+    def test_csharp_directory_mapping(self, tmp_path):
+        _write_lang_config(tmp_path, "csharp", {"if_statement": "branch"})
+        result = load_cfg_roles(tmp_path)
 
         assert Language.CSHARP in result
 
-    def test_cpp_override_mapping(self, tmp_path):
-        config = {
-            "meta": {},
-            "languages": {"cpp": {"node_specs": {"if_statement": "branch"}}},
-        }
-        path = _write_config(tmp_path, config)
-        result = load_cfg_roles(path)
+    def test_cpp_directory_mapping(self, tmp_path):
+        _write_lang_config(tmp_path, "cpp", {"if_statement": "branch"})
+        result = load_cfg_roles(tmp_path)
 
         assert Language.CPP in result
 
@@ -127,27 +106,22 @@ class TestLoadCfgRoles:
 class TestGetCfgSpec:
     """Tests for get_cfg_spec()."""
 
-    def test_known_language_returns_spec(self, tmp_path, sample_config):
-        path = _write_config(tmp_path, sample_config)
-        spec = get_cfg_spec(Language.JAVA, path)
+    def test_known_language_returns_spec(self, sample_patterns_dir):
+        spec = get_cfg_spec(Language.JAVA, sample_patterns_dir)
 
         assert spec.language == Language.JAVA
         assert spec.node_specs["if_statement"] == ControlFlowRole.BRANCH
         assert len(spec.node_specs) == 4
 
-    def test_unknown_language_returns_empty_null_object_spec(
-        self, tmp_path, sample_config
-    ):
-        path = _write_config(tmp_path, sample_config)
-        spec = get_cfg_spec(Language.KOTLIN, path)
+    def test_unknown_language_returns_empty_null_object_spec(self, sample_patterns_dir):
+        spec = get_cfg_spec(Language.KOTLIN, sample_patterns_dir)
 
         assert spec.language == Language.KOTLIN
         assert spec.node_specs == {}
         assert spec.role_for("anything") == ControlFlowRole.LEAF
 
-    def test_missing_file_returns_empty_spec(self, tmp_path):
-        path = tmp_path / "nonexistent.json"
-        spec = get_cfg_spec(Language.JAVA, path)
+    def test_missing_dir_returns_empty_spec(self, tmp_path):
+        spec = get_cfg_spec(Language.JAVA, tmp_path / "nonexistent")
 
         assert spec.language == Language.JAVA
         assert spec.node_specs == {}

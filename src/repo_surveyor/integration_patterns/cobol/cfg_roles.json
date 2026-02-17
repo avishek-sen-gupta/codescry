@@ -1,0 +1,15 @@
+{
+  "accept_body": "sequence",
+  "add_body": "sequence",
+  "_alnum_or_id": "leaf",
+  "_alphabet_definition": "sequence",
+  "_alphabet_lits": "sequence",
+  "_call_header": "call",
+  "_coll_sequence": "sequence",
+  "call_statement": "call",
+  "collating_sequence_clause": "sequence",
+  "continue_statement": "continue",
+  "object_computer_sequence": "sequence",
+  "perform_statement_loop": "loop",
+  "return_statement": "return"
+}

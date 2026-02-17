@@ -1,8 +1,8 @@
-"""Load pre-classified CFG role mappings from a static JSON config.
+"""Load pre-classified CFG role mappings from per-language JSON files.
 
-Zero ML/Node.js dependencies — reads ``cfg_roles.json`` produced by the
-generator script and converts it into ``LanguageCFGSpec`` objects keyed by
-``Language`` enum members.
+Zero ML/Node.js dependencies — reads ``cfg_roles.json`` files from each
+language's ``integration_patterns/{lang}/`` directory and converts them into
+``LanguageCFGSpec`` objects keyed by ``Language`` enum members.
 """
 
 import json
@@ -11,33 +11,29 @@ from pathlib import Path
 from repo_surveyor.cfg_constructor.types import ControlFlowRole, LanguageCFGSpec
 from repo_surveyor.integration_patterns.types import Language
 
-_DEFAULT_CONFIG_PATH = Path(__file__).parent / "cfg_roles.json"
+_PATTERNS_DIR = Path(__file__).resolve().parents[1] / "integration_patterns"
 
-# Manual overrides for tree-sitter JSON keys that don't match Language enum
-# member names (lowercased). Keys are JSON keys, values are Language members.
-_JSON_KEY_OVERRIDES: dict[str, Language] = {
-    "c_sharp": Language.CSHARP,
-    "cpp": Language.CPP,
-    "typescript": Language.TYPESCRIPT,
-    "javascript": Language.JAVASCRIPT,
+# Mapping from Language enum members to their integration_patterns directory name.
+# Only languages whose directory actually exists get an entry.
+_LANG_TO_DIR: dict[Language, str] = {
+    Language.JAVA: "java",
+    Language.PYTHON: "python",
+    Language.JAVASCRIPT: "javascript",
+    Language.GO: "go",
+    Language.RUBY: "ruby",
+    Language.RUST: "rust",
+    Language.COBOL: "cobol",
+    Language.TYPESCRIPT: "typescript",
+    Language.CSHARP: "csharp",
+    Language.CPP: "cpp",
+    Language.PLI: "pli",
 }
 
 _ROLE_LOOKUP: dict[str, ControlFlowRole] = {
     role.value: role for role in ControlFlowRole
 }
 
-
-def _build_language_lookup() -> dict[str, Language]:
-    """Build a mapping from JSON key strings to ``Language`` enum members.
-
-    Starts from lowercased enum member names, then applies manual overrides.
-    """
-    lookup: dict[str, Language] = {member.name.lower(): member for member in Language}
-    lookup.update(_JSON_KEY_OVERRIDES)
-    return lookup
-
-
-_LANGUAGE_LOOKUP = _build_language_lookup()
+_CFG_ROLES_FILENAME = "cfg_roles.json"
 
 
 def _parse_node_specs(raw_specs: dict[str, str]) -> dict[str, ControlFlowRole]:
@@ -51,53 +47,61 @@ def _parse_node_specs(raw_specs: dict[str, str]) -> dict[str, ControlFlowRole]:
     }
 
 
-def load_cfg_roles(
-    config_path: Path = _DEFAULT_CONFIG_PATH,
-) -> dict[Language, LanguageCFGSpec]:
-    """Load all CFG role specs for languages with a matching ``Language`` enum member.
+def _load_language_spec(language: Language, patterns_dir: Path) -> LanguageCFGSpec:
+    """Load CFG role spec for a single language from its directory.
 
-    Languages present in the JSON but without a corresponding enum member are
-    silently skipped.
+    Returns an empty null-object spec if the language has no directory or no
+    ``cfg_roles.json`` file.
+    """
+    dir_name = _LANG_TO_DIR.get(language)
+    if dir_name is None:
+        return LanguageCFGSpec(language=language, node_specs={})
+
+    cfg_path = patterns_dir / dir_name / _CFG_ROLES_FILENAME
+    if not cfg_path.exists():
+        return LanguageCFGSpec(language=language, node_specs={})
+
+    raw_specs = json.loads(cfg_path.read_text())
+    return LanguageCFGSpec(
+        language=language,
+        node_specs=_parse_node_specs(raw_specs),
+    )
+
+
+def load_cfg_roles(
+    patterns_dir: Path = _PATTERNS_DIR,
+) -> dict[Language, LanguageCFGSpec]:
+    """Load all CFG role specs for languages that have a ``cfg_roles.json``.
+
+    Scans each ``Language`` enum member, checks for
+    ``{patterns_dir}/{dir_name}/cfg_roles.json``, and loads if present.
 
     Args:
-        config_path: Path to the ``cfg_roles.json`` file.
+        patterns_dir: Root directory containing per-language pattern directories.
 
     Returns:
         Mapping from ``Language`` to its ``LanguageCFGSpec``.
     """
-    if not config_path.exists():
-        return {}
-
-    raw = json.loads(config_path.read_text())
-    languages_section = raw.get("languages", {})
-
     return {
-        lang: LanguageCFGSpec(
-            language=lang,
-            node_specs=_parse_node_specs(entry.get("node_specs", {})),
-        )
-        for key, entry in languages_section.items()
-        if (lang := _LANGUAGE_LOOKUP.get(key)) is not None
+        spec.language: spec
+        for member in Language
+        if (spec := _load_language_spec(member, patterns_dir)).node_specs
     }
 
 
 def get_cfg_spec(
     language: Language,
-    config_path: Path = _DEFAULT_CONFIG_PATH,
+    patterns_dir: Path = _PATTERNS_DIR,
 ) -> LanguageCFGSpec:
     """Return the CFG spec for a single language.
 
-    Returns an empty null-object spec if the language is not found in the config.
+    Returns an empty null-object spec if the language has no cfg_roles.json.
 
     Args:
         language: The language to look up.
-        config_path: Path to the ``cfg_roles.json`` file.
+        patterns_dir: Root directory containing per-language pattern directories.
 
     Returns:
         ``LanguageCFGSpec`` with node specs, or an empty spec if not found.
     """
-    specs = load_cfg_roles(config_path)
-    return specs.get(
-        language,
-        LanguageCFGSpec(language=language, node_specs={}),
-    )
+    return _load_language_spec(language, patterns_dir)

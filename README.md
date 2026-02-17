@@ -827,37 +827,32 @@ Components:
 
 The classifier reuses the existing `LineClassifierModel` protocol and `QwenClassifierModel` from the `ml_classifier` module. Requires Node.js for rule extraction. This is exploratory — results depend on model capability and prompt tuning.
 
-#### Static Config: `cfg_roles.json`
+#### Static Config: Per-Language `cfg_roles.json`
 
-The generator script classifies all 220 languages from tree-sitter-language-pack once and stores the results in `src/repo_surveyor/cfg_constructor/cfg_roles.json`. The JSON schema:
+The generator script classifies all 220 languages from tree-sitter-language-pack once and produces a monolithic intermediate file. The per-language role mappings are then stored as individual `cfg_roles.json` files inside each language's `integration_patterns/{lang}/` directory. Each file contains a flat mapping from tree-sitter node type to role string:
 
 ```json
-{
-  "meta": { "generated_at": "...", "source": "tree-sitter-language-pack" },
-  "languages": {
-    "java": { "node_specs": { "if_statement": "branch", "while_statement": "loop" } }
-  },
-  "failures": {
-    "some_lang": "extract_rules.js failed: Cannot find module './common'"
-  }
-}
+{"if_statement": "branch", "while_statement": "loop", "method_invocation": "call"}
 ```
+
+Languages with per-language cfg_roles.json: Java, Python, JavaScript, Go, Ruby, Rust, COBOL.
 
 To regenerate (requires Ollama with the Qwen model running):
 
 ```bash
 poetry run python scripts/generate_cfg_roles.py
 poetry run python scripts/generate_cfg_roles.py --model qwen2.5-coder:7b-instruct
+poetry run python scripts/generate_cfg_roles.py --split  # also distribute to per-language dirs
 ```
 
-The script is incremental — it skips languages already in `languages` or `failures` and saves after every language for crash safety.
+The script is incremental — it skips languages already in `languages` or `failures` and saves after every language for crash safety. The `--split` flag distributes the monolithic output into per-language `cfg_roles.json` files under `integration_patterns/{lang}/`.
 
 #### Loader API: `cfg_role_registry`
 
-The loader module reads `cfg_roles.json` at runtime with zero ML or Node.js dependencies:
+The loader module reads per-language `cfg_roles.json` files at runtime with zero ML or Node.js dependencies:
 
-- **`load_cfg_roles(config_path)`** — loads all languages that have a matching `Language` enum member, returns `dict[Language, LanguageCFGSpec]`
-- **`get_cfg_spec(language, config_path)`** — returns the spec for a single language; returns an empty null-object spec (all nodes map to `LEAF`) if not found
+- **`load_cfg_roles(patterns_dir)`** — scans each `Language` enum member's directory for a `cfg_roles.json`, returns `dict[Language, LanguageCFGSpec]`
+- **`get_cfg_spec(language, patterns_dir)`** — returns the spec for a single language; returns an empty null-object spec (all nodes map to `LEAF`) if not found
 
 ```python
 from repo_surveyor.cfg_constructor import load_cfg_roles, get_cfg_spec
@@ -874,7 +869,7 @@ print(spec.role_for("for_statement"))  # ControlFlowRole.LOOP
 print(spec.role_for("unknown_node"))   # ControlFlowRole.LEAF
 ```
 
-JSON keys are mapped to `Language` enum members by lowercased member name, with manual overrides for naming mismatches (e.g. `"c_sharp"` → `Language.CSHARP`, `"cpp"` → `Language.CPP`).
+`Language` enum members are mapped to their `integration_patterns/` directory names via an internal `_LANG_TO_DIR` dict (e.g. `Language.CSHARP` → `"csharp"`, `Language.CPP` → `"cpp"`).
 
 #### Design Decisions
 

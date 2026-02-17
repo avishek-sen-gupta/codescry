@@ -1,0 +1,12 @@
+{
+  "block": "sequence",
+  "break_statement": "break",
+  "call_expression": "call",
+  "continue_statement": "continue",
+  "for_statement": "loop",
+  "if_statement": "branch",
+  "return_statement": "return",
+  "select_statement": "switch",
+  "type_switch_statement": "switch",
+  "var_declaration": "leaf"
+}
