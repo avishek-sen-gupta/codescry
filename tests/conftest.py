@@ -12,7 +12,10 @@ def pytest_collection_modifyitems(
     if not os.environ.get("CI"):
         return
 
-    skip_marker = pytest.mark.skip(reason="requires local repository clones (CI)")
+    skip_local = pytest.mark.skip(reason="requires local repository clones (CI)")
+    skip_ollama = pytest.mark.skip(reason="requires Ollama instance (CI)")
     for item in items:
         if "local_repo" in item.keywords:
-            item.add_marker(skip_marker)
+            item.add_marker(skip_local)
+        if "ollama" in item.keywords:
+            item.add_marker(skip_ollama)

@@ -51,3 +51,6 @@ Thumbs.db
 # Environment variables
 .env
 .env.local
+
+# MCP config (contains credentials)
+.mcp.json
