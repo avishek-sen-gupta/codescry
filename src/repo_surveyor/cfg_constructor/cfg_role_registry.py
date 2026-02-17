@@ -46,6 +46,7 @@ _ROLE_LOOKUP: dict[str, ControlFlowRole] = {
 _CFG_ROLES_FILENAME = "cfg_roles.json"
 
 _RESERVED_KEYS = frozenset({"role"})
+_META_KEY = "_meta"
 
 
 def _parse_field_mapping(raw: dict, role: ControlFlowRole) -> FieldMapping:
@@ -73,11 +74,22 @@ def _parse_node_specs(raw_specs: dict[str, str | dict]) -> dict[str, NodeCFGSpec
     Accepts both simple string values (``"branch"``) and extended object values
     (``{"role": "branch", "condition": "condition"}``).
     Unknown role values are silently mapped to ``ControlFlowRole.LEAF``.
+    Filters out the ``_meta`` key before parsing node types.
     """
     return {
         node_type: _parse_single_spec(raw_value)
         for node_type, raw_value in raw_specs.items()
+        if node_type != _META_KEY
     }
+
+
+def _parse_meta(raw_specs: dict) -> dict:
+    """Extract the ``_meta`` section from raw JSON specs.
+
+    Returns an empty dict if ``_meta`` is absent.
+    """
+    meta = raw_specs.get(_META_KEY, {})
+    return meta if isinstance(meta, dict) else {}
 
 
 def _load_language_spec(language: Language, patterns_dir: Path) -> LanguageCFGSpec:
@@ -95,9 +107,11 @@ def _load_language_spec(language: Language, patterns_dir: Path) -> LanguageCFGSp
         return LanguageCFGSpec(language=language, node_specs={})
 
     raw_specs = json.loads(cfg_path.read_text())
+    meta = _parse_meta(raw_specs)
     return LanguageCFGSpec(
         language=language,
         node_specs=_parse_node_specs(raw_specs),
+        switch_fallthrough=bool(meta.get("switch_fallthrough", False)),
     )
 
 

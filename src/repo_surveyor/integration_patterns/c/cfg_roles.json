@@ -1,4 +1,5 @@
 {
+  "_meta": {"switch_fallthrough": true},
   "translation_unit": "sequence",
   "compound_statement": "sequence",
   "declaration_list": "sequence",
@@ -87,7 +88,6 @@
   "field_designator": "leaf",
   "field_expression": "leaf",
   "function_declarator": "leaf",
-  "function_definition": "leaf",
   "generic_expression": "leaf",
   "gnu_asm_clobber_list": "leaf",
   "gnu_asm_expression": "leaf",
@@ -100,7 +100,6 @@
   "init_declarator": "leaf",
   "initializer_list": "leaf",
   "initializer_pair": "leaf",
-  "linkage_specification": "leaf",
   "macro_type_specifier": "leaf",
   "ms_based_modifier": "leaf",
   "ms_call_modifier": "leaf",

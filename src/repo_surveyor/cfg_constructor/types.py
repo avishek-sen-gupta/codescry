@@ -92,10 +92,18 @@ class LanguageCFGSpec:
 
     Node types absent from ``node_specs`` implicitly map to a null-object
     ``NodeCFGSpec`` with role ``ControlFlowRole.LEAF``.
+
+    Attributes:
+        language: The programming language.
+        node_specs: Per-node-type control flow specs.
+        switch_fallthrough: Whether switch cases fall through to the next
+            case by default (C, C++, Java, JS, TS, PHP).  Languages that
+            require explicit ``break`` per arm (C#) set this to ``False``.
     """
 
     language: Language
     node_specs: dict[str, NodeCFGSpec]
+    switch_fallthrough: bool = False
 
     def role_for(self, node_type: str) -> ControlFlowRole:
         """Return the control flow role for a tree-sitter node type.
@@ -110,3 +118,7 @@ class LanguageCFGSpec:
         Returns a null-object ``NodeCFGSpec`` (LEAF, no field mapping) for unmapped types.
         """
         return self.node_specs.get(node_type, _NULL_NODE_SPEC)
+
+    def is_mapped(self, node_type: str) -> bool:
+        """Return whether a node type has an explicit entry in the spec."""
+        return node_type in self.node_specs
