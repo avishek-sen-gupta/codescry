@@ -8,13 +8,32 @@
   "gen_block": "sequence",
   "match_arm": "sequence",
   "last_match_arm": "sequence",
-  "if_expression": "branch",
+  "if_expression": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
   "else_clause": "branch",
-  "match_expression": "switch",
+  "match_expression": {
+    "role": "switch",
+    "value": "value",
+    "body": "body"
+  },
   "match_block": "switch",
-  "for_expression": "loop",
-  "while_expression": "loop",
-  "loop_expression": "loop",
+  "for_expression": {
+    "role": "loop",
+    "body": "body"
+  },
+  "while_expression": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body"
+  },
+  "loop_expression": {
+    "role": "loop",
+    "body": "body"
+  },
   "break_expression": "break",
   "continue_expression": "continue",
   "return_expression": "return",

@@ -860,6 +860,8 @@ Languages with per-language cfg_roles.json: Java, Python, JavaScript, TypeScript
 
 These files were hand-authored by consulting each language's tree-sitter grammar (`src/node-types.json`) from the [tree-sitter-language-pack](https://github.com/Goldziher/tree-sitter-language-pack). Every named node type is explicitly classified — unmapped types default to `leaf` at runtime via `LanguageCFGSpec.role_for()`.
 
+Semantic field mappings (extended object form) are populated for node types with roles `BRANCH`, `SWITCH`, `LOOP`, `LOOP_POST_CONDITION`, and `TRY` across all 13 languages except COBOL (whose tree-sitter grammar uses header nodes without standard named fields). Each mapping was sourced from the respective tree-sitter grammar's `grammar.js` / `node-types.json`. Node types that lack named fields (e.g. sub-clauses like `else_clause`, `catch_clause`) or use only positional children remain in simple string form.
+
 #### Loader API: `cfg_role_registry`
 
 The loader module reads per-language `cfg_roles.json` files at runtime with zero ML or Node.js dependencies:

@@ -9,20 +9,50 @@
   "block": "sequence",
   "when": "sequence",
   "in_clause": "sequence",
-  "if": "branch",
+  "if": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
   "elsif": "branch",
   "else": "branch",
-  "unless": "branch",
+  "unless": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
   "if_modifier": "branch",
   "unless_modifier": "branch",
-  "conditional": "branch",
+  "conditional": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
   "if_guard": "branch",
   "unless_guard": "branch",
-  "case": "switch",
+  "case": {
+    "role": "switch",
+    "value": "value",
+    "body": "body"
+  },
   "case_match": "switch",
-  "for": "loop",
-  "while": "loop",
-  "until": "loop",
+  "for": {
+    "role": "loop",
+    "body": "body"
+  },
+  "while": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body"
+  },
+  "until": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body"
+  },
   "while_modifier": "loop",
   "until_modifier": "loop",
   "break": "break",

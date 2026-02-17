@@ -4,13 +4,41 @@
   "declaration_list": "sequence",
   "labeled_statement": "sequence",
   "case_statement": "sequence",
-  "if_statement": "branch",
+  "if_statement": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
   "else_clause": "branch",
-  "conditional_expression": "branch",
-  "switch_statement": "switch",
-  "for_statement": "loop",
-  "while_statement": "loop",
-  "do_statement": "loop_post_condition",
+  "conditional_expression": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
+  "switch_statement": {
+    "role": "switch",
+    "value": "condition",
+    "body": "body"
+  },
+  "for_statement": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body",
+    "initializer": "initializer",
+    "update": "update"
+  },
+  "while_statement": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body"
+  },
+  "do_statement": {
+    "role": "loop_post_condition",
+    "body": "body",
+    "condition": "condition"
+  },
   "break_statement": "break",
   "continue_statement": "continue",
   "return_statement": "return",

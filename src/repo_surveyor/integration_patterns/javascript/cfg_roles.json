@@ -7,21 +7,57 @@
   "labeled_statement": "sequence",
   "switch_case": "sequence",
   "switch_default": "sequence",
-  "if_statement": "branch",
+  "if_statement": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
   "else_clause": "branch",
-  "ternary_expression": "branch",
-  "switch_statement": "switch",
+  "ternary_expression": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
+  "switch_statement": {
+    "role": "switch",
+    "value": "value",
+    "body": "body"
+  },
   "switch_body": "switch",
-  "for_statement": "loop",
-  "for_in_statement": "loop",
-  "while_statement": "loop",
-  "do_statement": "loop_post_condition",
+  "for_statement": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body",
+    "initializer": "initializer",
+    "update": "increment"
+  },
+  "for_in_statement": {
+    "role": "loop",
+    "body": "body"
+  },
+  "while_statement": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body"
+  },
+  "do_statement": {
+    "role": "loop_post_condition",
+    "body": "body",
+    "condition": "condition"
+  },
   "break_statement": "break",
   "continue_statement": "continue",
   "return_statement": "return",
   "yield_expression": "return",
   "throw_statement": "throw",
-  "try_statement": "try",
+  "try_statement": {
+    "role": "try",
+    "body": "body",
+    "handler": "handler",
+    "finalizer": "finalizer"
+  },
   "catch_clause": "try",
   "finally_clause": "try",
   "call_expression": "call",

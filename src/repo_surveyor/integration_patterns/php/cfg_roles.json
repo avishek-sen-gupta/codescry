@@ -9,18 +9,50 @@
   "default_statement": "sequence",
   "match_conditional_expression": "sequence",
   "match_default_expression": "sequence",
-  "if_statement": "branch",
+  "if_statement": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "body",
+    "alternative": "alternative"
+  },
   "else_clause": "branch",
   "else_if_clause": "branch",
-  "conditional_expression": "branch",
-  "switch_statement": "switch",
+  "conditional_expression": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "body",
+    "alternative": "alternative"
+  },
+  "switch_statement": {
+    "role": "switch",
+    "value": "condition",
+    "body": "body"
+  },
   "switch_block": "switch",
-  "match_expression": "switch",
+  "match_expression": {
+    "role": "switch",
+    "value": "condition",
+    "body": "body"
+  },
   "match_block": "switch",
-  "for_statement": "loop",
-  "foreach_statement": "loop",
-  "while_statement": "loop",
-  "do_statement": "loop_post_condition",
+  "for_statement": {
+    "role": "loop",
+    "body": "body"
+  },
+  "foreach_statement": {
+    "role": "loop",
+    "body": "body"
+  },
+  "while_statement": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body"
+  },
+  "do_statement": {
+    "role": "loop_post_condition",
+    "body": "body",
+    "condition": "condition"
+  },
   "break_statement": "break",
   "continue_statement": "continue",
   "goto_statement": "break",
@@ -28,7 +60,10 @@
   "yield_expression": "return",
   "exit_statement": "return",
   "throw_expression": "throw",
-  "try_statement": "try",
+  "try_statement": {
+    "role": "try",
+    "body": "body"
+  },
   "catch_clause": "try",
   "finally_clause": "try",
   "function_call_expression": "call",

@@ -7,16 +7,39 @@
   "case_clause": "sequence",
   "enum_body": "sequence",
   "enum_case_definitions": "sequence",
-  "if_expression": "branch",
+  "if_expression": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
   "guard": "branch",
-  "match_expression": "switch",
+  "match_expression": {
+    "role": "switch",
+    "value": "value",
+    "body": "body"
+  },
   "case_block": "switch",
   "indented_cases": "switch",
-  "for_expression": "loop",
-  "while_expression": "loop",
-  "do_while_expression": "loop_post_condition",
+  "for_expression": {
+    "role": "loop",
+    "body": "body"
+  },
+  "while_expression": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body"
+  },
+  "do_while_expression": {
+    "role": "loop_post_condition",
+    "body": "body",
+    "condition": "condition"
+  },
   "return_expression": "return",
-  "try_expression": "try",
+  "try_expression": {
+    "role": "try",
+    "body": "body"
+  },
   "catch_clause": "try",
   "finally_clause": "try",
   "call_expression": "call",

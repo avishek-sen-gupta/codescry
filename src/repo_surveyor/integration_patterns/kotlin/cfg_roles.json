@@ -5,13 +5,36 @@
   "enum_class_body": "sequence",
   "function_body": "sequence",
   "when_entry": "sequence",
-  "if_expression": "branch",
-  "when_expression": "switch",
-  "for_statement": "loop",
-  "while_statement": "loop",
-  "do_while_statement": "loop_post_condition",
+  "if_expression": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
+  "when_expression": {
+    "role": "switch",
+    "value": "subject",
+    "body": "body"
+  },
+  "for_statement": {
+    "role": "loop",
+    "body": "body"
+  },
+  "while_statement": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body"
+  },
+  "do_while_statement": {
+    "role": "loop_post_condition",
+    "body": "body",
+    "condition": "condition"
+  },
   "jump_expression": "return",
-  "try_expression": "try",
+  "try_expression": {
+    "role": "try",
+    "body": "body"
+  },
   "catch_block": "try",
   "finally_block": "try",
   "call_expression": "call",

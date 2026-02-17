@@ -7,11 +7,25 @@
   "type_case": "sequence",
   "default_case": "sequence",
   "communication_case": "sequence",
-  "if_statement": "branch",
-  "expression_switch_statement": "switch",
-  "type_switch_statement": "switch",
+  "if_statement": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
+  "expression_switch_statement": {
+    "role": "switch",
+    "value": "value"
+  },
+  "type_switch_statement": {
+    "role": "switch",
+    "value": "value"
+  },
   "select_statement": "switch",
-  "for_statement": "loop",
+  "for_statement": {
+    "role": "loop",
+    "body": "body"
+  },
   "break_statement": "break",
   "continue_statement": "continue",
   "fallthrough_statement": "continue",
