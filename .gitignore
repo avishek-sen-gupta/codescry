@@ -54,3 +54,6 @@ Thumbs.db
 
 # MCP config (contains credentials)
 .mcp.json
+
+# Claude Code (local settings are machine-specific)
+.claude/settings.local.json
