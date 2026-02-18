@@ -24,7 +24,9 @@ from .integration_patterns import (
 from .pipeline_timer import NullPipelineTimer, PipelineTimer
 from .syntax_zone import SyntaxRangeMap, SyntaxZone, classify_line, parse_file_zones
 
-_SKIP_ZONES = frozenset({SyntaxZone.COMMENT, SyntaxZone.STRING_LITERAL})
+_SKIP_ZONES = frozenset(
+    {SyntaxZone.COMMENT, SyntaxZone.STRING_LITERAL, SyntaxZone.IMPORT}
+)
 
 DEFAULT_SKIP_DIRS = frozenset(
     {

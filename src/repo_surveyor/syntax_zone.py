@@ -67,11 +67,14 @@ class _NodeTypes:
 
     IMPORT = frozenset(
         {
-            "import_declaration",
-            "import_statement",
-            "import_from_statement",
-            "use_declaration",
-            "using_directive",
+            "import_declaration",  # Java, Go, Scala
+            "import_statement",  # Python, TypeScript, JavaScript
+            "import_from_statement",  # Python
+            "use_declaration",  # Rust
+            "using_directive",  # C#
+            "preproc_include",  # C, C++
+            "import_header",  # Kotlin
+            "import_list",  # Kotlin (grouped imports)
         }
     )
 

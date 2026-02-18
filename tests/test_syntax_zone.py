@@ -101,6 +101,29 @@ class TestBuildSyntaxRangeMap:
         assert classify_line(range_map, 2) == SyntaxZone.IMPORT
         assert classify_line(range_map, 3) == SyntaxZone.CODE
 
+    def test_c_preproc_include(self) -> None:
+        """Should classify a C #include as IMPORT zone."""
+        source = b"#include <stdio.h>\n#include <stdlib.h>\nint main() { return 0; }\n"
+        range_map = parse_file_zones(source, Language.C)
+        assert classify_line(range_map, 1) == SyntaxZone.IMPORT
+        assert classify_line(range_map, 2) == SyntaxZone.IMPORT
+        assert classify_line(range_map, 3) == SyntaxZone.CODE
+
+    def test_cpp_preproc_include(self) -> None:
+        """Should classify a C++ #include as IMPORT zone."""
+        source = b"#include <iostream>\n#include <vector>\nint main() { return 0; }\n"
+        range_map = parse_file_zones(source, Language.CPP)
+        assert classify_line(range_map, 1) == SyntaxZone.IMPORT
+        assert classify_line(range_map, 2) == SyntaxZone.IMPORT
+        assert classify_line(range_map, 3) == SyntaxZone.CODE
+
+    def test_kotlin_import(self) -> None:
+        """Should classify a Kotlin import as IMPORT zone."""
+        source = b"import kotlin.io.println\nfun main() {}\n"
+        range_map = parse_file_zones(source, Language.KOTLIN)
+        assert classify_line(range_map, 1) == SyntaxZone.IMPORT
+        assert classify_line(range_map, 2) == SyntaxZone.CODE
+
 
 class TestClassifyLine:
     """Tests for the classify_line function."""
