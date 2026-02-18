@@ -5,7 +5,6 @@ Pure functions — no I/O, no side effects.
 
 from repo_surveyor.symbol_resolver import ResolutionResult, SymbolIntegrationProfile
 
-
 _CONFIDENCE_STYLE: dict[str, str] = {
     "high": 'style=bold, color="#0d9488"',
     "medium": 'color="#f59e0b"',
@@ -100,7 +99,7 @@ def integration_to_dot(
                 seen_types.add(type_val)
                 nid = _integration_node_id(type_val)
                 lines.append(
-                    f'  {nid} [shape=ellipse, style=filled, '
+                    f"  {nid} [shape=ellipse, style=filled, "
                     f'fillcolor="#0d9488", fontcolor="white", label="{type_val}"];'
                 )
 
@@ -118,9 +117,7 @@ def integration_to_dot(
         for type_val, confidence in edge_set.items():
             int_nid = _integration_node_id(type_val)
             style = _CONFIDENCE_STYLE.get(confidence, _DEFAULT_EDGE_STYLE)
-            lines.append(
-                f'  {sym_nid} -- {int_nid} [{style}, label="{confidence}"];'
-            )
+            lines.append(f'  {sym_nid} -- {int_nid} [{style}, label="{confidence}"];')
 
     lines.append("}")
     return "\n".join(lines)
