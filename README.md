@@ -3,6 +3,10 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/avishek-sen-gupta/codescry/actions/workflows/ci.yml"><img src="https://github.com/avishek-sen-gupta/codescry/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+</p>
+
+<p align="center">
   Codescry is a Python library for analysing technology stacks and code structure across a bunch of programming languages.
 </p>
 
