@@ -73,7 +73,7 @@ class TestParseResponse:
         response = "0|NOT_DEFINITE||Import statement only"
         results = parse_response(response, group)
         assert results[0].is_definite is False
-        assert results[0].direction is None
+        assert results[0].direction == IntegrationDirection.UNKNOWN
         assert results[0].reasoning == "Import statement only"
 
     def test_parse_multiple_signals(self):

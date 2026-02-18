@@ -41,6 +41,10 @@
 - If a function returns a non-None type in its signature, but cannot return an object of that type because of some condition, use null object pattern. Do not return None.
 - Prefer small, composable functions. Do not write massive functions.
 
+## Code Review Patterns
+
+- Use the `Programming Patterns` section to ensure compliance of code.
+
 ## Dependencies
 
 - Python 3.13+

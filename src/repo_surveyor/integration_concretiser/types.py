@@ -11,6 +11,7 @@ class IntegrationDirection(Enum):
 
     INWARD = "inward"
     OUTWARD = "outward"
+    UNKNOWN = "unknown"
 
 
 @dataclass(frozen=True)
@@ -38,14 +39,14 @@ class ConcretisedSignal:
         original_signal: The raw detected signal.
         ast_context: The enclosing AST node context.
         is_definite: Whether the signal is a definite integration point.
-        direction: Inward or outward; empty tuple when is_definite is False.
+        direction: Inward, outward, or unknown (when is_definite is False).
         reasoning: LLM's explanation for the classification.
     """
 
     original_signal: IntegrationSignal
     ast_context: ASTContext
     is_definite: bool
-    direction: IntegrationDirection | None
+    direction: IntegrationDirection
     reasoning: str
 
 

@@ -20,12 +20,12 @@ def _make_not_definite(
         original_signal=signal,
         ast_context=ast_context,
         is_definite=False,
-        direction=None,
+        direction=IntegrationDirection.UNKNOWN,
         reasoning=reasoning,
     )
 
 
-def _parse_single_line(line: str) -> tuple[int, bool, IntegrationDirection | None, str]:
+def _parse_single_line(line: str) -> tuple[int, bool, IntegrationDirection, str]:
     """Parse a single response line.
 
     Returns:
@@ -44,7 +44,7 @@ def _parse_single_line(line: str) -> tuple[int, bool, IntegrationDirection | Non
     reasoning = parts[3].strip()
 
     is_definite = classification == "DEFINITE"
-    direction = _DIRECTION_MAP.get(direction_str) if is_definite else None
+    direction = _DIRECTION_MAP.get(direction_str, IntegrationDirection.UNKNOWN) if is_definite else IntegrationDirection.UNKNOWN
 
     return signal_index, is_definite, direction, reasoning
 
