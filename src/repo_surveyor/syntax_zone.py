@@ -77,7 +77,10 @@ class _NodeTypes:
 
 
 class _TreeSitterLanguages:
-    """Mapping from Language enum to tree-sitter grammar names."""
+    """Mapping from Language enum to tree-sitter grammar names.
+
+    Use LANGUAGE_TO_TS_NAME module-level alias for external access.
+    """
 
     MAPPING: dict[Language, str] = {
         Language.JAVA: "java",
@@ -96,6 +99,8 @@ class _TreeSitterLanguages:
         Language.COBOL: "cobol",
     }
 
+
+LANGUAGE_TO_TS_NAME: dict[Language, str] = _TreeSitterLanguages.MAPPING
 
 _EMPTY_RANGE_MAP = SyntaxRangeMap(ranges=())
 
