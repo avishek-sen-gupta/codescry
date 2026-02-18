@@ -6,6 +6,15 @@ Pure functions — no I/O, no side effects.
 from repo_surveyor.symbol_resolver import ResolutionResult, SymbolIntegrationProfile
 
 
+_CONFIDENCE_STYLE: dict[str, str] = {
+    "high": 'style=bold, color="#0d9488"',
+    "medium": 'color="#f59e0b"',
+    "low": 'style=dashed, color="#94a3b8"',
+}
+
+_DEFAULT_EDGE_STYLE = 'color="#64748b"'
+
+
 def _escape_dot(text: str) -> str:
     """Escape text for DOT label strings."""
     return text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
@@ -34,8 +43,9 @@ def integration_to_dot(
 ) -> str:
     """Convert a ResolutionResult to a Graphviz DOT string.
 
-    Symbol nodes are grouped by file path into ``subgraph cluster_*`` blocks.
-    IntegrationType nodes are deduplicated ellipses.
+    Produces a ``graph`` (undirected) suitable for force-directed layout
+    engines like ``fdp`` or ``neato``.  Symbol nodes are styled as rounded
+    boxes grouped by file path; integration-type nodes are coloured ellipses.
 
     Args:
         result: The resolution result containing symbol profiles.
@@ -43,15 +53,21 @@ def integration_to_dot(
         max_profiles: Maximum number of symbol profiles to include.
 
     Returns:
-        A complete DOT ``digraph`` string.
+        A complete DOT ``graph`` string.
     """
     profiles = result.profiles[:max_profiles]
 
     lines = [
-        f'digraph "{_escape_dot(title)}" {{',
-        "  rankdir=LR;",
+        f'graph "{_escape_dot(title)}" {{',
+        "  overlap=false;",
+        "  splines=true;",
+        "  K=0.6;",
+        '  sep="+4";',
         f'  label="{_escape_dot(title)}";',
-        "  node [fontsize=10];",
+        '  labelloc="t";',
+        '  fontsize=16; fontname="Helvetica";',
+        '  node [fontsize=10, fontname="Helvetica"];',
+        '  edge [fontsize=8, fontname="Helvetica"];',
         "",
     ]
 
@@ -64,11 +80,14 @@ def integration_to_dot(
         safe_label = _escape_dot(path)
         lines.append(f"  subgraph cluster_{cluster_idx} {{")
         lines.append(f'    label="{safe_label}";')
-        lines.append("    style=dashed;")
+        lines.append('    style="rounded,dashed"; color="#64748b"; fontsize=9;')
         for profile in path_profiles:
             nid = _symbol_node_id(profile)
             label = f"{profile.symbol_name}\\n({profile.symbol_kind})"
-            lines.append(f'    {nid} [shape=box, label="{label}"];')
+            lines.append(
+                f'    {nid} [shape=box, style="rounded,filled", '
+                f'fillcolor="#1e293b", fontcolor="#e2e8f0", label="{label}"];'
+            )
         lines.append("  }")
         lines.append("")
 
@@ -80,14 +99,16 @@ def integration_to_dot(
             if type_val not in seen_types:
                 seen_types.add(type_val)
                 nid = _integration_node_id(type_val)
-                lines.append(f'  {nid} [shape=ellipse, label="{type_val}"];')
+                lines.append(
+                    f'  {nid} [shape=ellipse, style=filled, '
+                    f'fillcolor="#0d9488", fontcolor="white", label="{type_val}"];'
+                )
 
     lines.append("")
 
-    # Edges: symbol -> integration type, labeled with confidence
+    # Edges: symbol -- integration type, styled by confidence
     for profile in profiles:
         sym_nid = _symbol_node_id(profile)
-        # Deduplicate edges per (symbol, integration_type)
         edge_set: dict[str, str] = {}
         for si in profile.integrations:
             type_val = si.signal.integration_type.value
@@ -96,7 +117,10 @@ def integration_to_dot(
 
         for type_val, confidence in edge_set.items():
             int_nid = _integration_node_id(type_val)
-            lines.append(f'  {sym_nid} -> {int_nid} [label="{confidence}"];')
+            style = _CONFIDENCE_STYLE.get(confidence, _DEFAULT_EDGE_STYLE)
+            lines.append(
+                f'  {sym_nid} -- {int_nid} [{style}, label="{confidence}"];'
+            )
 
     lines.append("}")
     return "\n".join(lines)

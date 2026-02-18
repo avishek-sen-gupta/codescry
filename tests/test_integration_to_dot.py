@@ -60,10 +60,10 @@ def _make_profile(
 
 
 class TestIntegrationToDot:
-    def test_empty_result_produces_valid_digraph(self):
+    def test_empty_result_produces_valid_graph(self):
         result = ResolutionResult(resolved=(), unresolved=(), profiles=())
         dot = integration_to_dot(result)
-        assert dot.startswith("digraph")
+        assert dot.startswith("graph")
         assert dot.endswith("}")
 
     def test_single_profile_with_two_types(self):
@@ -91,7 +91,8 @@ class TestIntegrationToDot:
         assert "http_rest" in dot
         assert "database" in dot
 
-        # Should have edges with confidence labels
+        # Should have undirected edges with confidence labels
+        assert " -- " in dot
         assert 'label="high"' in dot
         assert 'label="medium"' in dot
 
@@ -119,4 +120,21 @@ class TestIntegrationToDot:
     def test_custom_title(self):
         result = ResolutionResult(resolved=(), unresolved=(), profiles=())
         dot = integration_to_dot(result, title="My Integrations")
-        assert 'digraph "My Integrations"' in dot
+        assert 'graph "My Integrations"' in dot
+
+    def test_confidence_styling_on_edges(self):
+        sig_high = _make_signal(IntegrationType.HTTP_REST, Confidence.HIGH)
+        sig_low = _make_signal(IntegrationType.DATABASE, Confidence.LOW)
+        profile = _make_profile(
+            name="styled_func",
+            signals=[sig_high, sig_low],
+        )
+        result = ResolutionResult(
+            resolved=tuple(profile.integrations),
+            unresolved=(),
+            profiles=(profile,),
+        )
+        dot = integration_to_dot(result)
+
+        assert "style=bold" in dot
+        assert "style=dashed" in dot

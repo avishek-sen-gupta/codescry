@@ -12,8 +12,14 @@ def test_null_renderer_returns_input_unchanged():
 def test_graphviz_cli_renderer_default_binary():
     renderer = GraphvizCliRenderer()
     assert renderer.dot_binary == "dot"
+    assert renderer.layout_engine == "dot"
 
 
 def test_graphviz_cli_renderer_custom_binary():
     renderer = GraphvizCliRenderer(dot_binary="/usr/local/bin/dot")
     assert renderer.dot_binary == "/usr/local/bin/dot"
+
+
+def test_graphviz_cli_renderer_custom_layout_engine():
+    renderer = GraphvizCliRenderer(layout_engine="fdp")
+    assert renderer.layout_engine == "fdp"

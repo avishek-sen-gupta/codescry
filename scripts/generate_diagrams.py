@@ -93,7 +93,8 @@ def generate_integration_diagram(renderer: GraphvizCliRenderer) -> None:
         title="Codescry Integration Signals",
         max_profiles=15,
     )
-    svg = renderer.render_svg(dot_source)
+    fdp_renderer = GraphvizCliRenderer(layout_engine="fdp")
+    svg = fdp_renderer.render_svg(dot_source)
 
     out_path = OUTPUT_DIR / "integration_signals.svg"
     out_path.write_text(svg)

@@ -18,14 +18,15 @@ class DotRenderer(Protocol):
 
 @dataclass(frozen=True)
 class GraphvizCliRenderer:
-    """Renders DOT source to SVG by invoking the Graphviz ``dot`` binary."""
+    """Renders DOT source to SVG by invoking a Graphviz layout engine."""
 
     dot_binary: str = "dot"
+    layout_engine: str = "dot"
 
     def render_svg(self, dot_source: str) -> str:
-        """Run ``dot -Tsvg`` and return the SVG string."""
+        """Run the layout engine with ``-Tsvg`` and return the SVG string."""
         result = subprocess.run(
-            [self.dot_binary, "-Tsvg"],
+            [self.layout_engine, "-Tsvg"],
             input=dot_source,
             capture_output=True,
             text=True,
