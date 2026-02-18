@@ -88,10 +88,13 @@ class TestBuildSyntaxRangeMap:
 
     def test_go_comment(self) -> None:
         """Should classify a Go comment."""
-        source = b"// http.Get is the standard HTTP client\npackage main\n"
+        source = (
+            b"// http.Get is the standard HTTP client\npackage main\nfunc main() {}\n"
+        )
         range_map = parse_file_zones(source, Language.GO)
         assert classify_line(range_map, 1) == SyntaxZone.COMMENT
-        assert classify_line(range_map, 2) == SyntaxZone.CODE
+        assert classify_line(range_map, 2) == SyntaxZone.PACKAGE_DECLARATION
+        assert classify_line(range_map, 3) == SyntaxZone.CODE
 
     def test_rust_comment_and_use(self) -> None:
         """Should classify a Rust comment and use declaration."""
@@ -123,6 +126,48 @@ class TestBuildSyntaxRangeMap:
         range_map = parse_file_zones(source, Language.KOTLIN)
         assert classify_line(range_map, 1) == SyntaxZone.IMPORT
         assert classify_line(range_map, 2) == SyntaxZone.CODE
+
+    def test_java_package_declaration(self) -> None:
+        """Should classify a Java package declaration as PACKAGE_DECLARATION zone."""
+        source = b"package com.example.grpc.service;\n\nclass Foo {}\n"
+        range_map = parse_file_zones(source, Language.JAVA)
+        assert classify_line(range_map, 1) == SyntaxZone.PACKAGE_DECLARATION
+        assert classify_line(range_map, 3) == SyntaxZone.CODE
+
+    def test_go_package_clause(self) -> None:
+        """Should classify a Go package clause as PACKAGE_DECLARATION zone."""
+        source = b"package main\n\nfunc main() {}\n"
+        range_map = parse_file_zones(source, Language.GO)
+        assert classify_line(range_map, 1) == SyntaxZone.PACKAGE_DECLARATION
+        assert classify_line(range_map, 3) == SyntaxZone.CODE
+
+    def test_kotlin_package_header(self) -> None:
+        """Should classify a Kotlin package header as PACKAGE_DECLARATION zone."""
+        source = b"package com.example.grpc\n\nfun main() {}\n"
+        range_map = parse_file_zones(source, Language.KOTLIN)
+        assert classify_line(range_map, 1) == SyntaxZone.PACKAGE_DECLARATION
+        assert classify_line(range_map, 3) == SyntaxZone.CODE
+
+    def test_scala_package_clause(self) -> None:
+        """Should classify a Scala package clause as PACKAGE_DECLARATION zone."""
+        source = b"package com.example.grpc\n\nobject Main {}\n"
+        range_map = parse_file_zones(source, Language.SCALA)
+        assert classify_line(range_map, 1) == SyntaxZone.PACKAGE_DECLARATION
+        assert classify_line(range_map, 3) == SyntaxZone.CODE
+
+    def test_csharp_file_scoped_namespace(self) -> None:
+        """Should classify a C# file-scoped namespace as PACKAGE_DECLARATION zone."""
+        source = b"namespace MyApp.Grpc.Services;\n\nclass Foo {}\n"
+        range_map = parse_file_zones(source, Language.CSHARP)
+        assert classify_line(range_map, 1) == SyntaxZone.PACKAGE_DECLARATION
+        assert classify_line(range_map, 3) == SyntaxZone.CODE
+
+    def test_php_namespace_definition(self) -> None:
+        """Should classify a PHP namespace definition as PACKAGE_DECLARATION zone."""
+        source = b"<?php\nnamespace App\\Grpc\\Services;\n\nclass Foo {}\n"
+        range_map = parse_file_zones(source, Language.PHP)
+        assert classify_line(range_map, 2) == SyntaxZone.PACKAGE_DECLARATION
+        assert classify_line(range_map, 4) == SyntaxZone.CODE
 
 
 class TestClassifyLine:

@@ -20,6 +20,7 @@ class SyntaxZone(Enum):
     COMMENT = "comment"
     STRING_LITERAL = "string_literal"
     IMPORT = "import"
+    PACKAGE_DECLARATION = "package_declaration"
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,16 @@ class _NodeTypes:
         }
     )
 
+    PACKAGE_DECLARATION = frozenset(
+        {
+            "package_declaration",  # Java
+            "package_clause",  # Go, Scala
+            "package_header",  # Kotlin
+            "file_scoped_namespace_declaration",  # C# (semicolon form)
+            "namespace_definition",  # PHP
+        }
+    )
+
 
 class _TreeSitterLanguages:
     """Mapping from Language enum to tree-sitter grammar names.
@@ -111,6 +122,7 @@ _ZONE_BY_NODE_TYPE: dict[str, SyntaxZone] = {
     **{t: SyntaxZone.COMMENT for t in _NodeTypes.COMMENT},
     **{t: SyntaxZone.STRING_LITERAL for t in _NodeTypes.STRING},
     **{t: SyntaxZone.IMPORT for t in _NodeTypes.IMPORT},
+    **{t: SyntaxZone.PACKAGE_DECLARATION for t in _NodeTypes.PACKAGE_DECLARATION},
 }
 
 

@@ -25,7 +25,12 @@ from .pipeline_timer import NullPipelineTimer, PipelineTimer
 from .syntax_zone import SyntaxRangeMap, SyntaxZone, classify_line, parse_file_zones
 
 _SKIP_ZONES = frozenset(
-    {SyntaxZone.COMMENT, SyntaxZone.STRING_LITERAL, SyntaxZone.IMPORT}
+    {
+        SyntaxZone.COMMENT,
+        SyntaxZone.STRING_LITERAL,
+        SyntaxZone.IMPORT,
+        SyntaxZone.PACKAGE_DECLARATION,
+    }
 )
 
 DEFAULT_SKIP_DIRS = frozenset(
