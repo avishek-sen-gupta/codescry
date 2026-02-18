@@ -1,6 +1,9 @@
 """Tests for concretiser response parser."""
 
-from repo_surveyor.integration_concretiser.response_parser import parse_response
+from repo_surveyor.integration_concretiser.response_parser import (
+    parse_batched_response,
+    parse_response,
+)
 from repo_surveyor.integration_concretiser.grouper import SignalGroup
 from repo_surveyor.integration_concretiser.types import (
     ASTContext,
@@ -142,3 +145,80 @@ class TestParseResponse:
         results = parse_response(response, group)
         assert results[0].is_definite is True
         assert results[0].direction == IntegrationDirection.INWARD
+
+    def test_group_delimiters_ignored_in_single_response(self):
+        group = _make_group(1)
+        response = "---GROUP 0---\n0|DEFINITE|INWARD|Handler\n---END GROUP 0---"
+        results = parse_response(response, group)
+        assert results[0].is_definite is True
+        assert results[0].direction == IntegrationDirection.INWARD
+
+
+class TestParseBatchedResponse:
+    """Tests for batched response parsing."""
+
+    def test_two_groups(self):
+        group_a = _make_group(1)
+        group_b = _make_group(2)
+        response = (
+            "---GROUP 0---\n"
+            "0|DEFINITE|INWARD|Handler\n"
+            "---END GROUP 0---\n"
+            "---GROUP 1---\n"
+            "0|DEFINITE|OUTWARD|DB query\n"
+            "1|NOT_DEFINITE||Import only\n"
+            "---END GROUP 1---"
+        )
+        results = parse_batched_response(response, [group_a, group_b])
+
+        assert len(results) == 2
+        assert len(results[0]) == 1
+        assert results[0][0].is_definite is True
+        assert results[0][0].direction == IntegrationDirection.INWARD
+        assert len(results[1]) == 2
+        assert results[1][0].is_definite is True
+        assert results[1][0].direction == IntegrationDirection.OUTWARD
+        assert results[1][1].is_definite is False
+
+    def test_missing_group_defaults_to_not_definite(self):
+        group_a = _make_group(1)
+        group_b = _make_group(1)
+        response = "---GROUP 0---\n" "0|DEFINITE|INWARD|Handler\n" "---END GROUP 0---"
+        results = parse_batched_response(response, [group_a, group_b])
+
+        assert len(results) == 2
+        assert results[0][0].is_definite is True
+        assert results[1][0].is_definite is False
+        assert "No valid LLM response" in results[1][0].reasoning
+
+    def test_empty_response(self):
+        group = _make_group(1)
+        results = parse_batched_response("", [group])
+
+        assert len(results) == 1
+        assert results[0][0].is_definite is False
+
+    def test_malformed_lines_within_group(self):
+        group = _make_group(2)
+        response = (
+            "---GROUP 0---\n"
+            "garbage line\n"
+            "0|DEFINITE|OUTWARD|Valid\n"
+            "---END GROUP 0---"
+        )
+        results = parse_batched_response(response, [group])
+
+        assert results[0][0].is_definite is True
+        assert results[0][1].is_definite is False
+
+    def test_preserves_original_signals_across_groups(self):
+        group_a = _make_group(1)
+        group_b = _make_group(1)
+        response = (
+            "---GROUP 0---\n0|DEFINITE|INWARD|A\n---END GROUP 0---\n"
+            "---GROUP 1---\n0|DEFINITE|OUTWARD|B\n---END GROUP 1---"
+        )
+        results = parse_batched_response(response, [group_a, group_b])
+
+        assert results[0][0].original_signal is group_a.signals[0]
+        assert results[1][0].original_signal is group_b.signals[0]

@@ -1,6 +1,8 @@
 """Tests for concretiser prompt construction."""
 
 from repo_surveyor.integration_concretiser.prompt import (
+    build_batched_system_prompt,
+    build_batched_user_prompt,
     build_system_prompt,
     build_user_prompt,
 )
@@ -127,3 +129,62 @@ class TestBuildUserPrompt:
         prompt = build_user_prompt(group)
         assert "0." in prompt
         assert "1." not in prompt
+
+
+class TestBuildBatchedSystemPrompt:
+    """Tests for batched system prompt construction."""
+
+    def test_mentions_multiple_groups(self):
+        prompt = build_batched_system_prompt()
+        assert "MULTIPLE" in prompt.upper()
+
+    def test_mentions_group_delimiters(self):
+        prompt = build_batched_system_prompt()
+        assert "---GROUP" in prompt
+        assert "---END GROUP" in prompt
+
+    def test_mentions_inward_outward(self):
+        prompt = build_batched_system_prompt()
+        assert "INWARD" in prompt
+        assert "OUTWARD" in prompt
+
+
+class TestBuildBatchedUserPrompt:
+    """Tests for batched user prompt construction."""
+
+    def test_wraps_groups_in_delimiters(self):
+        prompt = build_batched_user_prompt([SAMPLE_GROUP])
+        assert "---GROUP 0---" in prompt
+        assert "---END GROUP 0---" in prompt
+
+    def test_multiple_groups_numbered(self):
+        group_b = SignalGroup(
+            ast_context=ASTContext(
+                node_type="function_definition",
+                node_text="def foo():\n    pass",
+                start_line=1,
+                end_line=2,
+            ),
+            signals=(_make_signal(1, "def foo():", IntegrationType.HTTP_REST, "foo"),),
+            file_path="test.py",
+        )
+        prompt = build_batched_user_prompt([SAMPLE_GROUP, group_b])
+        assert "---GROUP 0---" in prompt
+        assert "---END GROUP 0---" in prompt
+        assert "---GROUP 1---" in prompt
+        assert "---END GROUP 1---" in prompt
+
+    def test_contains_code_from_all_groups(self):
+        group_b = SignalGroup(
+            ast_context=ASTContext(
+                node_type="function_definition",
+                node_text="def foo():\n    pass",
+                start_line=1,
+                end_line=2,
+            ),
+            signals=(_make_signal(1, "def foo():", IntegrationType.HTTP_REST, "foo"),),
+            file_path="test.py",
+        )
+        prompt = build_batched_user_prompt([SAMPLE_GROUP, group_b])
+        assert "getUsers" in prompt
+        assert "def foo" in prompt

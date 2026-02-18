@@ -59,6 +59,7 @@ BASE = BasePatternSpec(
                 (r"DynamoDbClient", Confidence.HIGH),
                 (r"import org\.neo4j\.driver", Confidence.HIGH),
                 (r"GraphDatabase\.driver", Confidence.HIGH),
+                (r"DriverManager\.getConnection", Confidence.HIGH),
             ],
         },
         IntegrationType.FILE_IO: {

@@ -1,5 +1,7 @@
 """Parse LLM responses into ConcretisedSignal objects."""
 
+import re
+
 from ..integration_detector import IntegrationSignal
 from .grouper import SignalGroup
 from .types import ASTContext, ConcretisedSignal, IntegrationDirection
@@ -11,6 +13,8 @@ class _ResponseFormat:
     EXPECTED_FIELD_COUNT = 4
     DEFINITE_LABEL = "DEFINITE"
     DEFAULT_REASONING = "No valid LLM response for this signal"
+    GROUP_DELIMITER_PATTERN = re.compile(r"---GROUP\s+(\d+)---")
+    GROUP_END_PATTERN = re.compile(r"---END GROUP\s+(\d+)---")
 
 
 _DIRECTION_MAP = {
@@ -66,9 +70,15 @@ def _parse_single_line(line: str) -> tuple[int, bool, IntegrationDirection, str]
 
 
 def _is_valid_line(line: str) -> bool:
-    """Return True if the line is non-empty and not a comment."""
+    """Return True if the line is non-empty and not a delimiter or comment."""
     stripped = line.strip()
-    return bool(stripped) and not stripped.startswith("#")
+    if not stripped or stripped.startswith("#"):
+        return False
+    if _ResponseFormat.GROUP_DELIMITER_PATTERN.match(stripped):
+        return False
+    if _ResponseFormat.GROUP_END_PATTERN.match(stripped):
+        return False
+    return True
 
 
 def _try_parse_line(
@@ -95,27 +105,12 @@ def _try_parse_line(
     )
 
 
-def parse_response(
-    response_text: str,
+def _parse_lines_for_group(
+    lines: list[str],
     group: SignalGroup,
 ) -> tuple[ConcretisedSignal, ...]:
-    """Parse an LLM response into ConcretisedSignal objects.
-
-    Each line of the response corresponds to one signal in the group.
-    Malformed or missing lines default to not-definite.
-
-    Args:
-        response_text: Raw text response from the LLM.
-        group: The signal group that was submitted to the LLM.
-
-    Returns:
-        Tuple of ConcretisedSignal objects, one per signal in the group.
-    """
-    valid_lines = [
-        line.strip()
-        for line in response_text.strip().splitlines()
-        if _is_valid_line(line)
-    ]
+    """Parse a list of response lines into ConcretisedSignals for a group."""
+    valid_lines = [line.strip() for line in lines if _is_valid_line(line)]
 
     parsed: dict[int, ConcretisedSignal] = dict(
         result
@@ -132,4 +127,75 @@ def parse_response(
             ),
         )
         for i, signal in enumerate(group.signals)
+    )
+
+
+def parse_response(
+    response_text: str,
+    group: SignalGroup,
+) -> tuple[ConcretisedSignal, ...]:
+    """Parse an LLM response into ConcretisedSignal objects.
+
+    Each line of the response corresponds to one signal in the group.
+    Malformed or missing lines default to not-definite.
+
+    Args:
+        response_text: Raw text response from the LLM.
+        group: The signal group that was submitted to the LLM.
+
+    Returns:
+        Tuple of ConcretisedSignal objects, one per signal in the group.
+    """
+    return _parse_lines_for_group(response_text.strip().splitlines(), group)
+
+
+def _split_batched_response(response_text: str) -> dict[int, list[str]]:
+    """Split a batched LLM response into per-group line lists.
+
+    Expects response delimited by ---GROUP N--- / ---END GROUP N---.
+    Lines not inside any group delimiter are discarded.
+
+    Returns:
+        Dict mapping group index to list of response lines.
+    """
+    sections: dict[int, list[str]] = {}
+    current_group: int | None = None
+
+    for line in response_text.strip().splitlines():
+        stripped = line.strip()
+        start_match = _ResponseFormat.GROUP_DELIMITER_PATTERN.match(stripped)
+        if start_match:
+            current_group = int(start_match.group(1))
+            sections.setdefault(current_group, [])
+            continue
+
+        end_match = _ResponseFormat.GROUP_END_PATTERN.match(stripped)
+        if end_match:
+            current_group = None
+            continue
+
+        if current_group is not None:
+            sections[current_group].append(line)
+
+    return sections
+
+
+def parse_batched_response(
+    response_text: str,
+    groups: list[SignalGroup],
+) -> tuple[tuple[ConcretisedSignal, ...], ...]:
+    """Parse a batched LLM response into per-group ConcretisedSignal tuples.
+
+    Args:
+        response_text: Raw batched response with group delimiters.
+        groups: The signal groups in batch order.
+
+    Returns:
+        Tuple of tuples, one per group, each containing ConcretisedSignals.
+    """
+    sections = _split_batched_response(response_text)
+
+    return tuple(
+        _parse_lines_for_group(sections.get(i, []), group)
+        for i, group in enumerate(groups)
     )

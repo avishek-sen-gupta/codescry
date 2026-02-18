@@ -125,8 +125,8 @@ class TestConcretiseGroups:
         )
         model = MockModel(
             responses=[
-                "0|DEFINITE|INWARD|HTTP handler",
-                "0|DEFINITE|OUTWARD|Message publish",
+                "---GROUP 0---\n0|DEFINITE|INWARD|HTTP handler\n---END GROUP 0---\n"
+                "---GROUP 1---\n0|DEFINITE|OUTWARD|Message publish\n---END GROUP 1---",
             ]
         )
         result = concretise_groups([group_a, group_b], model)

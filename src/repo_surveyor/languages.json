@@ -82,7 +82,8 @@
         "spring-ws": "Spring WS",
         "jaxws-rt": "JAX-WS",
         "metro-jax-ws": "JAX-WS",
-        "helidon": "Helidon"
+        "helidon": "Helidon",
+        "jooq": "jOOQ"
       },
       "integration_module": "java"
     },
