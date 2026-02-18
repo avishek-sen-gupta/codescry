@@ -4,6 +4,15 @@ from ..integration_detector import IntegrationSignal
 from .grouper import SignalGroup
 from .types import ASTContext, ConcretisedSignal, IntegrationDirection
 
+
+class _ResponseFormat:
+    """Constants for the pipe-delimited LLM response format."""
+
+    EXPECTED_FIELD_COUNT = 4
+    DEFINITE_LABEL = "DEFINITE"
+    DEFAULT_REASONING = "No valid LLM response for this signal"
+
+
 _DIRECTION_MAP = {
     "INWARD": IntegrationDirection.INWARD,
     "OUTWARD": IntegrationDirection.OUTWARD,
@@ -35,18 +44,55 @@ def _parse_single_line(line: str) -> tuple[int, bool, IntegrationDirection, str]
         ValueError: If the line is malformed.
     """
     parts = line.strip().split("|")
-    if len(parts) < 4:
-        raise ValueError(f"Expected at least 4 pipe-delimited fields, got {len(parts)}")
+    if len(parts) < _ResponseFormat.EXPECTED_FIELD_COUNT:
+        raise ValueError(
+            f"Expected at least {_ResponseFormat.EXPECTED_FIELD_COUNT} "
+            f"pipe-delimited fields, got {len(parts)}"
+        )
 
     signal_index = int(parts[0].strip())
     classification = parts[1].strip().upper()
     direction_str = parts[2].strip().upper()
     reasoning = parts[3].strip()
 
-    is_definite = classification == "DEFINITE"
-    direction = _DIRECTION_MAP.get(direction_str, IntegrationDirection.UNKNOWN) if is_definite else IntegrationDirection.UNKNOWN
+    is_definite = classification == _ResponseFormat.DEFINITE_LABEL
+    direction = (
+        _DIRECTION_MAP.get(direction_str, IntegrationDirection.UNKNOWN)
+        if is_definite
+        else IntegrationDirection.UNKNOWN
+    )
 
     return signal_index, is_definite, direction, reasoning
+
+
+def _is_valid_line(line: str) -> bool:
+    """Return True if the line is non-empty and not a comment."""
+    stripped = line.strip()
+    return bool(stripped) and not stripped.startswith("#")
+
+
+def _try_parse_line(
+    line: str, group: SignalGroup
+) -> tuple[int, ConcretisedSignal] | None:
+    """Attempt to parse a line into an indexed ConcretisedSignal.
+
+    Returns None if the line is malformed or the index is out of range.
+    """
+    try:
+        signal_index, is_definite, direction, reasoning = _parse_single_line(line)
+    except (ValueError, IndexError):
+        return None
+
+    if signal_index < 0 or signal_index >= len(group.signals):
+        return None
+
+    return signal_index, ConcretisedSignal(
+        original_signal=group.signals[signal_index],
+        ast_context=group.ast_context,
+        is_definite=is_definite,
+        direction=direction,
+        reasoning=reasoning,
+    )
 
 
 def parse_response(
@@ -65,36 +111,24 @@ def parse_response(
     Returns:
         Tuple of ConcretisedSignal objects, one per signal in the group.
     """
-    parsed: dict[int, ConcretisedSignal] = {}
-    lines = [
+    valid_lines = [
         line.strip()
         for line in response_text.strip().splitlines()
-        if line.strip() and not line.strip().startswith("#")
+        if _is_valid_line(line)
     ]
 
-    for line in lines:
-        try:
-            signal_index, is_definite, direction, reasoning = _parse_single_line(line)
-        except (ValueError, IndexError):
-            continue
-
-        if signal_index < 0 or signal_index >= len(group.signals):
-            continue
-
-        signal = group.signals[signal_index]
-        parsed[signal_index] = ConcretisedSignal(
-            original_signal=signal,
-            ast_context=group.ast_context,
-            is_definite=is_definite,
-            direction=direction,
-            reasoning=reasoning,
-        )
+    parsed: dict[int, ConcretisedSignal] = dict(
+        result
+        for line in valid_lines
+        for result in [_try_parse_line(line, group)]
+        if result is not None
+    )
 
     return tuple(
         parsed.get(
             i,
             _make_not_definite(
-                signal, group.ast_context, "No valid LLM response for this signal"
+                signal, group.ast_context, _ResponseFormat.DEFAULT_REASONING
             ),
         )
         for i, signal in enumerate(group.signals)

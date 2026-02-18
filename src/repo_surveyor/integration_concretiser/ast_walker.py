@@ -7,44 +7,57 @@ from ..integration_patterns import Language
 from ..syntax_zone import LANGUAGE_TO_TS_NAME
 from .types import ASTContext
 
-_DEFINITION_SUFFIXES = ("_definition", "_declaration")
 
-_DEFINITION_EXACT = frozenset(
-    {
-        "decorated_definition",
-        "class_declaration",
-        "method_declaration",
-        "function_declaration",
-        "function_definition",
-        "class_definition",
-        "lexical_declaration",
-        "variable_declaration",
-        "field_declaration",
-        "property_declaration",
-    }
-)
+class _DefinitionNodes:
+    """Tree-sitter node types that represent definitions/declarations."""
 
-_STATEMENT_SUFFIXES = ("_statement",)
+    SUFFIXES = ("_definition", "_declaration")
 
-_STATEMENT_EXACT = frozenset(
-    {
-        "expression_statement",
-        "assignment",
-        "annotation",
-    }
-)
+    EXACT = frozenset(
+        {
+            "decorated_definition",
+            "class_declaration",
+            "method_declaration",
+            "function_declaration",
+            "function_definition",
+            "class_definition",
+            "lexical_declaration",
+            "variable_declaration",
+            "field_declaration",
+            "property_declaration",
+        }
+    )
 
-_ROOT_NODE_TYPES = frozenset(
-    {
-        "module",
-        "program",
-        "translation_unit",
-        "source_file",
-        "compilation_unit",
-    }
-)
 
-_FALLBACK_AST_CONTEXT = ASTContext(
+class _StatementNodes:
+    """Tree-sitter node types that represent statement-level constructs."""
+
+    SUFFIXES = ("_statement",)
+
+    EXACT = frozenset(
+        {
+            "expression_statement",
+            "assignment",
+            "annotation",
+        }
+    )
+
+
+class _RootNodes:
+    """Tree-sitter node types that represent root/module-level constructs."""
+
+    TYPES = frozenset(
+        {
+            "module",
+            "program",
+            "translation_unit",
+            "source_file",
+            "compilation_unit",
+        }
+    )
+
+
+FALLBACK_AST_CONTEXT = ASTContext(
     node_type="unknown",
     node_text="",
     start_line=0,
@@ -55,22 +68,22 @@ _FALLBACK_AST_CONTEXT = ASTContext(
 def _is_definition_node(node: Node) -> bool:
     """Return True if the node is a definition or declaration node."""
     node_type = node.type
-    if node_type in _DEFINITION_EXACT:
+    if node_type in _DefinitionNodes.EXACT:
         return True
-    return any(node_type.endswith(suffix) for suffix in _DEFINITION_SUFFIXES)
+    return any(node_type.endswith(suffix) for suffix in _DefinitionNodes.SUFFIXES)
 
 
 def _is_statement_node(node: Node) -> bool:
     """Return True if the node is a statement-level node."""
     node_type = node.type
-    if node_type in _STATEMENT_EXACT:
+    if node_type in _StatementNodes.EXACT:
         return True
-    return any(node_type.endswith(suffix) for suffix in _STATEMENT_SUFFIXES)
+    return any(node_type.endswith(suffix) for suffix in _StatementNodes.SUFFIXES)
 
 
 def _is_root_node(node: Node) -> bool:
     """Return True if the node is a root/module-level node."""
-    return node.type in _ROOT_NODE_TYPES
+    return node.type in _RootNodes.TYPES
 
 
 def _deepest_named_node_at_line(root: Node, line_0indexed: int) -> Node | None:
@@ -141,7 +154,7 @@ def extract_ast_context(
     """
     ts_name = LANGUAGE_TO_TS_NAME.get(language)
     if ts_name is None:
-        return _FALLBACK_AST_CONTEXT
+        return FALLBACK_AST_CONTEXT
 
     parser = get_parser(ts_name)
     tree = parser.parse(file_content)
@@ -149,14 +162,12 @@ def extract_ast_context(
 
     deepest = _deepest_named_node_at_line(tree.root_node, line_0indexed)
     if deepest is None:
-        return _FALLBACK_AST_CONTEXT
+        return FALLBACK_AST_CONTEXT
 
     structural = _walk_up_to_structural(deepest)
 
-    # If the structural node is the original deepest node and it's
-    # a root-level node, return fallback (e.g., empty file parsed to module)
     if _is_root_node(structural):
-        return _FALLBACK_AST_CONTEXT
+        return FALLBACK_AST_CONTEXT
 
     return ASTContext(
         node_type=structural.type,

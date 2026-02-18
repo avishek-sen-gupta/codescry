@@ -4,7 +4,7 @@ import pytest
 
 from repo_surveyor.integration_concretiser.ast_walker import (
     extract_ast_context,
-    _FALLBACK_AST_CONTEXT,
+    FALLBACK_AST_CONTEXT,
 )
 from repo_surveyor.integration_patterns import Language
 
@@ -122,15 +122,15 @@ class TestExtractASTContextEdgeCases:
 
     def test_unsupported_language_returns_fallback(self):
         ctx = extract_ast_context(b"some content", Language.PLI, 1)
-        assert ctx == _FALLBACK_AST_CONTEXT
+        assert ctx == FALLBACK_AST_CONTEXT
 
     def test_empty_file_returns_fallback(self):
         ctx = extract_ast_context(b"", Language.PYTHON, 1)
-        assert ctx == _FALLBACK_AST_CONTEXT
+        assert ctx == FALLBACK_AST_CONTEXT
 
     def test_line_beyond_file_returns_fallback(self):
         ctx = extract_ast_context(b"x = 1\n", Language.PYTHON, 999)
-        assert ctx == _FALLBACK_AST_CONTEXT
+        assert ctx == FALLBACK_AST_CONTEXT
 
     def test_context_has_positive_line_numbers(self):
         source = b"def foo():\n    pass\n"

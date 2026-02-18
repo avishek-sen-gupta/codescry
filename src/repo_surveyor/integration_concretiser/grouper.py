@@ -1,7 +1,10 @@
 """Group integration signals by their enclosing AST context."""
 
-from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass
+from functools import reduce
+from itertools import groupby
+from operator import attrgetter
 
 from ..integration_detector import IntegrationSignal
 from ..integration_patterns import Language
@@ -30,9 +33,77 @@ def _read_file_bytes(file_path: str) -> bytes:
         return f.read()
 
 
+@dataclass(frozen=True)
+class _SignalWithContext:
+    """A signal paired with its resolved AST context and grouping key."""
+
+    signal: IntegrationSignal
+    ast_context: ASTContext
+    group_key: tuple[str, int, int]
+
+
+def _resolve_signal(
+    signal: IntegrationSignal,
+    file_content: bytes,
+    language: Language,
+) -> _SignalWithContext:
+    """Resolve a single signal to its AST context."""
+    ctx = extract_ast_context(file_content, language, signal.match.line_number)
+    return _SignalWithContext(
+        signal=signal,
+        ast_context=ctx,
+        group_key=(signal.match.file_path, ctx.start_line, ctx.end_line),
+    )
+
+
+def _resolve_file_signals(
+    file_path: str,
+    signals: list[IntegrationSignal],
+    file_reader: Callable[[str], bytes],
+) -> tuple[_SignalWithContext, ...]:
+    """Resolve all signals in a single file to their AST contexts."""
+    first_language = signals[0].match.language
+    if first_language is None:
+        return ()
+
+    file_content = file_reader(file_path)
+    return tuple(
+        _resolve_signal(signal, file_content, first_language) for signal in signals
+    )
+
+
+def _group_by_file(
+    signals: list[IntegrationSignal],
+) -> dict[str, list[IntegrationSignal]]:
+    """Group signals by file path."""
+    sorted_signals = sorted(signals, key=attrgetter("match.file_path"))
+    return {
+        file_path: list(group)
+        for file_path, group in groupby(
+            sorted_signals, key=attrgetter("match.file_path")
+        )
+    }
+
+
+def _collect_into_groups(
+    resolved: tuple[_SignalWithContext, ...],
+) -> list[SignalGroup]:
+    """Collect resolved signals into SignalGroups by their group key."""
+    sorted_resolved = sorted(resolved, key=attrgetter("group_key"))
+    return [
+        SignalGroup(
+            ast_context=group_items[0].ast_context,
+            signals=tuple(item.signal for item in group_items),
+            file_path=key[0],
+        )
+        for key, group_iter in groupby(sorted_resolved, key=attrgetter("group_key"))
+        for group_items in [list(group_iter)]
+    ]
+
+
 def group_signals_by_ast_context(
     signals: list[IntegrationSignal],
-    file_reader: object = _read_file_bytes,
+    file_reader: Callable[[str], bytes] = _read_file_bytes,
 ) -> list[SignalGroup]:
     """Group signals by their enclosing AST node.
 
@@ -48,32 +119,12 @@ def group_signals_by_ast_context(
     Returns:
         List of SignalGroups, one per unique enclosing AST node.
     """
-    signals_by_file: dict[str, list[IntegrationSignal]] = defaultdict(list)
-    for signal in signals:
-        signals_by_file[signal.match.file_path].append(signal)
+    by_file = _group_by_file(signals)
 
-    groups: dict[tuple[str, int, int], list[IntegrationSignal]] = {}
-    contexts: dict[tuple[str, int, int], ASTContext] = {}
+    all_resolved = reduce(
+        lambda acc, item: acc + _resolve_file_signals(item[0], item[1], file_reader),
+        by_file.items(),
+        (),
+    )
 
-    for file_path, file_signals in signals_by_file.items():
-        first_signal = file_signals[0]
-        language = first_signal.match.language
-        if language is None:
-            continue
-
-        file_content = file_reader(file_path)
-
-        for signal in file_signals:
-            ctx = extract_ast_context(file_content, language, signal.match.line_number)
-            key = (file_path, ctx.start_line, ctx.end_line)
-            groups.setdefault(key, []).append(signal)
-            contexts[key] = ctx
-
-    return [
-        SignalGroup(
-            ast_context=contexts[key],
-            signals=tuple(group_signals),
-            file_path=key[0],
-        )
-        for key, group_signals in groups.items()
-    ]
+    return _collect_into_groups(all_resolved)
