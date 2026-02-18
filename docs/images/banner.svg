@@ -1,90 +1,109 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" width="900" height="220">
   <defs>
-    <!-- Background gradient -->
+    <!-- Background gradient — deeper indigo to slate -->
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1a1a2e"/>
-      <stop offset="100%" stop-color="#16213e"/>
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
     </linearGradient>
 
-    <!-- Elevation fills — light comes from top-left, so upper-left = lit, lower-right = shadow -->
+    <!-- Elevation fills — teal/cyan palette -->
     <linearGradient id="elev0" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#1b4332" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#0d2818" stop-opacity="0.15"/>
+      <stop offset="0%" stop-color="#134e4a" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#042f2e" stop-opacity="0.15"/>
     </linearGradient>
     <linearGradient id="elev1" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#2d6a4f" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#1b4332" stop-opacity="0.15"/>
+      <stop offset="0%" stop-color="#115e59" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#134e4a" stop-opacity="0.15"/>
     </linearGradient>
     <linearGradient id="elev2" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#40916c" stop-opacity="0.3"/>
-      <stop offset="100%" stop-color="#2d6a4f" stop-opacity="0.15"/>
+      <stop offset="0%" stop-color="#0f766e" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#115e59" stop-opacity="0.15"/>
     </linearGradient>
     <linearGradient id="elev3" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#52b788" stop-opacity="0.32"/>
-      <stop offset="100%" stop-color="#40916c" stop-opacity="0.15"/>
+      <stop offset="0%" stop-color="#0d9488" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#0f766e" stop-opacity="0.15"/>
     </linearGradient>
     <linearGradient id="elev4" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#74c69d" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#52b788" stop-opacity="0.15"/>
+      <stop offset="0%" stop-color="#14b8a6" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0d9488" stop-opacity="0.15"/>
     </linearGradient>
     <linearGradient id="elev5" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#95d5b2" stop-opacity="0.38"/>
-      <stop offset="100%" stop-color="#74c69d" stop-opacity="0.18"/>
+      <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#14b8a6" stop-opacity="0.18"/>
     </linearGradient>
     <linearGradient id="elev6" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#b7e4c7" stop-opacity="0.4"/>
-      <stop offset="100%" stop-color="#95d5b2" stop-opacity="0.2"/>
+      <stop offset="0%" stop-color="#5eead4" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#2dd4bf" stop-opacity="0.2"/>
     </linearGradient>
 
     <!-- Hill 2 elevation fills -->
     <linearGradient id="h2elev0" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#2d6a4f" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#1b4332" stop-opacity="0.1"/>
+      <stop offset="0%" stop-color="#115e59" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#134e4a" stop-opacity="0.1"/>
     </linearGradient>
     <linearGradient id="h2elev1" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#40916c" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#2d6a4f" stop-opacity="0.12"/>
+      <stop offset="0%" stop-color="#0f766e" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#115e59" stop-opacity="0.12"/>
     </linearGradient>
     <linearGradient id="h2elev2" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#52b788" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#40916c" stop-opacity="0.14"/>
+      <stop offset="0%" stop-color="#0d9488" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#0f766e" stop-opacity="0.14"/>
     </linearGradient>
 
-    <!-- Trail/route gradient -->
+    <!-- Trail/route gradient — warm amber -->
     <linearGradient id="trail" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#f59e0b"/>
       <stop offset="100%" stop-color="#d97706"/>
     </linearGradient>
 
-    <!-- Peak highlight — radial, light from top-left -->
+    <!-- Peak highlight -->
     <radialGradient id="peak-glow" cx="40%" cy="35%" r="60%">
-      <stop offset="0%" stop-color="#95d5b2" stop-opacity="0.5"/>
-      <stop offset="100%" stop-color="#40916c" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#0f766e" stop-opacity="0"/>
     </radialGradient>
 
     <!-- Right-side hill fills -->
     <linearGradient id="relev0" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#2d6a4f" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#1b4332" stop-opacity="0.08"/>
+      <stop offset="0%" stop-color="#115e59" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#134e4a" stop-opacity="0.08"/>
     </linearGradient>
     <linearGradient id="relev1" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#40916c" stop-opacity="0.2"/>
-      <stop offset="100%" stop-color="#2d6a4f" stop-opacity="0.1"/>
+      <stop offset="0%" stop-color="#0f766e" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#115e59" stop-opacity="0.1"/>
     </linearGradient>
     <linearGradient id="relev2" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#52b788" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#40916c" stop-opacity="0.12"/>
+      <stop offset="0%" stop-color="#0d9488" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#0f766e" stop-opacity="0.12"/>
     </linearGradient>
 
-    <!-- Subtle grid pattern -->
-    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
-      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e3a5f" stroke-width="0.3" opacity="0.35"/>
+    <!-- Far-left hill fills -->
+    <linearGradient id="flelev0" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#134e4a" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#042f2e" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="flelev1" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#115e59" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#134e4a" stop-opacity="0.08"/>
+    </linearGradient>
+
+    <!-- Dot grid pattern -->
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="0.6" fill="#94a3b8" opacity="0.12"/>
     </pattern>
 
     <!-- Rounded rectangle clip -->
     <clipPath id="banner-clip">
       <rect x="0" y="0" width="900" height="220" rx="12" ry="12"/>
     </clipPath>
+
+    <!-- Title text glow -->
+    <filter id="text-glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
 
   <g clip-path="url(#banner-clip)">
@@ -92,62 +111,72 @@
     <rect width="900" height="220" fill="url(#bg)"/>
     <rect width="900" height="220" fill="url(#grid)"/>
 
+    <!-- ============ FAR-LEFT HILL (background, faint) ============ -->
+    <g opacity="0.35">
+      <path d="M -30,160 C -25,128 5,110 40,114 C 78,118 98,140 94,162
+               C 90,184 68,198 38,196 C 8,194 -35,190 -30,160 Z"
+            fill="url(#flelev0)" stroke="#115e59" stroke-width="0.8"/>
+      <path d="M -10,158 C -6,138 14,126 38,130 C 64,134 78,148 76,162
+               C 74,176 58,186 38,184 C 18,182 -14,176 -10,158 Z"
+            fill="url(#flelev1)" stroke="#0f766e" stroke-width="0.7"/>
+    </g>
+
     <!-- ============ MAIN HILL: filled elevation bands + contour strokes ============ -->
 
-    <!-- Band 0 (lowest) — fill between outermost and ring 1 -->
+    <!-- Band 0 (lowest) -->
     <path d="M 20,120 C 25,62 68,18 150,22 C 232,26 278,68 280,115
              C 282,162 240,208 155,210 C 70,212 15,178 20,120 Z"
-          fill="url(#elev0)" stroke="#2d6a4f" stroke-width="1.0" opacity="0.8"/>
+          fill="url(#elev0)" stroke="#115e59" stroke-width="1.0" opacity="0.8"/>
 
     <!-- Band 1 -->
     <path d="M 42,118 C 45,70 82,38 148,40 C 218,42 258,78 256,116
              C 254,155 222,190 152,192 C 82,194 39,166 42,118 Z"
-          fill="url(#elev1)" stroke="#2d6a4f" stroke-width="1.0" opacity="0.8"/>
+          fill="url(#elev1)" stroke="#115e59" stroke-width="1.0" opacity="0.8"/>
 
     <!-- Band 2 -->
     <path d="M 58,112 C 62,74 94,50 145,52 C 200,54 238,82 235,114
              C 232,148 204,174 148,176 C 92,178 54,152 58,112 Z"
-          fill="url(#elev2)" stroke="#40916c" stroke-width="1.1" opacity="0.8"/>
+          fill="url(#elev2)" stroke="#0f766e" stroke-width="1.1" opacity="0.8"/>
 
     <!-- Band 3 -->
     <path d="M 75,106 C 80,78 104,60 140,62 C 182,64 214,86 210,110
              C 206,136 182,158 142,160 C 102,162 70,138 75,106 Z"
-          fill="url(#elev3)" stroke="#40916c" stroke-width="1.2" opacity="0.8"/>
+          fill="url(#elev3)" stroke="#0f766e" stroke-width="1.2" opacity="0.8"/>
 
     <!-- Band 4 -->
     <path d="M 90,100 C 94,80 112,68 138,70 C 168,72 192,88 188,106
              C 184,126 166,142 138,144 C 110,146 86,124 90,100 Z"
-          fill="url(#elev4)" stroke="#52b788" stroke-width="1.3" opacity="0.8"/>
+          fill="url(#elev4)" stroke="#0d9488" stroke-width="1.3" opacity="0.8"/>
 
     <!-- Band 5 -->
     <path d="M 104,94 C 107,82 118,74 135,76 C 156,78 172,88 168,100
              C 164,114 150,126 134,127 C 118,128 101,110 104,94 Z"
-          fill="url(#elev5)" stroke="#52b788" stroke-width="1.3" opacity="0.85"/>
+          fill="url(#elev5)" stroke="#0d9488" stroke-width="1.3" opacity="0.85"/>
 
     <!-- Band 6 (summit) -->
     <path d="M 116,90 C 118,83 124,78 133,79 C 144,80 152,86 150,94
              C 148,102 140,108 132,108 C 124,108 114,98 116,90 Z"
-          fill="url(#elev6)" stroke="#74c69d" stroke-width="1.4" opacity="0.9"/>
+          fill="url(#elev6)" stroke="#14b8a6" stroke-width="1.4" opacity="0.9"/>
 
     <!-- Peak highlight glow -->
     <circle cx="134" cy="92" r="16" fill="url(#peak-glow)"/>
 
     <!-- Peak marker with shadow -->
-    <polygon points="135,80 130,92 140,92" fill="#74c69d" opacity="0.8"/>
-    <polygon points="135,80 135,92 140,92" fill="#52b788" opacity="0.5"/>
-    <line x1="135" y1="80" x2="135" y2="75" stroke="#95d5b2" stroke-width="1.2" opacity="0.8"/>
+    <polygon points="135,80 130,92 140,92" fill="#14b8a6" opacity="0.8"/>
+    <polygon points="135,80 135,92 140,92" fill="#0d9488" opacity="0.5"/>
+    <line x1="135" y1="80" x2="135" y2="75" stroke="#2dd4bf" stroke-width="1.2" opacity="0.8"/>
 
     <!-- ============ SECOND HILL: filled bands ============ -->
 
     <path d="M 162,155 C 166,128 188,112 218,115 C 250,118 268,138 264,158
              C 260,178 240,194 214,192 C 188,190 158,182 162,155 Z"
-          fill="url(#h2elev0)" stroke="#2d6a4f" stroke-width="1.0" opacity="0.75"/>
+          fill="url(#h2elev0)" stroke="#115e59" stroke-width="1.0" opacity="0.75"/>
     <path d="M 178,152 C 181,136 196,126 216,128 C 238,130 250,144 248,158
              C 246,172 232,182 214,180 C 196,178 175,168 178,152 Z"
-          fill="url(#h2elev1)" stroke="#40916c" stroke-width="1.1" opacity="0.75"/>
+          fill="url(#h2elev1)" stroke="#0f766e" stroke-width="1.1" opacity="0.75"/>
     <path d="M 194,150 C 196,142 204,136 216,138 C 228,140 236,148 234,156
              C 232,164 222,170 214,168 C 206,166 192,158 194,150 Z"
-          fill="url(#h2elev2)" stroke="#52b788" stroke-width="1.2" opacity="0.8"/>
+          fill="url(#h2elev2)" stroke="#0d9488" stroke-width="1.2" opacity="0.8"/>
 
     <!-- Trail/route winding through the terrain -->
     <path d="M 30,190 C 55,175 70,140 95,125 S 130,100 145,95 S 175,105 195,130 S 220,150 250,140 S 270,110 285,105"
@@ -172,42 +201,48 @@
 
     <!-- River/stream with depth -->
     <path d="M 60,30 C 75,55 85,70 100,90 S 120,130 130,155 S 145,180 155,205"
-          fill="none" stroke="#1d3557" stroke-width="2.5" opacity="0.3" stroke-linecap="round"/>
+          fill="none" stroke="#0c4a6e" stroke-width="2.5" opacity="0.3" stroke-linecap="round"/>
     <path d="M 60,30 C 75,55 85,70 100,90 S 120,130 130,155 S 145,180 155,205"
-          fill="none" stroke="#457b9d" stroke-width="1.2" opacity="0.4" stroke-linecap="round"/>
+          fill="none" stroke="#0284c7" stroke-width="1.2" opacity="0.35" stroke-linecap="round"/>
     <path d="M 59,30 C 74,55 84,70 99,89 S 119,129 129,154 S 144,179 154,204"
-          fill="none" stroke="#a8dadc" stroke-width="0.4" opacity="0.25" stroke-linecap="round"/>
+          fill="none" stroke="#7dd3fc" stroke-width="0.4" opacity="0.2" stroke-linecap="round"/>
 
     <!-- ============ TEXT ============ -->
 
     <!-- Text shadow -->
-    <text x="322" y="114" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="58" fill="#000" opacity="0.25" letter-spacing="-1">
-      Cartographer
+    <text x="322" y="108" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="56" fill="#000" opacity="0.3" letter-spacing="1">
+      codescry
     </text>
     <!-- Title -->
-    <text x="320" y="112" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="58" fill="#f1f5f9" letter-spacing="-1">
-      Cartographer
+    <text x="320" y="106" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="56" fill="#e2e8f0" letter-spacing="1" filter="url(#text-glow)">
+      codescry
     </text>
 
-    <!-- Decorative underline — earthy gold + forest green -->
-    <rect x="322" y="124" width="100" height="3" rx="1.5" fill="#f59e0b" opacity="0.9"/>
-    <rect x="430" y="124" width="50" height="3" rx="1.5" fill="#52b788" opacity="0.6"/>
+    <!-- Subtitle -->
+    <text x="322" y="132" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-weight="400" font-size="14" fill="#94a3b8" letter-spacing="3">
+      CODE STRUCTURE ANALYSIS
+    </text>
+
+    <!-- Decorative underline — amber + teal -->
+    <rect x="322" y="140" width="80" height="2.5" rx="1.25" fill="#f59e0b" opacity="0.9"/>
+    <rect x="410" y="140" width="40" height="2.5" rx="1.25" fill="#0d9488" opacity="0.6"/>
+    <rect x="458" y="140" width="20" height="2.5" rx="1.25" fill="#0d9488" opacity="0.3"/>
 
     <!-- ============ RIGHT SIDE: faint hill with filled bands ============ -->
     <g opacity="0.3">
       <path d="M 758,115 C 762,72 790,60 825,64 C 862,68 888,90 885,118
                C 882,148 858,168 822,166 C 786,164 754,156 758,115 Z"
-            fill="url(#relev0)" stroke="#40916c" stroke-width="0.9"/>
+            fill="url(#relev0)" stroke="#0f766e" stroke-width="0.9"/>
       <path d="M 778,112 C 780,82 800,72 824,75 C 850,78 868,94 866,116
                C 864,138 846,152 822,150 C 798,148 776,140 778,112 Z"
-            fill="url(#relev1)" stroke="#52b788" stroke-width="0.8"/>
+            fill="url(#relev1)" stroke="#0d9488" stroke-width="0.8"/>
       <path d="M 796,110 C 798,94 808,86 824,88 C 840,90 850,100 848,114
                C 846,128 834,136 822,134 C 810,132 794,124 796,110 Z"
-            fill="url(#relev2)" stroke="#52b788" stroke-width="0.7"/>
+            fill="url(#relev2)" stroke="#0d9488" stroke-width="0.7"/>
     </g>
 
     <!-- Subtle top/bottom border accents -->
-    <rect x="0" y="0" width="900" height="1" fill="#40916c" opacity="0.3"/>
-    <rect x="0" y="219" width="900" height="1" fill="#40916c" opacity="0.3"/>
+    <rect x="0" y="0" width="900" height="1" fill="#0d9488" opacity="0.4"/>
+    <rect x="0" y="219" width="900" height="1" fill="#0d9488" opacity="0.4"/>
   </g>
 </svg>

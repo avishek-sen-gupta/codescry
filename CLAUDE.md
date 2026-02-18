@@ -1,4 +1,4 @@
-# Cartographer - Claude Code Instructions
+# Codescry - Claude Code Instructions
 
 ## Workflow Rules
 

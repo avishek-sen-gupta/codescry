@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="docs/images/banner.svg" alt="Cartographer" width="900"/>
+  <img src="docs/images/banner.svg" alt="Codescry" width="900"/>
 </p>
 
 <p align="center">
-  Cartographer is a Python library for analysing technology stacks and code structure across a bunch of programming languages.
+  Codescry is a Python library for analysing technology stacks and code structure across a bunch of programming languages.
 </p>
 
 ## What It Does
@@ -108,7 +108,7 @@ See the [API Reference](docs/api-reference.md) for detailed usage of each subsys
 
 ## Visual Examples
 
-These diagrams are generated from Cartographer's own codebase by `scripts/generate_diagrams.py`.
+These diagrams are generated from Codescry's own codebase by `scripts/generate_diagrams.py`.
 
 ### Control Flow Graph
 

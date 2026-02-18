@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate example SVG diagrams from Cartographer's own codebase.
+"""Generate example SVG diagrams from Codescry's own codebase.
 
 Produces:
   - docs/images/cfg_example.svg — CFG for ``_dep_matches_pattern``
@@ -90,7 +90,7 @@ def generate_integration_diagram(renderer: GraphvizCliRenderer) -> None:
 
     dot_source = integration_to_dot(
         resolution,
-        title="Cartographer Integration Signals",
+        title="Codescry Integration Signals",
         max_profiles=15,
     )
     svg = renderer.render_svg(dot_source)
