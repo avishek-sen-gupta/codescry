@@ -9,3 +9,5 @@ fileignoreconfig:
   checksum: b470bb3111f5f3efac9ab62c94e17c61da912fa82c0f65274188e27000045f43
 - filename: poetry.lock
   checksum: bf8526a9216477b855ebcde14e5a1f11a7d0796236a4c1a91b5dfa7b946a8f28
+- filename: docs/internal
+  checksum: 6acfef09ea4a27ec5b4f93e3abda3b4dc5845f2ac62e67574039295d403bc0b5
