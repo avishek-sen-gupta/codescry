@@ -62,8 +62,8 @@ class TestCfgToDot:
 
     def test_sentinel_nodes_get_doublecircle(self):
         dot = cfg_to_dot(_minimal_cfg())
-        assert "n0 [shape=doublecircle" in dot
-        assert "n2 [shape=doublecircle" in dot
+        assert "n0 [shape=doublecircle, fillcolor=" in dot
+        assert "n2 [shape=doublecircle, fillcolor=" in dot
 
     def test_branch_node_gets_diamond(self):
         entry = _make_sentinel(0, "ENTRY")
@@ -120,8 +120,8 @@ class TestCfgToDot:
             exit=4,
         )
         dot = cfg_to_dot(cfg)
-        assert 'color="green"' in dot
-        assert 'color="red"' in dot
+        assert 'color="#059669"' in dot
+        assert 'color="#dc2626"' in dot
         # Exception edge has dotted style
         assert 'style="dotted"' in dot
 
@@ -140,7 +140,7 @@ class TestCfgToDot:
             exit=2,
         )
         dot = cfg_to_dot(cfg)
-        assert 'color="purple"' in dot
+        assert 'color="#7c3aed"' in dot
         assert 'style="dashed"' in dot
 
     def test_custom_title(self):
