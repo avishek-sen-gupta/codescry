@@ -27,6 +27,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -217,7 +218,7 @@ class GitHubClient:
         self, term: str, language: str, per_page: int = 10
     ) -> list[dict]:
         """Search GitHub code for a literal term in files of a given language."""
-        query = f"{term}+language:{language}"
+        query = quote(f"{term} language:{language}", safe=":")
         url = f"{self._BASE}/search/code?q={query}&per_page={per_page}"
         time.sleep(_SEARCH_SLEEP)
         data = self._get(url)
