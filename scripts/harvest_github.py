@@ -83,6 +83,46 @@ _SEARCH_SLEEP = 2.5
 # Seconds to wait between file content requests (rate limit: 5000/hr).
 _CONTENT_SLEEP = 0.3
 
+# Search terms that reliably return non-integration code by language.
+# Files found via these queries are scanned for coincidental integration-pattern
+# matches — those lines become NOT_DEFINITE training examples.
+_NOT_DEFINITE_SEARCH_TERMS: dict[str, list[str]] = {
+    "Java": [
+        "implements Serializable",
+        "Objects.requireNonNull",
+        "Collections.unmodifiableList",
+        "@FunctionalInterface",
+        "LocalDateTime.now()",
+        "BigDecimal.ZERO",
+        "Optional.empty()",
+        "Comparator.comparing",
+        "UUID.randomUUID()",
+        "Arrays.asList(",
+        "StringBuilder append",
+        "throws IllegalArgumentException",
+        "extends AbstractMap",
+        "Stream.of(",
+        "Math.max(",
+    ],
+    "Python": [
+        "dataclasses.dataclass",
+        "isinstance(",
+        "collections.defaultdict",
+        "functools.reduce",
+        "itertools.chain",
+        "typing.Optional",
+        "pathlib.Path(",
+        "datetime.timedelta",
+    ],
+    "Go": [
+        "sort.Slice(",
+        "strings.Builder",
+        "sync.WaitGroup",
+        "math.MaxInt",
+        "bytes.Buffer",
+    ],
+}
+
 
 @dataclass(frozen=True)
 class HarvestSpec:
@@ -179,9 +219,41 @@ def _build_harvest_specs(
     return specs
 
 
+@dataclass(frozen=True)
+class NotDefiniteSpec:
+    """A non-integration search term for harvesting NOT_DEFINITE examples."""
+
+    language: Language
+    search_term: str
+
+
 def _spec_key(spec: HarvestSpec) -> str:
     """Stable string key for a HarvestSpec (used in checkpoint)."""
     return f"{spec.language.value}/{spec.integration_type.value}/{spec.pattern}"
+
+
+def _not_definite_spec_key(spec: NotDefiniteSpec) -> str:
+    """Stable string key for a NotDefiniteSpec (used in checkpoint)."""
+    return f"nd/{spec.language.value}/{spec.search_term}"
+
+
+def _build_not_definite_specs(languages: list[Language]) -> list[NotDefiniteSpec]:
+    """Build NOT_DEFINITE harvest specs for the requested languages."""
+    target_langs = (
+        languages
+        if languages
+        else [
+            lang
+            for lang in Language
+            if lang.value in _NOT_DEFINITE_SEARCH_TERMS
+        ]
+    )
+    return [
+        NotDefiniteSpec(language=lang, search_term=term)
+        for lang in target_langs
+        if lang.value in _NOT_DEFINITE_SEARCH_TERMS
+        for term in _NOT_DEFINITE_SEARCH_TERMS[lang.value]
+    ]
 
 
 class GitHubClient:
@@ -303,6 +375,73 @@ def _examples_from_file(
     return examples
 
 
+def _examples_from_file_not_definite(
+    content: str,
+    spec: NotDefiniteSpec,
+    file_url: str,
+    context: int,
+    seen: set[tuple[str, int]],
+    integration_patterns: dict[IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]],
+) -> list[TrainingExample]:
+    """Extract NOT_DEFINITE examples from a non-integration file.
+
+    Finds lines that coincidentally match an integration pattern and labels
+    them NOT_DEFINITE — these are the false-positive cases the model must learn
+    to reject.  Only the first matching pattern per line is used.
+    """
+    lines = content.splitlines()
+    examples: list[TrainingExample] = []
+    for idx, line in enumerate(lines):
+        for itype, pattern_tuples in integration_patterns.items():
+            for regex, _conf, source, _direction in pattern_tuples:
+                if not re.search(regex, line):
+                    continue
+                dedup_key = (file_url, idx)
+                if dedup_key in seen:
+                    break
+                seen.add(dedup_key)
+                snippet, signal_idx = _extract_snippet(lines, idx, context)
+                raw_id = f"{spec.language.value}__{itype.value}__{idx}__{file_url}"
+                digest = hashlib.sha1(raw_id.encode()).hexdigest()[:8]
+                examples.append(
+                    TrainingExample(
+                        id=f"github_nd__{spec.language.value}__{itype.value}__NOT_DEFINITE__{source}__{digest}",
+                        language=spec.language.value,
+                        integration_type=itype.value,
+                        label=TrainingLabel.NOT_DEFINITE.value,
+                        code_snippet=snippet,
+                        signal_line_index=signal_idx,
+                        signal_line_content=line.strip(),
+                        matched_pattern=regex,
+                        ast_node_type="unknown",
+                        framework=source,
+                    )
+                )
+                break  # one example per line
+    return examples
+
+
+def _harvest_not_definite_spec(
+    spec: NotDefiniteSpec,
+    client: GitHubClient,
+    max_files: int,
+    context: int,
+    seen_dedup: set[tuple[str, int]],
+    integration_patterns: dict[IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]],
+) -> list[TrainingExample]:
+    """Harvest NOT_DEFINITE examples for a single NotDefiniteSpec."""
+    github_lang = _GITHUB_LANGUAGE[spec.language.value]
+    items = client.search_code(spec.search_term, github_lang, per_page=max_files)
+    return [
+        ex
+        for item in items
+        if (url := item.get("url", "")) and (content := client.fetch_file_content(url))
+        for ex in _examples_from_file_not_definite(
+            content, spec, url, context, seen_dedup, integration_patterns
+        )
+    ]
+
+
 def _load_checkpoint(path: Path) -> set[str]:
     """Load the set of already-completed spec keys."""
     if not path.exists():
@@ -398,6 +537,11 @@ def _parse_args() -> argparse.Namespace:
         help="Skip specs already in the checkpoint file.",
     )
     parser.add_argument(
+        "--not-definite",
+        action="store_true",
+        help="Harvest NOT_DEFINITE examples from non-integration code.",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print the harvest plan without making any API calls.",
@@ -457,17 +601,22 @@ def main() -> None:
     integration_types = _resolve_integration_types(args.integration_types)
 
     specs = _build_harvest_specs(languages, integration_types)
+    nd_specs = _build_not_definite_specs(languages) if args.not_definite else []
 
     inward = sum(1 for s in specs if s.direction == SignalDirection.INWARD)
     outward = sum(1 for s in specs if s.direction == SignalDirection.OUTWARD)
-    print(f"\nHarvest plan: {len(specs)} patterns")
-    print(f"  INWARD:  {inward}")
-    print(f"  OUTWARD: {outward}")
+    print(f"\nHarvest plan: {len(specs)} INWARD/OUTWARD patterns + {len(nd_specs)} NOT_DEFINITE search terms")
+    print(f"  INWARD:       {inward}")
+    print(f"  OUTWARD:      {outward}")
+    print(f"  NOT_DEFINITE: {len(nd_specs)}")
+    total_searches = len(specs) + len(nd_specs)
     print(
-        f"  Estimated API calls: {len(specs)} search + up to {len(specs) * args.max_files} content fetches"
+        f"  Estimated API calls: {total_searches} search + up to {total_searches * args.max_files} content fetches"
     )
     by_lang: dict[str, int] = {}
     for s in specs:
+        by_lang[s.language.value] = by_lang.get(s.language.value, 0) + 1
+    for s in nd_specs:
         by_lang[s.language.value] = by_lang.get(s.language.value, 0) + 1
     for lang, count in sorted(by_lang.items()):
         print(f"    {lang}: {count} patterns")
@@ -493,6 +642,19 @@ def main() -> None:
     # Append when resuming (preserve prior results); overwrite on a fresh run.
     raw_fp = raw_path.open("a" if args.resume else "w", encoding="utf-8")
 
+    pending_nd = [s for s in nd_specs if _not_definite_spec_key(s) not in completed]
+
+    # Pre-compute integration patterns once for NOT_DEFINITE scanning.
+    nd_integration_patterns = (
+        {
+            lang: get_patterns_for_language(lang, list(LANGUAGE_MODULES[lang].FRAMEWORK_PATTERNS.keys()))
+            for lang in {s.language for s in pending_nd}
+            if lang in LANGUAGE_MODULES
+        }
+        if pending_nd
+        else {}
+    )
+
     try:
         for i, spec in enumerate(pending, 1):
             print(
@@ -505,6 +667,23 @@ def main() -> None:
             raw_fp.flush()
             run_examples.extend(examples)
             completed.add(_spec_key(spec))
+            _save_checkpoint(checkpoint_path, completed)
+            print(f"       → {len(examples)} examples")
+
+        for i, nd_spec in enumerate(pending_nd, 1):
+            print(
+                f"[nd {i}/{len(pending_nd)}] {nd_spec.language.value} NOT_DEFINITE"
+                f" — {nd_spec.search_term!r}"
+            )
+            lang_patterns = nd_integration_patterns.get(nd_spec.language, {})
+            examples = _harvest_not_definite_spec(
+                nd_spec, client, args.max_files, args.context_lines, seen_dedup, lang_patterns
+            )
+            for ex in examples:
+                raw_fp.write(json.dumps(ex.to_dict(), ensure_ascii=False) + "\n")
+            raw_fp.flush()
+            run_examples.extend(examples)
+            completed.add(_not_definite_spec_key(nd_spec))
             _save_checkpoint(checkpoint_path, completed)
             print(f"       → {len(examples)} examples")
     finally:
