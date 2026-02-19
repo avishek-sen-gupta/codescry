@@ -1,0 +1,175 @@
+// Soufflé schema for the rich Tree-sitter Datalog ontology.
+//
+// Load with:
+//   souffle -F <facts_dir> -D <output_dir> scripts/analysis.dl
+//
+// Base relations mirror RichDatalogFactSet exactly.
+// Derived relations provide higher-level query vocabulary.
+
+// ---------------------------------------------------------------------------
+// Base relations — raw structure
+// ---------------------------------------------------------------------------
+
+.decl node(id: number, node_type: symbol)
+.input node(filename="node.facts")
+
+.decl token(id: number, text: symbol)
+.input token(filename="token.facts")
+
+.decl position(id: number, start_row: number, start_col: number, end_row: number, end_col: number)
+.input position(filename="position.facts")
+
+.decl parent(child_id: number, parent_id: number)
+.input parent(filename="parent.facts")
+
+// ---------------------------------------------------------------------------
+// Base relations — semantic structure (named nodes only)
+// Note: "contains" is a reserved Soufflé built-in, so this relation is
+// named sem_contains (facts file is still contains.facts).
+// ---------------------------------------------------------------------------
+
+.decl sem_contains(parent_id: number, child_id: number)
+.input sem_contains(filename="contains.facts")
+
+.decl field(parent_id: number, field_name: symbol, child_id: number)
+.input field(filename="field.facts")
+
+// ---------------------------------------------------------------------------
+// Base relations — identity
+// ---------------------------------------------------------------------------
+
+.decl name(node_id: number, text: symbol)
+.input name(filename="name.facts")
+
+.decl declared_type(node_id: number, type_text: symbol)
+.input declared_type(filename="declared_type.facts")
+
+// ---------------------------------------------------------------------------
+// Base relations — scoping
+// ---------------------------------------------------------------------------
+
+.decl scope(scope_id: number, kind: symbol)
+.input scope(filename="scope.facts")
+
+.decl scope_parent(inner_id: number, outer_id: number)
+.input scope_parent(filename="scope_parent.facts")
+
+.decl declares(scope_id: number, decl_id: number)
+.input declares(filename="declares.facts")
+
+// ---------------------------------------------------------------------------
+// Base relations — use-def
+// ---------------------------------------------------------------------------
+
+.decl declaration(node_id: number)
+.input declaration(filename="declaration.facts")
+
+.decl reference(node_id: number)
+.input reference(filename="reference.facts")
+
+.decl refers_to(ref_id: number, decl_id: number)
+.input refers_to(filename="refers_to.facts")
+
+// ---------------------------------------------------------------------------
+// Base relations — higher-level
+// receiver_id = -1 means no explicit receiver (bare method call)
+// ---------------------------------------------------------------------------
+
+.decl call(site_id: number, receiver_id: number, method_name: symbol)
+.input call(filename="call.facts")
+
+.decl instantiation(site_id: number, type_name: symbol)
+.input instantiation(filename="instantiation.facts")
+
+// ---------------------------------------------------------------------------
+// Derived: transitive structural containment
+// ancestor(X, Y)  ←  X is a (possibly indirect) child of Y in the raw tree
+// ---------------------------------------------------------------------------
+
+.decl ancestor(x: number, y: number)
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+.output ancestor(filename="ancestor.csv")
+
+// ---------------------------------------------------------------------------
+// Derived: calls on a named receiver
+// call_on("repo", "findById", site_id)
+// ---------------------------------------------------------------------------
+
+.decl call_on(receiver_name: symbol, method_name: symbol, site_id: number)
+call_on(RName, MName, Site) :-
+    call(Site, Recv, MName),
+    Recv != -1,
+    name(Recv, RName).
+.output call_on(filename="call_on.csv")
+
+// ---------------------------------------------------------------------------
+// Derived: transitive scope chain
+// scope_chain(I, O)  ←  O is a (possibly indirect) enclosing scope of I
+// ---------------------------------------------------------------------------
+
+.decl scope_chain(inner: number, outer: number)
+scope_chain(I, O) :- scope_parent(I, O).
+scope_chain(I, O) :- scope_parent(I, M), scope_chain(M, O).
+.output scope_chain(filename="scope_chain.csv")
+
+// ---------------------------------------------------------------------------
+// Derived: declarations visible from a scope (own + all enclosing scopes)
+// ---------------------------------------------------------------------------
+
+.decl visible_from(scope_id: number, decl_id: number)
+visible_from(S, D) :- declares(S, D).
+visible_from(S, D) :- scope_chain(S, P), declares(P, D).
+.output visible_from(filename="visible_from.csv")
+
+// ---------------------------------------------------------------------------
+// Derived: call sites within a lexical scope (direct or nested)
+// ---------------------------------------------------------------------------
+
+.decl call_in_scope(scope_id: number, site_id: number, method_name: symbol)
+call_in_scope(Scope, Site, MName) :-
+    call(Site, _, MName),
+    ancestor(Site, Scope),
+    scope(Scope, _).
+.output call_in_scope(filename="call_in_scope.csv")
+
+// ---------------------------------------------------------------------------
+// Derived: method declarations (node_type = "method_declaration")
+// ---------------------------------------------------------------------------
+
+.decl method_decl(node_id: number, method_name: symbol)
+method_decl(N, MName) :-
+    node(N, "method_declaration"),
+    field(N, "name", NameNode),
+    name(NameNode, MName).
+.output method_decl(filename="method_decl.csv")
+
+// ---------------------------------------------------------------------------
+// Derived: typed declarations — pairs (decl_node, name_text, type_text)
+//
+// Two structural patterns are needed:
+//   Pattern A (one-hop): the same parent node holds both the "name" field and
+//     the declared_type — covers method_declaration, formal_parameter.
+//   Pattern B (two-hop): the declaration name is nested one level deeper, e.g.
+//     field_declaration → variable_declarator → identifier("repo").
+//     The container (field_declaration) owns the declared_type.
+// ---------------------------------------------------------------------------
+
+.decl typed_decl(decl_id: number, var_name: symbol, type_text: symbol)
+
+// Pattern A: same node owns "name" field and declared_type
+typed_decl(D, VName, TText) :-
+    declaration(D),
+    name(D, VName),
+    field(Parent, "name", D),
+    declared_type(Parent, TText).
+
+// Pattern B: D is the "name" child of DeclNode; DeclNode's parent has the type
+typed_decl(D, VName, TText) :-
+    declaration(D),
+    name(D, VName),
+    field(DeclNode, "name", D),
+    parent(DeclNode, Container),
+    declared_type(Container, TText).
+
+.output typed_decl(filename="typed_decl.csv")

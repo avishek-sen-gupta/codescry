@@ -31,3 +31,5 @@ fileignoreconfig:
   checksum: ad344a2475bda969f805702778b1e64335900b2986da14b79f8454f556260c29
 - filename: data/github_harvest/test.jsonl
   checksum: b8c4d980d7012555f8178fa2fd4d2194a7f29c6c60d00da3263c71d72f98e04a
+- filename: scripts/treesitter_to_datalog.py
+  checksum: e84af923796a2de90e8c59a37d6875fbb5da863a2375e9941e3f0b95293cae6d

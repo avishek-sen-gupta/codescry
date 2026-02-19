@@ -21,6 +21,7 @@ Codescry is a Python library for analysing technology stacks and code structure 
 - **GitHub training-data harvester**: `scripts/harvest_github.py` mines real code from GitHub code search using the pattern registry itself as queries. Each HIGH-confidence, non-AMBIGUOUS pattern becomes a search query; the pattern's `SignalDirection` annotation provides the label (INWARD → `DEFINITE_INWARD`, OUTWARD → `DEFINITE_OUTWARD`) with no LLM required. Pass `--not-definite` to additionally harvest `NOT_DEFINITE` examples: non-integration search terms (e.g. `"implements Serializable"`) are used to find files that coincidentally match integration patterns, providing false-positive cases the model must learn to reject. Harvested examples are validated and exported with the same stratified train/val/test split as the synthetic generator. Supports `--resume` (checkpoint-based), `--languages`, `--integration-types`, and `--dry-run`.
 - **Ollama-based signal concretisation**: A parallel concretisation pipeline (`scripts/survey_repo_ollama.py`) that passes each unique file with detected signals to a local Ollama model, asking it to classify each signal as `DEFINITE_INWARD`, `DEFINITE_OUTWARD`, or `NOT_DEFINITE` with a confidence score and reason. Runs the same pre-concretisation stages as the ML pipeline; the Ollama step is implemented in `src/repo_surveyor/integration_concretiser/ollama_concretiser.py`. Supports `--model` (default: `qwen2.5-coder:7b-instruct`) and `--ollama-url` (default: `http://localhost:11434`).
 - **Neo4j persistence**: Persists all analysis results to a graph database
+- **Datalog emission**: `scripts/treesitter_to_datalog.py` walks a tree-sitter parse tree and emits a rich 16-relation Datalog ontology covering raw structure (`node`, `token`, `position`, `parent`), semantic structure (`sem_contains`, `field`), identity (`name`, `declared_type`), scoping (`scope`, `scope_parent`, `declares`), use-def (`declaration`, `reference`, `refers_to`), and higher-level facts (`call`, `instantiation`). `scripts/analysis.dl` provides the companion Soufflé schema plus derived rules — `ancestor` (transitive containment), `call_on` (calls on a named receiver), `scope_chain` (transitive scope enclosure), `visible_from` (declarations visible from a scope), `call_in_scope` (call sites within a lexical scope), `method_decl`, and `typed_decl`. Run with `souffle -F <facts_dir> -D <output_dir> scripts/analysis.dl` after exporting facts via `RichDatalogFactSet.to_souffle_facts(output_dir)`.
 
 ## Supported Languages
 
@@ -112,6 +113,7 @@ See the [API Reference](docs/api-reference.md) for detailed usage of each subsys
 - [Universal CTags](https://github.com/universal-ctags/ctags) for code symbol extraction
 - [Neo4j](https://neo4j.com/) (optional) for graph persistence
 - [Graphviz](https://graphviz.org/) (optional) for DOT diagram export — provides the `dot` CLI used by `scripts/generate_diagrams.py`
+- [Soufflé](https://souffle-lang.github.io/) (optional) for Datalog analysis — provides the `souffle` CLI used by `scripts/analysis.dl` and `scripts/treesitter_to_datalog.py`
 
 ## Visual Examples
 
