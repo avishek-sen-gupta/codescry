@@ -134,6 +134,48 @@ call_in_scope(Scope, Site, MName) :-
 .output call_in_scope(filename="call_in_scope.csv")
 
 // ---------------------------------------------------------------------------
+// Derived: method chain root resolution
+//
+// For a chain like x.alpha().beta().gamma():
+//   call(site_gamma, site_beta,  "gamma")
+//   call(site_beta,  site_alpha, "beta")
+//   call(site_alpha, x_id,       "alpha")
+//
+// chain_root(site_gamma, x_id) resolves the ultimate named base object.
+//
+// is_call_site marks nodes that appear as a call site so the base-case
+// check avoids negating a recursive relation (keeps stratification clean).
+// ---------------------------------------------------------------------------
+
+.decl is_call_site(id: number)
+is_call_site(Site) :- call(Site, _, _).
+
+// Base case: receiver is a named object, not itself a call site.
+.decl chain_root(site_id: number, base_id: number)
+chain_root(Site, Recv) :-
+    call(Site, Recv, _),
+    Recv != -1,
+    !is_call_site(Recv).
+
+// Recursive case: receiver is itself a call site — follow its chain root.
+chain_root(Site, Base) :-
+    call(Site, Recv, _),
+    Recv != -1,
+    chain_root(Recv, Base).
+
+.output chain_root(filename="chain_root.csv")
+
+// chained_call(root_name, method_name): method_name is called somewhere
+// in a chain whose ultimate base object is named root_name.
+.decl chained_call(root_name: symbol, method_name: symbol)
+chained_call(RootName, MName) :-
+    call(Site, _, MName),
+    chain_root(Site, Root),
+    name(Root, RootName).
+
+.output chained_call(filename="chained_call.csv")
+
+// ---------------------------------------------------------------------------
 // Derived: method declarations (node_type = "method_declaration")
 // ---------------------------------------------------------------------------
 

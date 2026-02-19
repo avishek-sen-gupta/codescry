@@ -65,6 +65,17 @@ public class Factory {
 }
 """
 
+# A class with an explicit three-deep method chain on 'x' and a separate
+# single call on 'y', so chain-root resolution can be tested precisely.
+_CHAIN_JAVA = b"""\
+public class ChainExample {
+    public void run() {
+        x.alpha().beta().gamma();
+        y.single();
+    }
+}
+"""
+
 requires_souffle = pytest.mark.skipif(
     shutil.which("souffle") is None,
     reason="souffle binary not in PATH",
@@ -80,6 +91,17 @@ def service_facts(tmp_path: Path):
     parser = get_parser("java")
     tree = parser.parse(_SERVICE_JAVA)
     facts = emit_datalog(tree.root_node, _SERVICE_JAVA)
+    facts_dir = tmp_path / "facts"
+    facts_dir.mkdir()
+    facts.to_souffle_facts(facts_dir)
+    return facts, facts_dir
+
+
+@pytest.fixture()
+def chain_facts(tmp_path: Path):
+    parser = get_parser("java")
+    tree = parser.parse(_CHAIN_JAVA)
+    facts = emit_datalog(tree.root_node, _CHAIN_JAVA)
     facts_dir = tmp_path / "facts"
     facts_dir.mkdir()
     facts.to_souffle_facts(facts_dir)
@@ -298,3 +320,55 @@ class TestComplexSouffleQueries:
         assert method_scope_ids & call_scope_ids, (
             "no call_in_scope entry shares a scope_id with any method_decl"
         )
+
+
+# ---------------------------------------------------------------------------
+# 4. Method chain queries
+# Source: x.alpha().beta().gamma()  and  y.single()
+# ---------------------------------------------------------------------------
+
+
+class TestMethodChainQueries:
+    @requires_souffle
+    def test_chain_resolves_direct_call_to_base_object(self, chain_facts, tmp_path):
+        # x.alpha() — alpha is called directly on x, so chain_root resolves to x
+        _, facts_dir = chain_facts
+        results = _souffle_out(facts_dir, tmp_path)
+        chained = {(r[0], r[1]) for r in results.get("chained_call", [])}
+        assert ("x", "alpha") in chained
+
+    @requires_souffle
+    def test_chain_resolves_mid_chain_call_to_base_object(self, chain_facts, tmp_path):
+        # x.alpha().beta() — beta's receiver is a method_invocation, not x directly
+        _, facts_dir = chain_facts
+        results = _souffle_out(facts_dir, tmp_path)
+        chained = {(r[0], r[1]) for r in results.get("chained_call", [])}
+        assert ("x", "beta") in chained
+
+    @requires_souffle
+    def test_chain_resolves_deep_call_to_base_object(self, chain_facts, tmp_path):
+        # x.alpha().beta().gamma() — gamma is two hops away from x
+        _, facts_dir = chain_facts
+        results = _souffle_out(facts_dir, tmp_path)
+        chained = {(r[0], r[1]) for r in results.get("chained_call", [])}
+        assert ("x", "gamma") in chained
+
+    @requires_souffle
+    def test_chain_does_not_mix_receivers(self, chain_facts, tmp_path):
+        # y.single() must not appear under root 'x', and vice versa
+        _, facts_dir = chain_facts
+        results = _souffle_out(facts_dir, tmp_path)
+        chained = {(r[0], r[1]) for r in results.get("chained_call", [])}
+        assert ("y", "single") in chained
+        assert ("x", "single") not in chained
+        assert ("y", "alpha") not in chained
+        assert ("y", "beta") not in chained
+        assert ("y", "gamma") not in chained
+
+    @requires_souffle
+    def test_all_x_chain_calls_found(self, chain_facts, tmp_path):
+        # Exactly alpha, beta, gamma are chained on x — nothing more, nothing less
+        _, facts_dir = chain_facts
+        results = _souffle_out(facts_dir, tmp_path)
+        x_methods = {r[1] for r in results.get("chained_call", []) if r[0] == "x"}
+        assert x_methods == {"alpha", "beta", "gamma"}
