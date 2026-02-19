@@ -1,9 +1,13 @@
-"""Harvest real code examples from GitHub to augment classifier training data.
+"""Harvest real code examples from GitHub as a held-out evaluation corpus.
 
 Uses the pattern registry as the source of search queries: each HIGH-confidence,
 non-AMBIGUOUS pattern becomes a GitHub code-search query.  The pattern's
 SignalDirection provides the label directly (INWARD → DEFINITE_INWARD,
 OUTWARD → DEFINITE_OUTWARD), so no LLM call is required.
+
+All harvested examples are written to a single real_test.jsonl — an independent
+evaluation set for models trained on synthetic data.  Mixing real and synthetic
+data in the same split would corrupt that signal, so no train/val split is done.
 
 Usage:
     poetry run python scripts/harvest_github.py --token $GITHUB_TOKEN
@@ -38,7 +42,6 @@ from repo_surveyor.integration_patterns.types import (
     Language,
     SignalDirection,
 )
-from repo_surveyor.training.exporter import export_training_data
 from repo_surveyor.training.types import TrainingExample, TrainingLabel
 from repo_surveyor.training.validator import validate_batch
 
@@ -382,12 +385,6 @@ def _parse_args() -> argparse.Namespace:
         help=f"Directory to write output (default: {_DEFAULT_OUTPUT_DIR}).",
     )
     parser.add_argument(
-        "--seed",
-        type=int,
-        default=42,
-        help="Random seed for train/val/test split (default: 42).",
-    )
-    parser.add_argument(
         "--resume",
         action="store_true",
         help="Skip specs already in the checkpoint file.",
@@ -518,17 +515,19 @@ def main() -> None:
     if validation.invalid > 0:
         print(f"  {validation.invalid} examples failed validation (discarded)")
 
-    export_result = export_training_data(
-        examples=list(validation.valid_examples),
-        output_dir=args.output_dir,
-        seed=args.seed,
-    )
+    real_test_path = args.output_dir / "real_test.jsonl"
+    valid_examples = list(validation.valid_examples)
+    with real_test_path.open("w", encoding="utf-8") as f:
+        for ex in valid_examples:
+            f.write(json.dumps(ex.to_dict(), ensure_ascii=False) + "\n")
 
-    print(f"\nExported to {export_result.output_dir}:")
-    print(f"  Total: {export_result.total_examples}")
-    print(f"  Train: {export_result.train_count}")
-    print(f"  Val:   {export_result.val_count}")
-    print(f"  Test:  {export_result.test_count}")
+    by_label: dict[str, int] = {}
+    for ex in valid_examples:
+        by_label[ex.label] = by_label.get(ex.label, 0) + 1
+
+    print(f"\nWrote {len(valid_examples)} examples to {real_test_path}")
+    for label, count in sorted(by_label.items()):
+        print(f"  {label}: {count}")
 
 
 if __name__ == "__main__":
