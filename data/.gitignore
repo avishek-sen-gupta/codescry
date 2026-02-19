@@ -1,0 +1,3 @@
+# Ignore all survey output directories; only data/training/ is tracked.
+*/
+!training/
