@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from repo_surveyor.integration_patterns.types import IntegrationType, Language
 from repo_surveyor.training.coverage import build_coverage_matrix
 from repo_surveyor.training.exporter import export_training_data
-from repo_surveyor.training.generator import generate_all
+from repo_surveyor.training.generator import generate_all, generate_all_batch
 from repo_surveyor.training.types import TrainingLabel
 from repo_surveyor.training.validator import validate_batch
 
@@ -108,6 +108,16 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Random seed for train/val/test split (default: 42).",
     )
     parser.add_argument(
+        "--batch",
+        action="store_true",
+        help="Use the Anthropic Batches API (async, 50%% cost savings).",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Resume from checkpoint file, skipping already-completed triples.",
+    )
+    parser.add_argument(
         "--verbose",
         "-v",
         action="store_true",
@@ -154,7 +164,13 @@ def main() -> None:
     print(f"\nCoverage report written to {coverage_path}")
 
     if args.dry_run:
-        print("\nDry run — skipping generation.")
+        if args.batch:
+            print(
+                "\nDry run (batch mode) — would submit 1 batch with "
+                f"{matrix.total_triples} requests."
+            )
+        else:
+            print("\nDry run — skipping generation.")
         return
 
     # Step 2: Generate examples
@@ -162,11 +178,24 @@ def main() -> None:
 
     model = ClaudeClassifierModel(model=args.model, api_key=args.api_key)
 
-    results = generate_all(
-        model=model,
-        entries=list(matrix.entries),
-        examples_per_triple=args.examples_per_triple,
-    )
+    if args.batch:
+        batch_checkpoint_path = args.output_dir / "batch_checkpoint.json"
+        results = generate_all_batch(
+            model=model,
+            entries=list(matrix.entries),
+            examples_per_triple=args.examples_per_triple,
+            batch_checkpoint_path=batch_checkpoint_path,
+            resume=args.resume,
+        )
+    else:
+        checkpoint_path = args.output_dir / "checkpoint.jsonl"
+        results = generate_all(
+            model=model,
+            entries=list(matrix.entries),
+            examples_per_triple=args.examples_per_triple,
+            checkpoint_path=checkpoint_path,
+            resume=args.resume,
+        )
 
     all_examples = [ex for r in results for ex in r.examples]
     total_prompt_tokens = sum(r.prompt_tokens for r in results)

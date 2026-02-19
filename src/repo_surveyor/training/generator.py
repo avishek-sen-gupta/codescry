@@ -5,14 +5,21 @@ prompting Claude with a target (language, integration_type, label)
 triple and representative patterns from the existing pattern registry.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ..ml_classifier.types import CompletionResult
 from ..ml_classifier.model_protocol import LLMModel
 from .types import TrainingExample, TrainingLabel
 from .coverage import CoverageEntry
+
+if TYPE_CHECKING:
+    from ..ml_classifier.claude_model import ClaudeClassifierModel
 
 logger = logging.getLogger(__name__)
 
@@ -247,27 +254,105 @@ def generate_examples_for_triple(
     )
 
 
+def _triple_key(language: str, integration_type: str, label: str) -> str:
+    """Build a unique key for a (language, integration_type, label) triple."""
+    return f"{language}__{integration_type}__{label}"
+
+
+def _load_checkpoint(checkpoint_path: Path) -> list[GenerationResult]:
+    """Load previously completed results from a checkpoint JSONL file."""
+    if not checkpoint_path.exists():
+        return []
+
+    results: list[GenerationResult] = []
+    with checkpoint_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            raw = json.loads(line)
+            examples = tuple(TrainingExample(**ex) for ex in raw["examples"])
+            results.append(
+                GenerationResult(
+                    language=raw["language"],
+                    integration_type=raw["integration_type"],
+                    label=raw["label"],
+                    examples=examples,
+                    prompt_tokens=raw["prompt_tokens"],
+                    completion_tokens=raw["completion_tokens"],
+                )
+            )
+
+    logger.info("Loaded %d completed triples from checkpoint", len(results))
+    return results
+
+
+def _append_checkpoint(checkpoint_path: Path, result: GenerationResult) -> None:
+    """Append a single GenerationResult to the checkpoint file."""
+    record = {
+        "language": result.language,
+        "integration_type": result.integration_type,
+        "label": result.label,
+        "examples": [ex.to_dict() for ex in result.examples],
+        "prompt_tokens": result.prompt_tokens,
+        "completion_tokens": result.completion_tokens,
+    }
+    with checkpoint_path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
 def generate_all(
     model: LLMModel,
     entries: list[CoverageEntry],
     examples_per_triple: int = _Defaults.EXAMPLES_PER_TRIPLE,
+    checkpoint_path: Path = Path(""),
+    resume: bool = False,
 ) -> list[GenerationResult]:
     """Generate training examples for all coverage entries and all labels.
+
+    Results are always checkpointed incrementally to ``checkpoint_path``
+    (when non-empty) so that interrupted runs can be resumed.
 
     Args:
         model: The LLM model to use for generation.
         entries: Coverage entries defining valid (language, type) pairs.
         examples_per_triple: Number of examples per (language, type, label) triple.
+        checkpoint_path: Path to checkpoint JSONL file.
+            New results are appended after each triple completes.
+        resume: When True, load completed triples from checkpoint and skip them.
+            When False, start fresh (truncating any existing checkpoint).
 
     Returns:
         List of GenerationResult, one per triple.
     """
-    results: list[GenerationResult] = []
+    has_checkpoint = str(checkpoint_path) != ""
+    completed_results: list[GenerationResult] = []
+
+    if has_checkpoint and resume:
+        completed_results = _load_checkpoint(checkpoint_path)
+    elif has_checkpoint:
+        checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+        checkpoint_path.write_text("")
+
+    completed_keys = {
+        _triple_key(r.language, r.integration_type, r.label) for r in completed_results
+    }
+
+    results: list[GenerationResult] = list(completed_results)
     total = len(entries) * len(TrainingLabel)
+    skipped = 0
 
     for i, entry in enumerate(entries):
         for label in TrainingLabel:
             triple_index = i * len(TrainingLabel) + list(TrainingLabel).index(label) + 1
+            key = _triple_key(
+                entry.language.value, entry.integration_type.value, label.value
+            )
+
+            if key in completed_keys:
+                skipped += 1
+                logger.debug(
+                    "Skipping completed triple %d/%d: %s", triple_index, total, key
+                )
+                continue
+
             logger.info("Triple %d/%d", triple_index, total)
 
             result = generate_examples_for_triple(
@@ -277,5 +362,169 @@ def generate_all(
                 count=examples_per_triple,
             )
             results.append(result)
+
+            if has_checkpoint:
+                _append_checkpoint(checkpoint_path, result)
+
+    if skipped > 0:
+        logger.info(
+            "Skipped %d already-completed triples, generated %d new",
+            skipped,
+            len(results) - len(completed_results),
+        )
+
+    return results
+
+
+def _build_batch_requests(
+    entries: list[CoverageEntry],
+    examples_per_triple: int,
+) -> list[tuple[str, str, str]]:
+    """Build all (custom_id, system_prompt, user_prompt) tuples for a batch.
+
+    Returns:
+        List of (custom_id, system_prompt, user_prompt) tuples.
+    """
+    return [
+        (
+            _triple_key(
+                entry.language.value, entry.integration_type.value, label.value
+            ),
+            _SYSTEM_PROMPT,
+            _build_user_prompt(
+                language=entry.language.value,
+                integration_type=entry.integration_type.value,
+                label=label,
+                patterns=entry.sample_patterns,
+                count=examples_per_triple,
+            ),
+        )
+        for entry in entries
+        for label in TrainingLabel
+    ]
+
+
+def _save_batch_checkpoint(checkpoint_path: Path, batch_id: str) -> None:
+    """Save batch ID to a checkpoint file for resume support."""
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpoint_path.write_text(
+        json.dumps({"batch_id": batch_id}, ensure_ascii=False), encoding="utf-8"
+    )
+    logger.info("Saved batch checkpoint: %s -> %s", batch_id, checkpoint_path)
+
+
+def _load_batch_checkpoint(checkpoint_path: Path) -> str:
+    """Load batch ID from a checkpoint file.
+
+    Returns:
+        The batch ID, or empty string if no checkpoint exists.
+    """
+    if not checkpoint_path.exists():
+        return ""
+    raw = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+    batch_id = raw.get("batch_id", "")
+    if batch_id:
+        logger.info("Loaded batch checkpoint: %s from %s", batch_id, checkpoint_path)
+    return batch_id
+
+
+def _parse_batch_results(
+    batch_results: dict,
+    entries: list[CoverageEntry],
+) -> list[GenerationResult]:
+    """Parse batch API results into GenerationResult objects.
+
+    Args:
+        batch_results: Dict mapping custom_id to BatchResult.
+        entries: Coverage entries used to generate the batch.
+
+    Returns:
+        List of GenerationResult, one per successful triple.
+    """
+    results: list[GenerationResult] = []
+
+    for entry in entries:
+        for label in TrainingLabel:
+            key = _triple_key(
+                entry.language.value, entry.integration_type.value, label.value
+            )
+            batch_result = batch_results.get(key)
+
+            if batch_result is None:
+                logger.warning("Missing batch result for %s", key)
+                continue
+
+            if not batch_result.succeeded:
+                logger.warning("Batch request failed for %s", key)
+                continue
+
+            examples = _parse_generated_examples(
+                batch_result.completion.text,
+                entry.language.value,
+                entry.integration_type.value,
+                label.value,
+            )
+
+            results.append(
+                GenerationResult(
+                    language=entry.language.value,
+                    integration_type=entry.integration_type.value,
+                    label=label.value,
+                    examples=tuple(examples),
+                    prompt_tokens=batch_result.completion.prompt_tokens,
+                    completion_tokens=batch_result.completion.completion_tokens,
+                )
+            )
+
+    return results
+
+
+def generate_all_batch(
+    model: ClaudeClassifierModel,
+    entries: list[CoverageEntry],
+    examples_per_triple: int = _Defaults.EXAMPLES_PER_TRIPLE,
+    batch_checkpoint_path: Path = Path(""),
+    resume: bool = False,
+) -> list[GenerationResult]:
+    """Generate training examples for all triples using the Batches API.
+
+    Submits all requests as a single batch for asynchronous processing
+    at 50% cost savings. Polls for completion, then parses results.
+
+    Args:
+        model: ClaudeClassifierModel with batch API access.
+        entries: Coverage entries defining valid (language, type) pairs.
+        examples_per_triple: Number of examples per triple.
+        batch_checkpoint_path: Path to save/load batch ID for resume.
+        resume: When True, attempt to resume from a saved batch ID.
+
+    Returns:
+        List of GenerationResult, one per triple.
+    """
+    has_checkpoint = batch_checkpoint_path != Path("")
+    batch_id = ""
+
+    if has_checkpoint and resume:
+        batch_id = _load_batch_checkpoint(batch_checkpoint_path)
+
+    if not batch_id:
+        requests = _build_batch_requests(entries, examples_per_triple)
+        logger.info("Submitting batch with %d requests", len(requests))
+        batch_id = model.create_batch(requests, temperature=_Defaults.TEMPERATURE)
+        if has_checkpoint:
+            _save_batch_checkpoint(batch_checkpoint_path, batch_id)
+
+    logger.info("Polling batch %s for completion...", batch_id)
+    model.poll_batch(batch_id)
+
+    logger.info("Retrieving batch results...")
+    batch_results = model.retrieve_batch_results(batch_id)
+
+    results = _parse_batch_results(batch_results, entries)
+    logger.info(
+        "Batch complete: %d/%d triples succeeded",
+        len(results),
+        len(entries) * len(TrainingLabel),
+    )
 
     return results
