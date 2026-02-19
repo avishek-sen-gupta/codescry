@@ -3,7 +3,7 @@
 import logging
 from itertools import chain
 
-from ..ml_classifier.model_protocol import LineClassifierModel
+from ..ml_classifier.model_protocol import LLMModel
 from .grouper import SignalGroup
 from .prompt import (
     build_batched_system_prompt,
@@ -25,7 +25,7 @@ class _BatchConfig:
 
 def _concretise_group(
     group: SignalGroup,
-    model: LineClassifierModel,
+    model: LLMModel,
     system_prompt: str,
 ) -> tuple[ConcretisedSignal, ...]:
     """Concretise a single signal group via one LLM call."""
@@ -36,7 +36,7 @@ def _concretise_group(
 
 def _concretise_batch(
     groups: list[SignalGroup],
-    model: LineClassifierModel,
+    model: LLMModel,
     system_prompt: str,
 ) -> tuple[ConcretisedSignal, ...]:
     """Concretise a batch of signal groups via one LLM call."""
@@ -56,7 +56,7 @@ def _partition_into_batches(
 
 def concretise_groups(
     groups: list[SignalGroup],
-    model: LineClassifierModel,
+    model: LLMModel,
     batch_size: int = _BatchConfig.DEFAULT_BATCH_SIZE,
 ) -> ConcretisationResult:
     """Concretise all signal groups via LLM calls.
@@ -66,7 +66,7 @@ def concretise_groups(
 
     Args:
         groups: Signal groups to concretise.
-        model: LLM model implementing the LineClassifierModel protocol.
+        model: LLM model implementing the LLMModel protocol.
         batch_size: Number of groups per LLM call. Defaults to 10.
 
     Returns:

@@ -7,14 +7,14 @@ from .types import (
     MLIntegrationType,
     RepositoryClassification,
 )
-from .model_protocol import LineClassifierModel
+from .model_protocol import LLMModel
 from .classifier import classify_file, classify_repository
 
 __all__ = [
     "ClassifiedLine",
     "CompletionResult",
     "FileClassification",
-    "LineClassifierModel",
+    "LLMModel",
     "MLIntegrationType",
     "RepositoryClassification",
     "classify_file",

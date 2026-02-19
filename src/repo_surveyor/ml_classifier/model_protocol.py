@@ -5,8 +5,8 @@ from typing import Protocol
 from .types import CompletionResult
 
 
-class LineClassifierModel(Protocol):
-    """Protocol for models that classify code lines.
+class LLMModel(Protocol):
+    """Protocol for LLM-backed models.
 
     Implementations must provide a classify method that accepts
     system and user prompts and returns a CompletionResult.

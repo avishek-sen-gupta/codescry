@@ -1,4 +1,4 @@
-"""Concrete LineClassifierModel implementation using Qwen2.5-Coder via Ollama."""
+"""Concrete LLMModel implementation using Qwen2.5-Coder via Ollama."""
 
 from .types import CompletionResult
 

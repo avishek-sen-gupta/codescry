@@ -5,7 +5,7 @@ from typing import Iterator
 
 from ..integration_detector import _get_source_files, get_language_from_extension
 from ..integration_patterns import Language
-from .model_protocol import LineClassifierModel
+from .model_protocol import LLMModel
 from .prefilter import prefilter_lines
 from .prompt import SYSTEM_PROMPT, build_user_prompt, chunk_lines
 from .response_parser import parse_classification_response
@@ -14,13 +14,13 @@ from .types import ClassifiedLine, FileClassification, RepositoryClassification
 
 def classify_file(
     file_path: Path,
-    model: LineClassifierModel,
+    model: LLMModel,
 ) -> FileClassification | None:
     """Classify all lines in a single source file.
 
     Args:
         file_path: Path to the source file.
-        model: A LineClassifierModel implementation.
+        model: An LLMModel implementation.
 
     Returns:
         FileClassification result, or None if the file cannot be read.
@@ -65,14 +65,14 @@ def classify_file(
 
 def classify_repository(
     repo_path: str | Path,
-    model: LineClassifierModel,
+    model: LLMModel,
     languages: list[Language] = [],
 ) -> RepositoryClassification:
     """Classify all source files in a repository.
 
     Args:
         repo_path: Path to the repository.
-        model: A LineClassifierModel implementation.
+        model: An LLMModel implementation.
         languages: List of languages to filter by. Empty means all.
 
     Returns:

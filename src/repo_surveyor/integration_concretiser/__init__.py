@@ -8,7 +8,7 @@ import logging
 from collections.abc import Callable
 
 from ..integration_detector import EntityType, IntegrationDetectorResult
-from ..ml_classifier.model_protocol import LineClassifierModel
+from ..ml_classifier.model_protocol import LLMModel
 from .concretiser import concretise_groups
 from .grouper import _read_file_bytes, group_signals_by_ast_context
 from .types import ConcretisationResult
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def concretise_integration_signals(
     detector_result: IntegrationDetectorResult,
-    model: LineClassifierModel,
+    model: LLMModel,
     file_reader: Callable[[str], bytes] = _read_file_bytes,
     batch_size: int = 10,
 ) -> ConcretisationResult:
@@ -29,7 +29,7 @@ def concretise_integration_signals(
 
     Args:
         detector_result: Raw integration detection result.
-        model: LLM model implementing LineClassifierModel protocol.
+        model: LLM model implementing LLMModel protocol.
         file_reader: Callable to read file bytes. Defaults to reading
             from disk. Inject for testing.
         batch_size: Number of signal groups per LLM call. Defaults to 10.
