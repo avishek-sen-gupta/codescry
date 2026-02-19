@@ -10,9 +10,12 @@ from repo_surveyor.training.signal_classifier import NullSignalClassifier, Signa
 from repo_surveyor.training.types import TrainingLabel
 
 
-def _signal_to_dict(s) -> dict:
+def _signal_to_dict(s, classifier: SignalClassifier) -> dict:
+    proba = classifier.predict_proba(s.original_signal.match.line_content)
+    ml_confidence = round(proba[s.label], 4)
     return {
         "label": s.label.value,
+        "ml_confidence": ml_confidence,
         "integration_type": s.original_signal.integration_type.value,
         "confidence": s.original_signal.confidence.value,
         "line_content": s.original_signal.match.line_content.strip(),
@@ -97,7 +100,7 @@ def main() -> None:
         signals = [s for s in concretisation.concretised if s.label == label]
         path = out / f"{label.value.lower()}.jsonl"
         path.write_text(
-            "\n".join(json.dumps(_signal_to_dict(s)) for s in signals) + "\n",
+            "\n".join(json.dumps(_signal_to_dict(s, classifier)) for s in signals) + "\n",
             encoding="utf-8",
         )
         print(f"  {label.value}: {len(signals):4d} signals → {path}")
