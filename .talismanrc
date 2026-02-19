@@ -23,3 +23,11 @@ fileignoreconfig:
   checksum: 3607043428a653444cb5811816b569191cbfca13a573353f5ac0f9a286c88218
 - filename: data/training/examples.jsonl
   checksum: 56fd3595e0258175f633bd363c43bc20e4839bd4dfb4601bc110d52534d85054
+- filename: data/github_harvest/examples.jsonl
+  checksum: c9e914536b31d2e659ca1a019eeff54fce88ce2f2bfffc1bcefb6bb1f4a3cd03
+- filename: data/github_harvest/train.jsonl
+  checksum: 541f70df7864638ff4f3c2c622f1500e23197e79e5bc8440a83d573a05372e7c
+- filename: data/github_harvest/val.jsonl
+  checksum: f80b99f535cc484bb64da2fef10f3a9d10e5c872977709a8b744124a93cdf785
+- filename: data/github_harvest/test.jsonl
+  checksum: aad0209a7a73d6aae235473511616892eadd7d337e84d227abeadfcd4f0a348e
