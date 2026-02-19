@@ -16,7 +16,7 @@ Codescry is a Python library for analysing technology stacks and code structure 
 - **Symbol resolution**: Resolves each integration signal to its containing code symbol via CTags line ranges, producing per-symbol integration profiles
 - **CFG construction**: Builds control flow graphs from tree-sitter parse trees using a language-independent role schema, supporting all 15 languages (except PL/I) with a single algorithm
 - **Call-flow extraction**: Traces method call trees within a file using [Mojo-LSP](https://github.com/avishek-sen-gupta/mojo-lsp) go-to-definition
-- **Training data generation**: Generates labelled training data for a fine-tuned integration classifier by prompting Claude to produce realistic code snippets per (language, integration_type, label) triple, validated against the existing pattern registry and exported as stratified JSONL splits. Supports a `--batch` mode using the Anthropic Batches API for asynchronous processing at 50% cost savings, with checkpoint/resume support
+- **Training data generation**: Generates labelled training data for a fine-tuned integration classifier by prompting Claude to produce realistic code snippets per (language, integration_type, label) triple, validated against the existing pattern registry and exported as stratified JSONL splits. Supports a `--batch` mode using the Anthropic Batches API for asynchronous processing at 50% cost savings, with checkpoint/resume support and `--batch-status` to check progress of a running batch
 - **Neo4j persistence**: Persists all analysis results to a graph database
 
 ## Supported Languages

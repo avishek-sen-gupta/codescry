@@ -23,7 +23,7 @@ from repo_surveyor.training.coverage import CoverageEntry
 from repo_surveyor.training.types import TrainingExample, TrainingLabel
 from repo_surveyor.integration_patterns.types import IntegrationType, Language
 from repo_surveyor.ml_classifier.types import CompletionResult
-from repo_surveyor.ml_classifier.claude_model import BatchResult
+from repo_surveyor.ml_classifier.claude_model import BatchResult, BatchStatus
 from repo_surveyor.ml_classifier.model_protocol import LLMModel
 
 
@@ -643,3 +643,39 @@ class TestGenerateAllBatch:
 
         assert len(results) == len(TrainingLabel)
         assert model.poll_count == 1
+
+
+class TestBatchStatus:
+    def test_batch_status_fields(self):
+        status = BatchStatus(
+            batch_id="batch_123",
+            processing_status="ended",
+            succeeded=10,
+            errored=2,
+            expired=1,
+            processing=0,
+            canceled=0,
+        )
+        assert status.batch_id == "batch_123"
+        assert status.processing_status == "ended"
+        assert status.succeeded == 10
+        assert status.errored == 2
+        assert status.expired == 1
+        assert status.processing == 0
+        assert status.canceled == 0
+
+    def test_batch_status_is_frozen(self):
+        status = BatchStatus(
+            batch_id="batch_123",
+            processing_status="in_progress",
+            succeeded=0,
+            errored=0,
+            expired=0,
+            processing=5,
+            canceled=0,
+        )
+        try:
+            status.processing_status = "ended"
+            assert False, "Should have raised FrozenInstanceError"
+        except AttributeError:
+            pass

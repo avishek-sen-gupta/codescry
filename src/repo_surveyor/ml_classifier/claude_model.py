@@ -21,6 +21,19 @@ class _Defaults:
 
 
 @dataclass(frozen=True)
+class BatchStatus:
+    """Snapshot of a batch's processing status."""
+
+    batch_id: str
+    processing_status: str
+    succeeded: int
+    errored: int
+    expired: int
+    processing: int
+    canceled: int
+
+
+@dataclass(frozen=True)
 class BatchResult:
     """Result of a single request within a completed batch."""
 
@@ -139,6 +152,26 @@ class ClaudeClassifierModel:
                 delay * _Defaults.BATCH_POLL_BACKOFF_FACTOR,
                 _Defaults.BATCH_POLL_MAX_DELAY_SECONDS,
             )
+
+    def batch_status(self, batch_id: str) -> BatchStatus:
+        """Query the current status of a batch without blocking.
+
+        Args:
+            batch_id: The batch ID to check.
+
+        Returns:
+            BatchStatus with current processing counts.
+        """
+        batch = self._client.messages.batches.retrieve(batch_id)
+        return BatchStatus(
+            batch_id=batch_id,
+            processing_status=batch.processing_status,
+            succeeded=batch.request_counts.succeeded,
+            errored=batch.request_counts.errored,
+            expired=batch.request_counts.expired,
+            processing=batch.request_counts.processing,
+            canceled=batch.request_counts.canceled,
+        )
 
     def retrieve_batch_results(self, batch_id: str) -> dict[str, BatchResult]:
         """Retrieve results from a completed batch.

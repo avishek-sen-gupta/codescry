@@ -21,7 +21,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from repo_surveyor.integration_patterns.types import IntegrationType, Language
 from repo_surveyor.training.coverage import build_coverage_matrix
 from repo_surveyor.training.exporter import export_training_data
-from repo_surveyor.training.generator import generate_all, generate_all_batch
+from repo_surveyor.training.generator import (
+    generate_all,
+    generate_all_batch,
+    _load_batch_checkpoint,
+)
 from repo_surveyor.training.types import TrainingLabel
 from repo_surveyor.training.validator import validate_batch
 
@@ -113,6 +117,11 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Use the Anthropic Batches API (async, 50%% cost savings).",
     )
     parser.add_argument(
+        "--batch-status",
+        action="store_true",
+        help="Check the status of a previously submitted batch and exit.",
+    )
+    parser.add_argument(
         "--resume",
         action="store_true",
         help="Resume from checkpoint file, skipping already-completed triples.",
@@ -126,6 +135,40 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _handle_batch_status(args: argparse.Namespace) -> None:
+    """Check and print the status of a previously submitted batch."""
+    batch_checkpoint_path = args.output_dir / "batch_checkpoint.json"
+    batch_id = _load_batch_checkpoint(batch_checkpoint_path)
+
+    if not batch_id:
+        print(
+            f"No batch checkpoint found at {batch_checkpoint_path}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    from repo_surveyor.ml_classifier.claude_model import ClaudeClassifierModel
+
+    model = ClaudeClassifierModel(model=args.model, api_key=args.api_key)
+    status = model.batch_status(batch_id)
+
+    total = (
+        status.succeeded
+        + status.errored
+        + status.expired
+        + status.processing
+        + status.canceled
+    )
+    print(f"\nBatch: {status.batch_id}")
+    print(f"Status: {status.processing_status}")
+    print(f"  Total requests: {total}")
+    print(f"  Processing:     {status.processing}")
+    print(f"  Succeeded:      {status.succeeded}")
+    print(f"  Errored:        {status.errored}")
+    print(f"  Expired:        {status.expired}")
+    print(f"  Canceled:       {status.canceled}")
+
+
 def main() -> None:
     """Run the training data generation pipeline."""
     args = _build_parser().parse_args()
@@ -134,6 +177,10 @@ def main() -> None:
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
+
+    if args.batch_status:
+        _handle_batch_status(args)
+        return
 
     languages = _parse_languages(args.languages) if args.languages else []
     integration_types = (
