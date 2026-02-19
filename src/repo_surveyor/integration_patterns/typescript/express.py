@@ -1,6 +1,6 @@
 """Express framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Express",
@@ -8,11 +8,11 @@ FRAMEWORK = FrameworkPatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"from ['\"]express['\"]", Confidence.HIGH),
-                (r"\w*\.get\(", Confidence.HIGH),
-                (r"\w*\.post\(", Confidence.HIGH),
-                (r"\w*\.put\(", Confidence.HIGH),
-                (r"\w*\.delete\(", Confidence.HIGH),
+                (r"from ['\"]express['\"]", Confidence.HIGH, SignalDirection.INWARD),
+                (r"\w*\.get\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"\w*\.post\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"\w*\.put\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"\w*\.delete\(", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
     },

@@ -1,6 +1,6 @@
 """jOOQ framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
 
 FRAMEWORK = FrameworkPatternSpec(
     name="jOOQ",
@@ -8,16 +8,16 @@ FRAMEWORK = FrameworkPatternSpec(
     patterns={
         IntegrationType.DATABASE: {
             PatternKey.PATTERNS: [
-                (r"import org\.jooq", Confidence.HIGH),
-                (r"DSLContext", Confidence.HIGH),
-                (r"\.insertInto\(", Confidence.HIGH),
-                (r"\.select\(", Confidence.HIGH),
-                (r"\.selectFrom\(", Confidence.HIGH),
-                (r"\.update\(", Confidence.HIGH),
-                (r"\.deleteFrom\(", Confidence.HIGH),
-                (r"\.fetch\(", Confidence.HIGH),
-                (r"\.fetchOne\(", Confidence.HIGH),
-                (r"\.execute\(", Confidence.MEDIUM),
+                (r"import org\.jooq", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"DSLContext", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"\.insertInto\(", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"\.select\(", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"\.selectFrom\(", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"\.update\(", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"\.deleteFrom\(", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"\.fetch\(", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"\.fetchOne\(", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"\.execute\(", Confidence.MEDIUM, SignalDirection.OUTWARD),
             ],
         },
     },

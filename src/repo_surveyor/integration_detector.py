@@ -16,6 +16,7 @@ from .integration_patterns import (
     Confidence,
     IntegrationType,
     Language,
+    SignalDirection,
     EXTENSION_TO_LANGUAGE,
     get_patterns_for_language,
     get_import_patterns_for_framework,
@@ -79,6 +80,7 @@ class IntegrationSignal:
     matched_pattern: str
     entity_type: EntityType
     source: str
+    direction: SignalDirection = SignalDirection.AMBIGUOUS
 
 
 @dataclass(frozen=True)
@@ -100,6 +102,7 @@ class IntegrationDetectorResult:
                         "matched_pattern": point.matched_pattern,
                         "entity_type": point.entity_type.value,
                         "source": point.source,
+                        "direction": point.direction.value,
                         "match": {
                             "file_path": point.match.file_path,
                             "line_number": point.match.line_number,
@@ -234,7 +237,7 @@ def scan_file_for_integrations(
         if classify_line(range_map, line_num) in _SKIP_ZONES:
             continue
         for integration_type, type_patterns in patterns.items():
-            for pattern, confidence, source in type_patterns:
+            for pattern, confidence, source, direction in type_patterns:
                 if re.search(pattern, line):
                     match = FileMatch(
                         file_path=str(file_path),
@@ -249,6 +252,7 @@ def scan_file_for_integrations(
                         matched_pattern=pattern,
                         entity_type=EntityType.FILE_CONTENT,
                         source=source,
+                        direction=direction,
                     )
 
 

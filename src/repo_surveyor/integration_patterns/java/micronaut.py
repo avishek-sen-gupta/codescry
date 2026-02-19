@@ -1,28 +1,28 @@
 """Micronaut framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Micronaut",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"import io\.micronaut", Confidence.HIGH),
-                (r"@Client\(", Confidence.HIGH),
+                (r"import io\.micronaut", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"@Client\(", Confidence.HIGH, SignalDirection.OUTWARD),
             ],
         },
         IntegrationType.DATABASE: {
             PatternKey.PATTERNS: [
-                (r"import io\.micronaut\.data", Confidence.HIGH),
-                (r"@MappedEntity", Confidence.HIGH),
-                (r"@MappedProperty", Confidence.HIGH),
-                (r"CrudRepository", Confidence.HIGH),
-                (r"PageableRepository", Confidence.HIGH),
-                (r"JpaRepository", Confidence.HIGH),
-                (r"io\.micronaut\.transaction", Confidence.HIGH),
-                (r"@R2dbcRepository", Confidence.HIGH),
-                (r"@JdbcRepository", Confidence.HIGH),
-                (r"@MongoRepository", Confidence.HIGH),
+                (r"import io\.micronaut\.data", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"@MappedEntity", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"@MappedProperty", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"CrudRepository", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"PageableRepository", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"JpaRepository", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"io\.micronaut\.transaction", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"@R2dbcRepository", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"@JdbcRepository", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"@MongoRepository", Confidence.HIGH, SignalDirection.OUTWARD),
             ],
         },
     },

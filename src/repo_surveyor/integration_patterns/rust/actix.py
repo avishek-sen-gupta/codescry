@@ -1,24 +1,30 @@
 """Actix framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Actix",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"use actix_web::", Confidence.HIGH),
-                (r"#\[get\(", Confidence.HIGH),
-                (r"#\[post\(", Confidence.HIGH),
-                (r"#\[put\(", Confidence.HIGH),
-                (r"#\[delete\(", Confidence.HIGH),
-                (r"#\[patch\(", Confidence.HIGH),
-                (r"HttpResponse", Confidence.HIGH),
-                (r"HttpRequest", Confidence.HIGH),
-                (r"web::Json", Confidence.HIGH),
-                (r"web::Path", Confidence.HIGH),
-                (r"web::Query", Confidence.HIGH),
-                (r"web::Data", Confidence.HIGH),
+                (r"use actix_web::", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"#\[get\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[post\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[put\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[delete\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[patch\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"HttpResponse", Confidence.HIGH, SignalDirection.INWARD),
+                (r"HttpRequest", Confidence.HIGH, SignalDirection.INWARD),
+                (r"web::Json", Confidence.HIGH, SignalDirection.INWARD),
+                (r"web::Path", Confidence.HIGH, SignalDirection.INWARD),
+                (r"web::Query", Confidence.HIGH, SignalDirection.INWARD),
+                (r"web::Data", Confidence.HIGH, SignalDirection.AMBIGUOUS),
             ],
         },
     },

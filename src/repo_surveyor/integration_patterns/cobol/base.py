@@ -1,149 +1,182 @@
 """COBOL base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey
+from ..types import (
+    BasePatternSpec,
+    Confidence,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 BASE = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                # CICS Web Services
-                (r"EXEC\s+CICS\s+WEB\s+", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+INVOKE\s+WEBSERVICE", Confidence.HIGH),
-                (r"DFHWS-", Confidence.HIGH),  # CICS Web Services copybooks
-                (r"WEB\s+SEND", Confidence.HIGH),
-                (r"WEB\s+RECEIVE", Confidence.HIGH),
-                (r"URIMAP", Confidence.MEDIUM),
-                (r"WEBSERVICE", Confidence.MEDIUM),
+                (r"EXEC\s+CICS\s+WEB\s+", Confidence.HIGH, SignalDirection.INWARD),
+                (
+                    r"EXEC\s+CICS\s+INVOKE\s+WEBSERVICE",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (r"DFHWS-", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"WEB\s+SEND", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"WEB\s+RECEIVE", Confidence.HIGH, SignalDirection.INWARD),
+                (r"URIMAP", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"WEBSERVICE", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
             ],
         },
         IntegrationType.SOAP: {
             PatternKey.PATTERNS: [
-                # SOAP/XML processing
-                (r"EXEC\s+CICS\s+TRANSFORM", Confidence.HIGH),
-                (r"XML\s+PARSE", Confidence.HIGH),
-                (r"XML\s+GENERATE", Confidence.HIGH),
-                (r"DFHWS2LS", Confidence.HIGH),  # CICS SOAP converter
-                (r"DFHLS2WS", Confidence.HIGH),  # CICS SOAP converter
-                (r"SOAPACTION", Confidence.HIGH),
-                (r"WSDL", Confidence.MEDIUM),
+                (
+                    r"EXEC\s+CICS\s+TRANSFORM",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
+                (r"XML\s+PARSE", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"XML\s+GENERATE", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"DFHWS2LS", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"DFHLS2WS", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"SOAPACTION", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"WSDL", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
             ],
         },
         IntegrationType.MESSAGING: {
             PatternKey.PATTERNS: [
-                # IBM MQ (MQSeries)
-                (r"MQOPEN", Confidence.HIGH),
-                (r"MQPUT", Confidence.HIGH),
-                (r"MQGET", Confidence.HIGH),
-                (r"MQCLOSE", Confidence.HIGH),
-                (r"MQCONN", Confidence.HIGH),
-                (r"MQDISC", Confidence.HIGH),
-                (r"MQOD", Confidence.HIGH),  # Object Descriptor
-                (r"MQMD", Confidence.HIGH),  # Message Descriptor
-                (r"CMQC", Confidence.HIGH),  # MQ copybook
-                # CICS queues
-                (r"EXEC\s+CICS\s+WRITEQ\s+TD", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+READQ\s+TD", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+WRITEQ\s+TS", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+READQ\s+TS", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+DEQ", Confidence.MEDIUM),
-                (r"EXEC\s+CICS\s+ENQ", Confidence.MEDIUM),
+                (r"MQOPEN", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"MQPUT", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"MQGET", Confidence.HIGH, SignalDirection.INWARD),
+                (r"MQCLOSE", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"MQCONN", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"MQDISC", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"MQOD", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"MQMD", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"CMQC", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"EXEC\s+CICS\s+WRITEQ\s+TD",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (r"EXEC\s+CICS\s+READQ\s+TD", Confidence.HIGH, SignalDirection.INWARD),
+                (
+                    r"EXEC\s+CICS\s+WRITEQ\s+TS",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (r"EXEC\s+CICS\s+READQ\s+TS", Confidence.HIGH, SignalDirection.INWARD),
+                (r"EXEC\s+CICS\s+DEQ", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"EXEC\s+CICS\s+ENQ", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
             ],
         },
         IntegrationType.SOCKET: {
             PatternKey.PATTERNS: [
-                # TCP/IP Sockets
-                (r"EZASOKET", Confidence.HIGH),  # IBM TCP/IP socket API
-                (r"CALL\s+['\"]EZASOKET['\"]", Confidence.HIGH),
-                (r"SOCKET-", Confidence.MEDIUM),
-                (r"TCPIP", Confidence.MEDIUM),
-                # CICS sockets
-                (r"EXEC\s+CICS\s+EXTRACT\s+TCPIP", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+SOCKET", Confidence.HIGH),
+                (r"EZASOKET", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"CALL\s+['\"]EZASOKET['\"]",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
+                (r"SOCKET-", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"TCPIP", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (
+                    r"EXEC\s+CICS\s+EXTRACT\s+TCPIP",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
+                (r"EXEC\s+CICS\s+SOCKET", Confidence.HIGH, SignalDirection.AMBIGUOUS),
             ],
         },
         IntegrationType.DATABASE: {
             PatternKey.PATTERNS: [
-                # Embedded SQL (DB2)
-                (r"EXEC\s+SQL", Confidence.HIGH),
-                (r"SQLCA", Confidence.HIGH),
-                (r"SQLCODE", Confidence.HIGH),
-                (r"DCLGEN", Confidence.HIGH),
-                (r"INCLUDE\s+SQLCA", Confidence.HIGH),
-                (r"DECLARE\s+.*\s+CURSOR", Confidence.HIGH),
-                (r"FETCH\s+.*\s+INTO", Confidence.HIGH),
-                (r"SELECT\s+.*\s+INTO", Confidence.HIGH),
-                (r"INSERT\s+INTO", Confidence.HIGH),
-                (r"UPDATE\s+.*\s+SET", Confidence.HIGH),
-                (r"DELETE\s+FROM", Confidence.HIGH),
-                # VSAM
-                (r"READ\s+.*\s+FILE", Confidence.MEDIUM),
-                (r"WRITE\s+.*\s+FILE", Confidence.MEDIUM),
-                (r"REWRITE\s+.*\s+FILE", Confidence.MEDIUM),
-                (r"DELETE\s+.*\s+FILE", Confidence.MEDIUM),
-                (r"START\s+.*\s+FILE", Confidence.MEDIUM),
-                # CICS file control
-                (r"EXEC\s+CICS\s+READ", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+WRITE", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+REWRITE", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+DELETE", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+STARTBR", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+READNEXT", Confidence.HIGH),
-                (r"EXEC\s+CICS\s+READPREV", Confidence.HIGH),
-                # IMS DB
-                (r"CALL\s+['\"]CBLTDLI['\"]", Confidence.HIGH),
-                (r"CALL\s+['\"]PLITDLI['\"]", Confidence.HIGH),  # PL/I variant
-                (r"CALL\s+['\"]AIBTDLI['\"]", Confidence.HIGH),  # AIB variant
-                (r"PCB\s+MASK", Confidence.HIGH),  # PCB mask definition
-                (r"SSA\s+AREA", Confidence.MEDIUM),  # Segment search argument
-                (r"IO-PCB", Confidence.HIGH),  # I/O PCB
-                (r"DB-PCB", Confidence.HIGH),  # Database PCB
-                # CA IDMS Database
-                (r"EXEC\s+IDMS", Confidence.HIGH),  # IDMS DML prefix
-                (r"BIND\s+RUN-UNIT", Confidence.HIGH),
+                (r"EXEC\s+SQL", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"SQLCA", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"SQLCODE", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"DCLGEN", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"INCLUDE\s+SQLCA", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"DECLARE\s+.*\s+CURSOR", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"FETCH\s+.*\s+INTO", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"SELECT\s+.*\s+INTO", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"INSERT\s+INTO", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"UPDATE\s+.*\s+SET", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"DELETE\s+FROM", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"READ\s+.*\s+FILE", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"WRITE\s+.*\s+FILE", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"REWRITE\s+.*\s+FILE", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"DELETE\s+.*\s+FILE", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"START\s+.*\s+FILE", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"EXEC\s+CICS\s+READ", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"EXEC\s+CICS\s+WRITE", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"EXEC\s+CICS\s+REWRITE", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"EXEC\s+CICS\s+DELETE", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"EXEC\s+CICS\s+STARTBR", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"EXEC\s+CICS\s+READNEXT", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"EXEC\s+CICS\s+READPREV", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"CALL\s+['\"]CBLTDLI['\"]", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"CALL\s+['\"]PLITDLI['\"]", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"CALL\s+['\"]AIBTDLI['\"]", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"PCB\s+MASK", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"SSA\s+AREA", Confidence.MEDIUM, SignalDirection.OUTWARD),
+                (r"IO-PCB", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"DB-PCB", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"EXEC\s+IDMS", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"BIND\s+RUN-UNIT", Confidence.HIGH, SignalDirection.OUTWARD),
                 (
                     r"READY\s+\w+\s+USAGE-MODE",
                     Confidence.HIGH,
-                ),  # Ready an area with usage mode
-                (r"FINISH\s+TASK", Confidence.HIGH),
+                    SignalDirection.OUTWARD,
+                ),
+                (r"FINISH\s+TASK", Confidence.HIGH, SignalDirection.OUTWARD),
                 (
                     r"OBTAIN\s+(CALC|FIRST|NEXT|PRIOR|LAST|OWNER|WITHIN)",
                     Confidence.HIGH,
+                    SignalDirection.OUTWARD,
                 ),
-                (r"FIND\s+CALC", Confidence.HIGH),  # Find via CALC key
-                (r"FIND\s+FIRST\s+\w+\s+WITHIN", Confidence.HIGH),
-                (r"FIND\s+NEXT\s+\w+\s+WITHIN", Confidence.HIGH),
-                (r"FIND\s+PRIOR", Confidence.HIGH),
-                (r"FIND\s+LAST", Confidence.HIGH),
-                (r"FIND\s+OWNER", Confidence.HIGH),
-                (r"FIND\s+\w+\s+WITHIN\s+\w+", Confidence.HIGH),
-                (r"CONNECT\s+\w+\s+TO\s+\w+", Confidence.HIGH),  # Connect to set
+                (r"FIND\s+CALC", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"FIND\s+FIRST\s+\w+\s+WITHIN",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (
+                    r"FIND\s+NEXT\s+\w+\s+WITHIN",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (r"FIND\s+PRIOR", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"FIND\s+LAST", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"FIND\s+OWNER", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"FIND\s+\w+\s+WITHIN\s+\w+",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (r"CONNECT\s+\w+\s+TO\s+\w+", Confidence.HIGH, SignalDirection.OUTWARD),
                 (
                     r"DISCONNECT\s+\w+\s+FROM\s+\w+",
                     Confidence.HIGH,
-                ),  # Disconnect from set
-                (r"COMMIT\s+TASK", Confidence.HIGH),
-                (r"ROLLBACK\s+TASK", Confidence.HIGH),
-                (r"IDMS-STATUS", Confidence.HIGH),  # Status check
-                (r"SUBSCHEMA-CTRL", Confidence.HIGH),  # Subschema control block
-                (r"COPY\s+IDMS\s+", Confidence.HIGH),  # IDMS copybook
-                (r"SCHEMA\s+SECTION", Confidence.HIGH),  # IDMS schema section
-                # IDMS-DC (Data Communications / Online)
-                (r"DC\s+RETURN", Confidence.HIGH),
-                (r"GET\s+SCRATCH", Confidence.HIGH),
-                (r"PUT\s+SCRATCH", Confidence.HIGH),
-                (r"TRANSFER\s+CONTROL\s+TO", Confidence.HIGH),
-                (r"IDMS-DC", Confidence.HIGH),  # IDMS-DC section
+                    SignalDirection.OUTWARD,
+                ),
+                (r"COMMIT\s+TASK", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"ROLLBACK\s+TASK", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"IDMS-STATUS", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"SUBSCHEMA-CTRL", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"COPY\s+IDMS\s+", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"SCHEMA\s+SECTION", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"DC\s+RETURN", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"GET\s+SCRATCH", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"PUT\s+SCRATCH", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"TRANSFER\s+CONTROL\s+TO", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"IDMS-DC", Confidence.HIGH, SignalDirection.OUTWARD),
             ],
         },
         IntegrationType.FILE_IO: {
             PatternKey.PATTERNS: [
-                (r"OPEN\s+INPUT", Confidence.HIGH),
-                (r"OPEN\s+OUTPUT", Confidence.HIGH),
-                (r"OPEN\s+I-O", Confidence.HIGH),
-                (r"\bREAD\b", Confidence.MEDIUM),
-                (r"\bWRITE\b", Confidence.MEDIUM),
-                (r"\bCLOSE\b", Confidence.MEDIUM),
-                (r"FD\s+", Confidence.HIGH),
+                (r"OPEN\s+INPUT", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"OPEN\s+OUTPUT", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"OPEN\s+I-O", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"\bREAD\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"\bWRITE\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"\bCLOSE\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"FD\s+", Confidence.HIGH, SignalDirection.AMBIGUOUS),
             ],
         },
     },

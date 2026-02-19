@@ -4,7 +4,7 @@ Patterns are organized by language with base patterns that always apply
 and framework-specific patterns that apply when a framework is active.
 """
 
-from .types import Confidence, IntegrationType, Language, PatternKey
+from .types import Confidence, IntegrationType, Language, PatternKey, SignalDirection
 from . import common
 
 from ..language_plugin import PluginRegistry
@@ -19,7 +19,7 @@ LANGUAGE_MODULES = _registry.language_to_integration_module()
 def get_patterns_for_language(
     language: Language | None,
     frameworks: list[str] = [],
-) -> dict[IntegrationType, list[tuple[str, Confidence, str]]]:
+) -> dict[IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]]:
     """Get integration patterns for a specific language and active frameworks.
 
     Combines common patterns with language-specific base patterns and
@@ -32,18 +32,19 @@ def get_patterns_for_language(
                     are included alongside base patterns.
 
     Returns:
-        Dict mapping IntegrationType to list of (pattern, confidence, source) tuples.
+        Dict mapping IntegrationType to list of
+        (pattern, confidence, source, direction) tuples.
     """
-    result: dict[IntegrationType, list[tuple[str, Confidence, str]]] = {}
+    result: dict[IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]] = {}
 
     for integration_type in IntegrationType:
-        patterns: list[tuple[str, Confidence, str]] = []
+        patterns: list[tuple[str, Confidence, str, SignalDirection]] = []
 
         # Add common patterns
         common_type_patterns = common.COMMON.patterns.get(integration_type, {})
         patterns.extend(
-            (p, c, "common")
-            for p, c in common_type_patterns.get(PatternKey.PATTERNS, [])
+            (p, c, "common", d)
+            for p, c, d in common_type_patterns.get(PatternKey.PATTERNS, [])
         )
 
         # Add language-specific base patterns
@@ -53,8 +54,8 @@ def get_patterns_for_language(
                 lang_source = language.value
                 lang_type_patterns = lang_module.BASE_PATTERNS.get(integration_type, {})
                 patterns.extend(
-                    (p, c, lang_source)
-                    for p, c in lang_type_patterns.get(PatternKey.PATTERNS, [])
+                    (p, c, lang_source, d)
+                    for p, c, d in lang_type_patterns.get(PatternKey.PATTERNS, [])
                 )
 
                 # Add framework-specific patterns for active frameworks
@@ -62,8 +63,8 @@ def get_patterns_for_language(
                     fw_patterns = lang_module.FRAMEWORK_PATTERNS.get(framework, {})
                     fw_type_patterns = fw_patterns.get(integration_type, {})
                     patterns.extend(
-                        (p, c, framework)
-                        for p, c in fw_type_patterns.get(PatternKey.PATTERNS, [])
+                        (p, c, framework, d)
+                        for p, c, d in fw_type_patterns.get(PatternKey.PATTERNS, [])
                     )
 
         result[integration_type] = patterns
@@ -108,6 +109,7 @@ __all__ = [
     "Confidence",
     "IntegrationType",
     "Language",
+    "SignalDirection",
     "EXTENSION_TO_LANGUAGE",
     "LANGUAGE_MODULES",
     "get_patterns_for_language",

@@ -1,19 +1,25 @@
 """Rocket framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Rocket",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"use rocket::", Confidence.HIGH),
-                (r"#\[get\(", Confidence.HIGH),
-                (r"#\[post\(", Confidence.HIGH),
-                (r"#\[put\(", Confidence.HIGH),
-                (r"#\[delete\(", Confidence.HIGH),
-                (r"#\[patch\(", Confidence.HIGH),
-                (r"#\[route\(", Confidence.HIGH),
+                (r"use rocket::", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"#\[get\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[post\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[put\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[delete\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[patch\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"#\[route\(", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
     },

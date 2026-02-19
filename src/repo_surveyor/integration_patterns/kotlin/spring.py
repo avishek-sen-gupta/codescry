@@ -1,49 +1,55 @@
 """Spring framework integration patterns for Kotlin."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Spring",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"@RestController", Confidence.HIGH),
-                (r"@GetMapping", Confidence.HIGH),
-                (r"@PostMapping", Confidence.HIGH),
-                (r"@PutMapping", Confidence.HIGH),
-                (r"@DeleteMapping", Confidence.HIGH),
-                (r"@RequestMapping", Confidence.HIGH),
-                (r"coRouter\s*\{", Confidence.HIGH),
-                (r"router\s*\{", Confidence.MEDIUM),
+                (r"@RestController", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@GetMapping", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@PostMapping", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@PutMapping", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@DeleteMapping", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@RequestMapping", Confidence.HIGH, SignalDirection.INWARD),
+                (r"coRouter\s*\{", Confidence.HIGH, SignalDirection.INWARD),
+                (r"router\s*\{", Confidence.MEDIUM, SignalDirection.INWARD),
             ],
         },
         IntegrationType.MESSAGING: {
             PatternKey.PATTERNS: [
-                (r"@KafkaListener", Confidence.HIGH),
-                (r"@JmsListener", Confidence.HIGH),
-                (r"@RabbitListener", Confidence.HIGH),
-                (r"KafkaTemplate", Confidence.HIGH),
+                (r"@KafkaListener", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@JmsListener", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@RabbitListener", Confidence.HIGH, SignalDirection.INWARD),
+                (r"KafkaTemplate", Confidence.HIGH, SignalDirection.OUTWARD),
             ],
         },
         IntegrationType.DATABASE: {
             PatternKey.PATTERNS: [
-                (r"@Repository", Confidence.HIGH),
-                (r"@Query", Confidence.HIGH),
-                (r"JdbcTemplate", Confidence.HIGH),
-                (r"R2dbcRepository", Confidence.HIGH),
+                (r"@Repository", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"@Query", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"JdbcTemplate", Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"R2dbcRepository", Confidence.HIGH, SignalDirection.OUTWARD),
             ],
         },
         IntegrationType.CACHING: {
             PatternKey.PATTERNS: [
-                (r"@Cacheable", Confidence.HIGH),
-                (r"@CacheEvict", Confidence.HIGH),
-                (r"@EnableCaching", Confidence.HIGH),
+                (r"@Cacheable", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"@CacheEvict", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"@EnableCaching", Confidence.HIGH, SignalDirection.AMBIGUOUS),
             ],
         },
         IntegrationType.SCHEDULING: {
             PatternKey.PATTERNS: [
-                (r"@Scheduled", Confidence.HIGH),
-                (r"@EnableScheduling", Confidence.HIGH),
+                (r"@Scheduled", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"@EnableScheduling", Confidence.HIGH, SignalDirection.AMBIGUOUS),
             ],
         },
     },

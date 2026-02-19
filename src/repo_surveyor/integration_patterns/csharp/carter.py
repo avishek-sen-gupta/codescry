@@ -1,14 +1,14 @@
 """Carter framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Carter",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"CarterModule", Confidence.HIGH),
-                (r"ICarterModule", Confidence.HIGH),
+                (r"CarterModule", Confidence.HIGH, SignalDirection.INWARD),
+                (r"ICarterModule", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
     },

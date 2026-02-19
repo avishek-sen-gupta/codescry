@@ -1,6 +1,6 @@
 """Hono framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Hono",
@@ -8,10 +8,10 @@ FRAMEWORK = FrameworkPatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"from ['\"]hono['\"]", Confidence.HIGH),
-                (r"new Hono\(", Confidence.HIGH),
-                (r"app\.get\(", Confidence.HIGH),
-                (r"app\.post\(", Confidence.HIGH),
+                (r"from ['\"]hono['\"]", Confidence.HIGH, SignalDirection.INWARD),
+                (r"new Hono\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"app\.get\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"app\.post\(", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
     },

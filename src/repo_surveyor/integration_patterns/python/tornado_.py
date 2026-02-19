@@ -1,22 +1,40 @@
 """Tornado framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Tornado",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"import tornado", Confidence.HIGH),
-                (r"from tornado\.web import", Confidence.HIGH),
-                (r"from tornado\.httpclient import", Confidence.HIGH),
-                (r"RequestHandler", Confidence.MEDIUM),
+                (r"import tornado", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"from tornado\.web import",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
+                (
+                    r"from tornado\.httpclient import",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (r"RequestHandler", Confidence.MEDIUM, SignalDirection.INWARD),
             ],
         },
         IntegrationType.SOCKET: {
             PatternKey.PATTERNS: [
-                (r"from tornado\.websocket import", Confidence.HIGH),
-                (r"WebSocketHandler", Confidence.HIGH),
+                (
+                    r"from tornado\.websocket import",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
+                (r"WebSocketHandler", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
     },

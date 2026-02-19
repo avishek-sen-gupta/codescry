@@ -62,6 +62,19 @@ class Confidence(Enum):
     LOW = "low"
 
 
+class SignalDirection(Enum):
+    """Direction of a detected integration signal.
+
+    INWARD  – the service exposes this integration point (receives external calls).
+    OUTWARD – the service consumes an external system (makes outbound calls).
+    AMBIGUOUS – the pattern alone cannot determine direction.
+    """
+
+    INWARD = "inward"
+    OUTWARD = "outward"
+    AMBIGUOUS = "ambiguous"
+
+
 @dataclass(frozen=True)
 class BasePatternSpec:
     """Base integration patterns for a language or common patterns."""

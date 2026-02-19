@@ -1,20 +1,26 @@
 """Axum framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Axum",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"use axum::", Confidence.HIGH),
-                (r"Router::", Confidence.MEDIUM),
-                (r"\.route\(", Confidence.MEDIUM),
+                (r"use axum::", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"Router::", Confidence.MEDIUM, SignalDirection.INWARD),
+                (r"\.route\(", Confidence.MEDIUM, SignalDirection.INWARD),
             ],
         },
         IntegrationType.SSE_STREAMING: {
             PatternKey.PATTERNS: [
-                (r"axum::response::sse", Confidence.HIGH),
+                (r"axum::response::sse", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
     },

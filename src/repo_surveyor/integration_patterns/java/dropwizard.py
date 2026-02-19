@@ -1,16 +1,16 @@
 """Dropwizard framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Dropwizard",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"import io\.dropwizard", Confidence.HIGH),
-                (r"@Path\(", Confidence.HIGH),
-                (r"@Produces", Confidence.HIGH),
-                (r"@Consumes", Confidence.HIGH),
+                (r"import io\.dropwizard", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@Path\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@Produces", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@Consumes", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
     },

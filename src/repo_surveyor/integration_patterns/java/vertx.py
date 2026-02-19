@@ -1,27 +1,27 @@
 """Vert.x framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Vert.x",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"import io\.vertx", Confidence.HIGH),
-                (r"vertx\.createHttpServer", Confidence.HIGH),
-                (r"Router\.router", Confidence.HIGH),
+                (r"import io\.vertx", Confidence.HIGH, SignalDirection.INWARD),
+                (r"vertx\.createHttpServer", Confidence.HIGH, SignalDirection.INWARD),
+                (r"Router\.router", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
         IntegrationType.SOCKET: {
             PatternKey.PATTERNS: [
-                (r"ServerWebSocket", Confidence.HIGH),
-                (r"SockJSHandler", Confidence.HIGH),
+                (r"ServerWebSocket", Confidence.HIGH, SignalDirection.INWARD),
+                (r"SockJSHandler", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
         IntegrationType.MESSAGING: {
             PatternKey.PATTERNS: [
-                (r"EventBus", Confidence.HIGH),
-                (r"vertx\.eventBus\(\)", Confidence.HIGH),
+                (r"EventBus", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"vertx\.eventBus\(\)", Confidence.HIGH, SignalDirection.AMBIGUOUS),
             ],
         },
     },

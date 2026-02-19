@@ -1,15 +1,15 @@
 """Common integration patterns that apply across all languages."""
 
-from .types import BasePatternSpec, Confidence, IntegrationType, PatternKey
+from .types import BasePatternSpec, Confidence, IntegrationType, PatternKey, SignalDirection
 
 COMMON = BasePatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bhttp\b", Confidence.LOW),
-                (r"(?i)\brest(?:ful)?\b", Confidence.LOW),
-                (r"(?i)\bapi\b", Confidence.LOW),
-                (r"(?i)\bendpoint\b", Confidence.LOW),
+                (r"(?i)\bhttp\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
+                (r"(?i)\brest(?:ful)?\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bapi\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bendpoint\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^controllers?$",
@@ -23,9 +23,9 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.SOAP: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bsoap\b", Confidence.MEDIUM),
-                (r"(?i)\bwsdl\b", Confidence.HIGH),
-                (r"(?i)\benvelope\b", Confidence.LOW),
+                (r"(?i)\bsoap\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bwsdl\b", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"(?i)\benvelope\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^soap$",
@@ -35,11 +35,11 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.MESSAGING: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bkafka\b", Confidence.HIGH),
-                (r"(?i)\brabbit(?:mq)?\b", Confidence.HIGH),
-                (r"(?i)\bamqp\b", Confidence.HIGH),
-                (r"(?i)\bpulsar\b", Confidence.HIGH),
-                (r"(?i)\bnats\b", Confidence.MEDIUM),
+                (r"(?i)\bkafka\b", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"(?i)\brabbit(?:mq)?\b", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bamqp\b", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bpulsar\b", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bnats\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^messaging$",
@@ -51,9 +51,9 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.SOCKET: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bwebsocket\b", Confidence.HIGH),
-                (r"(?i)\btcp\b", Confidence.MEDIUM),
-                (r"(?i)\budp\b", Confidence.MEDIUM),
+                (r"(?i)\bwebsocket\b", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"(?i)\btcp\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"(?i)\budp\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^sockets?$",
@@ -62,8 +62,8 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.DATABASE: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bdatabase\b", Confidence.LOW),
-                (r"(?i)\bdatasource\b", Confidence.MEDIUM),
+                (r"(?i)\bdatabase\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bdatasource\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^repositor(?:y|ies)$",
@@ -76,9 +76,9 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.FILE_IO: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bfile\b", Confidence.LOW),
-                (r"(?i)\bupload\b", Confidence.LOW),
-                (r"(?i)\bdownload\b", Confidence.LOW),
+                (r"(?i)\bfile\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bupload\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bdownload\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^uploads?$",
@@ -89,8 +89,8 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.GRPC: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bgrpc\b", Confidence.MEDIUM),
-                (r"(?i)\bprotobuf\b", Confidence.MEDIUM),
+                (r"(?i)\bgrpc\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bprotobuf\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^proto$",
@@ -100,7 +100,7 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.GRAPHQL: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bgraphql\b", Confidence.LOW),
+                (r"(?i)\bgraphql\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^graphql$",
@@ -108,8 +108,8 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.EMAIL: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bsmtp\b", Confidence.MEDIUM),
-                (r"(?i)\bemail\b", Confidence.LOW),
+                (r"(?i)\bsmtp\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bemail\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^email$",
@@ -119,9 +119,9 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.CACHING: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bcache\b", Confidence.LOW),
-                (r"(?i)\bredis\b", Confidence.HIGH),
-                (r"(?i)\bmemcached\b", Confidence.HIGH),
+                (r"(?i)\bcache\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bredis\b", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bmemcached\b", Confidence.HIGH, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^cache$",
@@ -130,8 +130,8 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.SSE_STREAMING: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bserver.sent.events?\b", Confidence.MEDIUM),
-                (r"(?i)\bsse\b", Confidence.LOW),
+                (r"(?i)\bserver.sent.events?\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bsse\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^streaming$",
@@ -140,8 +140,8 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.SCHEDULING: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bcron\b", Confidence.MEDIUM),
-                (r"(?i)\bscheduler?\b", Confidence.LOW),
+                (r"(?i)\bcron\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bscheduler?\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^scheduler$",
@@ -152,8 +152,8 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.FTP_SFTP: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bftp\b", Confidence.LOW),
-                (r"(?i)\bsftp\b", Confidence.LOW),
+                (r"(?i)\bftp\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
+                (r"(?i)\bsftp\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [
                 r"(?i)^ftp$",

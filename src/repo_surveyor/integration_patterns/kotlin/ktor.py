@@ -1,32 +1,50 @@
 """Ktor framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey
+from ..types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Ktor",
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"import io\.ktor\.server\.routing", Confidence.HIGH),
-                (r"routing\s*\{", Confidence.MEDIUM),
-                (r"get\s*\(\"", Confidence.MEDIUM),
-                (r"post\s*\(\"", Confidence.MEDIUM),
-                (r"call\.respond\(", Confidence.HIGH),
-                (r"call\.receive\(", Confidence.HIGH),
-                (r"embeddedServer\(", Confidence.HIGH),
+                (
+                    r"import io\.ktor\.server\.routing",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
+                (r"routing\s*\{", Confidence.MEDIUM, SignalDirection.INWARD),
+                (r"get\s*\(\"", Confidence.MEDIUM, SignalDirection.INWARD),
+                (r"post\s*\(\"", Confidence.MEDIUM, SignalDirection.INWARD),
+                (r"call\.respond\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"call\.receive\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"embeddedServer\(", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
         IntegrationType.SOCKET: {
             PatternKey.PATTERNS: [
-                (r"import io\.ktor\.server\.websocket", Confidence.HIGH),
-                (r"webSocket\s*\(", Confidence.HIGH),
-                (r"incoming\.receive\(", Confidence.HIGH),
+                (
+                    r"import io\.ktor\.server\.websocket",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
+                (r"webSocket\s*\(", Confidence.HIGH, SignalDirection.INWARD),
+                (r"incoming\.receive\(", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
         IntegrationType.SSE_STREAMING: {
             PatternKey.PATTERNS: [
-                (r"import io\.ktor\.server\.sse", Confidence.HIGH),
-                (r"sse\s*\(", Confidence.MEDIUM),
+                (
+                    r"import io\.ktor\.server\.sse",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
+                (r"sse\s*\(", Confidence.MEDIUM, SignalDirection.INWARD),
             ],
         },
     },

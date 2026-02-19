@@ -11,7 +11,7 @@ Codescry is a Python library for analysing technology stacks and code structure 
 ## What It Does
 
 - **Tech stack detection**: Scans a repository and identifies languages, package managers, frameworks, and infrastructure, associating each with its containing directory (useful for monorepos)
-- **Integration point detection**: Finds system integration points (HTTP/REST, SOAP, messaging, databases, gRPC, GraphQL, and 7 more types) using framework-aware pattern matching with tree-sitter syntax zone filtering to skip comments, string literals, import lines, and package/namespace declarations
+- **Integration point detection**: Finds system integration points (HTTP/REST, SOAP, messaging, databases, gRPC, GraphQL, and 7 more types) using framework-aware pattern matching with tree-sitter syntax zone filtering to skip comments, string literals, import lines, and package/namespace declarations. Every pattern is annotated with a `SignalDirection` (`INWARD` / `OUTWARD` / `AMBIGUOUS`) indicating whether the detected code is exposing an integration point to callers or consuming an external system; this annotation is propagated onto each `IntegrationSignal.direction` field.
 - **Symbol resolution**: Resolves each integration signal to its containing code symbol via CTags line ranges, producing per-symbol integration profiles
 - **CFG construction**: Builds control flow graphs from tree-sitter parse trees using a language-independent role schema, supporting all 15 languages (except PL/I) with a single algorithm
 - **Call-flow extraction**: Traces method call trees within a file using [Mojo-LSP](https://github.com/avishek-sen-gupta/mojo-lsp) go-to-definition

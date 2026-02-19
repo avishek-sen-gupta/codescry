@@ -80,7 +80,7 @@ def _collect_all_patterns_for_language(
     patterns_by_type = get_patterns_for_language(language, all_frameworks)
 
     return {
-        itype: [regex for regex, _confidence, _source in patterns]
+        itype: [regex for regex, _confidence, _source, _direction in patterns]
         for itype, patterns in patterns_by_type.items()
         if patterns
     }
