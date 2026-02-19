@@ -7,6 +7,8 @@ import pytest
 from repo_surveyor.integration_patterns import Language
 from repo_surveyor.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.surveyor import RepoSurveyor, _normalise_languages, survey
+from repo_surveyor.training.signal_classifier import NullSignalClassifier
+from repo_surveyor.training.types import TrainingLabel
 
 
 def _create_python_repo(tmp_path: Path) -> Path:
@@ -286,6 +288,40 @@ class TestSurveyFunction:
             if p.match.language
         }
         assert scanned_languages <= {"Python"}
+
+    def test_default_classifier_labels_all_not_definite(self, tmp_path: Path) -> None:
+        """survey() with default NullSignalClassifier should label every signal NOT_DEFINITE."""
+        repo = _create_python_repo(tmp_path)
+        _, _, _, _, concretisation = survey(str(repo))
+
+        assert concretisation.signals_definite == 0
+        assert concretisation.signals_discarded == concretisation.signals_submitted
+        assert all(
+            s.label == TrainingLabel.NOT_DEFINITE for s in concretisation.concretised
+        )
+
+    def test_custom_classifier_is_used(self, tmp_path: Path) -> None:
+        """survey() should pass the classifier to concretise_integration_signals."""
+        repo = _create_python_repo(tmp_path)
+
+        class _AlwaysInwardClassifier(NullSignalClassifier):
+            def predict(self, signal_line: str) -> TrainingLabel:
+                return TrainingLabel.DEFINITE_INWARD
+
+        _, _, integration_result, _, concretisation = survey(
+            str(repo), classifier=_AlwaysInwardClassifier()
+        )
+
+        file_content_count = sum(
+            1
+            for p in integration_result.integration_points
+            if p.entity_type.value == "file_content"
+        )
+        assert concretisation.signals_submitted == file_content_count
+        assert concretisation.signals_definite == file_content_count
+        assert all(
+            s.label == TrainingLabel.DEFINITE_INWARD for s in concretisation.concretised
+        )
 
 
 class TestNormaliseLanguages:

@@ -6,7 +6,10 @@ from pathlib import Path
 import pytest
 
 from repo_surveyor.training.types import TrainingExample, TrainingLabel
-from repo_surveyor.training.signal_classifier import SignalClassifier
+from repo_surveyor.training.signal_classifier import (
+    NullSignalClassifier,
+    SignalClassifier,
+)
 from repo_surveyor.training.classifier_trainer import (
     EvaluationResult,
     load_examples,
@@ -196,6 +199,45 @@ class TestEvaluationResult:
         assert set(result.per_class_f1.keys()) == expected_keys
         assert set(result.per_class_precision.keys()) == expected_keys
         assert set(result.per_class_recall.keys()) == expected_keys
+
+
+# ---------------------------------------------------------------------------
+# TestLoadExamples
+# ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# TestNullSignalClassifier
+# ---------------------------------------------------------------------------
+
+
+class TestNullSignalClassifier:
+    def test_is_signal_classifier(self):
+        assert isinstance(NullSignalClassifier(), SignalClassifier)
+
+    def test_predict_always_returns_not_definite(self):
+        null = NullSignalClassifier()
+        for line in [
+            '@GetMapping("/users")',
+            "restTemplate.post(url)",
+            "String x = y;",
+        ]:
+            assert null.predict(line) == TrainingLabel.NOT_DEFINITE
+
+    def test_predict_proba_covers_all_labels(self):
+        null = NullSignalClassifier()
+        proba = null.predict_proba("anything")
+        assert set(proba.keys()) == set(TrainingLabel)
+
+    def test_predict_proba_all_zero(self):
+        null = NullSignalClassifier()
+        proba = null.predict_proba("anything")
+        assert all(v == 0.0 for v in proba.values())
+
+    def test_model_id_is_non_empty_string(self):
+        null = NullSignalClassifier()
+        assert isinstance(null.model_id, str)
+        assert len(null.model_id) > 0
 
 
 # ---------------------------------------------------------------------------
