@@ -125,6 +125,11 @@ def _build_user_prompt(
     )
 
 
+def _language_slug(language: str) -> str:
+    """Slugify a language name to alphanumeric-and-underscore only."""
+    return language.lower().replace("#", "sharp").replace("+", "p").replace("/", "")
+
+
 def _make_example_id(
     language: str,
     integration_type: str,
@@ -133,9 +138,7 @@ def _make_example_id(
     seq: int,
 ) -> str:
     """Generate a unique example ID."""
-    lang_slug = (
-        language.lower().replace("#", "sharp").replace("+", "p").replace("/", "")
-    )
+    lang_slug = _language_slug(language)
     fw_slug = framework.lower().replace(" ", "_").replace("-", "_")
     return f"{lang_slug}__{integration_type}__{label.lower()}__{fw_slug}__{seq:03d}"
 
@@ -257,6 +260,15 @@ def generate_examples_for_triple(
 def _triple_key(language: str, integration_type: str, label: str) -> str:
     """Build a unique key for a (language, integration_type, label) triple."""
     return f"{language}__{integration_type}__{label}"
+
+
+def _batch_custom_id(language: str, integration_type: str, label: str) -> str:
+    """Build a batch API-safe custom_id (^[a-zA-Z0-9_-]{1,64}$).
+
+    Uses the same language slugification as _make_example_id so that
+    special characters in language names (C++, C#, PL/I) are removed.
+    """
+    return f"{_language_slug(language)}__{integration_type}__{label}"
 
 
 def _load_checkpoint(checkpoint_path: Path) -> list[GenerationResult]:
@@ -382,12 +394,14 @@ def _build_batch_requests(
 ) -> list[tuple[str, str, str]]:
     """Build all (custom_id, system_prompt, user_prompt) tuples for a batch.
 
+    custom_id is slugified to satisfy the Batches API pattern ^[a-zA-Z0-9_-]{1,64}$.
+
     Returns:
         List of (custom_id, system_prompt, user_prompt) tuples.
     """
     return [
         (
-            _triple_key(
+            _batch_custom_id(
                 entry.language.value, entry.integration_type.value, label.value
             ),
             _SYSTEM_PROMPT,
@@ -445,7 +459,7 @@ def _parse_batch_results(
 
     for entry in entries:
         for label in TrainingLabel:
-            key = _triple_key(
+            key = _batch_custom_id(
                 entry.language.value, entry.integration_type.value, label.value
             )
             batch_result = batch_results.get(key)

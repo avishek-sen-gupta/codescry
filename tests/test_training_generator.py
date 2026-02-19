@@ -11,6 +11,7 @@ from repo_surveyor.training.generator import (
     _load_checkpoint,
     _append_checkpoint,
     _triple_key,
+    _batch_custom_id,
     _build_batch_requests,
     _save_batch_checkpoint,
     _load_batch_checkpoint,
@@ -375,6 +376,40 @@ class TestGenerateAllResume:
         assert len(loaded) == len(TrainingLabel)
 
 
+class TestBatchCustomId:
+    def test_plain_language(self):
+        assert (
+            _batch_custom_id("Java", "http_rest", "DEFINITE_INWARD")
+            == "java__http_rest__DEFINITE_INWARD"
+        )
+
+    def test_csharp_slugified(self):
+        assert (
+            _batch_custom_id("C#", "database", "NOT_DEFINITE")
+            == "csharp__database__NOT_DEFINITE"
+        )
+
+    def test_cpp_slugified(self):
+        assert (
+            _batch_custom_id("C++", "socket", "DEFINITE_OUTWARD")
+            == "cpp__socket__DEFINITE_OUTWARD"
+        )
+
+    def test_pli_slugified(self):
+        assert (
+            _batch_custom_id("PL/I", "file_io", "DEFINITE_INWARD")
+            == "pli__file_io__DEFINITE_INWARD"
+        )
+
+    def test_result_matches_api_pattern(self):
+        import re
+
+        pattern = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
+        for lang in ("Java", "Python", "C#", "C++", "PL/I", "TypeScript"):
+            cid = _batch_custom_id(lang, "http_rest", "DEFINITE_INWARD")
+            assert pattern.match(cid), f"custom_id {cid!r} does not match API pattern"
+
+
 class TestBuildBatchRequests:
     def test_builds_requests_for_all_triples(self):
         entry = CoverageEntry(
@@ -387,9 +422,9 @@ class TestBuildBatchRequests:
 
         assert len(requests) == len(TrainingLabel)
         custom_ids = [r[0] for r in requests]
-        assert "Java__http_rest__DEFINITE_INWARD" in custom_ids
-        assert "Java__http_rest__DEFINITE_OUTWARD" in custom_ids
-        assert "Java__http_rest__NOT_DEFINITE" in custom_ids
+        assert "java__http_rest__DEFINITE_INWARD" in custom_ids
+        assert "java__http_rest__DEFINITE_OUTWARD" in custom_ids
+        assert "java__http_rest__NOT_DEFINITE" in custom_ids
 
     def test_all_requests_share_system_prompt(self):
         entry = CoverageEntry(
@@ -486,8 +521,8 @@ class TestParseBatchResults:
     def test_parses_all_succeeded_results(self):
         entry = self._make_entry(Language.JAVA, IntegrationType.HTTP_REST)
         batch_results = {
-            _triple_key("Java", "http_rest", label.value): self._make_batch_result(
-                _triple_key("Java", "http_rest", label.value)
+            _batch_custom_id("Java", "http_rest", label.value): self._make_batch_result(
+                _batch_custom_id("Java", "http_rest", label.value)
             )
             for label in TrainingLabel
         }
@@ -503,14 +538,20 @@ class TestParseBatchResults:
         entry = self._make_entry(Language.JAVA, IntegrationType.HTTP_REST)
         labels = list(TrainingLabel)
         batch_results = {
-            _triple_key("Java", "http_rest", labels[0].value): self._make_batch_result(
-                _triple_key("Java", "http_rest", labels[0].value), succeeded=False
+            _batch_custom_id(
+                "Java", "http_rest", labels[0].value
+            ): self._make_batch_result(
+                _batch_custom_id("Java", "http_rest", labels[0].value), succeeded=False
             ),
-            _triple_key("Java", "http_rest", labels[1].value): self._make_batch_result(
-                _triple_key("Java", "http_rest", labels[1].value)
+            _batch_custom_id(
+                "Java", "http_rest", labels[1].value
+            ): self._make_batch_result(
+                _batch_custom_id("Java", "http_rest", labels[1].value)
             ),
-            _triple_key("Java", "http_rest", labels[2].value): self._make_batch_result(
-                _triple_key("Java", "http_rest", labels[2].value)
+            _batch_custom_id(
+                "Java", "http_rest", labels[2].value
+            ): self._make_batch_result(
+                _batch_custom_id("Java", "http_rest", labels[2].value)
             ),
         }
 
@@ -521,10 +562,10 @@ class TestParseBatchResults:
         entry = self._make_entry(Language.JAVA, IntegrationType.HTTP_REST)
         first_label = list(TrainingLabel)[0]
         batch_results = {
-            _triple_key(
+            _batch_custom_id(
                 "Java", "http_rest", first_label.value
             ): self._make_batch_result(
-                _triple_key("Java", "http_rest", first_label.value)
+                _batch_custom_id("Java", "http_rest", first_label.value)
             ),
         }
 
@@ -628,7 +669,7 @@ class TestGenerateAllBatch:
 
         model = _FakeBatchModel()
         model.created_requests = [
-            (_triple_key("Java", "http_rest", label.value), "", "")
+            (_batch_custom_id("Java", "http_rest", label.value), "", "")
             for label in TrainingLabel
         ]
         entry = self._make_entry(Language.JAVA, IntegrationType.HTTP_REST)
