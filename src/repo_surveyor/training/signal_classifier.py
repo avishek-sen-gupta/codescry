@@ -158,3 +158,24 @@ class SignalClassifier:
             f":C={_ModelConfig.LR_C}"
             f":class_weight={_ModelConfig.LR_CLASS_WEIGHT}"
         )
+
+
+class NullSignalClassifier(SignalClassifier):
+    """Null object SignalClassifier that always predicts NOT_DEFINITE.
+
+    Used as the default when no trained classifier is available, so the
+    pipeline can run without a model file.
+    """
+
+    def __init__(self) -> None:
+        pass
+
+    def predict(self, signal_line: str) -> TrainingLabel:
+        return TrainingLabel.NOT_DEFINITE
+
+    def predict_proba(self, signal_line: str) -> dict[TrainingLabel, float]:
+        return {label: 0.0 for label in TrainingLabel}
+
+    @property
+    def model_id(self) -> str:
+        return "signal_classifier:null"

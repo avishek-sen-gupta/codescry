@@ -12,11 +12,16 @@ from .detectors import (
     detect_kubernetes,
     detect_languages_from_extensions,
 )
+from .integration_concretiser import (
+    ConcretisationResult,
+    concretise_integration_signals,
+)
 from .integration_detector import IntegrationDetectorResult, detect_integrations
 from .integration_patterns import Language
 from .pipeline_timer import NullPipelineTimer, PipelineTimer
 from .report import DirectoryMarker, SurveyReport
 from .symbol_resolver import ResolutionResult, resolve_integration_signals
+from .training.signal_classifier import NullSignalClassifier, SignalClassifier
 
 logger = logging.getLogger(__name__)
 
@@ -196,8 +201,15 @@ def survey(
     languages: list[str | Language] = [],
     extra_skip_dirs: list[str] = [],
     timer: PipelineTimer = NullPipelineTimer(),
-) -> tuple[SurveyReport, CTagsResult, IntegrationDetectorResult, ResolutionResult]:
-    """Run tech_stacks(), coarse_structure(), detect_integrations(), and symbol resolution.
+    classifier: SignalClassifier = NullSignalClassifier(),
+) -> tuple[
+    SurveyReport,
+    CTagsResult,
+    IntegrationDetectorResult,
+    ResolutionResult,
+    ConcretisationResult,
+]:
+    """Run tech_stacks(), coarse_structure(), detect_integrations(), symbol resolution, and concretisation.
 
     Convenience function that orchestrates the full analysis pipeline
     without requiring a Neo4j connection.
@@ -210,9 +222,11 @@ def survey(
         extra_skip_dirs: Additional directory names to skip during scanning,
                          appended to the default skip list.
         timer: Pipeline timing observer for recording stage durations.
+        classifier: Trained SignalClassifier for ML-based concretisation.
+                    Defaults to NullSignalClassifier (labels all signals NOT_DEFINITE).
 
     Returns:
-        Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult, ResolutionResult).
+        Tuple of (SurveyReport, CTagsResult, IntegrationDetectorResult, ResolutionResult, ConcretisationResult).
     """
     ctags_languages, integration_languages = _normalise_languages(languages)
     surveyor = RepoSurveyor(repo_path)
@@ -257,4 +271,14 @@ def survey(
         len(resolution.profiles),
     )
 
-    return tech_report, structure_result, integration_result, resolution
+    timer.stage_started("signal_concretisation")
+    concretisation = concretise_integration_signals(integration_result, classifier)
+    timer.stage_completed("signal_concretisation")
+    logger.info(
+        "Signal concretisation completed: %d submitted, %d definite, %d discarded",
+        concretisation.signals_submitted,
+        concretisation.signals_definite,
+        concretisation.signals_discarded,
+    )
+
+    return tech_report, structure_result, integration_result, resolution, concretisation

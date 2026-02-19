@@ -2,6 +2,13 @@
 
 from .ctags import CTagsConfig, CTagsEntry, CTagsResult
 from .analysis_graph_builder import AnalysisGraphBuilder, survey_and_persist
+from .integration_concretiser import (
+    ASTContext,
+    ConcretisationResult,
+    ConcretisedSignal,
+    SignalGroup,
+    concretise_integration_signals,
+)
 from .integration_patterns import Confidence, IntegrationType, Language
 from .integration_detector import (
     EntityType,
@@ -38,6 +45,11 @@ from .symbol_resolver import (
 
 __all__ = [
     "AnalysisGraphBuilder",
+    "ASTContext",
+    "ConcretisationResult",
+    "ConcretisedSignal",
+    "SignalGroup",
+    "concretise_integration_signals",
     "ClassifiedLine",
     "CompletionResult",
     "Confidence",

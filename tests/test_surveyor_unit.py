@@ -193,22 +193,27 @@ class TestCoarseStructure:
 class TestSurveyFunction:
     """Tests for the survey() convenience function with synthetic repos."""
 
-    def test_returns_four_results(self, tmp_path: Path) -> None:
-        """survey() should return a SurveyReport, CTagsResult, IntegrationDetectorResult, and ResolutionResult."""
+    def test_returns_five_results(self, tmp_path: Path) -> None:
+        """survey() should return a SurveyReport, CTagsResult, IntegrationDetectorResult, ResolutionResult, and ConcretisationResult."""
         repo = _create_python_repo(tmp_path)
-        tech_report, structure_result, integration_result, resolution = survey(
-            str(repo)
-        )
+        (
+            tech_report,
+            structure_result,
+            integration_result,
+            resolution,
+            concretisation,
+        ) = survey(str(repo))
 
         assert "Python" in tech_report.languages
         assert structure_result.success
         assert integration_result.files_scanned > 0
         assert resolution is not None
+        assert concretisation.signals_submitted >= 0
 
     def test_wires_frameworks_to_integration_detection(self, tmp_path: Path) -> None:
         """survey() should pass detected frameworks to integration detection."""
         repo = _create_python_repo(tmp_path)
-        tech_report, _, integration_result, _ = survey(str(repo))
+        tech_report, _, integration_result, _, _ = survey(str(repo))
 
         assert "FastAPI" in tech_report.frameworks
         fastapi_points = [
@@ -219,7 +224,7 @@ class TestSurveyFunction:
     def test_extra_skip_dirs_propagated(self, tmp_path: Path) -> None:
         """survey() should propagate extra_skip_dirs to both stacks and integration detection."""
         repo = _create_monorepo(tmp_path)
-        tech_report, _, integration_result, _ = survey(
+        tech_report, _, integration_result, _, _ = survey(
             str(repo), extra_skip_dirs=["frontend"]
         )
 
@@ -240,11 +245,12 @@ class TestSurveyFunction:
         assert "integration_detection.file_scanning" in stage_names
         assert "integration_detection.directory_classification" in stage_names
         assert "symbol_resolution" in stage_names
+        assert "signal_concretisation" in stage_names
 
     def test_languages_filter_passed_to_ctags(self, tmp_path: Path) -> None:
         """survey() should pass languages to coarse_structure()."""
         repo = _create_monorepo(tmp_path)
-        _, structure_result, _, _ = survey(str(repo), languages=["Python"])
+        _, structure_result, _, _, _ = survey(str(repo), languages=["Python"])
 
         assert structure_result.success
         languages = {e.language for e in structure_result.entries if e.language}
@@ -255,7 +261,7 @@ class TestSurveyFunction:
     ) -> None:
         """survey() should pass languages to detect_integrations(), filtering integration signals."""
         repo = _create_monorepo(tmp_path)
-        _, _, integration_result, _ = survey(str(repo), languages=["Python"])
+        _, _, integration_result, _, _ = survey(str(repo), languages=["Python"])
 
         scanned_languages = {
             p.match.language.value
@@ -267,7 +273,7 @@ class TestSurveyFunction:
     def test_language_enum_accepted_by_survey(self, tmp_path: Path) -> None:
         """survey() should accept Language enum members directly."""
         repo = _create_python_repo(tmp_path)
-        _, structure_result, integration_result, _ = survey(
+        _, structure_result, integration_result, _, _ = survey(
             str(repo), languages=[Language.PYTHON]
         )
 

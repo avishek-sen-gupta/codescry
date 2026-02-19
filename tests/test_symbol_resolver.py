@@ -390,7 +390,7 @@ class TestSurveyEndToEnd:
 
         from repo_surveyor.surveyor import survey
 
-        tech_report, structure_result, integration_result, resolution = survey(
+        tech_report, structure_result, integration_result, resolution, _ = survey(
             str(tmp_path)
         )
 
