@@ -1,0 +1,1939 @@
+{
+  "total_triples": 585,
+  "languages_covered": 15,
+  "integration_types_covered": 13,
+  "entries": [
+    {
+      "language": "Java",
+      "integration_type": "http_rest",
+      "pattern_count": 52,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "soap",
+      "pattern_count": 20,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "messaging",
+      "pattern_count": 22,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "socket",
+      "pattern_count": 16,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "database",
+      "pattern_count": 57,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "@Entity"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "file_io",
+      "pattern_count": 12,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "grpc",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "import io\\.grpc"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "graphql",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "import graphql\\.",
+        "GraphQLSchema"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "email",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "javax\\.mail"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "caching",
+      "pattern_count": 11,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "sse_streaming",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "SseEmitter"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "scheduling",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "import org\\.quartz"
+      ]
+    },
+    {
+      "language": "Java",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 9,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "FTPClient"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "http_rest",
+      "pattern_count": 33,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "soap",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "messaging",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "socket",
+      "pattern_count": 10,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "database",
+      "pattern_count": 20,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "use diesel::"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "file_io",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "grpc",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "tonic::"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "graphql",
+      "pattern_count": 3,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "use juniper::",
+        "use async_graphql::"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "email",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "use lettre::"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "caching",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "sse_streaming",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "use eventsource::"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "scheduling",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "use tokio_cron_scheduler::"
+      ]
+    },
+    {
+      "language": "Rust",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "use ssh2::"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "http_rest",
+      "pattern_count": 42,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "soap",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "messaging",
+      "pattern_count": 15,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "socket",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "database",
+      "pattern_count": 40,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "from sqlalchemy import"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "file_io",
+      "pattern_count": 9,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "grpc",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "import grpc"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "graphql",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "import graphene",
+        "from ariadne import"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "email",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "import smtplib"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "caching",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "sse_streaming",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "sse_starlette"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "scheduling",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "import schedule"
+      ]
+    },
+    {
+      "language": "Python",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "import ftplib"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "http_rest",
+      "pattern_count": 33,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "soap",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "messaging",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "socket",
+      "pattern_count": 10,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "database",
+      "pattern_count": 30,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "@Entity\\("
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "file_io",
+      "pattern_count": 9,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "grpc",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "from ['\\\"]@grpc/grpc-js['\\\"]"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "graphql",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "from ['\\\"]apollo-server['\\\"]",
+        "from ['\\\"]type-graphql['\\\"]"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "email",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "from ['\\\"]nodemailer['\\\"]"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "caching",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "sse_streaming",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "EventSource"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "scheduling",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "from ['\\\"]node-cron['\\\"]"
+      ]
+    },
+    {
+      "language": "TypeScript",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "from ['\\\"]ssh2-sftp-client['\\\"]"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "http_rest",
+      "pattern_count": 24,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "soap",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "messaging",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "socket",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "database",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "require\\(['\\\"]sequelize['\\\"]\\)"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "file_io",
+      "pattern_count": 9,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "grpc",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "require\\(['\\\"]@grpc/grpc-js['\\\"]\\)"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "graphql",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "require\\(['\\\"]apollo-server['\\\"]\\)",
+        "require\\(['\\\"]type-graphql['\\\"]\\)"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "email",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "require\\(['\\\"]nodemailer['\\\"]\\)"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "caching",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "sse_streaming",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "EventSource"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "scheduling",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "require\\(['\\\"]node-cron['\\\"]\\)"
+      ]
+    },
+    {
+      "language": "JavaScript",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "require\\(['\\\"]ssh2-sftp-client['\\\"]\\)"
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "http_rest",
+      "pattern_count": 26,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "soap",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "messaging",
+      "pattern_count": 12,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "socket",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "database",
+      "pattern_count": 15,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "\"gorm\\.io/gorm\""
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "file_io",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "grpc",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "\"google\\.golang\\.org/grpc\""
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "graphql",
+      "pattern_count": 3,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "\"github\\.com/99designs/gqlgen\"",
+        "\"github\\.com/graphql-go/graphql\""
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "email",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "\"net/smtp\""
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "caching",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "sse_streaming",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "text/event-stream"
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "scheduling",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "\"github\\.com/robfig/cron\""
+      ]
+    },
+    {
+      "language": "Go",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "\"github\\.com/pkg/sftp\""
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "http_rest",
+      "pattern_count": 29,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "soap",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "messaging",
+      "pattern_count": 14,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "socket",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "database",
+      "pattern_count": 35,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "using.*EntityFramework"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "file_io",
+      "pattern_count": 10,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "grpc",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "Grpc\\.Core"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "graphql",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "HotChocolate",
+        "GraphQL\\.Server"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "email",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "System\\.Net\\.Mail"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "caching",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "sse_streaming",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "IAsyncEnumerable"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "scheduling",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "Hangfire"
+      ]
+    },
+    {
+      "language": "C#",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "FtpWebRequest"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "http_rest",
+      "pattern_count": 25,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "soap",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "messaging",
+      "pattern_count": 15,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "socket",
+      "pattern_count": 10,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "database",
+      "pattern_count": 16,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "import org\\.jetbrains\\.exposed"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "file_io",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "grpc",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "import io\\.grpc"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "graphql",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "import graphql\\.",
+        "GraphQLSchema"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "email",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "import javax\\.mail"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "caching",
+      "pattern_count": 9,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "sse_streaming",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "SseEmitter"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "scheduling",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "import org\\.quartz"
+      ]
+    },
+    {
+      "language": "Kotlin",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "FTPClient\\("
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "http_rest",
+      "pattern_count": 30,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "soap",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "messaging",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "socket",
+      "pattern_count": 12,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "database",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "import slick\\."
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "file_io",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "grpc",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "import io\\.grpc"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "graphql",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "import sangria\\.",
+        "import caliban\\."
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "email",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "import javax\\.mail"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "caching",
+      "pattern_count": 9,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "sse_streaming",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "text/event-stream"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "scheduling",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "import org\\.quartz"
+      ]
+    },
+    {
+      "language": "Scala",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "FTPClient\\("
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "http_rest",
+      "pattern_count": 23,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "soap",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "messaging",
+      "pattern_count": 12,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "socket",
+      "pattern_count": 11,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "database",
+      "pattern_count": 63,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "ActiveRecord::Base"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "file_io",
+      "pattern_count": 11,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "grpc",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "require ['\\\"]grpc['\\\"]"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "graphql",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "GraphQL::Schema",
+        "require ['\\\"]graphql['\\\"]"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "email",
+      "pattern_count": 10,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "ActionMailer"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "caching",
+      "pattern_count": 12,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "sse_streaming",
+      "pattern_count": 5,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "ActionController::Live"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "scheduling",
+      "pattern_count": 10,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "require ['\\\"]whenever['\\\"]"
+      ]
+    },
+    {
+      "language": "Ruby",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "require ['\\\"]net/ftp['\\\"]"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "http_rest",
+      "pattern_count": 30,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "soap",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "messaging",
+      "pattern_count": 17,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "socket",
+      "pattern_count": 12,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "database",
+      "pattern_count": 24,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "new\\s+PDO\\("
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "file_io",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "grpc",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "Grpc\\\\"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "graphql",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b",
+        "GraphQL\\\\",
+        "webonyx/graphql-php"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "email",
+      "pattern_count": 13,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "mail\\s*\\("
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "caching",
+      "pattern_count": 15,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "sse_streaming",
+      "pattern_count": 4,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "text/event-stream"
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "scheduling",
+      "pattern_count": 11,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "cron_schedule\\("
+      ]
+    },
+    {
+      "language": "PHP",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "ftp_connect\\("
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "http_rest",
+      "pattern_count": 25,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "soap",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "messaging",
+      "pattern_count": 12,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "socket",
+      "pattern_count": 19,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "database",
+      "pattern_count": 24,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "#include\\s*[<\"]sqlite3\\.h[\">]"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "file_io",
+      "pattern_count": 19,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "grpc",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "#include\\s*[<\"]grpcpp/"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "graphql",
+      "pattern_count": 1,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "email",
+      "pattern_count": 15,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "#include\\s*[<\"]mailio/"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "caching",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "sse_streaming",
+      "pattern_count": 3,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "\\bQWebSocket\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "scheduling",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "\\btimer_create\\b"
+      ]
+    },
+    {
+      "language": "C",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "#include\\s*[<\"]libssh2_sftp\\.h[\">]"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "http_rest",
+      "pattern_count": 25,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "soap",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "messaging",
+      "pattern_count": 12,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "socket",
+      "pattern_count": 19,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "database",
+      "pattern_count": 24,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "#include\\s*[<\"]sqlite3\\.h[\">]"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "file_io",
+      "pattern_count": 19,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "grpc",
+      "pattern_count": 6,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b",
+        "#include\\s*[<\"]grpcpp/"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "graphql",
+      "pattern_count": 1,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "email",
+      "pattern_count": 15,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b",
+        "#include\\s*[<\"]mailio/"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "caching",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "sse_streaming",
+      "pattern_count": 3,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b",
+        "\\bQWebSocket\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "scheduling",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b",
+        "\\btimer_create\\b"
+      ]
+    },
+    {
+      "language": "C++",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b",
+        "#include\\s*[<\"]libssh2_sftp\\.h[\">]"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "http_rest",
+      "pattern_count": 11,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "soap",
+      "pattern_count": 10,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "messaging",
+      "pattern_count": 20,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "socket",
+      "pattern_count": 9,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "database",
+      "pattern_count": 57,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "EXEC\\s+SQL"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "file_io",
+      "pattern_count": 10,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "grpc",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "graphql",
+      "pattern_count": 1,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "email",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "caching",
+      "pattern_count": 3,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "sse_streaming",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "scheduling",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b"
+      ]
+    },
+    {
+      "language": "COBOL",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "http_rest",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bhttp\\b",
+        "(?i)\\brest(?:ful)?\\b",
+        "(?i)\\bapi\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "soap",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bsoap\\b",
+        "(?i)\\bwsdl\\b",
+        "(?i)\\benvelope\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "messaging",
+      "pattern_count": 17,
+      "sample_patterns": [
+        "(?i)\\bkafka\\b",
+        "(?i)\\brabbit(?:mq)?\\b",
+        "(?i)\\bamqp\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "socket",
+      "pattern_count": 7,
+      "sample_patterns": [
+        "(?i)\\bwebsocket\\b",
+        "(?i)\\btcp\\b",
+        "(?i)\\budp\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "database",
+      "pattern_count": 31,
+      "sample_patterns": [
+        "(?i)\\bdatabase\\b",
+        "(?i)\\bdatasource\\b",
+        "EXEC\\s+SQL"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "file_io",
+      "pattern_count": 8,
+      "sample_patterns": [
+        "(?i)\\bfile\\b",
+        "(?i)\\bupload\\b",
+        "(?i)\\bdownload\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "grpc",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bgrpc\\b",
+        "(?i)\\bprotobuf\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "graphql",
+      "pattern_count": 1,
+      "sample_patterns": [
+        "(?i)\\bgraphql\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "email",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bsmtp\\b",
+        "(?i)\\bemail\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "caching",
+      "pattern_count": 3,
+      "sample_patterns": [
+        "(?i)\\bcache\\b",
+        "(?i)\\bredis\\b",
+        "(?i)\\bmemcached\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "sse_streaming",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bserver.sent.events?\\b",
+        "(?i)\\bsse\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "scheduling",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bcron\\b",
+        "(?i)\\bscheduler?\\b"
+      ]
+    },
+    {
+      "language": "PL/I",
+      "integration_type": "ftp_sftp",
+      "pattern_count": 2,
+      "sample_patterns": [
+        "(?i)\\bftp\\b",
+        "(?i)\\bsftp\\b"
+      ]
+    }
+  ]
+}
