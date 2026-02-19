@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -156,7 +157,18 @@ def _parse_generated_examples(
         last_fence = text.rfind("```")
         text = text[first_newline + 1 : last_fence].strip()
 
-    raw_examples = json.loads(text)
+    try:
+        raw_examples = json.loads(text)
+    except json.JSONDecodeError:
+        # Haiku sometimes emits invalid JSON escape sequences (e.g. \p, \s, \d
+        # in code/regex snippets). Escape lone backslashes that are not part of
+        # a valid JSON escape sequence and retry once.
+        text = re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', text)
+        try:
+            raw_examples = json.loads(text)
+        except json.JSONDecodeError as exc:
+            logger.warning("Failed to parse JSON response: %s", exc)
+            return []
     if not isinstance(raw_examples, list):
         logger.warning("Expected JSON array, got %s", type(raw_examples).__name__)
         return []
