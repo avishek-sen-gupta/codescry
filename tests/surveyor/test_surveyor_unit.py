@@ -245,7 +245,7 @@ class TestSurveyFunction:
         assert "coarse_structure" in stage_names
         assert "integration_detection" in stage_names
         assert "integration_detection.file_scanning" in stage_names
-        assert "integration_detection.directory_classification" in stage_names
+        # directory_classification is currently disabled (no downstream consumer)
         assert "symbol_resolution" in stage_names
         assert "signal_concretisation" in stage_names
 

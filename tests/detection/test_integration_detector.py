@@ -699,10 +699,9 @@ public class UserController {
             # Should only scan the file outside node_modules
             assert result.files_scanned == 1
 
-    def test_detect_integrations_includes_directory_matches(self) -> None:
-        """Should detect integration points from directory names."""
+    def test_detect_integrations_excludes_directory_matches(self) -> None:
+        """Directory classification is disabled; no DIRECTORY signals should appear."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create controllers directory
             controllers = Path(tmpdir) / "controllers"
             controllers.mkdir()
             java_file = controllers / "UserController.java"
@@ -715,7 +714,7 @@ public class UserController {
                 for p in result.integration_points
                 if p.entity_type == EntityType.DIRECTORY
             ]
-            assert len(dir_points) >= 1
+            assert len(dir_points) == 0
 
 
 class TestIntegrationSignalDataclass:

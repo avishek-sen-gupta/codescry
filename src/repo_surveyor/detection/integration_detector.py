@@ -426,33 +426,11 @@ def detect_integrations(
         integration_points.extend(scan_file_for_integrations(file_path, frameworks))
     timer.stage_completed("integration_detection.file_scanning")
 
-    # Scan directory names
-    timer.stage_started("integration_detection.directory_classification")
-    scanned_dirs: set[str] = set()
-    for file_path in _get_source_files(repo_path, languages, extra_skip_dirs):
-        for parent in file_path.relative_to(repo_path).parents:
-            dir_name = parent.name
-            if dir_name and dir_name not in scanned_dirs:
-                scanned_dirs.add(dir_name)
-                for int_type, confidence, pattern in classify_directory(dir_name):
-                    # Create a placeholder match for the directory
-                    match = FileMatch(
-                        file_path=str(repo_path / parent),
-                        line_number=0,
-                        line_content="",
-                        language="",
-                    )
-                    integration_points.append(
-                        IntegrationSignal(
-                            match=match,
-                            integration_type=int_type,
-                            confidence=confidence,
-                            matched_pattern=pattern,
-                            entity_type=EntityType.DIRECTORY,
-                            source="common",
-                        )
-                    )
-    timer.stage_completed("integration_detection.directory_classification")
+    # NOTE: Directory classification is disabled — DIRECTORY signals are not
+    # consumed by any downstream stage (they bypass symbol resolution and are
+    # only persisted as UnresolvedIntegration nodes). Re-enable when a
+    # reinforcement or cross-referencing mechanism is implemented.
+    # See: classify_directory(), EntityType.DIRECTORY
 
     return IntegrationDetectorResult(
         integration_points=integration_points,
