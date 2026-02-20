@@ -289,17 +289,17 @@ report, symbols, signals, resolved, concretised = survey(
   <h2>Stage 3: Integration Detection</h2>
   <h3>The core of Codescry</h3>
   <p style="margin-top: 20px;">Three sub-stages for each source file:</p>
-  <div style="max-width: 600px; margin: 20px auto;">
+  <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px; margin-top: 20px;">
     <div class="pipeline-box">
       <strong class="accent-amber">A. Import Gating</strong><br>
       <span class="dim">Filter framework patterns by actual imports in the file</span>
     </div>
-    <div class="pipeline-arrow">&darr;</div>
+    <div style="font-size: 1.4em; color: #475569;">&rarr;</div>
     <div class="pipeline-box">
       <strong class="accent">B. Zone-Filtered Pattern Matching</strong><br>
       <span class="dim">tree-sitter classifies lines &rarr; skip comments/strings &rarr; apply regex</span>
     </div>
-    <div class="pipeline-arrow">&darr;</div>
+    <div style="font-size: 1.4em; color: #475569;">&rarr;</div>
     <div class="pipeline-box">
       <strong class="accent-green">C. Directory Classification</strong><br>
       <span class="dim">Directory names like <code>controllers/</code>, <code>repositories/</code></span>
