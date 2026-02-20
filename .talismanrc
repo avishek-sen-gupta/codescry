@@ -33,3 +33,5 @@ fileignoreconfig:
   checksum: b8c4d980d7012555f8178fa2fd4d2194a7f29c6c60d00da3263c71d72f98e04a
 - filename: scripts/treesitter_to_datalog.py
   checksum: e84af923796a2de90e8c59a37d6875fbb5da863a2375e9941e3f0b95293cae6d
+- filename: scripts/embedding_matrix_test.py
+  checksum: f396d5b6dc845e7c9ecd792ff51f7077218169e59e1103576491676c77e00766
