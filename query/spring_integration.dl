@@ -1,0 +1,175 @@
+// Soufflé rules for detecting Spring framework integration patterns.
+//
+// Self-contained: redeclares the base relations from analysis.dl so this
+// file can be loaded independently.
+//
+// Load with:
+//   souffle -F <facts_dir> -D <output_dir> query/spring_integration.dl
+
+// ---------------------------------------------------------------------------
+// Base relations (same schema as analysis.dl)
+// ---------------------------------------------------------------------------
+
+.decl node(id: number, node_type: symbol)
+.input node(filename="node.facts")
+
+.decl token(id: number, text: symbol)
+.input token(filename="token.facts")
+
+.decl position(id: number, start_row: number, start_col: number, end_row: number, end_col: number)
+.input position(filename="position.facts")
+
+.decl parent(child_id: number, parent_id: number)
+.input parent(filename="parent.facts")
+
+.decl sem_contains(parent_id: number, child_id: number)
+.input sem_contains(filename="contains.facts")
+
+.decl field(parent_id: number, field_name: symbol, child_id: number)
+.input field(filename="field.facts")
+
+.decl name(node_id: number, text: symbol)
+.input name(filename="name.facts")
+
+.decl declared_type(node_id: number, type_text: symbol)
+.input declared_type(filename="declared_type.facts")
+
+.decl scope(scope_id: number, kind: symbol)
+.input scope(filename="scope.facts")
+
+.decl scope_parent(inner_id: number, outer_id: number)
+.input scope_parent(filename="scope_parent.facts")
+
+.decl declares(scope_id: number, decl_id: number)
+.input declares(filename="declares.facts")
+
+.decl declaration(node_id: number)
+.input declaration(filename="declaration.facts")
+
+.decl reference(node_id: number)
+.input reference(filename="reference.facts")
+
+.decl refers_to(ref_id: number, decl_id: number)
+.input refers_to(filename="refers_to.facts")
+
+.decl call(site_id: number, receiver_id: number, method_name: symbol)
+.input call(filename="call.facts")
+
+.decl instantiation(site_id: number, type_name: symbol)
+.input instantiation(filename="instantiation.facts")
+
+// ---------------------------------------------------------------------------
+// Bridge facts — annotation and type mappings injected by the Python runner.
+// Each row maps a name to an (integration_type, direction) pair.
+// ---------------------------------------------------------------------------
+
+.decl annotation_integration(ann_name: symbol, integration_type: symbol, direction: symbol)
+.input annotation_integration(filename="annotation_integration.facts")
+
+.decl type_integration(type_name: symbol, integration_type: symbol, direction: symbol)
+.input type_integration(filename="type_integration.facts")
+
+// ---------------------------------------------------------------------------
+// Structural helper — transitive ancestor
+// ---------------------------------------------------------------------------
+
+.decl ancestor(x: number, y: number)
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+
+// ---------------------------------------------------------------------------
+// Derived: annotation_node(ann_id, ann_name)
+//
+// Extracts the name from marker_annotation and annotation nodes.
+// In Java tree-sitter:
+//   - marker_annotation: no arguments (e.g., @RestController)
+//   - annotation: has argument list (e.g., @GetMapping("/users"))
+// Both forms have a "name" field child.
+// ---------------------------------------------------------------------------
+
+.decl annotation_node(ann_id: number, ann_name: symbol)
+annotation_node(AnnId, AnnName) :-
+    node(AnnId, "marker_annotation"),
+    field(AnnId, "name", NameChild),
+    name(NameChild, AnnName).
+
+annotation_node(AnnId, AnnName) :-
+    node(AnnId, "annotation"),
+    field(AnnId, "name", NameChild),
+    name(NameChild, AnnName).
+
+// ---------------------------------------------------------------------------
+// Output: integration_signal(site_id, integration_type, direction, detail, line)
+//
+// Three rules fire into this single output relation:
+//   1. Annotation matches (e.g., @GetMapping -> HTTP_REST/INWARD)
+//   2. Type identifier references (e.g., KafkaTemplate field -> MESSAGING/OUTWARD)
+//   3. Instantiation matches (e.g., new JdbcTemplate() -> DATABASE/OUTWARD)
+// ---------------------------------------------------------------------------
+
+.decl integration_signal(site_id: number, integration_type: symbol, direction: symbol, detail: symbol, line: number)
+
+// Rule 1: Annotation-based detection
+integration_signal(AnnId, IType, Dir, AnnName, Row) :-
+    annotation_node(AnnId, AnnName),
+    annotation_integration(AnnName, IType, Dir),
+    position(AnnId, Row, _, _, _).
+
+// Rule 2: Type reference in declarations (field types, extends/implements)
+integration_signal(TypeNode, IType, Dir, TypeName, Row) :-
+    node(TypeNode, "type_identifier"),
+    name(TypeNode, TypeName),
+    type_integration(TypeName, IType, Dir),
+    position(TypeNode, Row, _, _, _).
+
+// Rule 3: Instantiation matches (new SomeType())
+integration_signal(SiteId, IType, Dir, TypeName, Row) :-
+    instantiation(SiteId, TypeName),
+    type_integration(TypeName, IType, Dir),
+    position(SiteId, Row, _, _, _).
+
+.output integration_signal(filename="integration_signal.csv")
+
+// ---------------------------------------------------------------------------
+// Bonus composite rule: controller_endpoint
+//
+// Links a class-level @RestController annotation with a method-level
+// HTTP mapping annotation (e.g., @GetMapping). Proves structural
+// composition that regex cannot achieve.
+//
+// controller_endpoint(class_ann_id, method_ann_id, class_name, method_name, http_verb, line)
+// ---------------------------------------------------------------------------
+
+.decl controller_annotation(ann_name: symbol)
+controller_annotation("RestController").
+controller_annotation("Controller").
+
+.decl http_method_annotation(ann_name: symbol)
+http_method_annotation("GetMapping").
+http_method_annotation("PostMapping").
+http_method_annotation("PutMapping").
+http_method_annotation("DeleteMapping").
+http_method_annotation("PatchMapping").
+http_method_annotation("RequestMapping").
+
+.decl controller_endpoint(class_ann_id: number, method_ann_id: number, class_name: symbol, method_name: symbol, http_verb: symbol, line: number)
+
+controller_endpoint(ClassAnnId, MethodAnnId, ClassName, MethodName, HttpVerb, MethodLine) :-
+    // Class has a controller annotation
+    annotation_node(ClassAnnId, ClassAnnName),
+    controller_annotation(ClassAnnName),
+    ancestor(ClassAnnId, ClassNode),
+    node(ClassNode, "class_declaration"),
+    field(ClassNode, "name", ClassNameNode),
+    name(ClassNameNode, ClassName),
+    // Method inside the class has an HTTP mapping annotation
+    annotation_node(MethodAnnId, HttpVerb),
+    http_method_annotation(HttpVerb),
+    ancestor(MethodAnnId, MethodNode),
+    node(MethodNode, "method_declaration"),
+    ancestor(MethodNode, ClassNode),
+    field(MethodNode, "name", MethodNameNode),
+    name(MethodNameNode, MethodName),
+    position(MethodAnnId, MethodLine, _, _, _).
+
+.output controller_endpoint(filename="controller_endpoint.csv")

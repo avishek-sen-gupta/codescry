@@ -740,7 +740,7 @@ class Fragment:
     </div>
     <div class="card">
       <h3 class="accent-pink">Datalog Emission</h3>
-      <p>tree-sitter &rarr; <strong>16-relation Souffl&eacute; facts</strong>. Enables structural queries: scope chains, transitive calls, visible declarations.</p>
+      <p>tree-sitter &rarr; <strong>16-relation Souffl&eacute; facts</strong>. Enables structural queries: scope chains, transitive calls, visible declarations, and <strong>framework integration detection</strong>.</p>
     </div>
     <div class="card">
       <h3 class="dim">CFG Construction</h3>
@@ -985,6 +985,230 @@ souffle -F out/facts -D out/results \
 </section>
 
 <!-- ============================================================ -->
+<!-- SECTION: DATALOG-BASED INTEGRATION DETECTION -->
+<!-- ============================================================ -->
+<section class="section-divider">
+  <h2>Datalog-Based Integration Detection</h2>
+  <h3>Replacing regex with structural AST queries</h3>
+</section>
+
+<!-- DATALOG INTEGRATION: THE PROBLEM -->
+<section>
+  <h2>Regex vs. Structural Matching</h2>
+  <div class="two-col">
+    <div class="card">
+      <h3 class="accent-pink">Regex limitations</h3>
+      <ul>
+        <li>Can match <code>@GetMapping</code> but can't verify it's <strong>inside a <code>@RestController</code> class</strong></li>
+        <li>Can match <code>KafkaTemplate</code> but can't distinguish field declarations from string literals</li>
+        <li>No structural composition &mdash; each pattern is an island</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">Datalog approach</h3>
+      <ul>
+        <li>Queries join across <strong>AST structure</strong>: annotations, types, parent nodes, scopes</li>
+        <li>Patterns are <strong>data</strong> (TSV bridge facts), not code</li>
+        <li>Composite rules prove structural properties impossible with regex</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small" style="margin-top: 15px;">PoC: Spring Java patterns &mdash; HTTP_REST, MESSAGING, DATABASE. Parallel path, does not modify the regex detector.</p>
+</section>
+
+<!-- DATALOG INTEGRATION: THREE RULES -->
+<section>
+  <h2>Three Detection Rules</h2>
+  <p>A single output relation, <code>integration_signal</code>, fed by three rules:</p>
+  <div class="three-col" style="margin-top: 15px;">
+    <div class="card">
+      <h3 class="accent">1. Annotations</h3>
+      <pre style="font-size: 0.48em;"><code class="language-prolog">integration_signal(AnnId,
+    IType, Dir, AnnName, Row) :-
+  annotation_node(AnnId, AnnName),
+  annotation_integration(
+    AnnName, IType, Dir),
+  position(AnnId, Row, _, _, _).</code></pre>
+      <p class="small" style="margin-top: 8px;"><code>@GetMapping</code> &rarr; HTTP_REST/INWARD<br><code>@KafkaListener</code> &rarr; MESSAGING/INWARD</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">2. Type References</h3>
+      <pre style="font-size: 0.48em;"><code class="language-prolog">integration_signal(TypeNode,
+    IType, Dir, TypeName, Row) :-
+  node(TypeNode, "type_identifier"),
+  name(TypeNode, TypeName),
+  type_integration(
+    TypeName, IType, Dir),
+  position(TypeNode, Row, _, _, _).</code></pre>
+      <p class="small" style="margin-top: 8px;"><code>KafkaTemplate</code> field &rarr; MESSAGING/OUTWARD<br><code>Neo4jRepository</code> extends &rarr; DATABASE/OUTWARD</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-amber">3. Instantiations</h3>
+      <pre style="font-size: 0.48em;"><code class="language-prolog">integration_signal(SiteId,
+    IType, Dir, TypeName, Row) :-
+  instantiation(SiteId, TypeName),
+  type_integration(
+    TypeName, IType, Dir),
+  position(SiteId, Row, _, _, _).</code></pre>
+      <p class="small" style="margin-top: 8px;"><code>new JdbcTemplate()</code> &rarr; DATABASE/OUTWARD<br><code>new RestTemplate()</code> &rarr; HTTP_REST/OUTWARD</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATALOG INTEGRATION: BRIDGE FACTS -->
+<section>
+  <h2>Data-Driven Pattern Mapping</h2>
+  <h3>Bridge facts separate patterns from rules</h3>
+  <div class="two-col">
+    <div>
+      <p>Mappings are <strong>frozen dataclasses</strong> in Python, written as TSV bridge facts for Souffl&eacute;:</p>
+      <pre style="font-size: 0.5em;"><code class="language-python">SPRING_BRIDGE_FACTS = FrameworkBridgeFacts(
+  annotations=(
+    AnnotationMapping("RestController",
+      IntegrationType.HTTP_REST,
+      SignalDirection.INWARD),
+    AnnotationMapping("GetMapping",
+      IntegrationType.HTTP_REST,
+      SignalDirection.INWARD),
+    AnnotationMapping("KafkaListener",
+      IntegrationType.MESSAGING,
+      SignalDirection.INWARD),
+    # ... 12 more
+  ),
+  types=(
+    TypeMapping("KafkaTemplate",
+      IntegrationType.MESSAGING,
+      SignalDirection.OUTWARD),
+    TypeMapping("JdbcTemplate",
+      IntegrationType.DATABASE,
+      SignalDirection.OUTWARD),
+    # ... 8 more
+  ),
+)</code></pre>
+    </div>
+    <div>
+      <p>Written as <strong>tab-separated .facts files</strong>:</p>
+      <pre style="font-size: 0.5em;"><code class="nohighlight">% annotation_integration.facts
+RestController  http_rest   inward
+GetMapping      http_rest   inward
+PostMapping     http_rest   inward
+KafkaListener   messaging   inward
+Transactional   database    ambiguous
+
+% type_integration.facts
+KafkaTemplate   messaging   outward
+JdbcTemplate    database    outward
+Neo4jRepository database    outward
+RestTemplate    http_rest   outward
+WebClient       http_rest   outward</code></pre>
+      <div class="card" style="margin-top: 12px;">
+        <h3 class="accent" style="font-size: 0.9em;">Adding a new pattern</h3>
+        <p style="font-size: 0.75em;">Add a row to the dataclass. No Souffl&eacute; edits, no regex to write, no tree walker to modify.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATALOG INTEGRATION: COMPOSITE RULE -->
+<section>
+  <h2>Composite Rule: <code>controller_endpoint</code></h2>
+  <h3>Structural composition impossible with regex</h3>
+  <div class="two-col">
+    <div>
+      <pre style="font-size: 0.48em;"><code class="language-prolog">controller_endpoint(ClassAnnId, MethodAnnId,
+    ClassName, MethodName, HttpVerb, Line) :-
+  // Class has a controller annotation
+  annotation_node(ClassAnnId, ClassAnnName),
+  controller_annotation(ClassAnnName),
+  ancestor(ClassAnnId, ClassNode),
+  node(ClassNode, "class_declaration"),
+  field(ClassNode, "name", ClassNameNode),
+  name(ClassNameNode, ClassName),
+  // Method inside the class has an HTTP annotation
+  annotation_node(MethodAnnId, HttpVerb),
+  http_method_annotation(HttpVerb),
+  ancestor(MethodAnnId, MethodNode),
+  node(MethodNode, "method_declaration"),
+  ancestor(MethodNode, ClassNode),
+  field(MethodNode, "name", MethodNameNode),
+  name(MethodNameNode, MethodName),
+  position(MethodAnnId, Line, _, _, _).</code></pre>
+    </div>
+    <div>
+      <p><strong>Input:</strong></p>
+      <pre style="font-size: 0.48em;"><code class="language-java">@RestController
+public class UserController {
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable String id) {
+        return service.findById(id);
+    }
+    @PostMapping("/users")
+    public User createUser(@RequestBody User u) {
+        return service.save(u);
+    }
+}</code></pre>
+      <p style="margin-top: 10px;"><strong>Output:</strong></p>
+      <pre style="font-size: 0.48em;"><code class="nohighlight">% controller_endpoint.csv
+...  UserController  getUser     GetMapping   3
+...  UserController  createUser  PostMapping  8</code></pre>
+      <p class="small" style="margin-top: 8px;">Proves <code>@GetMapping</code> is on a method <strong>inside</strong> a <code>@RestController</code> class &mdash; not just in the same file.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATALOG INTEGRATION: RUNNING IT -->
+<section>
+  <h2>Running the Pipeline</h2>
+  <div class="two-col">
+    <div>
+      <pre><code class="language-python">from query.datalog_integration_runner import (
+    detect_integrations_datalog,
+    SPRING_BRIDGE_FACTS,
+)
+from query.datalog_plugins import make_default_registry
+
+plugin = make_default_registry().get(Language.JAVA)
+parser = get_parser("java")
+tree = parser.parse(source_bytes)
+
+signals = detect_integrations_datalog(
+    tree.root_node,
+    source_bytes,
+    file_path="UserController.java",
+    plugin=plugin,
+    bridge=SPRING_BRIDGE_FACTS,
+    work_dir=Path("/tmp/datalog"),
+)
+
+for s in signals:
+    print(f"{s.matched_pattern:18s}"
+          f" {s.integration_type.value:12s}"
+          f" {s.direction.value}")</code></pre>
+    </div>
+    <div>
+      <pre style="font-size: 0.52em;"><code class="nohighlight">RestController     http_rest    inward
+GetMapping         http_rest    inward
+PathVariable       http_rest    inward
+PostMapping        http_rest    inward
+RequestBody        http_rest    inward</code></pre>
+      <div class="card" style="margin-top: 15px;">
+        <h3 class="accent" style="font-size: 0.9em;">What happens under the hood</h3>
+        <ol style="font-size: 0.7em;">
+          <li><code>emit_datalog()</code> &rarr; 16-relation fact set</li>
+          <li><code>to_souffle_facts()</code> + bridge TSVs</li>
+          <li><code>souffle</code> evaluates <code>spring_integration.dl</code></li>
+          <li>Parse <code>integration_signal.csv</code> &rarr; <code>IntegrationSignal</code> objects</li>
+        </ol>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent-green" style="font-size: 0.9em;">Same output type</h3>
+        <p style="font-size: 0.75em;">Returns <code>list[IntegrationSignal]</code> &mdash; identical to the regex detector. <code>source="Spring/Datalog"</code> distinguishes origin.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
 <!-- SECTION: DESIGN DECISIONS -->
 <!-- ============================================================ -->
 <section class="section-divider">
@@ -1111,6 +1335,7 @@ _EMPTY_RANGE_MAP</code></pre>
       <li><strong class="accent-amber">tree-sitter</strong> for syntax-aware filtering and CFG construction</li>
       <li><strong class="accent-purple">Language-independent CFG</strong> via 12-role schema &mdash; one algorithm, per-language JSON config</li>
       <li><strong class="accent-pink">Multiple concretisation paths</strong>: ML classifier, local LLM, or raw signals</li>
+      <li><strong>Datalog integration detection</strong>: structural AST queries replace regex &mdash; data-driven bridge facts, composite rules</li>
       <li><strong>Declarative plugin system</strong>: add a language with JSON + a pattern file</li>
       <li>Output to <strong>JSON, Neo4j, Graphviz, or Datalog</strong></li>
     </ul>
