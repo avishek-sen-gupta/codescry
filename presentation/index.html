@@ -23,18 +23,19 @@
       text-transform: none;
       font-weight: 700;
     }
-    .reveal h1 { font-size: 2.2em; }
-    .reveal h2 { font-size: 1.6em; }
-    .reveal h3 { font-size: 1.2em; color: #94a3b8; }
-    .reveal pre { font-size: 0.55em; box-shadow: none; }
+    .reveal h1 { font-size: 1.8em; }
+    .reveal h2 { font-size: 1.3em; }
+    .reveal h3 { font-size: 1.0em; color: #94a3b8; }
+    .reveal pre { font-size: 0.5em; box-shadow: none; }
     .reveal pre code {
       border-radius: 8px;
-      padding: 16px !important;
-      max-height: 520px;
+      padding: 12px !important;
+      max-height: 420px;
     }
-    .reveal ul, .reveal ol { font-size: 0.85em; }
-    .reveal li { margin-bottom: 0.4em; }
-    .reveal .small { font-size: 0.7em; color: #94a3b8; }
+    .reveal p { font-size: 0.75em; }
+    .reveal ul, .reveal ol { font-size: 0.75em; }
+    .reveal li { margin-bottom: 0.3em; }
+    .reveal .small { font-size: 0.6em; color: #94a3b8; }
     .reveal .accent { color: #38bdf8; }
     .reveal .accent-green { color: #4ade80; }
     .reveal .accent-amber { color: #fbbf24; }
@@ -54,7 +55,7 @@
     .pill-amber { background: #451a03; color: #fde68a; }
     .pill-pink { background: #500724; color: #fbcfe8; }
     .pill-purple { background: #2e1065; color: #c4b5fd; }
-    .reveal table { font-size: 0.65em; margin: 0 auto; }
+    .reveal table { font-size: 0.6em; margin: 0 auto; }
     .reveal table th { background: #1e293b; color: #38bdf8; font-weight: 600; }
     .reveal table td { border-color: #334155; }
     .reveal .two-col {
@@ -75,8 +76,8 @@
       padding: 20px;
       border: 1px solid #334155;
     }
-    .reveal .card h3 { margin-top: 0; font-size: 1em; }
-    .reveal .card p, .reveal .card ul { font-size: 0.75em; }
+    .reveal .card h3 { margin-top: 0; font-size: 0.85em; }
+    .reveal .card p, .reveal .card ul { font-size: 0.65em; }
     .pipeline-box {
       background: #1e293b;
       border: 2px solid #334155;
@@ -84,7 +85,7 @@
       padding: 12px 20px;
       margin: 8px 0;
       text-align: center;
-      font-size: 0.8em;
+      font-size: 0.7em;
       position: relative;
     }
     .pipeline-box.active {
@@ -109,7 +110,7 @@
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 8px;
-      font-size: 0.7em;
+      font-size: 0.6em;
     }
     .lang-grid .lang-item {
       background: #1e293b;
@@ -122,7 +123,7 @@
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
     }
     .reveal .title-slide h1 {
-      font-size: 2.8em;
+      font-size: 2.4em;
       background: linear-gradient(135deg, #38bdf8, #818cf8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -343,23 +344,26 @@ def build_syntax_range_map(root_node, source_lines):
 <!-- THREE-LAYER PATTERN MERGING -->
 <section>
   <h2>Three-Layer Pattern Merging</h2>
-  <div style="max-width: 700px; margin: 0 auto;">
+  <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px;">
     <div class="pipeline-box" style="border-color: #475569;">
-      <strong class="dim">Layer 1: Common</strong> (cross-language, low confidence)<br>
-      <span class="small"><code>(?i)\bkafka\b</code>, <code>(?i)\bredis\b</code>, <code>(?i)\bwebsocket\b</code></span>
+      <strong class="dim">Layer 1: Common</strong><br>
+      <span class="small">Cross-language, low confidence</span><br>
+      <span class="small"><code>(?i)\bkafka\b</code>, <code>(?i)\bredis\b</code></span>
     </div>
-    <div class="pipeline-arrow">&darr; merged with</div>
+    <div style="font-size: 1.4em; color: #475569;">&rarr;</div>
     <div class="pipeline-box" style="border-color: #38bdf8;">
-      <strong class="accent">Layer 2: Language Base</strong> (always active for that language)<br>
-      <span class="small"><code>@WebService</code> (Java), <code>import grpc</code> (Python), <code>use actix_web::</code> (Rust)</span>
+      <strong class="accent">Layer 2: Language Base</strong><br>
+      <span class="small">Always active for that language</span><br>
+      <span class="small"><code>@WebService</code>, <code>import grpc</code></span>
     </div>
-    <div class="pipeline-arrow">&darr; merged with (if framework detected + import present)</div>
+    <div style="font-size: 1.4em; color: #475569;">&rarr;</div>
     <div class="pipeline-box" style="border-color: #4ade80;">
-      <strong class="accent-green">Layer 3: Framework-Specific</strong> (import-gated)<br>
-      <span class="small"><code>@RestController</code> (Spring), <code>@app.get</code> (FastAPI), <code>Route::get</code> (Laravel)</span>
+      <strong class="accent-green">Layer 3: Framework</strong><br>
+      <span class="small">Import-gated</span><br>
+      <span class="small"><code>@RestController</code>, <code>@app.get</code></span>
     </div>
   </div>
-  <p class="small" style="margin-top: 20px;">Double gating: framework must be in the directory's tech stack <strong>AND</strong> imported in the file</p>
+  <p class="small" style="margin-top: 15px;">Double gating: framework must be in the directory's tech stack <strong>AND</strong> imported in the file</p>
 </section>
 
 <!-- PATTERN EXAMPLE: SPRING -->
@@ -419,6 +423,14 @@ class IntegrationSignal:
       <p><strong>INWARD</strong>: we expose it<br><strong>OUTWARD</strong>: we consume it<br><strong>AMBIGUOUS</strong>: can't tell from pattern alone</p>
     </div>
   </div>
+</section>
+
+<!-- INTEGRATION SIGNAL DIAGRAM -->
+<section>
+  <h2>Integration Signal Diagram</h2>
+  <p class="small">Codescry run against its own codebase</p>
+  <img src="../docs/images/integration_signals.svg" alt="Integration Signals" style="max-height: 450px; background: white; border-radius: 8px; padding: 10px;">
+  <p class="small" style="margin-top: 10px;">Symbols grouped by file (dashed clusters), integration types as teal nodes. Edge weight = confidence.</p>
 </section>
 
 <!-- ============================================================ -->
@@ -780,12 +792,11 @@ class Fragment:
 <!-- DATALOG: FROM SOURCE TO FACTS -->
 <section>
   <h2>Source &rarr; Facts &rarr; Queries</h2>
-  <p>Single-pass DFS over the tree-sitter AST emits <strong>16 Datalog relations</strong>. Souffl&eacute; evaluates derived rules. No custom tree walkers needed.</p>
-  <div class="two-col" style="margin-top: 15px;">
+  <p>Single-pass DFS over the tree-sitter AST emits <strong>16 Datalog relations</strong>. Souffl&eacute; evaluates derived rules.</p>
+  <div class="two-col" style="margin-top: 10px;">
     <div>
-      <pre><code class="language-java">public class OrderService {
+      <pre style="font-size: 0.45em;"><code class="language-java">public class OrderService {
     private final OrderRepository repo;
-
     public Order findById(long id) {
         return repo.findById(id)
             .orElseThrow(() ->
@@ -794,26 +805,22 @@ class Fragment:
 }</code></pre>
     </div>
     <div>
-      <pre><code class="language-prolog">% Structure
+      <pre style="font-size: 0.45em;"><code class="language-prolog">% Structure
 scope(1, "class_declaration").
 scope(5, "method_declaration").
 scope_parent(5, 1).
-
 % Identity
 name(12, "findById").
 declared_type(5, "Order").
-declares(5, 12).
-
 % Use-def
 refers_to(28, 3).  % "repo" ref → decl
-
 % Calls &amp; instantiations
 call(20, 18, "findById").
 call(22, 20, "orElseThrow").
 instantiation(25, "OrderNotFoundException").</code></pre>
     </div>
   </div>
-  <p class="small" style="margin-top: 8px;">Language-specific node types (e.g. <code>method_invocation</code> vs <code>call_expression</code>) are injected via <strong>bridge facts</strong> from a plugin &mdash; <code>analysis.dl</code> has zero hardcoded strings.</p>
+  <p class="small" style="margin-top: 6px;">Language-specific node types injected via <strong>bridge facts</strong> from a plugin &mdash; <code>analysis.dl</code> has zero hardcoded strings.</p>
 </section>
 
 <!-- DATALOG: QUERY EXAMPLES - STRUCTURAL -->
@@ -865,7 +872,7 @@ $ cat output/typed_decl.csv
   <h2>Query: "What does <code>repo</code> call &mdash; including chains?"</h2>
   <div class="two-col">
     <div>
-      <pre style="font-size: 0.52em;"><code class="language-prolog">% Direct calls on a named receiver
+      <pre style="font-size: 0.45em;"><code class="language-prolog">% Direct calls on a named receiver
 call_on(RName, MName, Site) :-
     call(Site, Recv, MName), Recv != -1,
     name(Recv, RName).
@@ -882,16 +889,11 @@ chain_root(Site, Base) :-
 chained_call(RootName, MName) :-
     call(Site, _, MName),
     chain_root(Site, Root),
-    name(Root, RootName).
-
-% Calls inside createOrder()'s scope
-call_in_scope(Scope, Site, MName) :-
-    call(Site, _, MName),
-    ancestor(Site, Scope), scope(Scope, _).</code></pre>
+    name(Root, RootName).</code></pre>
     </div>
     <div>
       <p><strong>Actual Souffl&eacute; output:</strong></p>
-      <pre style="font-size: 0.52em;"><code class="nohighlight">$ cat output/call_on.csv
+      <pre style="font-size: 0.45em;"><code class="nohighlight">$ cat output/call_on.csv
 repo    findById    55
 repo    save        148
 items   isEmpty     108
@@ -900,15 +902,10 @@ $ cat output/chained_call.csv
 repo    findById       ← direct
 repo    orElseThrow    ← chained!
 repo    save
-items   isEmpty
-
-$ cat output/call_in_scope.csv | grep "^102"
-# scope 102 = createOrder() body
-102  108  isEmpty
-102  148  save</code></pre>
-      <div class="card" style="margin-top: 12px;">
-        <h3 class="accent-purple" style="font-size: 0.9em;">Why chain resolution matters</h3>
-        <p style="font-size: 0.75em;">Without it, <code>orElseThrow</code> is called on <em>some call result</em>. With <code>chain_root</code>: <strong>both calls trace to <code>repo</code></strong>.</p>
+items   isEmpty</code></pre>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent-purple">Why chain resolution matters</h3>
+        <p>Without it, <code>orElseThrow</code> is called on <em>some call result</em>. With <code>chain_root</code>: <strong>both calls trace to <code>repo</code></strong>.</p>
       </div>
     </div>
   </div>
@@ -954,34 +951,29 @@ souffle -F out/facts -D out/results \
   <h2>Toward Formal Reasoning</h2>
   <h3>Why Datalog facts are a foundation, not a destination</h3>
   <div class="two-col">
-    <div>
-      <p>The 16-relation ontology gives us a <strong>normalised, language-neutral program representation</strong>. This is exactly the input that formal reasoning tools expect.</p>
-      <div class="card" style="margin-top: 15px;">
-        <h3 class="accent" style="font-size: 0.9em;">What we have today</h3>
-        <ul style="font-size: 0.7em;">
-          <li><code>scope_chain</code>, <code>visible_from</code> &mdash; lexical scoping model</li>
-          <li><code>refers_to</code> &mdash; approximate use-def chains</li>
-          <li><code>call</code>, <code>chain_root</code> &mdash; call graph with chain resolution</li>
-          <li><code>typed_decl</code> &mdash; type annotations on declarations</li>
-          <li>CFG construction &mdash; control flow for all 14 languages</li>
-        </ul>
-      </div>
+    <div class="card">
+      <h3 class="accent">What we have today</h3>
+      <ul>
+        <li><code>scope_chain</code>, <code>visible_from</code> &mdash; lexical scoping</li>
+        <li><code>refers_to</code> &mdash; approximate use-def chains</li>
+        <li><code>call</code>, <code>chain_root</code> &mdash; call graph + chains</li>
+        <li><code>typed_decl</code> &mdash; type annotations</li>
+        <li>CFG construction &mdash; 14 languages</li>
+      </ul>
     </div>
-    <div>
-      <div class="card">
-        <h3 class="accent-green" style="font-size: 0.9em;">What this enables</h3>
-        <table style="font-size: 0.65em;">
-          <tr><th>Technique</th><th>Built on</th></tr>
-          <tr><td><strong>Points-to analysis</strong></td><td><code>call</code> + <code>refers_to</code> + <code>instantiation</code><br><span class="dim">cf. Doop &mdash; also Datalog-based</span></td></tr>
-          <tr><td><strong>Taint tracking</strong></td><td>CFG edges + <code>call</code> + <code>refers_to</code><br><span class="dim">Source/sink reachability over the graph</span></td></tr>
-          <tr><td><strong>Dead code detection</strong></td><td><code>declares</code> + <code>reference</code> + <code>refers_to</code><br><span class="dim">Declarations with no inbound references</span></td></tr>
-          <tr><td><strong>Security policy checking</strong></td><td>Integration signals + <code>scope_chain</code><br><span class="dim">e.g. "no DB call outside a service layer"</span></td></tr>
-          <tr><td><strong>SMT-backed verification</strong></td><td>CFG + <code>typed_decl</code> + branch conditions<br><span class="dim">Export constraints to Z3/CVC5</span></td></tr>
-        </table>
-      </div>
-      <p class="small" style="margin-top: 12px;">The key insight: Datalog facts are <strong>interoperable</strong>. Tools like Doop, CodeQL, and Souffl&eacute; all consume relational facts. The ontology is the interchange format.</p>
+    <div class="card">
+      <h3 class="accent-green">What this enables</h3>
+      <table style="font-size: 0.55em;">
+        <tr><th>Technique</th><th>Built on</th></tr>
+        <tr><td><strong>Points-to</strong></td><td><code>call</code> + <code>refers_to</code> + <code>instantiation</code></td></tr>
+        <tr><td><strong>Taint tracking</strong></td><td>CFG + <code>call</code> + <code>refers_to</code></td></tr>
+        <tr><td><strong>Dead code</strong></td><td><code>declares</code> + <code>refers_to</code></td></tr>
+        <tr><td><strong>Security policy</strong></td><td>Signals + <code>scope_chain</code></td></tr>
+        <tr><td><strong>SMT verification</strong></td><td>CFG + <code>typed_decl</code> + conditions</td></tr>
+      </table>
     </div>
   </div>
+  <p class="small" style="margin-top: 10px;">Datalog facts are <strong>interoperable</strong> &mdash; Doop, CodeQL, and Souffl&eacute; all consume relational facts. The ontology is the interchange format.</p>
 </section>
 
 <!-- ============================================================ -->
@@ -1020,37 +1012,37 @@ souffle -F out/facts -D out/results \
 <section>
   <h2>Three Detection Rules</h2>
   <p>A single output relation, <code>integration_signal</code>, fed by three rules:</p>
-  <div class="three-col" style="margin-top: 15px;">
-    <div class="card">
+  <div class="three-col" style="margin-top: 10px;">
+    <div class="card" style="padding: 14px;">
       <h3 class="accent">1. Annotations</h3>
-      <pre style="font-size: 0.48em;"><code class="language-prolog">integration_signal(AnnId,
+      <pre style="font-size: 0.38em;"><code class="language-prolog">integration_signal(AnnId,
     IType, Dir, AnnName, Row) :-
   annotation_node(AnnId, AnnName),
   annotation_integration(
     AnnName, IType, Dir),
   position(AnnId, Row, _, _, _).</code></pre>
-      <p class="small" style="margin-top: 8px;"><code>@GetMapping</code> &rarr; HTTP_REST/INWARD<br><code>@KafkaListener</code> &rarr; MESSAGING/INWARD</p>
+      <p class="small"><code>@GetMapping</code> &rarr; HTTP_REST/INWARD</p>
     </div>
-    <div class="card">
+    <div class="card" style="padding: 14px;">
       <h3 class="accent-green">2. Type References</h3>
-      <pre style="font-size: 0.48em;"><code class="language-prolog">integration_signal(TypeNode,
+      <pre style="font-size: 0.38em;"><code class="language-prolog">integration_signal(TypeNode,
     IType, Dir, TypeName, Row) :-
   node(TypeNode, "type_identifier"),
   name(TypeNode, TypeName),
   type_integration(
     TypeName, IType, Dir),
   position(TypeNode, Row, _, _, _).</code></pre>
-      <p class="small" style="margin-top: 8px;"><code>KafkaTemplate</code> field &rarr; MESSAGING/OUTWARD<br><code>Neo4jRepository</code> extends &rarr; DATABASE/OUTWARD</p>
+      <p class="small"><code>KafkaTemplate</code> &rarr; MESSAGING/OUTWARD</p>
     </div>
-    <div class="card">
+    <div class="card" style="padding: 14px;">
       <h3 class="accent-amber">3. Instantiations</h3>
-      <pre style="font-size: 0.48em;"><code class="language-prolog">integration_signal(SiteId,
+      <pre style="font-size: 0.38em;"><code class="language-prolog">integration_signal(SiteId,
     IType, Dir, TypeName, Row) :-
   instantiation(SiteId, TypeName),
   type_integration(
     TypeName, IType, Dir),
   position(SiteId, Row, _, _, _).</code></pre>
-      <p class="small" style="margin-top: 8px;"><code>new JdbcTemplate()</code> &rarr; DATABASE/OUTWARD<br><code>new RestTemplate()</code> &rarr; HTTP_REST/OUTWARD</p>
+      <p class="small"><code>new JdbcTemplate()</code> &rarr; DATABASE/OUTWARD</p>
     </div>
   </div>
 </section>
@@ -1061,49 +1053,40 @@ souffle -F out/facts -D out/results \
   <h3>Bridge facts separate patterns from rules</h3>
   <div class="two-col">
     <div>
-      <p>Mappings are <strong>frozen dataclasses</strong> in Python, written as TSV bridge facts for Souffl&eacute;:</p>
-      <pre style="font-size: 0.5em;"><code class="language-python">SPRING_BRIDGE_FACTS = FrameworkBridgeFacts(
+      <pre style="font-size: 0.42em;"><code class="language-python">SPRING_BRIDGE_FACTS = FrameworkBridgeFacts(
   annotations=(
     AnnotationMapping("RestController",
-      IntegrationType.HTTP_REST,
-      SignalDirection.INWARD),
+      IntegrationType.HTTP_REST, SignalDirection.INWARD),
     AnnotationMapping("GetMapping",
-      IntegrationType.HTTP_REST,
-      SignalDirection.INWARD),
+      IntegrationType.HTTP_REST, SignalDirection.INWARD),
     AnnotationMapping("KafkaListener",
-      IntegrationType.MESSAGING,
-      SignalDirection.INWARD),
+      IntegrationType.MESSAGING, SignalDirection.INWARD),
     # ... 12 more
   ),
   types=(
     TypeMapping("KafkaTemplate",
-      IntegrationType.MESSAGING,
-      SignalDirection.OUTWARD),
+      IntegrationType.MESSAGING, SignalDirection.OUTWARD),
     TypeMapping("JdbcTemplate",
-      IntegrationType.DATABASE,
-      SignalDirection.OUTWARD),
+      IntegrationType.DATABASE, SignalDirection.OUTWARD),
     # ... 8 more
   ),
 )</code></pre>
     </div>
     <div>
-      <p>Written as <strong>tab-separated .facts files</strong>:</p>
-      <pre style="font-size: 0.5em;"><code class="nohighlight">% annotation_integration.facts
+      <pre style="font-size: 0.42em;"><code class="nohighlight">% annotation_integration.facts
 RestController  http_rest   inward
 GetMapping      http_rest   inward
 PostMapping     http_rest   inward
 KafkaListener   messaging   inward
 Transactional   database    ambiguous
-
 % type_integration.facts
 KafkaTemplate   messaging   outward
 JdbcTemplate    database    outward
 Neo4jRepository database    outward
-RestTemplate    http_rest   outward
-WebClient       http_rest   outward</code></pre>
-      <div class="card" style="margin-top: 12px;">
-        <h3 class="accent" style="font-size: 0.9em;">Adding a new pattern</h3>
-        <p style="font-size: 0.75em;">Add a row to the dataclass. No Souffl&eacute; edits, no regex to write, no tree walker to modify.</p>
+RestTemplate    http_rest   outward</code></pre>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent">Adding a new pattern</h3>
+        <p>Add a row to the dataclass. No Souffl&eacute; edits, no regex, no tree walker.</p>
       </div>
     </div>
   </div>
@@ -1161,48 +1144,39 @@ public class UserController {
   <h2>Running the Pipeline</h2>
   <div class="two-col">
     <div>
-      <pre><code class="language-python">from query.datalog_integration_runner import (
-    detect_integrations_datalog,
-    SPRING_BRIDGE_FACTS,
-)
+      <pre style="font-size: 0.42em;"><code class="language-python">from query.datalog_integration_runner import (
+    detect_integrations_datalog, SPRING_BRIDGE_FACTS)
 from query.datalog_plugins import make_default_registry
 
 plugin = make_default_registry().get(Language.JAVA)
-parser = get_parser("java")
-tree = parser.parse(source_bytes)
+tree = get_parser("java").parse(source_bytes)
 
 signals = detect_integrations_datalog(
-    tree.root_node,
-    source_bytes,
+    tree.root_node, source_bytes,
     file_path="UserController.java",
     plugin=plugin,
     bridge=SPRING_BRIDGE_FACTS,
     work_dir=Path("/tmp/datalog"),
-)
-
-for s in signals:
-    print(f"{s.matched_pattern:18s}"
-          f" {s.integration_type.value:12s}"
-          f" {s.direction.value}")</code></pre>
-    </div>
-    <div>
-      <pre style="font-size: 0.52em;"><code class="nohighlight">RestController     http_rest    inward
+)</code></pre>
+      <pre style="font-size: 0.42em; margin-top: 8px;"><code class="nohighlight">RestController     http_rest    inward
 GetMapping         http_rest    inward
 PathVariable       http_rest    inward
 PostMapping        http_rest    inward
 RequestBody        http_rest    inward</code></pre>
-      <div class="card" style="margin-top: 15px;">
-        <h3 class="accent" style="font-size: 0.9em;">What happens under the hood</h3>
-        <ol style="font-size: 0.7em;">
+    </div>
+    <div>
+      <div class="card">
+        <h3 class="accent">Under the hood</h3>
+        <ol>
           <li><code>emit_datalog()</code> &rarr; 16-relation fact set</li>
           <li><code>to_souffle_facts()</code> + bridge TSVs</li>
           <li><code>souffle</code> evaluates <code>spring_integration.dl</code></li>
-          <li>Parse <code>integration_signal.csv</code> &rarr; <code>IntegrationSignal</code> objects</li>
+          <li>Parse <code>integration_signal.csv</code> &rarr; <code>IntegrationSignal</code></li>
         </ol>
       </div>
       <div class="card" style="margin-top: 10px;">
-        <h3 class="accent-green" style="font-size: 0.9em;">Same output type</h3>
-        <p style="font-size: 0.75em;">Returns <code>list[IntegrationSignal]</code> &mdash; identical to the regex detector. <code>source="Spring/Datalog"</code> distinguishes origin.</p>
+        <h3 class="accent-green">Same output type</h3>
+        <p>Returns <code>list[IntegrationSignal]</code> &mdash; identical to the regex detector. <code>source="Spring/Datalog"</code> distinguishes origin.</p>
       </div>
     </div>
   </div>
@@ -1275,16 +1249,6 @@ _EMPTY_RANGE_MAP</code></pre>
 </section>
 
 <!-- ============================================================ -->
-<!-- INTEGRATION SIGNAL DIAGRAM -->
-<!-- ============================================================ -->
-<section>
-  <h2>Integration Signal Diagram</h2>
-  <p class="small">Codescry run against its own codebase</p>
-  <img src="../docs/images/integration_signals.svg" alt="Integration Signals" style="max-height: 450px; background: white; border-radius: 8px; padding: 10px;">
-  <p class="small" style="margin-top: 10px;">Symbols grouped by file (dashed clusters), integration types as teal nodes. Edge weight = confidence.</p>
-</section>
-
-<!-- ============================================================ -->
 <!-- TECH STACK -->
 <!-- ============================================================ -->
 <section>
@@ -1332,15 +1296,13 @@ _EMPTY_RANGE_MAP</code></pre>
     <ul>
       <li><strong class="accent">15 languages</strong>, 90+ frameworks, 13 integration types</li>
       <li><strong class="accent-green">Five-stage pipeline</strong>: detect &rarr; extract &rarr; match &rarr; resolve &rarr; classify</li>
-      <li><strong class="accent-amber">tree-sitter</strong> for syntax-aware filtering and CFG construction</li>
-      <li><strong class="accent-purple">Language-independent CFG</strong> via 12-role schema &mdash; one algorithm, per-language JSON config</li>
-      <li><strong class="accent-pink">Multiple concretisation paths</strong>: ML classifier, local LLM, or raw signals</li>
-      <li><strong>Datalog integration detection</strong>: structural AST queries replace regex &mdash; data-driven bridge facts, composite rules</li>
+      <li><strong class="accent-amber">tree-sitter</strong> for syntax-aware filtering, CFG construction, and Datalog emission</li>
+      <li><strong class="accent-purple">Language-independent CFG</strong> via 12-role schema &mdash; one algorithm, per-language JSON</li>
+      <li><strong class="accent-pink">Datalog integration detection</strong>: structural AST queries replace regex with data-driven bridge facts</li>
       <li><strong>Declarative plugin system</strong>: add a language with JSON + a pattern file</li>
-      <li>Output to <strong>JSON, Neo4j, Graphviz, or Datalog</strong></li>
     </ul>
   </div>
-  <pre style="margin-top: 30px;"><code class="language-bash">pip install codescry  # or: poetry install</code></pre>
+  <pre style="margin-top: 15px;"><code class="language-bash">pip install codescry  # or: poetry install</code></pre>
 </section>
 
 <!-- END -->
