@@ -3,7 +3,7 @@
 Dispatches to format-specific parsers and provides smart framework matching.
 """
 
-from ..constants import TechCategory
+from ..core.constants import TechCategory
 from .constants import DepSeparators
 from .types import ParsedDependency
 from ..integration_patterns.python.package_parser import (

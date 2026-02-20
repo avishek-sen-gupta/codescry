@@ -3,7 +3,7 @@
 import pytest
 
 from repo_surveyor.integration_patterns import Language
-from repo_surveyor.syntax_zone import (
+from repo_surveyor.detection.syntax_zone import (
     SyntaxRange,
     SyntaxRangeMap,
     SyntaxZone,

@@ -6,7 +6,7 @@ then classifies each signal using a trained SignalClassifier.
 
 from collections.abc import Callable
 
-from ..integration_detector import (
+from ..detection.integration_detector import (
     IntegrationDetectorResult,
     IntegrationSignal,
     EntityType,

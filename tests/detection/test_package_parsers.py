@@ -21,7 +21,7 @@ from repo_surveyor.integration_patterns.cpp.package_parser import vcpkg_json
 from repo_surveyor.integration_patterns.cpp.package_parser import conanfile_txt
 from repo_surveyor.integration_patterns.php.package_parser import composer_json
 from repo_surveyor.integration_patterns.scala.package_parser import build_sbt
-from repo_surveyor.detectors import FRAMEWORK_PATTERNS
+from repo_surveyor.detection.detectors import FRAMEWORK_PATTERNS
 
 
 # ---------------------------------------------------------------------------

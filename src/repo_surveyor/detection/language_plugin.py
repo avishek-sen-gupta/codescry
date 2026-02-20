@@ -13,10 +13,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from .constants import TechCategory
+from ..core.constants import TechCategory
 
 if TYPE_CHECKING:
-    from .integration_patterns.types import Language
+    from ..integration_patterns.types import Language
 
 # JSON config keys (used only within this module)
 _EXTENSIONS = "extensions"
@@ -273,7 +273,7 @@ class PluginRegistry:
 
     def extension_to_language_enum(self) -> dict[str, Language]:
         """Produce the same shape as EXTENSION_TO_LANGUAGE in integration_patterns."""
-        from .integration_patterns.types import Language as Lang
+        from ..integration_patterns.types import Language as Lang
 
         return {
             ext: lang_enum
@@ -287,7 +287,7 @@ class PluginRegistry:
 
         Dynamically imports integration pattern modules listed in languages.json.
         """
-        from .integration_patterns.types import Language as Lang
+        from ..integration_patterns.types import Language as Lang
 
         return {
             lang_enum: importlib.import_module(

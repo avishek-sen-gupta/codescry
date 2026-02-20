@@ -1,7 +1,7 @@
 """ML-based concretisation of integration signals using SignalClassifier."""
 
 from ..training.signal_classifier import SignalClassifier
-from ..integration_detector import IntegrationSignal
+from ..detection.integration_detector import IntegrationSignal
 from .grouper import SignalGroup
 from .types import ASTContext, ConcretisedSignal, ConcretisationResult
 

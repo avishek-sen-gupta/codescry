@@ -6,7 +6,7 @@ from functools import reduce
 from itertools import groupby
 from operator import attrgetter
 
-from ..integration_detector import IntegrationSignal
+from ..detection.integration_detector import IntegrationSignal
 from ..integration_patterns import Language
 from .ast_walker import extract_ast_context
 from .types import ASTContext

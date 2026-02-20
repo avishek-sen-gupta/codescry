@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from repo_surveyor.constants import MarkerKey, TechCategory
-from repo_surveyor.detectors import (
+from repo_surveyor.core.constants import MarkerKey, TechCategory
+from repo_surveyor.detection.detectors import (
     detect_frameworks_for_file,
     detect_frameworks_from_packages,
     detect_from_glob_patterns,

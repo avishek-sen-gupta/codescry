@@ -3,7 +3,10 @@
 Pure functions — no I/O, no side effects.
 """
 
-from repo_surveyor.symbol_resolver import ResolutionResult, SymbolIntegrationProfile
+from repo_surveyor.symbols.symbol_resolver import (
+    ResolutionResult,
+    SymbolIntegrationProfile,
+)
 
 _CONFIDENCE_STYLE: dict[str, str] = {
     "high": 'style=bold, color="#0d9488"',

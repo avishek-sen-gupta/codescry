@@ -4,7 +4,7 @@ from tree_sitter import Node
 from tree_sitter_language_pack import get_parser
 
 from ..integration_patterns import Language
-from ..syntax_zone import LANGUAGE_TO_TS_NAME
+from ..detection.syntax_zone import LANGUAGE_TO_TS_NAME
 from .types import ASTContext
 
 

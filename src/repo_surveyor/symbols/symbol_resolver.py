@@ -11,7 +11,7 @@ from itertools import groupby
 from operator import attrgetter
 
 from .ctags import CTagsEntry, CTagsResult
-from .integration_detector import (
+from ..detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
     IntegrationSignal,

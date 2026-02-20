@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 
 from repo_surveyor.integration_patterns import Language
-from repo_surveyor.pipeline_timer import PipelineTimingObserver
-from repo_surveyor.surveyor import RepoSurveyor, _normalise_languages, survey
+from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
+from repo_surveyor.core.surveyor import RepoSurveyor, _normalise_languages, survey
 from repo_surveyor.training.signal_classifier import NullSignalClassifier
 from repo_surveyor.training.types import TrainingLabel
 

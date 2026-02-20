@@ -5,23 +5,23 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from repo_surveyor.analysis_graph_builder import AnalysisGraphBuilder
-from repo_surveyor.report import DirectoryMarker, SurveyReport
-from repo_surveyor.ctags import CTagsEntry, CTagsResult
-from repo_surveyor.integration_detector import (
+from repo_surveyor.graph.analysis_graph_builder import AnalysisGraphBuilder
+from repo_surveyor.core.report import DirectoryMarker, SurveyReport
+from repo_surveyor.symbols.ctags import CTagsEntry, CTagsResult
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
     IntegrationSignal,
 )
 from repo_surveyor.integration_patterns.types import Confidence, IntegrationType
-from repo_surveyor.surveyor import RepoSurveyor
-from repo_surveyor.symbol_resolver import (
+from repo_surveyor.core.surveyor import RepoSurveyor
+from repo_surveyor.symbols.symbol_resolver import (
     ResolutionResult,
     SymbolIntegration,
     SymbolIntegrationProfile,
 )
-from repo_surveyor.graph_builder import (
+from repo_surveyor.graph.graph_builder import (
     build_tech_stack_graph,
     build_coarse_structure_graph,
     build_integration_graph,

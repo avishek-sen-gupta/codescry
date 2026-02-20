@@ -20,7 +20,11 @@ from collections.abc import Callable
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from ..integration_detector import EntityType, IntegrationDetectorResult, IntegrationSignal
+from ..detection.integration_detector import (
+    EntityType,
+    IntegrationDetectorResult,
+    IntegrationSignal,
+)
 from ..training.types import TrainingLabel
 from .grouper import group_signals_by_ast_context
 from .types import ASTContext, ConcretisedSignal, ConcretisationResult
@@ -74,7 +78,11 @@ def _build_prompt(
     """Build the Ollama prompt for a single file."""
     signal_lines = sorted(
         {
-            (s.match.line_number, s.integration_type.value, s.match.line_content.strip())
+            (
+                s.match.line_number,
+                s.integration_type.value,
+                s.match.line_content.strip(),
+            )
             for s in signals
         }
     )
@@ -154,14 +162,20 @@ def _parse_ollama_response(raw: dict) -> dict[int, tuple[TrainingLabel, float, s
             label = TrainingLabel(label_str)
         except ValueError:
             logger.warning(
-                "Unknown label %r for line %s — defaulting to NOT_DEFINITE", label_str, line
+                "Unknown label %r for line %s — defaulting to NOT_DEFINITE",
+                label_str,
+                line,
             )
             label = TrainingLabel.NOT_DEFINITE
 
         if line is not None:
             result[int(line)] = (label, confidence, reason)
             logger.debug(
-                "  Line %4d  %-20s  conf=%.2f  %s", int(line), label.value, confidence, reason[:60]
+                "  Line %4d  %-20s  conf=%.2f  %s",
+                int(line),
+                label.value,
+                confidence,
+                reason[:60],
             )
 
     return result
@@ -176,9 +190,7 @@ def _concretise_file(
     file_reader: Callable[[str], bytes],
 ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
     """Run Ollama classification for all signals in a single file."""
-    logger.info(
-        "Processing file: %s  (%d signals)", file_path, len(signals)
-    )
+    logger.info("Processing file: %s  (%d signals)", file_path, len(signals))
 
     try:
         raw_bytes = file_reader(file_path)
@@ -190,7 +202,9 @@ def _concretise_file(
                 original_signal=sig,
                 ast_context=signal_to_ast.get(
                     (sig.match.file_path, sig.match.line_number),
-                    ASTContext("unknown", "", sig.match.line_number, sig.match.line_number),
+                    ASTContext(
+                        "unknown", "", sig.match.line_number, sig.match.line_number
+                    ),
                 ),
                 label=TrainingLabel.NOT_DEFINITE,
             )
@@ -200,7 +214,10 @@ def _concretise_file(
     truncated = len(file_content) > _MAX_FILE_CHARS
     if truncated:
         logger.debug(
-            "File %s is %d chars — truncating to %d", file_path, len(file_content), _MAX_FILE_CHARS
+            "File %s is %d chars — truncating to %d",
+            file_path,
+            len(file_content),
+            _MAX_FILE_CHARS,
         )
         file_content = file_content[:_MAX_FILE_CHARS]
 
@@ -220,7 +237,10 @@ def _concretise_file(
         )
         if ln in line_map:
             label, confidence, reason = line_map[ln]
-            metadata[(sig.match.file_path, ln)] = {"confidence": confidence, "reason": reason}
+            metadata[(sig.match.file_path, ln)] = {
+                "confidence": confidence,
+                "reason": reason,
+            }
             logger.info(
                 "  Line %4d  %-20s  conf=%.2f  [%s]  %s  → %s",
                 ln,

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from repo_surveyor.integration_detector import (
+from repo_surveyor.detection.integration_detector import (
     Confidence,
     EntityType,
     FileMatch,

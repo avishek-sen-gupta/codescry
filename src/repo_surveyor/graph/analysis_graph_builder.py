@@ -6,20 +6,23 @@ from typing import Protocol
 
 from dotenv import load_dotenv
 
-from .constants import IntegrationLabel, IntegrationRelType, TechLabel
-from .ctags import CTagsResult
+from ..core.constants import IntegrationLabel, IntegrationRelType, TechLabel
+from ..symbols.ctags import CTagsResult
 from .graph_builder import (
     _TechNode,
     build_coarse_structure_graph,
     build_integration_graph,
     build_tech_stack_graph,
 )
-from .integration_detector import IntegrationDetectorResult, detect_integrations
-from .integration_patterns import Language
-from .pipeline_timer import NullPipelineTimer, PipelineTimer
-from .report import SurveyReport
-from .surveyor import RepoSurveyor, _normalise_languages
-from .symbol_resolver import ResolutionResult, resolve_integration_signals
+from ..detection.integration_detector import (
+    IntegrationDetectorResult,
+    detect_integrations,
+)
+from ..integration_patterns import Language
+from ..core.pipeline_timer import NullPipelineTimer, PipelineTimer
+from ..core.report import SurveyReport
+from ..core.surveyor import RepoSurveyor, _normalise_languages
+from ..symbols.symbol_resolver import ResolutionResult, resolve_integration_signals
 
 load_dotenv("../.env")
 

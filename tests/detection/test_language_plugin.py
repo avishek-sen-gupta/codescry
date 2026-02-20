@@ -1,6 +1,6 @@
 """Tests for the plugin registry and languages.json configuration."""
 
-from repo_surveyor.language_plugin import PluginRegistry
+from repo_surveyor.detection.language_plugin import PluginRegistry
 from repo_surveyor.integration_patterns.types import Language
 
 

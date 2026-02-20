@@ -7,7 +7,7 @@ and framework-specific patterns that apply when a framework is active.
 from .types import Confidence, IntegrationType, Language, PatternKey, SignalDirection
 from . import common
 
-from ..language_plugin import PluginRegistry
+from ..detection.language_plugin import PluginRegistry
 
 _registry = PluginRegistry()
 
@@ -35,7 +35,9 @@ def get_patterns_for_language(
         Dict mapping IntegrationType to list of
         (pattern, confidence, source, direction) tuples.
     """
-    result: dict[IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]] = {}
+    result: dict[
+        IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]
+    ] = {}
 
     for integration_type in IntegrationType:
         patterns: list[tuple[str, Confidence, str, SignalDirection]] = []

@@ -1,12 +1,12 @@
 """Tests for integration_to_dot module."""
 
-from repo_surveyor.integration_detector import (
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationSignal,
 )
 from repo_surveyor.integration_patterns.types import Confidence, IntegrationType
-from repo_surveyor.symbol_resolver import (
+from repo_surveyor.symbols.symbol_resolver import (
     ResolutionResult,
     SymbolIntegration,
     SymbolIntegrationProfile,

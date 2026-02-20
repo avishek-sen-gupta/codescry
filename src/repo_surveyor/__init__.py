@@ -1,7 +1,7 @@
 """Repo Surveyor - Analyze repository technology stacks."""
 
-from .ctags import CTagsConfig, CTagsEntry, CTagsResult
-from .analysis_graph_builder import AnalysisGraphBuilder, survey_and_persist
+from .symbols.ctags import CTagsConfig, CTagsEntry, CTagsResult
+from .graph.analysis_graph_builder import AnalysisGraphBuilder, survey_and_persist
 from .integration_concretiser import (
     ASTContext,
     ConcretisationResult,
@@ -10,7 +10,7 @@ from .integration_concretiser import (
     concretise_integration_signals,
 )
 from .integration_patterns import Confidence, IntegrationType, Language
-from .integration_detector import (
+from .detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
@@ -27,16 +27,16 @@ from .ml_classifier import (
     classify_file,
     classify_repository,
 )
-from .pipeline_timer import (
+from .core.pipeline_timer import (
     Clock,
     NullPipelineTimer,
     PipelineTimer,
     PipelineTimingObserver,
     SystemClock,
 )
-from .report import DirectoryMarker, SurveyReport
-from .surveyor import RepoSurveyor, survey
-from .symbol_resolver import (
+from .core.report import DirectoryMarker, SurveyReport
+from .core.surveyor import RepoSurveyor, survey
+from .symbols.symbol_resolver import (
     ResolutionResult,
     SymbolIntegration,
     SymbolIntegrationProfile,

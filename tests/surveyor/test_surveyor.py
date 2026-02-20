@@ -7,8 +7,8 @@ from pathlib import Path
 import pytest
 
 from repo_surveyor import CTagsConfig, CTagsEntry, RepoSurveyor, survey
-from repo_surveyor.ctags import _build_ctags_command, _parse_ctags_json_output
-from repo_surveyor.report import DirectoryMarker, SurveyReport
+from repo_surveyor.symbols.ctags import _build_ctags_command, _parse_ctags_json_output
+from repo_surveyor.core.report import DirectoryMarker, SurveyReport
 
 
 @pytest.mark.local_repo

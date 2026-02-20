@@ -8,7 +8,7 @@ from repo_surveyor.integration_concretiser import (
 )
 from repo_surveyor.integration_concretiser.concretiser import concretise_groups
 from repo_surveyor.integration_concretiser.types import ASTContext
-from repo_surveyor.integration_detector import (
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,

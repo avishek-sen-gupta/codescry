@@ -4,15 +4,15 @@ from pathlib import Path
 
 import pytest
 
-from repo_surveyor.ctags import CTagsEntry, CTagsResult
-from repo_surveyor.integration_detector import (
+from repo_surveyor.symbols.ctags import CTagsEntry, CTagsResult
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
     IntegrationSignal,
 )
 from repo_surveyor.integration_patterns import Confidence, IntegrationType
-from repo_surveyor.symbol_resolver import (
+from repo_surveyor.symbols.symbol_resolver import (
     ResolutionResult,
     SymbolIntegration,
     SymbolIntegrationProfile,
@@ -388,7 +388,7 @@ class TestSurveyEndToEnd:
             "    return {'status': 'ok'}\n"
         )
 
-        from repo_surveyor.surveyor import survey
+        from repo_surveyor.core.surveyor import survey
 
         tech_report, structure_result, integration_result, resolution, _ = survey(
             str(tmp_path)

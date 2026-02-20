@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from repo_surveyor.pipeline_timer import (
+from repo_surveyor.core.pipeline_timer import (
     NullPipelineTimer,
     PipelineTimingObserver,
     StageTimingRecord,

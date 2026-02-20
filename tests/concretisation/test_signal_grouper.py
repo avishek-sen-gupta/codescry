@@ -1,7 +1,7 @@
 """Tests for signal grouping by AST context."""
 
 from repo_surveyor.integration_concretiser.grouper import group_signals_by_ast_context
-from repo_surveyor.integration_detector import (
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationSignal,

@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 from ..training.types import TrainingLabel
-from ..integration_detector import IntegrationSignal
+from ..detection.integration_detector import IntegrationSignal
 
 
 @dataclass(frozen=True)

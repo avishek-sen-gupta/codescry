@@ -2,7 +2,7 @@
 
 import json
 
-from repo_surveyor.report import DirectoryMarker, SurveyReport
+from repo_surveyor.core.report import DirectoryMarker, SurveyReport
 
 
 class TestSurveyReportToText:

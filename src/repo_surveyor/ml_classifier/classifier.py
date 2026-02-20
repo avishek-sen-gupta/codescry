@@ -3,7 +3,10 @@
 from pathlib import Path
 from typing import Iterator
 
-from ..integration_detector import _get_source_files, get_language_from_extension
+from ..detection.integration_detector import (
+    _get_source_files,
+    get_language_from_extension,
+)
 from ..integration_patterns import Language
 from .model_protocol import LLMModel
 from .prefilter import prefilter_lines
