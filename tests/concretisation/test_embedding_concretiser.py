@@ -6,7 +6,7 @@ import pytest
 
 from repo_surveyor.integration_concretiser.ast_walker import (
     FALLBACK_AST_CONTEXT,
-    extract_statement_context,
+    extract_invocation_context,
 )
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
@@ -118,41 +118,60 @@ class _MockEmbeddingClient(EmbeddingClient):
 
 
 # ---------------------------------------------------------------------------
-# Tests: extract_statement_context (narrowest statement walk-up)
+# Tests: extract_invocation_context (nearest invocation walk-up)
 # ---------------------------------------------------------------------------
 
 
-class TestExtractStatementContext:
-    """Verify extract_statement_context returns the narrowest statement."""
+class TestExtractInvocationContext:
+    """Verify extract_invocation_context returns the nearest invocation."""
 
-    def test_returns_expression_statement_not_function(self):
-        ctx = extract_statement_context(_PYTHON_SOURCE, Language.PYTHON, 5)
-        assert "expression_statement" == ctx.node_type or "assignment" == ctx.node_type
+    def test_python_method_call_returns_call(self):
+        ctx = extract_invocation_context(_PYTHON_SOURCE, Language.PYTHON, 5)
+        assert ctx.node_type == "call"
+        assert "requests.get" in ctx.node_text
         assert ctx.start_line <= 5
         assert ctx.end_line >= 5
 
-    def test_standalone_function_body_returns_nearest_structural(self):
-        ctx = extract_statement_context(_PYTHON_SOURCE, Language.PYTHON, 12)
-        assert "statement" in ctx.node_type or "definition" in ctx.node_type
+    def test_python_standalone_call_returns_call(self):
+        ctx = extract_invocation_context(_PYTHON_SOURCE, Language.PYTHON, 12)
+        assert ctx.node_type == "call"
+        assert "db.execute" in ctx.node_text
 
     def test_unsupported_language_returns_fallback(self):
-        ctx = extract_statement_context(b"some content", Language.PLI, 1)
+        ctx = extract_invocation_context(b"some content", Language.PLI, 1)
         assert ctx == FALLBACK_AST_CONTEXT
 
     def test_empty_file_returns_fallback(self):
-        ctx = extract_statement_context(b"", Language.PYTHON, 1)
+        ctx = extract_invocation_context(b"", Language.PYTHON, 1)
         assert ctx == FALLBACK_AST_CONTEXT
 
-    def test_import_line_returns_import(self):
-        ctx = extract_statement_context(_PYTHON_SOURCE, Language.PYTHON, 1)
+    def test_import_line_falls_back_to_statement(self):
+        ctx = extract_invocation_context(_PYTHON_SOURCE, Language.PYTHON, 1)
         assert "import" in ctx.node_type
         assert "requests" in ctx.node_text
 
-    def test_java_method_body_returns_statement(self):
-        ctx = extract_statement_context(_JAVA_SOURCE, Language.JAVA, 10)
-        assert ctx.node_text != ""
+    def test_java_method_call_returns_invocation(self):
+        ctx = extract_invocation_context(_JAVA_SOURCE, Language.JAVA, 10)
+        assert ctx.node_type == "method_invocation"
+        assert "findAll" in ctx.node_text
         assert ctx.start_line <= 10
         assert ctx.end_line >= 10
+
+    def test_java_chained_builder_returns_innermost_invocation(self):
+        javalin_source = b"""\
+public class App {
+    void run() {
+        Javalin.create(config -> {
+            config.jsonMapper(mapper);
+        }).get("/api/users", ctx -> {
+            ctx.json(users);
+        }).start(8080);
+    }
+}
+"""
+        ctx = extract_invocation_context(javalin_source, Language.JAVA, 4)
+        assert ctx.node_type == "method_invocation"
+        assert "jsonMapper" in ctx.node_text
 
 
 # ---------------------------------------------------------------------------

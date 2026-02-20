@@ -29,7 +29,7 @@ from repo_surveyor.detection.integration_detector import (
 )
 from repo_surveyor.integration_concretiser.ast_walker import (
     FALLBACK_AST_CONTEXT,
-    extract_statement_context,
+    extract_invocation_context,
 )
 from repo_surveyor.integration_concretiser.types import (
     ASTContext,
@@ -40,7 +40,7 @@ from repo_surveyor.training.types import TrainingLabel
 
 logger = logging.getLogger(__name__)
 
-_CONFIDENCE_THRESHOLD = 0.40
+_CONFIDENCE_THRESHOLD = 0.18
 
 _BATCH_SIZE = 32
 
@@ -243,15 +243,13 @@ class EmbeddingConcretiser:
         )
 
         signal_contexts = self._extract_contexts(file_content_signals, file_reader)
-        statement_texts = [ctx.node_text for ctx in signal_contexts]
+        line_texts = [sig.match.line_content.strip() for sig in file_content_signals]
 
-        logger.info("Embedding %d statement texts...", len(statement_texts))
-        statement_embeddings = (
-            self._client.embed_batch(statement_texts) if statement_texts else []
-        )
+        logger.info("Embedding %d signal line texts...", len(line_texts))
+        signal_embeddings = self._client.embed_batch(line_texts) if line_texts else []
 
         concretised, metadata = self._classify_signals(
-            file_content_signals, signal_contexts, statement_embeddings
+            file_content_signals, signal_contexts, signal_embeddings
         )
 
         definite = sum(1 for s in concretised if s.is_definite)
@@ -291,7 +289,7 @@ class EmbeddingConcretiser:
                 contexts.append(FALLBACK_AST_CONTEXT)
                 continue
 
-            ctx = extract_statement_context(
+            ctx = extract_invocation_context(
                 file_cache[fp], language, sig.match.line_number
             )
             contexts.append(ctx)

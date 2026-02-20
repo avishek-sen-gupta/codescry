@@ -43,6 +43,39 @@ class _StatementNodes:
     )
 
 
+class _InvocationNodes:
+    """Tree-sitter node types that represent method/function calls."""
+
+    TYPES = frozenset(
+        {
+            "method_invocation",
+            "call_expression",
+            "call",
+            "invocation_expression",
+            "method_call",
+            "method_call_expression",
+            "function_call",
+        }
+    )
+
+
+class _BoundaryNodes:
+    """Tree-sitter node types that represent scope boundaries for walk-up.
+
+    Walking past these nodes would escape into a parent scope, losing
+    the tight context around the signal.
+    """
+
+    TYPES = frozenset(
+        {
+            "lambda_expression",
+            "arrow_function",
+            "anonymous_function",
+            "closure_expression",
+        }
+    )
+
+
 class _RootNodes:
     """Tree-sitter node types that represent root/module-level constructs."""
 
@@ -79,6 +112,16 @@ def _is_statement_node(node: Node) -> bool:
     if node_type in _StatementNodes.EXACT:
         return True
     return any(node_type.endswith(suffix) for suffix in _StatementNodes.SUFFIXES)
+
+
+def _is_invocation_node(node: Node) -> bool:
+    """Return True if the node is a method/function call node."""
+    return node.type in _InvocationNodes.TYPES
+
+
+def _is_boundary_node(node: Node) -> bool:
+    """Return True if the node is a scope boundary (lambda, arrow fn, etc.)."""
+    return node.type in _BoundaryNodes.TYPES
 
 
 def _is_root_node(node: Node) -> bool:
@@ -134,6 +177,30 @@ def _walk_up_to_statement(node: Node) -> Node:
     current = node
     while current is not None and not _is_root_node(current):
         if _is_statement_node(current) or _is_definition_node(current):
+            return current
+        current = current.parent
+    return node
+
+
+def _walk_up_to_invocation(node: Node) -> Node:
+    """Walk up the tree from node to the nearest method/function invocation.
+
+    Stops at the **first** invocation-like ancestor (e.g. ``method_invocation``,
+    ``call_expression``).  Also treats scope boundaries (lambda, arrow
+    function, block) as stop points to avoid escaping into a parent scope
+    that contains a much larger chained expression.
+
+    If no invocation is found before hitting a boundary, statement,
+    definition, or root node, falls back to whatever boundary or
+    statement was encountered.
+    """
+    current = node
+    while current is not None and not _is_root_node(current):
+        if _is_invocation_node(current):
+            return current
+        if _is_statement_node(current) or _is_definition_node(current):
+            return current
+        if _is_boundary_node(current):
             return current
         current = current.parent
     return node
@@ -235,4 +302,54 @@ def extract_statement_context(
         node_text=_node_text(statement, file_content),
         start_line=statement.start_point.row + 1,
         end_line=statement.end_point.row + 1,
+    )
+
+
+def extract_invocation_context(
+    file_content: bytes,
+    language: Language,
+    line_number: int,
+) -> ASTContext:
+    """Extract the nearest enclosing invocation-level AST context for a line.
+
+    Walks up to the **first** method/function call ancestor (e.g.
+    ``method_invocation``, ``call_expression``).  This captures just the
+    call and its arguments — tighter than statement-level context, which
+    for chained builder patterns can span an entire fluent expression.
+
+    Falls back to the nearest statement or definition if no invocation
+    ancestor exists (e.g. for annotations or import lines).
+
+    Args:
+        file_content: Raw bytes of the source file.
+        language: Programming language of the file.
+        line_number: 1-indexed line number of the signal.
+
+    Returns:
+        ASTContext with the enclosing node's type, text, and line range.
+        Returns a fallback context if the language is unsupported or
+        the line cannot be resolved.
+    """
+    ts_name = LANGUAGE_TO_TS_NAME.get(language)
+    if ts_name is None:
+        return FALLBACK_AST_CONTEXT
+
+    parser = get_parser(ts_name)
+    tree = parser.parse(file_content)
+    line_0indexed = line_number - 1
+
+    deepest = _deepest_named_node_at_line(tree.root_node, line_0indexed)
+    if deepest is None:
+        return FALLBACK_AST_CONTEXT
+
+    invocation = _walk_up_to_invocation(deepest)
+
+    if _is_root_node(invocation):
+        return FALLBACK_AST_CONTEXT
+
+    return ASTContext(
+        node_type=invocation.type,
+        node_text=_node_text(invocation, file_content),
+        start_line=invocation.start_point.row + 1,
+        end_line=invocation.end_point.row + 1,
     )
