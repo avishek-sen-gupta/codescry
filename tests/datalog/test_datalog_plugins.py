@@ -8,15 +8,15 @@ from pathlib import Path
 import pytest
 from tree_sitter_language_pack import get_parser
 
-from datalog_plugins import (
+from query.datalog_plugins import (
     CallExtractionStrategy,
     CallFieldMapping,
     DatalogLanguagePlugin,
     DatalogPluginRegistry,
     make_default_registry,
 )
+from query.treesitter_to_datalog import _NULL_PLUGIN, emit_datalog, run_souffle
 from repo_surveyor.integration_patterns.types import Language
-from treesitter_to_datalog import _NULL_PLUGIN, emit_datalog
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -327,9 +327,6 @@ class TestPluginAwareEmitter:
         assert "findById" in method_names
 
     def test_additive_scope_opener_extra_type_appears_in_scopes(self):
-        from datalog_plugins import CallFieldMapping
-        from repo_surveyor.integration_patterns.types import Language
-
         custom_plugin = DatalogLanguagePlugin(
             language=Language.JAVA,
             tree_sitter_language="java",
@@ -360,8 +357,6 @@ class TestPluginAwareEmitter:
 class TestAnalysisDlWithBridgeFacts:
     @requires_souffle
     def test_java_plugin_method_decl_contains_correct_names(self, tmp_path):
-        from treesitter_to_datalog import run_souffle
-
         java_plugin = _registry().get(Language.JAVA)
         assert java_plugin is not None
 
@@ -383,8 +378,6 @@ public class Service {
 
     @requires_souffle
     def test_python_plugin_method_decl_contains_function_names(self, tmp_path):
-        from treesitter_to_datalog import run_souffle
-
         python_plugin = _registry().get(Language.PYTHON)
         assert python_plugin is not None
 

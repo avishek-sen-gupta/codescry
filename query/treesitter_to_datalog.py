@@ -113,7 +113,7 @@ _DECLARATION_PARENTS: frozenset[str] = frozenset(
 # Plugin import (one-way: plugins → emitter, not back)
 # ---------------------------------------------------------------------------
 
-from datalog_plugins import (  # noqa: E402
+from .datalog_plugins import (  # noqa: E402
     CallExtractionStrategy,
     DatalogLanguagePlugin,
     make_default_registry,
@@ -444,7 +444,7 @@ class _Emitter:
         ),
         call_field_mapping: object = None,
     ) -> None:
-        from datalog_plugins import CallExtractionStrategy, CallFieldMapping
+        from .datalog_plugins import CallExtractionStrategy, CallFieldMapping
 
         self._source = source
         self._scope_openers = scope_openers
@@ -579,7 +579,7 @@ class _Emitter:
     # ------------------------------------------------------------------
 
     def _emit_call(self, node: Node, our_id: int) -> None:
-        from datalog_plugins import CallExtractionStrategy
+        from .datalog_plugins import CallExtractionStrategy
 
         mapping = self._call_field_mapping
         if mapping.mode == CallExtractionStrategy.DIRECT_FIELDS:

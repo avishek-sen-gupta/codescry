@@ -20,9 +20,9 @@ from pathlib import Path
 import pytest
 from tree_sitter_language_pack import get_parser
 
-from datalog_plugins import make_default_registry
+from query.datalog_plugins import make_default_registry
+from query.treesitter_to_datalog import emit_datalog, run_souffle
 from repo_surveyor.integration_patterns.types import Language
-from treesitter_to_datalog import emit_datalog, run_souffle
 
 _JAVA_PLUGIN = make_default_registry().get(Language.JAVA)
 
