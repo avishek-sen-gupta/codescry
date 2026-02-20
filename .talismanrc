@@ -35,3 +35,5 @@ fileignoreconfig:
   checksum: e84af923796a2de90e8c59a37d6875fbb5da863a2375e9941e3f0b95293cae6d
 - filename: scripts/embedding_matrix_test.py
   checksum: f396d5b6dc845e7c9ecd792ff51f7077218169e59e1103576491676c77e00766
+- filename: scripts/embedding_direction_test.py
+  checksum: d3d7f859a182f9c1cd907eb8c0da07b91ec336136113f1674d0d4714124b3732
