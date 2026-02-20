@@ -6,10 +6,10 @@ from functools import reduce
 from itertools import groupby
 from operator import attrgetter
 
-from ..detection.integration_detector import IntegrationSignal
-from ..integration_patterns import Language
-from .ast_walker import extract_ast_context
-from .types import ASTContext
+from repo_surveyor.detection.integration_detector import IntegrationSignal
+from repo_surveyor.integration_patterns import Language
+from repo_surveyor.integration_concretiser.ast_walker import extract_ast_context
+from repo_surveyor.integration_concretiser.types import ASTContext
 
 
 @dataclass(frozen=True)

@@ -10,8 +10,8 @@ from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
 
-from .ctags import CTagsEntry, CTagsResult
-from ..detection.integration_detector import (
+from repo_surveyor.symbols.ctags import CTagsEntry, CTagsResult
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
     IntegrationSignal,

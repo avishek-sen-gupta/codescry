@@ -11,7 +11,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-from .types import TrainingExample
+from repo_surveyor.training.types import TrainingExample
 
 logger = logging.getLogger(__name__)
 

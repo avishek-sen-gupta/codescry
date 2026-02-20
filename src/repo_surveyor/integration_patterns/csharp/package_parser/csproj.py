@@ -4,7 +4,10 @@ import xml.etree.ElementTree as ET
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import CsprojAttrs, CsprojElements
+from repo_surveyor.integration_patterns.csharp.package_parser.constants import (
+    CsprojAttrs,
+    CsprojElements,
+)
 
 SOURCE = ".csproj"
 

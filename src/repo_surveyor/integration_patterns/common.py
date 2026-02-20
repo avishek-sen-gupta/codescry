@@ -1,6 +1,12 @@
 """Common integration patterns that apply across all languages."""
 
-from .types import BasePatternSpec, Confidence, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    BasePatternSpec,
+    Confidence,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 COMMON = BasePatternSpec(
     patterns={
@@ -130,7 +136,11 @@ COMMON = BasePatternSpec(
         },
         IntegrationType.SSE_STREAMING: {
             PatternKey.PATTERNS: [
-                (r"(?i)\bserver.sent.events?\b", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (
+                    r"(?i)\bserver.sent.events?\b",
+                    Confidence.MEDIUM,
+                    SignalDirection.AMBIGUOUS,
+                ),
                 (r"(?i)\bsse\b", Confidence.LOW, SignalDirection.AMBIGUOUS),
             ],
             PatternKey.DIRECTORY_PATTERNS: [

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import requests
 
-from .types import DocumentSymbol, Location
+from repo_surveyor.lsp_bridge.types import DocumentSymbol, Location
 
 
 def _parse_symbol(raw: dict) -> DocumentSymbol:

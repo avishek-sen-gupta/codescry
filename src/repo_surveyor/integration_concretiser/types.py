@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 
-from ..training.types import TrainingLabel
-from ..detection.integration_detector import IntegrationSignal
+from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.detection.integration_detector import IntegrationSignal
 
 
 @dataclass(frozen=True)

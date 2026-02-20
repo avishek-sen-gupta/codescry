@@ -4,7 +4,11 @@ import json
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import ComposerJsonKeys, PLATFORM_EXACT, PLATFORM_PREFIX
+from repo_surveyor.integration_patterns.php.package_parser.constants import (
+    ComposerJsonKeys,
+    PLATFORM_EXACT,
+    PLATFORM_PREFIX,
+)
 
 SOURCE = "composer.json"
 

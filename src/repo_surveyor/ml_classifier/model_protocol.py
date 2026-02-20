@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from .types import CompletionResult
+from repo_surveyor.ml_classifier.types import CompletionResult
 
 
 class LLMModel(Protocol):

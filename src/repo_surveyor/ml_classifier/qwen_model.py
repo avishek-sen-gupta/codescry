@@ -1,6 +1,6 @@
 """Concrete LLMModel implementation using Qwen2.5-Coder via Ollama."""
 
-from .types import CompletionResult
+from repo_surveyor.ml_classifier.types import CompletionResult
 
 _MODEL = "qwen2.5-coder:1.5b-instruct"
 

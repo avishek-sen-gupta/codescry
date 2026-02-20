@@ -5,7 +5,7 @@ from tree_sitter_language_pack import get_language, get_parser
 
 from repo_surveyor.lsp_bridge import DocumentSymbol, LspBridgeClient
 
-from .types import CallTree
+from repo_surveyor.call_flow.types import CallTree
 
 # LSP SymbolKind: 6 = Method, 9 = Constructor, 12 = Function
 _METHOD_KINDS = {6, 9, 12}

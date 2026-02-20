@@ -3,28 +3,34 @@
 import logging
 from pathlib import Path
 
-from .constants import MarkerKey, TechCategory
-from ..symbols.ctags import CTagsConfig, CTagsResult, run_ctags
-from ..detection.detectors import (
+from repo_surveyor.core.constants import MarkerKey, TechCategory
+from repo_surveyor.symbols.ctags import CTagsConfig, CTagsResult, run_ctags
+from repo_surveyor.detection.detectors import (
     detect_frameworks_for_file,
     detect_from_glob_patterns,
     detect_indicator_files_with_directories,
     detect_kubernetes,
     detect_languages_from_extensions,
 )
-from ..integration_concretiser import (
+from repo_surveyor.integration_concretiser import (
     ConcretisationResult,
     concretise_integration_signals,
 )
-from ..detection.integration_detector import (
+from repo_surveyor.detection.integration_detector import (
     IntegrationDetectorResult,
     detect_integrations,
 )
-from ..integration_patterns import Language
-from .pipeline_timer import NullPipelineTimer, PipelineTimer
-from .report import DirectoryMarker, SurveyReport
-from ..symbols.symbol_resolver import ResolutionResult, resolve_integration_signals
-from ..training.signal_classifier import NullSignalClassifier, SignalClassifier
+from repo_surveyor.integration_patterns import Language
+from repo_surveyor.core.pipeline_timer import NullPipelineTimer, PipelineTimer
+from repo_surveyor.core.report import DirectoryMarker, SurveyReport
+from repo_surveyor.symbols.symbol_resolver import (
+    ResolutionResult,
+    resolve_integration_signals,
+)
+from repo_surveyor.training.signal_classifier import (
+    NullSignalClassifier,
+    SignalClassifier,
+)
 
 logger = logging.getLogger(__name__)
 

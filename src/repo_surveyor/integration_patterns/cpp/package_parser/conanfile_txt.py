@@ -2,7 +2,9 @@
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import ConanfileMarkers
+from repo_surveyor.integration_patterns.cpp.package_parser.constants import (
+    ConanfileMarkers,
+)
 
 SOURCE = "conanfile.txt"
 

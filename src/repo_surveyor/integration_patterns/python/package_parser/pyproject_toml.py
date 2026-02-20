@@ -5,7 +5,9 @@ import tomllib
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import PyprojectKeys
+from repo_surveyor.integration_patterns.python.package_parser.constants import (
+    PyprojectKeys,
+)
 
 SOURCE = "pyproject.toml"
 

@@ -1,6 +1,6 @@
 """Prompt construction and chunking for the ML classifier."""
 
-from .types import MLIntegrationType
+from repo_surveyor.ml_classifier.types import MLIntegrationType
 
 _CATEGORIES = ", ".join(t.value for t in MLIntegrationType)
 

@@ -1,6 +1,12 @@
 """ASP.NET Core framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="ASP.NET Core",
@@ -10,7 +16,11 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"IApplicationBuilder", Confidence.HIGH, SignalDirection.INWARD),
                 (r"app\.MapGet", Confidence.HIGH, SignalDirection.INWARD),
                 (r"app\.MapPost", Confidence.HIGH, SignalDirection.INWARD),
-                (r"WebApplication\.CreateBuilder", Confidence.HIGH, SignalDirection.INWARD),
+                (
+                    r"WebApplication\.CreateBuilder",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
                 (r"MinimalApi", Confidence.HIGH, SignalDirection.INWARD),
             ],
         },
@@ -25,7 +35,11 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"UseInMemoryDatabase\(", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"AddEntityFrameworkStores", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"AddNeo4j\(", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"services\.AddSingleton<IDriver>", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"services\.AddSingleton<IDriver>",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
             ],
         },
         IntegrationType.GRPC: {
@@ -42,8 +56,16 @@ FRAMEWORK = FrameworkPatternSpec(
         },
         IntegrationType.CACHING: {
             PatternKey.PATTERNS: [
-                (r"AddStackExchangeRedisCache", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"AddDistributedMemoryCache", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"AddStackExchangeRedisCache",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (
+                    r"AddDistributedMemoryCache",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
             ],
         },
         IntegrationType.SCHEDULING: {

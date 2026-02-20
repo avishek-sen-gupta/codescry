@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from .types import DocumentSymbol, Location
+from repo_surveyor.lsp_bridge.types import DocumentSymbol, Location
 
 
 class LspBridgeClient(Protocol):

@@ -3,9 +3,9 @@
 from tree_sitter import Node
 from tree_sitter_language_pack import get_parser
 
-from ..integration_patterns import Language
-from ..detection.syntax_zone import LANGUAGE_TO_TS_NAME
-from .types import ASTContext
+from repo_surveyor.integration_patterns import Language
+from repo_surveyor.detection.syntax_zone import LANGUAGE_TO_TS_NAME
+from repo_surveyor.integration_concretiser.types import ASTContext
 
 
 class _DefinitionNodes:

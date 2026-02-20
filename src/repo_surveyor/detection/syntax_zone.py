@@ -10,7 +10,7 @@ from enum import Enum
 
 from tree_sitter import Node
 
-from ..integration_patterns import Language
+from repo_surveyor.integration_patterns import Language
 
 
 class SyntaxZone(Enum):

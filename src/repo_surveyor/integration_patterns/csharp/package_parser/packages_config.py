@@ -4,7 +4,10 @@ import xml.etree.ElementTree as ET
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import PackagesConfigAttrs, PackagesConfigElements
+from repo_surveyor.integration_patterns.csharp.package_parser.constants import (
+    PackagesConfigAttrs,
+    PackagesConfigElements,
+)
 
 SOURCE = "packages.config"
 

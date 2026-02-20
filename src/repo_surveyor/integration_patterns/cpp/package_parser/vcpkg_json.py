@@ -4,7 +4,7 @@ import json
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import VcpkgKeys
+from repo_surveyor.integration_patterns.cpp.package_parser.constants import VcpkgKeys
 
 SOURCE = "vcpkg.json"
 

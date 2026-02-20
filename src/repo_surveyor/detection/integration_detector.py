@@ -12,7 +12,7 @@ from itertools import chain
 from pathlib import Path
 from typing import Iterator
 
-from ..integration_patterns import (
+from repo_surveyor.integration_patterns import (
     Confidence,
     IntegrationType,
     Language,
@@ -22,8 +22,13 @@ from ..integration_patterns import (
     get_import_patterns_for_framework,
     get_directory_patterns,
 )
-from ..core.pipeline_timer import NullPipelineTimer, PipelineTimer
-from .syntax_zone import SyntaxRangeMap, SyntaxZone, classify_line, parse_file_zones
+from repo_surveyor.core.pipeline_timer import NullPipelineTimer, PipelineTimer
+from repo_surveyor.detection.syntax_zone import (
+    SyntaxRangeMap,
+    SyntaxZone,
+    classify_line,
+    parse_file_zones,
+)
 
 _SKIP_ZONES = frozenset(
     {

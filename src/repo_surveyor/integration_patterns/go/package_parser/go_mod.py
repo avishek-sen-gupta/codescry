@@ -4,7 +4,7 @@ import re
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import GoModMarkers
+from repo_surveyor.integration_patterns.go.package_parser.constants import GoModMarkers
 
 SOURCE = "go.mod"
 

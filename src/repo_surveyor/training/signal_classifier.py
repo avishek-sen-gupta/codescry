@@ -13,7 +13,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from .types import TrainingExample, TrainingLabel
+from repo_surveyor.training.types import TrainingExample, TrainingLabel
 
 
 class _ModelConfig:

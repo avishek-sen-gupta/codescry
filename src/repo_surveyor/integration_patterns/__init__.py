@@ -4,10 +4,16 @@ Patterns are organized by language with base patterns that always apply
 and framework-specific patterns that apply when a framework is active.
 """
 
-from .types import Confidence, IntegrationType, Language, PatternKey, SignalDirection
-from . import common
+from repo_surveyor.integration_patterns.types import (
+    Confidence,
+    IntegrationType,
+    Language,
+    PatternKey,
+    SignalDirection,
+)
+from repo_surveyor.integration_patterns import common
 
-from ..detection.language_plugin import PluginRegistry
+from repo_surveyor.detection.language_plugin import PluginRegistry
 
 _registry = PluginRegistry()
 

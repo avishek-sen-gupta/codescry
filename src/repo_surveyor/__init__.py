@@ -1,23 +1,26 @@
 """Repo Surveyor - Analyze repository technology stacks."""
 
-from .symbols.ctags import CTagsConfig, CTagsEntry, CTagsResult
-from .graph.analysis_graph_builder import AnalysisGraphBuilder, survey_and_persist
-from .integration_concretiser import (
+from repo_surveyor.symbols.ctags import CTagsConfig, CTagsEntry, CTagsResult
+from repo_surveyor.graph.analysis_graph_builder import (
+    AnalysisGraphBuilder,
+    survey_and_persist,
+)
+from repo_surveyor.integration_concretiser import (
     ASTContext,
     ConcretisationResult,
     ConcretisedSignal,
     SignalGroup,
     concretise_integration_signals,
 )
-from .integration_patterns import Confidence, IntegrationType, Language
-from .detection.integration_detector import (
+from repo_surveyor.integration_patterns import Confidence, IntegrationType, Language
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
     IntegrationSignal,
     detect_integrations,
 )
-from .ml_classifier import (
+from repo_surveyor.ml_classifier import (
     ClassifiedLine,
     CompletionResult,
     FileClassification,
@@ -27,16 +30,16 @@ from .ml_classifier import (
     classify_file,
     classify_repository,
 )
-from .core.pipeline_timer import (
+from repo_surveyor.core.pipeline_timer import (
     Clock,
     NullPipelineTimer,
     PipelineTimer,
     PipelineTimingObserver,
     SystemClock,
 )
-from .core.report import DirectoryMarker, SurveyReport
-from .core.surveyor import RepoSurveyor, survey
-from .symbols.symbol_resolver import (
+from repo_surveyor.core.report import DirectoryMarker, SurveyReport
+from repo_surveyor.core.surveyor import RepoSurveyor, survey
+from repo_surveyor.symbols.symbol_resolver import (
     ResolutionResult,
     SymbolIntegration,
     SymbolIntegrationProfile,

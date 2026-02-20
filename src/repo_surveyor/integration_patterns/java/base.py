@@ -1,6 +1,12 @@
 """Java base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    BasePatternSpec,
+    Confidence,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 BASE = BasePatternSpec(
     patterns={
@@ -57,9 +63,17 @@ BASE = BasePatternSpec(
                 (r"PreparedStatement", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"ResultSet\b", Confidence.MEDIUM, SignalDirection.OUTWARD),
                 (r"DynamoDbClient", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"import org\.neo4j\.driver", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"import org\.neo4j\.driver",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
                 (r"GraphDatabase\.driver", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"DriverManager\.getConnection", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"DriverManager\.getConnection",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
             ],
         },
         IntegrationType.FILE_IO: {
@@ -71,8 +85,16 @@ BASE = BasePatternSpec(
                 (r"Files\.write", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"Files\.copy", Confidence.HIGH, SignalDirection.AMBIGUOUS),
                 (r"AmazonS3Client", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"import com\.azure\.storage\.blob", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"import com\.google\.cloud\.storage", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"import com\.azure\.storage\.blob",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (
+                    r"import com\.google\.cloud\.storage",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
             ],
         },
         IntegrationType.GRPC: {
@@ -97,7 +119,11 @@ BASE = BasePatternSpec(
         },
         IntegrationType.CACHING: {
             PatternKey.PATTERNS: [
-                (r"import redis\.clients\.jedis", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"import redis\.clients\.jedis",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
                 (r"import io\.lettuce", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"import javax\.cache", Confidence.HIGH, SignalDirection.OUTWARD),
             ],
@@ -121,7 +147,11 @@ BASE = BasePatternSpec(
             PatternKey.PATTERNS: [
                 (r"import org\.quartz", Confidence.HIGH, SignalDirection.AMBIGUOUS),
                 (r"@Schedule", Confidence.HIGH, SignalDirection.AMBIGUOUS),
-                (r"ScheduledExecutorService", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"ScheduledExecutorService",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
             ],
         },
     },

@@ -6,15 +6,15 @@ These are independent of any specific graph database.
 
 import itertools
 
-from ..core.constants import TechLabel, TechRelType
-from ..symbols.ctags import CTagsResult
-from ..detection.integration_detector import (
+from repo_surveyor.core.constants import TechLabel, TechRelType
+from repo_surveyor.symbols.ctags import CTagsResult
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
     IntegrationSignal,
 )
-from ..core.report import SurveyReport
-from ..symbols.symbol_resolver import ResolutionResult
+from repo_surveyor.core.report import SurveyReport
+from repo_surveyor.symbols.symbol_resolver import ResolutionResult
 
 
 class _DirNode:

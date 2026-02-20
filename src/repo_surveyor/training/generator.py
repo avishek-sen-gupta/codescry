@@ -14,13 +14,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ..ml_classifier.types import CompletionResult
-from ..ml_classifier.model_protocol import LLMModel
-from .types import TrainingExample, TrainingLabel
-from .coverage import CoverageEntry
+from repo_surveyor.ml_classifier.types import CompletionResult
+from repo_surveyor.ml_classifier.model_protocol import LLMModel
+from repo_surveyor.training.types import TrainingExample, TrainingLabel
+from repo_surveyor.training.coverage import CoverageEntry
 
 if TYPE_CHECKING:
-    from ..ml_classifier.claude_model import ClaudeClassifierModel
+    from repo_surveyor.ml_classifier.claude_model import ClaudeClassifierModel
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +163,7 @@ def _parse_generated_examples(
         # Haiku sometimes emits invalid JSON escape sequences (e.g. \p, \s, \d
         # in code/regex snippets). Escape lone backslashes that are not part of
         # a valid JSON escape sequence and retry once.
-        text = re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', text)
+        text = re.sub(r'\\(?!["\\/bfnrtu])', r"\\\\", text)
         try:
             raw_examples = json.loads(text)
         except json.JSONDecodeError as exc:

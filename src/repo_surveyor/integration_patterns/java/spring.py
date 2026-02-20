@@ -1,6 +1,12 @@
 """Spring framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Spring",
@@ -82,8 +88,16 @@ FRAMEWORK = FrameworkPatternSpec(
         },
         IntegrationType.FTP_SFTP: {
             PatternKey.PATTERNS: [
-                (r"FtpInboundFileSynchronizer", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"SftpInboundFileSynchronizer", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"FtpInboundFileSynchronizer",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (
+                    r"SftpInboundFileSynchronizer",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
                 (r"@ServiceActivator.*ftp", Confidence.HIGH, SignalDirection.OUTWARD),
             ],
         },

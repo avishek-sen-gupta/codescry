@@ -1,6 +1,12 @@
 """ServiceStack framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="ServiceStack",
@@ -15,7 +21,11 @@ FRAMEWORK = FrameworkPatternSpec(
         },
         IntegrationType.DATABASE: {
             PatternKey.PATTERNS: [
-                (r"using ServiceStack\.OrmLite", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"using ServiceStack\.OrmLite",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
                 (r"OrmLiteConnectionFactory", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"IDbConnectionFactory", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"Db\.Select<", Confidence.HIGH, SignalDirection.OUTWARD),

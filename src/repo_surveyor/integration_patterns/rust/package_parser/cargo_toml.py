@@ -4,7 +4,7 @@ import tomllib
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import CargoKeys
+from repo_surveyor.integration_patterns.rust.package_parser.constants import CargoKeys
 
 SOURCE = "Cargo.toml"
 

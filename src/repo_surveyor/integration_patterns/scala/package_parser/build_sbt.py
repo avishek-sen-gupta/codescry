@@ -2,7 +2,9 @@
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import BuildSbtPatterns
+from repo_surveyor.integration_patterns.scala.package_parser.constants import (
+    BuildSbtPatterns,
+)
 
 SOURCE = "build.sbt"
 

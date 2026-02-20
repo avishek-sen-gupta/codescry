@@ -1,7 +1,7 @@
 """Reusable call-flow extraction from source files via LSP."""
 
-from .types import CallTree
-from .extractor import extract_call_tree, format_call_tree
+from repo_surveyor.call_flow.types import CallTree
+from repo_surveyor.call_flow.extractor import extract_call_tree, format_call_tree
 
 __all__ = [
     "CallTree",

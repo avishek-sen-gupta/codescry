@@ -4,7 +4,9 @@ import json
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import PackageJsonKeys
+from repo_surveyor.integration_patterns.javascript.package_parser.constants import (
+    PackageJsonKeys,
+)
 
 SOURCE = "package.json"
 

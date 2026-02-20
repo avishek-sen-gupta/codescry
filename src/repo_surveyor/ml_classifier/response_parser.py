@@ -1,6 +1,6 @@
 """Parse model responses into ClassifiedLine instances."""
 
-from .types import ClassifiedLine, MLIntegrationType
+from repo_surveyor.ml_classifier.types import ClassifiedLine, MLIntegrationType
 
 _LABEL_LOOKUP: dict[str, MLIntegrationType] = {t.value: t for t in MLIntegrationType}
 

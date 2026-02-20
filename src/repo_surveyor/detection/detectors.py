@@ -3,8 +3,8 @@
 import os
 from pathlib import Path
 
-from ..core.constants import MarkerKey, TechCategory
-from .language_plugin import PluginRegistry
+from repo_surveyor.core.constants import MarkerKey, TechCategory
+from repo_surveyor.detection.language_plugin import PluginRegistry
 
 _registry = PluginRegistry()
 
@@ -101,7 +101,7 @@ def detect_indicator_files_with_directories(
 
 def detect_from_glob_patterns(repo_path: Path) -> dict[str, set[str]]:
     """Detect technologies from glob patterns."""
-    from ..package_parsers import match_frameworks, parse_dependencies
+    from repo_surveyor.package_parsers import match_frameworks, parse_dependencies
 
     results: dict[str, set[str]] = {
         TechCategory.LANGUAGES: set(),
@@ -184,7 +184,7 @@ def detect_languages_from_extensions(repo_path: Path) -> set[str]:
 
 def detect_frameworks_from_packages(repo_path: Path) -> set[str]:
     """Detect frameworks from package files."""
-    from ..package_parsers import match_frameworks, parse_dependencies
+    from repo_surveyor.package_parsers import match_frameworks, parse_dependencies
 
     frameworks: set[str] = set()
 
@@ -218,7 +218,7 @@ def detect_frameworks_from_packages(repo_path: Path) -> set[str]:
 
 def detect_frameworks_for_file(filepath: Path) -> list[str]:
     """Detect frameworks from a specific package file."""
-    from ..package_parsers import match_frameworks, parse_dependencies
+    from repo_surveyor.package_parsers import match_frameworks, parse_dependencies
 
     if not filepath.exists():
         return []

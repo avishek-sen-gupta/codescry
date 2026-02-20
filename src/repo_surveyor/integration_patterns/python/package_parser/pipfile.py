@@ -4,7 +4,9 @@ import tomllib
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import PipfileKeys
+from repo_surveyor.integration_patterns.python.package_parser.constants import (
+    PipfileKeys,
+)
 
 SOURCE = "Pipfile"
 

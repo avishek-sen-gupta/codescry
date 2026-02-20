@@ -1,8 +1,8 @@
 """Reusable client for communicating with an LSP bridge server."""
 
-from .types import DocumentSymbol, Location
-from .client_protocol import LspBridgeClient
-from .requests_client import RequestsLspBridgeClient
+from repo_surveyor.lsp_bridge.types import DocumentSymbol, Location
+from repo_surveyor.lsp_bridge.client_protocol import LspBridgeClient
+from repo_surveyor.lsp_bridge.requests_client import RequestsLspBridgeClient
 
 __all__ = [
     "DocumentSymbol",

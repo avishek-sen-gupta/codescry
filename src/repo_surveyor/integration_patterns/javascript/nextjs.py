@@ -1,6 +1,12 @@
 """Next.js framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Next.js",
@@ -11,7 +17,11 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"NextApiResponse", Confidence.HIGH, SignalDirection.INWARD),
                 (r"getServerSideProps", Confidence.HIGH, SignalDirection.INWARD),
                 (r"getStaticProps", Confidence.HIGH, SignalDirection.INWARD),
-                (r"require\(['\"]next/server['\"]\)", Confidence.HIGH, SignalDirection.INWARD),
+                (
+                    r"require\(['\"]next/server['\"]\)",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
             ],
         },
     },

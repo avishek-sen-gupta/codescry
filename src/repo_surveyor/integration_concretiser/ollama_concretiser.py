@@ -20,14 +20,18 @@ from collections.abc import Callable
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from ..detection.integration_detector import (
+from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
     IntegrationSignal,
 )
-from ..training.types import TrainingLabel
-from .grouper import group_signals_by_ast_context
-from .types import ASTContext, ConcretisedSignal, ConcretisationResult
+from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.integration_concretiser.grouper import group_signals_by_ast_context
+from repo_surveyor.integration_concretiser.types import (
+    ASTContext,
+    ConcretisedSignal,
+    ConcretisationResult,
+)
 
 logger = logging.getLogger(__name__)
 

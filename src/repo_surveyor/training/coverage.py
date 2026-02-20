@@ -6,10 +6,17 @@ patterns and are therefore valid targets for training example generation.
 
 from dataclasses import dataclass
 
-from ..integration_patterns import get_patterns_for_language, LANGUAGE_MODULES
-from ..integration_patterns.types import IntegrationType, Language, PatternKey
+from repo_surveyor.integration_patterns import (
+    get_patterns_for_language,
+    LANGUAGE_MODULES,
+)
+from repo_surveyor.integration_patterns.types import (
+    IntegrationType,
+    Language,
+    PatternKey,
+)
 
-from .types import TrainingLabel
+from repo_surveyor.training.types import TrainingLabel
 
 
 @dataclass(frozen=True)

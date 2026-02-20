@@ -6,15 +6,22 @@ then classifies each signal using a trained SignalClassifier.
 
 from collections.abc import Callable
 
-from ..detection.integration_detector import (
+from repo_surveyor.detection.integration_detector import (
     IntegrationDetectorResult,
     IntegrationSignal,
     EntityType,
 )
-from ..training.signal_classifier import SignalClassifier
-from .concretiser import concretise_groups
-from .grouper import SignalGroup, group_signals_by_ast_context
-from .types import ASTContext, ConcretisedSignal, ConcretisationResult
+from repo_surveyor.training.signal_classifier import SignalClassifier
+from repo_surveyor.integration_concretiser.concretiser import concretise_groups
+from repo_surveyor.integration_concretiser.grouper import (
+    SignalGroup,
+    group_signals_by_ast_context,
+)
+from repo_surveyor.integration_concretiser.types import (
+    ASTContext,
+    ConcretisedSignal,
+    ConcretisationResult,
+)
 
 
 def _read_file_bytes(file_path: str) -> bytes:

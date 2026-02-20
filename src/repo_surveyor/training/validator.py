@@ -11,10 +11,13 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 
-from ..integration_patterns import get_patterns_for_language, LANGUAGE_MODULES
-from ..integration_patterns.types import IntegrationType, Language
+from repo_surveyor.integration_patterns import (
+    get_patterns_for_language,
+    LANGUAGE_MODULES,
+)
+from repo_surveyor.integration_patterns.types import IntegrationType, Language
 
-from .types import TrainingExample, TrainingLabel
+from repo_surveyor.training.types import TrainingExample, TrainingLabel
 
 logger = logging.getLogger(__name__)
 

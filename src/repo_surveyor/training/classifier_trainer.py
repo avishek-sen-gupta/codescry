@@ -9,8 +9,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from .types import TrainingExample, TrainingLabel
-from .signal_classifier import SignalClassifier
+from repo_surveyor.training.types import TrainingExample, TrainingLabel
+from repo_surveyor.training.signal_classifier import SignalClassifier
 
 
 @dataclass(frozen=True)

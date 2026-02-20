@@ -1,6 +1,12 @@
 """C# base integration patterns."""
 
-from ..types import BasePatternSpec, Confidence, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    BasePatternSpec,
+    Confidence,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 BASE = BasePatternSpec(
     patterns={
@@ -36,13 +42,25 @@ BASE = BasePatternSpec(
                 (r"IMessageHandler", Confidence.HIGH, SignalDirection.INWARD),
                 (r"IBus\b", Confidence.MEDIUM, SignalDirection.OUTWARD),
                 (r"Amazon\.SQS", Confidence.HIGH, SignalDirection.AMBIGUOUS),
-                (r"Amazon\.SimpleNotificationService", Confidence.HIGH, SignalDirection.AMBIGUOUS),
-                (r"Azure\.Messaging\.ServiceBus", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"Amazon\.SimpleNotificationService",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
+                (
+                    r"Azure\.Messaging\.ServiceBus",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
             ],
         },
         IntegrationType.SOCKET: {
             PatternKey.PATTERNS: [
-                (r"using Microsoft\.AspNetCore\.SignalR", Confidence.HIGH, SignalDirection.INWARD),
+                (
+                    r"using Microsoft\.AspNetCore\.SignalR",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
                 (r": Hub\b", Confidence.HIGH, SignalDirection.INWARD),
                 (r"HubConnection", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"TcpClient", Confidence.MEDIUM, SignalDirection.OUTWARD),

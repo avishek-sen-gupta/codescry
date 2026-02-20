@@ -1,6 +1,6 @@
 """PL/I base integration patterns."""
 
-from ..types import (
+from repo_surveyor.integration_patterns.types import (
     BasePatternSpec,
     Confidence,
     IntegrationType,

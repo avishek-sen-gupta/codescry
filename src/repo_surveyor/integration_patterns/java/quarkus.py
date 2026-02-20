@@ -1,6 +1,12 @@
 """Quarkus framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Quarkus",
@@ -20,7 +26,11 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"io\.quarkus\.hibernate", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"io\.quarkus\.panache", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"@NamedQuery", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"import io\.quarkus\.neo4j", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"import io\.quarkus\.neo4j",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
             ],
         },
         IntegrationType.MESSAGING: {

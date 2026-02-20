@@ -1,6 +1,12 @@
 """NestJS framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="NestJS",
@@ -16,14 +22,30 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"@Body\(", Confidence.HIGH, SignalDirection.INWARD),
                 (r"@Param\(", Confidence.HIGH, SignalDirection.INWARD),
                 (r"@Query\(", Confidence.HIGH, SignalDirection.INWARD),
-                (r"from ['\"]@nestjs/common['\"]", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"from ['\"]@nestjs/common['\"]",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
             ],
         },
         IntegrationType.DATABASE: {
             PatternKey.PATTERNS: [
-                (r"from ['\"]@nestjs/typeorm['\"]", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"from ['\"]@nestjs/mongoose['\"]", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"from ['\"]@nestjs/sequelize['\"]", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"from ['\"]@nestjs/typeorm['\"]",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (
+                    r"from ['\"]@nestjs/mongoose['\"]",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
+                (
+                    r"from ['\"]@nestjs/sequelize['\"]",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
                 (r"TypeOrmModule", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"MongooseModule", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"SequelizeModule", Confidence.HIGH, SignalDirection.OUTWARD),
@@ -32,7 +54,11 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"InjectRepository\(", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"InjectModel\(", Confidence.HIGH, SignalDirection.OUTWARD),
                 (r"@nestjs/prisma", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"from ['\"]nest-neo4j['\"]", Confidence.HIGH, SignalDirection.OUTWARD),
+                (
+                    r"from ['\"]nest-neo4j['\"]",
+                    Confidence.HIGH,
+                    SignalDirection.OUTWARD,
+                ),
                 (r"Neo4jService", Confidence.HIGH, SignalDirection.OUTWARD),
             ],
         },
@@ -50,7 +76,11 @@ FRAMEWORK = FrameworkPatternSpec(
         },
         IntegrationType.GRAPHQL: {
             PatternKey.PATTERNS: [
-                (r"from ['\"]@nestjs/graphql['\"]", Confidence.HIGH, SignalDirection.INWARD),
+                (
+                    r"from ['\"]@nestjs/graphql['\"]",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                ),
                 (r"@Query\(\)", Confidence.HIGH, SignalDirection.INWARD),
                 (r"@Mutation\(\)", Confidence.HIGH, SignalDirection.INWARD),
                 (r"@Resolver\(\)", Confidence.HIGH, SignalDirection.INWARD),
@@ -77,7 +107,11 @@ FRAMEWORK = FrameworkPatternSpec(
         IntegrationType.SCHEDULING: {
             PatternKey.PATTERNS: [
                 (r"@Cron\(", Confidence.HIGH, SignalDirection.AMBIGUOUS),
-                (r"from ['\"]@nestjs/schedule['\"]", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"from ['\"]@nestjs/schedule['\"]",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
                 (r"ScheduleModule", Confidence.HIGH, SignalDirection.AMBIGUOUS),
             ],
         },

@@ -1,14 +1,14 @@
 """ML-based code line classifier using LLM models."""
 
-from .types import (
+from repo_surveyor.ml_classifier.types import (
     ClassifiedLine,
     CompletionResult,
     FileClassification,
     MLIntegrationType,
     RepositoryClassification,
 )
-from .model_protocol import LLMModel
-from .classifier import classify_file, classify_repository
+from repo_surveyor.ml_classifier.model_protocol import LLMModel
+from repo_surveyor.ml_classifier.classifier import classify_file, classify_repository
 
 __all__ = [
     "ClassifiedLine",

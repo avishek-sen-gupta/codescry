@@ -1,6 +1,12 @@
 """Spring WS framework integration patterns."""
 
-from ..types import Confidence, FrameworkPatternSpec, IntegrationType, PatternKey, SignalDirection
+from repo_surveyor.integration_patterns.types import (
+    Confidence,
+    FrameworkPatternSpec,
+    IntegrationType,
+    PatternKey,
+    SignalDirection,
+)
 
 FRAMEWORK = FrameworkPatternSpec(
     name="Spring WS",
@@ -10,7 +16,11 @@ FRAMEWORK = FrameworkPatternSpec(
                 (r"@Endpoint", Confidence.HIGH, SignalDirection.INWARD),
                 (r"@PayloadRoot", Confidence.HIGH, SignalDirection.INWARD),
                 (r"WebServiceTemplate", Confidence.HIGH, SignalDirection.OUTWARD),
-                (r"org\.springframework\.ws", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"org\.springframework\.ws",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                ),
             ],
         },
     },

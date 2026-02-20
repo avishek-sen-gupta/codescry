@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import PomElements
+from repo_surveyor.integration_patterns.java.package_parser.constants import PomElements
 
 SOURCE = "pom.xml"
 

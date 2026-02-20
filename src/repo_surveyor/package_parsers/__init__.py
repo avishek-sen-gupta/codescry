@@ -3,23 +3,29 @@
 Dispatches to format-specific parsers and provides smart framework matching.
 """
 
-from ..core.constants import TechCategory
-from .constants import DepSeparators
-from .types import ParsedDependency
-from ..integration_patterns.python.package_parser import (
+from repo_surveyor.core.constants import TechCategory
+from repo_surveyor.package_parsers.constants import DepSeparators
+from repo_surveyor.package_parsers.types import ParsedDependency
+from repo_surveyor.integration_patterns.python.package_parser import (
     pyproject_toml,
     requirements_txt,
     pipfile,
     setup_py,
 )
-from ..integration_patterns.javascript.package_parser import package_json
-from ..integration_patterns.java.package_parser import pom_xml, build_gradle
-from ..integration_patterns.go.package_parser import go_mod
-from ..integration_patterns.rust.package_parser import cargo_toml
-from ..integration_patterns.csharp.package_parser import csproj, packages_config
-from ..integration_patterns.cpp.package_parser import vcpkg_json, conanfile_txt
-from ..integration_patterns.php.package_parser import composer_json
-from ..integration_patterns.scala.package_parser import build_sbt
+from repo_surveyor.integration_patterns.javascript.package_parser import package_json
+from repo_surveyor.integration_patterns.java.package_parser import pom_xml, build_gradle
+from repo_surveyor.integration_patterns.go.package_parser import go_mod
+from repo_surveyor.integration_patterns.rust.package_parser import cargo_toml
+from repo_surveyor.integration_patterns.csharp.package_parser import (
+    csproj,
+    packages_config,
+)
+from repo_surveyor.integration_patterns.cpp.package_parser import (
+    vcpkg_json,
+    conanfile_txt,
+)
+from repo_surveyor.integration_patterns.php.package_parser import composer_json
+from repo_surveyor.integration_patterns.scala.package_parser import build_sbt
 
 _PARSERS: dict[str, callable] = {
     pyproject_toml.SOURCE: pyproject_toml.parse,

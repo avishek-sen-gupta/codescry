@@ -3,16 +3,24 @@
 from pathlib import Path
 from typing import Iterator
 
-from ..detection.integration_detector import (
+from repo_surveyor.detection.integration_detector import (
     _get_source_files,
     get_language_from_extension,
 )
-from ..integration_patterns import Language
-from .model_protocol import LLMModel
-from .prefilter import prefilter_lines
-from .prompt import SYSTEM_PROMPT, build_user_prompt, chunk_lines
-from .response_parser import parse_classification_response
-from .types import ClassifiedLine, FileClassification, RepositoryClassification
+from repo_surveyor.integration_patterns import Language
+from repo_surveyor.ml_classifier.model_protocol import LLMModel
+from repo_surveyor.ml_classifier.prefilter import prefilter_lines
+from repo_surveyor.ml_classifier.prompt import (
+    SYSTEM_PROMPT,
+    build_user_prompt,
+    chunk_lines,
+)
+from repo_surveyor.ml_classifier.response_parser import parse_classification_response
+from repo_surveyor.ml_classifier.types import (
+    ClassifiedLine,
+    FileClassification,
+    RepositoryClassification,
+)
 
 
 def classify_file(

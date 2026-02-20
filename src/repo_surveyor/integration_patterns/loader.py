@@ -4,7 +4,7 @@ import importlib
 import pkgutil
 from pathlib import Path
 
-from .types import BasePatternSpec
+from repo_surveyor.integration_patterns.types import BasePatternSpec
 
 
 def load_language_patterns(

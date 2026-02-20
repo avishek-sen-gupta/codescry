@@ -4,7 +4,9 @@ import re
 
 from repo_surveyor.package_parsers.types import ParsedDependency
 
-from .constants import RequirementsTxtMarkers
+from repo_surveyor.integration_patterns.python.package_parser.constants import (
+    RequirementsTxtMarkers,
+)
 
 SOURCE = "requirements.txt"
 
