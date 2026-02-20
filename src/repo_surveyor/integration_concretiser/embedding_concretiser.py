@@ -190,11 +190,27 @@ class EmbeddingClient:
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Embed a list of texts, batching internally to avoid overflows."""
         import json
+        import time
         from urllib.request import Request, urlopen
 
+        total_texts = len(texts)
+        total_batches = math.ceil(total_texts / _BATCH_SIZE)
+        logger.info(
+            "[Nomic] Embedding %d texts in %d batches (batch_size=%d)",
+            total_texts,
+            total_batches,
+            _BATCH_SIZE,
+        )
+
         all_embeddings: list[list[float]] = []
-        for chunk in batched(texts, _BATCH_SIZE):
+        for batch_idx, chunk in enumerate(batched(texts, _BATCH_SIZE), start=1):
             chunk_list = list(chunk)
+            logger.info(
+                "[Nomic] Batch %d/%d: sending %d texts to endpoint",
+                batch_idx,
+                total_batches,
+                len(chunk_list),
+            )
             payload = json.dumps({"inputs": chunk_list}).encode("utf-8")
             req = Request(
                 self._endpoint_url,
@@ -204,9 +220,24 @@ class EmbeddingClient:
                     "Authorization": f"Bearer {self._token}",
                 },
             )
+            t0 = time.monotonic()
             with urlopen(req, timeout=120) as resp:
                 result = json.loads(resp.read())
+            elapsed = time.monotonic() - t0
+            dim = len(result[0]) if result else 0
+            logger.info(
+                "[Nomic] Batch %d/%d: received %d embeddings (dim=%d) in %.2fs",
+                batch_idx,
+                total_batches,
+                len(result),
+                dim,
+                elapsed,
+            )
             all_embeddings.extend(result)
+
+        logger.info(
+            "[Nomic] Embedding complete: %d total embeddings", len(all_embeddings)
+        )
         return all_embeddings
 
 
@@ -222,17 +253,51 @@ class GeminiEmbeddingClient:
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Embed a list of texts via the Gemini embedding API."""
+        import time
+
         from google.genai import types
 
+        total_texts = len(texts)
+        total_batches = math.ceil(total_texts / _BATCH_SIZE)
+        logger.info(
+            "[Gemini] Embedding %d texts in %d batches (batch_size=%d, model=%s)",
+            total_texts,
+            total_batches,
+            _BATCH_SIZE,
+            self._MODEL,
+        )
+
         all_embeddings: list[list[float]] = []
-        for chunk in batched(texts, _BATCH_SIZE):
+        for batch_idx, chunk in enumerate(batched(texts, _BATCH_SIZE), start=1):
             chunk_list = list(chunk)
+            logger.info(
+                "[Gemini] Batch %d/%d: sending %d texts",
+                batch_idx,
+                total_batches,
+                len(chunk_list),
+            )
+            t0 = time.monotonic()
             result = self._client.models.embed_content(
                 model=self._MODEL,
                 contents=chunk_list,
                 config=types.EmbedContentConfig(output_dimensionality=768),
             )
-            all_embeddings.extend(emb.values for emb in result.embeddings)
+            elapsed = time.monotonic() - t0
+            batch_embeddings = [emb.values for emb in result.embeddings]
+            dim = len(batch_embeddings[0]) if batch_embeddings else 0
+            logger.info(
+                "[Gemini] Batch %d/%d: received %d embeddings (dim=%d) in %.2fs",
+                batch_idx,
+                total_batches,
+                len(batch_embeddings),
+                dim,
+                elapsed,
+            )
+            all_embeddings.extend(batch_embeddings)
+
+        logger.info(
+            "[Gemini] Embedding complete: %d total embeddings", len(all_embeddings)
+        )
         return all_embeddings
 
 
@@ -308,19 +373,23 @@ class EmbeddingConcretiser:
         file_reader: Callable[[str], bytes],
     ) -> list[ASTContext]:
         """Extract statement-level AST context for each signal."""
+        logger.info("Extracting AST contexts for %d signals...", len(signals))
         file_cache: dict[str, bytes] = {}
         contexts: list[ASTContext] = []
+        fallback_count = 0
         for sig in signals:
             fp = sig.match.file_path
             if fp not in file_cache:
                 try:
                     file_cache[fp] = file_reader(fp)
+                    logger.debug("Cached file: %s", fp)
                 except OSError as exc:
                     logger.error("Cannot read %s: %s", fp, exc)
                     file_cache[fp] = b""
 
             language = sig.match.language
             if language is None:
+                fallback_count += 1
                 contexts.append(FALLBACK_AST_CONTEXT)
                 continue
 
@@ -328,6 +397,13 @@ class EmbeddingConcretiser:
                 file_cache[fp], language, sig.match.line_number
             )
             contexts.append(ctx)
+
+        logger.info(
+            "AST context extraction complete: %d contexts from %d unique files (%d fallbacks)",
+            len(contexts),
+            len(file_cache),
+            fallback_count,
+        )
         return contexts
 
     def _classify_signals(
@@ -337,10 +413,17 @@ class EmbeddingConcretiser:
         embeddings: list[list[float]],
     ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
         """Classify each signal by argmax cosine similarity over descriptions."""
+        logger.info(
+            "Classifying %d signals against %d directional descriptions (threshold=%.3f)",
+            len(signals),
+            len(self._desc_keys),
+            self._threshold,
+        )
         concretised: list[ConcretisedSignal] = []
         metadata: dict[tuple[str, int], dict] = {}
+        label_counts: dict[str, int] = {}
 
-        for sig, ctx, emb in zip(signals, contexts, embeddings):
+        for idx, (sig, ctx, emb) in enumerate(zip(signals, contexts, embeddings)):
             scores = [cosine(emb, desc_emb) for desc_emb in self._desc_embeddings]
             best_idx = max(range(len(scores)), key=lambda i: scores[i])
             best_score = scores[best_idx]
@@ -351,6 +434,8 @@ class EmbeddingConcretiser:
             else:
                 label = _DIRECTION_TO_LABEL[best_direction]
 
+            label_counts[label.value] = label_counts.get(label.value, 0) + 1
+
             key = (sig.match.file_path, sig.match.line_number)
             metadata[key] = {
                 "best_type": best_type,
@@ -359,7 +444,9 @@ class EmbeddingConcretiser:
             }
 
             logger.debug(
-                "  %s:%d  score=%.3f  type=%s  dir=%s  label=%s",
+                "  [%d/%d] %s:%d  score=%.3f  type=%s  dir=%s  label=%s",
+                idx + 1,
+                len(signals),
                 sig.match.file_path,
                 sig.match.line_number,
                 best_score,
@@ -376,4 +463,8 @@ class EmbeddingConcretiser:
                 )
             )
 
+        logger.info(
+            "Classification complete: %s",
+            ", ".join(f"{k}={v}" for k, v in sorted(label_counts.items())),
+        )
         return concretised, metadata
