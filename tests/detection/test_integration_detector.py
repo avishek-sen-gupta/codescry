@@ -83,6 +83,28 @@ class TestGetLanguageFromExtension:
         """Should detect Scala from .scala extension."""
         assert get_language_from_extension("App.scala") == Language.SCALA
 
+    def test_ruby_extension(self) -> None:
+        """Should detect Ruby from .rb extension."""
+        assert get_language_from_extension("app.rb") == Language.RUBY
+
+    def test_cpp_extension(self) -> None:
+        """Should detect C++ from .cpp and .hpp extensions."""
+        assert get_language_from_extension("main.cpp") == Language.CPP
+        assert get_language_from_extension("header.hpp") == Language.CPP
+
+    def test_c_extension(self) -> None:
+        """Should detect C from .c and .h extensions."""
+        assert get_language_from_extension("main.c") == Language.C
+        assert get_language_from_extension("header.h") == Language.C
+
+    def test_pascal_extension(self) -> None:
+        """Should detect Pascal from .pas, .pp, .dpr, .lpr, and .inc extensions."""
+        assert get_language_from_extension("Unit1.pas") == Language.PASCAL
+        assert get_language_from_extension("Unit1.pp") == Language.PASCAL
+        assert get_language_from_extension("Project1.dpr") == Language.PASCAL
+        assert get_language_from_extension("Project1.lpr") == Language.PASCAL
+        assert get_language_from_extension("types.inc") == Language.PASCAL
+
     def test_unknown_extension(self) -> None:
         """Should return None for unknown extensions."""
         assert get_language_from_extension("file.xyz") is None
@@ -185,6 +207,80 @@ class TestGetPatternsForLanguage:
         patterns = get_patterns_for_language(Language.SCALA, frameworks=["http4s"])
         http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
         assert any("HttpRoutes" in p for p in http_patterns)
+
+    def test_go_base_patterns_loaded(self) -> None:
+        """Should load Go base patterns with HTTP and database types."""
+        patterns = get_patterns_for_language(Language.GO)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("HandleFunc" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("gorm" in p for p in db_patterns)
+
+    def test_csharp_base_patterns_loaded(self) -> None:
+        """Should load C# base patterns with HTTP and database types."""
+        patterns = get_patterns_for_language(Language.CSHARP)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("ApiController" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("EntityFramework" in p for p in db_patterns)
+
+    def test_cobol_base_patterns_loaded(self) -> None:
+        """Should load COBOL base patterns with database and messaging types."""
+        patterns = get_patterns_for_language(Language.COBOL)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("EXEC" in p and "SQL" in p for p in db_patterns)
+        msg_patterns = [p[0] for p in patterns[IntegrationType.MESSAGING]]
+        assert any("MQOPEN" in p for p in msg_patterns)
+
+    def test_javascript_base_patterns_loaded(self) -> None:
+        """Should load JavaScript base patterns with HTTP and database types."""
+        patterns = get_patterns_for_language(Language.JAVASCRIPT)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("fastify" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("sequelize" in p for p in db_patterns)
+
+    def test_ruby_base_patterns_loaded(self) -> None:
+        """Should load Ruby base patterns with HTTP and database types."""
+        patterns = get_patterns_for_language(Language.RUBY)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("Net::HTTP" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("ActiveRecord" in p for p in db_patterns)
+
+    def test_cpp_base_patterns_loaded(self) -> None:
+        """Should load C++ base patterns with HTTP and database types."""
+        patterns = get_patterns_for_language(Language.CPP)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("curl" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("sqlite3" in p for p in db_patterns)
+
+    def test_pli_base_patterns_loaded(self) -> None:
+        """Should load PL/I base patterns with database and messaging types."""
+        patterns = get_patterns_for_language(Language.PLI)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("EXEC" in p and "SQL" in p for p in db_patterns)
+        msg_patterns = [p[0] for p in patterns[IntegrationType.MESSAGING]]
+        assert any("MQOPEN" in p or "MQPUT" in p for p in msg_patterns)
+
+    def test_pascal_base_patterns_loaded(self) -> None:
+        """Should load Pascal base patterns with HTTP, database, and socket types."""
+        patterns = get_patterns_for_language(Language.PASCAL)
+        http_patterns = [p[0] for p in patterns[IntegrationType.HTTP_REST]]
+        assert any("TIdHTTP" in p for p in http_patterns)
+        db_patterns = [p[0] for p in patterns[IntegrationType.DATABASE]]
+        assert any("TFDConnection" in p for p in db_patterns)
+        socket_patterns = [p[0] for p in patterns[IntegrationType.SOCKET]]
+        assert any("TIdTCPServer" in p for p in socket_patterns)
+
+    def test_pascal_covers_nine_integration_types(self) -> None:
+        """Pascal base patterns should cover 9 integration types."""
+        patterns = get_patterns_for_language(Language.PASCAL)
+        pascal_types = [
+            t for t in IntegrationType if any(p[2] == "Pascal" for p in patterns[t])
+        ]
+        assert len(pascal_types) == 9
 
 
 class TestClassifyDirectory:
@@ -584,6 +680,125 @@ END MQSEND;
                 p for p in points if p.integration_type == IntegrationType.DATABASE
             ]
             assert len(db_points) > 0
+        finally:
+            file_path.unlink()
+
+    def test_scan_pascal_file_with_firedac_database(self) -> None:
+        """Should detect FireDAC database patterns in Pascal files."""
+        with tempfile.NamedTemporaryFile(suffix=".pas", mode="w", delete=False) as f:
+            f.write("""unit DataModule;
+
+interface
+
+uses
+  FireDAC.Comp.Client, FireDAC.Stan.Def;
+
+type
+  TDM = class(TDataModule)
+    FDConnection1: TFDConnection;
+    FDQuery1: TFDQuery;
+  end;
+
+implementation
+
+procedure TDM.LoadData;
+begin
+  FDQuery1.SQL.Text := 'SELECT * FROM customers';
+  FDQuery1.Open;
+end;
+
+end.
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            db_points = [
+                p for p in points if p.integration_type == IntegrationType.DATABASE
+            ]
+            assert len(db_points) > 0
+
+            high_conf = [p for p in db_points if p.confidence == Confidence.HIGH]
+            assert len(high_conf) > 0
+        finally:
+            file_path.unlink()
+
+    def test_scan_pascal_file_with_indy_http(self) -> None:
+        """Should detect Indy HTTP patterns in Pascal files."""
+        with tempfile.NamedTemporaryFile(suffix=".pas", mode="w", delete=False) as f:
+            f.write("""unit HttpClient;
+
+interface
+
+uses
+  IdHTTP;
+
+type
+  TMyClient = class
+    FHttp: TIdHTTP;
+  end;
+
+implementation
+
+procedure TMyClient.FetchData;
+var
+  Response: string;
+begin
+  Response := FHttp.Get('https://api.example.com/data');
+end;
+
+end.
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            http_points = [
+                p for p in points if p.integration_type == IntegrationType.HTTP_REST
+            ]
+            assert len(http_points) > 0
+
+            high_conf = [p for p in http_points if p.confidence == Confidence.HIGH]
+            assert len(high_conf) > 0
+        finally:
+            file_path.unlink()
+
+    def test_scan_pascal_file_with_indy_tcp_server(self) -> None:
+        """Should detect Indy TCP server patterns in Pascal files."""
+        with tempfile.NamedTemporaryFile(suffix=".pas", mode="w", delete=False) as f:
+            f.write("""unit SocketServer;
+
+interface
+
+uses
+  IdTCPServer;
+
+type
+  TMyServer = class
+    FServer: TIdTCPServer;
+  end;
+
+implementation
+
+end.
+""")
+            f.flush()
+            file_path = Path(f.name)
+
+        try:
+            points = list(scan_file_for_integrations(file_path))
+            assert len(points) > 0
+
+            socket_points = [
+                p for p in points if p.integration_type == IntegrationType.SOCKET
+            ]
+            assert len(socket_points) > 0
         finally:
             file_path.unlink()
 

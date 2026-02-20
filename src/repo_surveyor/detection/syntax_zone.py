@@ -63,6 +63,7 @@ class _NodeTypes:
             "template_string",
             "heredoc_body",
             "verbatim_string_literal",
+            "literalString",  # Pascal
         }
     )
 
@@ -111,6 +112,7 @@ class _TreeSitterLanguages:
         Language.C: "c",
         Language.CPP: "cpp",
         Language.COBOL: "cobol",
+        Language.PASCAL: "pascal",
     }
 
 

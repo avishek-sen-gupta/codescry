@@ -272,6 +272,10 @@
     "PL/I": {
       "extensions": [".pli", ".pl1", ".plinc"],
       "integration_module": "pli"
+    },
+    "Pascal": {
+      "extensions": [".pas", ".pp", ".dpr", ".lpr", ".inc"],
+      "integration_module": "pascal"
     }
   },
   "infrastructure": {

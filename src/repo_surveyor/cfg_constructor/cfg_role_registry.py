@@ -37,6 +37,7 @@ _LANG_TO_DIR: dict[Language, str] = {
     Language.KOTLIN: "kotlin",
     Language.SCALA: "scala",
     Language.PHP: "php",
+    Language.PASCAL: "pascal",
 }
 
 _ROLE_LOOKUP: dict[str, ControlFlowRole] = {

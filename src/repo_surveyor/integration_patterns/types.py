@@ -22,6 +22,7 @@ class Language(Enum):
     CPP = "C++"
     COBOL = "COBOL"
     PLI = "PL/I"
+    PASCAL = "Pascal"
 
     @classmethod
     def from_name(cls, name: str) -> "Language | None":

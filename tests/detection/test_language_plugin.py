@@ -191,6 +191,18 @@ class TestExtensionLanguagesParity:
     def test_perl(self):
         assert self.ext_langs[".pl"] == "Perl"
 
+    def test_pli(self):
+        assert self.ext_langs[".pli"] == "PL/I"
+        assert self.ext_langs[".pl1"] == "PL/I"
+        assert self.ext_langs[".plinc"] == "PL/I"
+
+    def test_pascal(self):
+        assert self.ext_langs[".pas"] == "Pascal"
+        assert self.ext_langs[".pp"] == "Pascal"
+        assert self.ext_langs[".dpr"] == "Pascal"
+        assert self.ext_langs[".lpr"] == "Pascal"
+        assert self.ext_langs[".inc"] == "Pascal"
+
 
 class TestFrameworkPatternsParity:
     """Verify all_framework_patterns() matches the old FRAMEWORK_PATTERNS dict."""
@@ -390,6 +402,14 @@ class TestIntegrationPatternLayer:
         assert ext_map[".pl1"] == Language.PLI
         assert ext_map[".plinc"] == Language.PLI
 
+    def test_extension_to_language_enum_pascal(self):
+        ext_map = self.registry.extension_to_language_enum()
+        assert ext_map[".pas"] == Language.PASCAL
+        assert ext_map[".pp"] == Language.PASCAL
+        assert ext_map[".dpr"] == Language.PASCAL
+        assert ext_map[".lpr"] == Language.PASCAL
+        assert ext_map[".inc"] == Language.PASCAL
+
     def test_extension_to_language_enum_includes_c_cpp(self):
         ext_map = self.registry.extension_to_language_enum()
         assert ext_map[".cpp"] == Language.CPP
@@ -416,6 +436,10 @@ class TestIntegrationPatternLayer:
         assert Language.COBOL in modules
         assert Language.PLI in modules
         assert Language.RUBY in modules
+        assert Language.PASCAL in modules
+        assert Language.KOTLIN in modules
+        assert Language.PHP in modules
+        assert Language.SCALA in modules
 
     def test_language_modules_have_base_patterns(self):
         modules = self.registry.language_to_integration_module()

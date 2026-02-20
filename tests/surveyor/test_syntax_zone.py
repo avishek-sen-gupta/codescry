@@ -227,6 +227,50 @@ class TestClassifyLine:
         assert classify_line(range_map, 6) == SyntaxZone.STRING_LITERAL
         assert classify_line(range_map, 7) == SyntaxZone.STRING_LITERAL
 
+    def test_javascript_comment(self) -> None:
+        """Should classify a JavaScript comment."""
+        source = b"// fetch data from API\nconst x = 1;\n"
+        range_map = parse_file_zones(source, Language.JAVASCRIPT)
+        assert classify_line(range_map, 1) == SyntaxZone.COMMENT
+        assert classify_line(range_map, 2) == SyntaxZone.CODE
+
+    def test_ruby_comment(self) -> None:
+        """Should classify a Ruby comment."""
+        source = b"# make HTTP request\nx = Net::HTTP.get(uri)\n"
+        range_map = parse_file_zones(source, Language.RUBY)
+        assert classify_line(range_map, 1) == SyntaxZone.COMMENT
+        assert classify_line(range_map, 2) == SyntaxZone.CODE
+
+    def test_cobol_all_lines_classify_as_code(self) -> None:
+        """COBOL comments are absorbed by the grammar; all lines classify as CODE."""
+        source = b"      * This is a comment\n       DISPLAY 'HELLO'.\n"
+        range_map = parse_file_zones(source, Language.COBOL)
+        assert classify_line(range_map, 1) == SyntaxZone.CODE
+        assert classify_line(range_map, 2) == SyntaxZone.CODE
+
+    def test_pascal_curly_brace_comment(self) -> None:
+        """Should classify a Pascal curly-brace comment."""
+        source = b"{ This is a comment }\nvar x: Integer;\n"
+        range_map = parse_file_zones(source, Language.PASCAL)
+        assert classify_line(range_map, 1) == SyntaxZone.COMMENT
+        assert classify_line(range_map, 2) == SyntaxZone.CODE
+
+    def test_pascal_line_comment(self) -> None:
+        """Should classify a Pascal double-slash comment."""
+        source = b"// This is a comment\nvar x: Integer;\n"
+        range_map = parse_file_zones(source, Language.PASCAL)
+        assert classify_line(range_map, 1) == SyntaxZone.COMMENT
+        assert classify_line(range_map, 2) == SyntaxZone.CODE
+
+    def test_pascal_inline_string_classified_as_code(self) -> None:
+        """Pascal strings sharing a line with code classify as CODE (conservative)."""
+        source = (
+            b"program Test;\nvar s: string;\nbegin\n  s :=\n    'hello world';\nend.\n"
+        )
+        range_map = parse_file_zones(source, Language.PASCAL)
+        # The string shares the line with ';', so it's inline → CODE
+        assert classify_line(range_map, 5) == SyntaxZone.CODE
+
 
 class TestParseFileZones:
     """Tests for parse_file_zones."""

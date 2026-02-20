@@ -13,7 +13,7 @@ Codescry is a Python library for analysing technology stacks and code structure 
 - **Tech stack detection**: Scans a repository and identifies languages, package managers, frameworks, and infrastructure, associating each with its containing directory (useful for monorepos)
 - **Integration point detection**: Finds system integration points (HTTP/REST, SOAP, messaging, databases, gRPC, GraphQL, and 7 more types) using framework-aware pattern matching with tree-sitter syntax zone filtering to skip comments, string literals, import lines, and package/namespace declarations. Every pattern is annotated with a `SignalDirection` (`INWARD` / `OUTWARD` / `AMBIGUOUS`) indicating whether the detected code is exposing an integration point to callers or consuming an external system; this annotation is propagated onto each `IntegrationSignal.direction` field.
 - **Symbol resolution**: Resolves each integration signal to its containing code symbol via CTags line ranges, producing per-symbol integration profiles
-- **CFG construction**: Builds control flow graphs from tree-sitter parse trees using a language-independent role schema, supporting all 15 languages (except PL/I) with a single algorithm
+- **CFG construction**: Builds control flow graphs from tree-sitter parse trees using a language-independent role schema, supporting all 16 languages (except PL/I) with a single algorithm
 - **Call-flow extraction**: Traces method call trees within a file using [Mojo-LSP](https://github.com/avishek-sen-gupta/mojo-lsp) go-to-definition
 - **Training data generation**: Generates labelled training data for a fine-tuned integration classifier by prompting Claude to produce realistic code snippets per (language, integration_type, label) triple, validated against the existing pattern registry and exported as stratified JSONL splits. Supports a `--batch` mode using the Anthropic Batches API for asynchronous processing at 50% cost savings, with checkpoint/resume support and `--batch-status` to check progress of a running batch
 - **Signal classifier training**: Trains a lightweight TF-IDF (word + char n-grams) + Logistic Regression classifier that predicts `DEFINITE_INWARD`, `DEFINITE_OUTWARD`, or `NOT_DEFINITE` from a single `signal_line_content` string with no API dependency at inference time. Serialised with joblib for fast loading. Run with `poetry run python scripts/train_signal_classifier.py --train data/training/train.jsonl --val data/training/val.jsonl --test data/training/test.jsonl --output data/training/signal_classifier.joblib`
@@ -42,6 +42,7 @@ Codescry is a Python library for analysing technology stacks and code structure 
 | PHP | `.php` | `composer.json` | Composer | Laravel, Symfony, Slim, CodeIgniter, CakePHP, Yii, Laminas |
 | COBOL | `.cbl`, `.cob`, `.cpy` | — | — | — |
 | PL/I | `.pli`, `.pl1`, `.plinc` | — | — | — |
+| Pascal | `.pas`, `.pp`, `.dpr`, `.lpr`, `.inc` | — | — | — |
 | Ruby | `.rb` | `Gemfile` | Bundler | Rails, Sinatra, Hanami |
 
 Infrastructure detection: Docker (`Dockerfile`, `docker-compose.yml`), Terraform (`*.tf`), Kubernetes (`*.yaml` with k8s markers).
@@ -68,23 +69,23 @@ Framework detection uses structured parsing of config files rather than naive su
 
 ### Integration Pattern Coverage by Language
 
-| Integration Type | Java | Python | TypeScript | JavaScript | Go | Rust | C# | C/C++ | Ruby | Kotlin | Scala | PHP | COBOL | PL/I |
-|------------------|:----:|:------:|:----------:|:----------:|:--:|:----:|:--:|:-----:|:----:|:------:|:-----:|:---:|:-----:|:----:|
-| `http_rest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `soap` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `messaging` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `socket` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `database` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `file_io` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `grpc` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `graphql` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ | — | — |
-| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ | — | — |
-| `ftp_sftp` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
-| `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| Integration Type | Java | Python | TypeScript | JavaScript | Go | Rust | C# | C/C++ | Ruby | Kotlin | Scala | PHP | COBOL | PL/I | Pascal |
+|------------------|:----:|:------:|:----------:|:----------:|:--:|:----:|:--:|:-----:|:----:|:------:|:-----:|:---:|:-----:|:----:|:------:|
+| `http_rest` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `soap` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `messaging` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `socket` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `database` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `file_io` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `grpc` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — |
+| `graphql` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ | — | — | — |
+| `email` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
+| `caching` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | — |
+| `sse_streaming` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✓ | — | — | — |
+| `ftp_sftp` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
+| `scheduling` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
 
-All 13 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, Ruby, Kotlin, Scala, and PHP. C and C++ share a common pattern module covering 11 base types (database, HTTP, messaging, sockets, gRPC, file I/O, FTP/SFTP, caching, SOAP, scheduling, email) with framework-specific patterns for Qt, Boost, POCO, Crow, and Drogon. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
+All 13 integration types have language-specific patterns for Java, Python, TypeScript, JavaScript, Go, Rust, C#, Ruby, Kotlin, Scala, and PHP. C and C++ share a common pattern module covering 11 base types (database, HTTP, messaging, sockets, gRPC, file I/O, FTP/SFTP, caching, SOAP, scheduling, email) with framework-specific patterns for Qt, Boost, POCO, Crow, and Drogon. Pascal covers 9 base types (HTTP/REST, SOAP, messaging, sockets, database, file I/O, email, FTP/SFTP, scheduling) with patterns for Indy, Synapse, FireDAC, ADO, BDE, dbExpress, and other Delphi/Free Pascal component libraries. COBOL and PL/I cover the 6 core types relevant to mainframe systems. Language-agnostic common patterns also apply across all files.
 
 ## Installation
 
