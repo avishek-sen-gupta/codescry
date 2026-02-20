@@ -20,13 +20,17 @@ from pathlib import Path
 import pytest
 from tree_sitter_language_pack import get_parser
 
+from datalog_plugins import make_default_registry
+from repo_surveyor.integration_patterns.types import Language
 from treesitter_to_datalog import emit_datalog, run_souffle
+
+_JAVA_PLUGIN = make_default_registry().get(Language.JAVA)
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "query"
 _DL_FILE = _SCRIPTS_DIR / "analysis.dl"
 
 # A small Java class with:
@@ -93,7 +97,7 @@ def service_facts(tmp_path: Path):
     facts = emit_datalog(tree.root_node, _SERVICE_JAVA)
     facts_dir = tmp_path / "facts"
     facts_dir.mkdir()
-    facts.to_souffle_facts(facts_dir)
+    facts.to_souffle_facts(facts_dir, plugin=_JAVA_PLUGIN)
     return facts, facts_dir
 
 
@@ -104,7 +108,7 @@ def chain_facts(tmp_path: Path):
     facts = emit_datalog(tree.root_node, _CHAIN_JAVA)
     facts_dir = tmp_path / "facts"
     facts_dir.mkdir()
-    facts.to_souffle_facts(facts_dir)
+    facts.to_souffle_facts(facts_dir, plugin=_JAVA_PLUGIN)
     return facts, facts_dir
 
 
@@ -115,7 +119,7 @@ def factory_facts(tmp_path: Path):
     facts = emit_datalog(tree.root_node, _FACTORY_JAVA)
     facts_dir = tmp_path / "facts"
     facts_dir.mkdir()
-    facts.to_souffle_facts(facts_dir)
+    facts.to_souffle_facts(facts_dir, plugin=_JAVA_PLUGIN)
     return facts, facts_dir
 
 
@@ -136,9 +140,22 @@ def _souffle_out(facts_dir: Path, tmp_path: Path) -> dict[str, list[tuple[str, .
 
 class TestFactExport:
     _ALL_RELATIONS = [
-        "node", "token", "position", "parent", "contains", "field",
-        "name", "declared_type", "scope", "scope_parent", "declares",
-        "declaration", "reference", "refers_to", "call", "instantiation",
+        "node",
+        "token",
+        "position",
+        "parent",
+        "contains",
+        "field",
+        "name",
+        "declared_type",
+        "scope",
+        "scope_parent",
+        "declares",
+        "declaration",
+        "reference",
+        "refers_to",
+        "call",
+        "instantiation",
     ]
 
     def test_writes_all_relation_files(self, service_facts, tmp_path):
@@ -256,9 +273,10 @@ class TestComplexSouffleQueries:
         ancestors = {(int(r[0]), int(r[1])) for r in results.get("ancestor", [])}
         # every direct parent pair must also appear in ancestor
         for p in facts.parents:
-            assert (p.child_id, p.parent_id) in ancestors, (
-                f"parent({p.child_id}, {p.parent_id}) missing from ancestor"
-            )
+            assert (
+                p.child_id,
+                p.parent_id,
+            ) in ancestors, f"parent({p.child_id}, {p.parent_id}) missing from ancestor"
 
     @requires_souffle
     def test_ancestor_has_transitive_pairs(self, service_facts, tmp_path):
@@ -317,9 +335,9 @@ class TestComplexSouffleQueries:
         method_scope_ids = {int(row[0]) for row in method_decls}
         call_scope_ids = {int(row[0]) for row in call_in_scope}
         # the intersection must be non-empty (calls found inside method scopes)
-        assert method_scope_ids & call_scope_ids, (
-            "no call_in_scope entry shares a scope_id with any method_decl"
-        )
+        assert (
+            method_scope_ids & call_scope_ids
+        ), "no call_in_scope entry shares a scope_id with any method_decl"
 
 
 # ---------------------------------------------------------------------------

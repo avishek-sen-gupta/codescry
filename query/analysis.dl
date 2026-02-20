@@ -82,6 +82,20 @@
 .input instantiation(filename="instantiation.facts")
 
 // ---------------------------------------------------------------------------
+// Bridge facts — language-specific node type strings injected by the emitter
+// so that derived rules below never hard-code language-specific literals.
+// ---------------------------------------------------------------------------
+
+.decl callable_node_type(t: symbol)
+.input callable_node_type(filename="callable_node_type.facts")
+
+.decl call_node_type(t: symbol)
+.input call_node_type(filename="call_node_type.facts")
+
+.decl instantiation_node_type(t: symbol)
+.input instantiation_node_type(filename="instantiation_node_type.facts")
+
+// ---------------------------------------------------------------------------
 // Derived: transitive structural containment
 // ancestor(X, Y)  ←  X is a (possibly indirect) child of Y in the raw tree
 // ---------------------------------------------------------------------------
@@ -176,12 +190,13 @@ chained_call(RootName, MName) :-
 .output chained_call(filename="chained_call.csv")
 
 // ---------------------------------------------------------------------------
-// Derived: method declarations (node_type = "method_declaration")
+// Derived: method declarations (node_type determined by bridge fact)
 // ---------------------------------------------------------------------------
 
 .decl method_decl(node_id: number, method_name: symbol)
 method_decl(N, MName) :-
-    node(N, "method_declaration"),
+    callable_node_type(T),
+    node(N, T),
     field(N, "name", NameNode),
     name(NameNode, MName).
 .output method_decl(filename="method_decl.csv")
