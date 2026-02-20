@@ -1,18 +1,27 @@
 """Embedding-based integration signal concretisation.
 
-Uses nomic-embed-code embeddings to classify each FILE_CONTENT integration
-signal as DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE by computing
-cosine similarity against 26 directional description embeddings (13 integration
+Uses code embeddings to classify each FILE_CONTENT integration signal as
+DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE by computing cosine
+similarity against 26 directional description embeddings (13 integration
 types x 2 directions).
 
-This is a third concretisation path alongside the ML classifier and Ollama LLM.
+Supports two embedding backends:
+  - HuggingFace Inference Endpoint (nomic-embed-code) via ``EmbeddingClient``
+  - Google Gemini (gemini-embedding-001) via ``GeminiEmbeddingClient``
+
+Both implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
+is backend-agnostic.
 
 Usage:
     from repo_surveyor.integration_concretiser.embedding_concretiser import (
         EmbeddingClient,
+        GeminiEmbeddingClient,
         EmbeddingConcretiser,
     )
+    # HuggingFace backend
     client = EmbeddingClient(endpoint_url=..., token=...)
+    # -- or Gemini backend --
+    client = GeminiEmbeddingClient(api_key=...)
     concretiser = EmbeddingConcretiser(client)
     result, metadata = concretiser.concretise(detector_result, file_reader)
 """
@@ -198,6 +207,32 @@ class EmbeddingClient:
             with urlopen(req, timeout=120) as resp:
                 result = json.loads(resp.read())
             all_embeddings.extend(result)
+        return all_embeddings
+
+
+class GeminiEmbeddingClient:
+    """Embedding client using Google's gemini-embedding-001 model."""
+
+    _MODEL = "gemini-embedding-001"
+
+    def __init__(self, api_key: str) -> None:
+        from google import genai
+
+        self._client = genai.Client(api_key=api_key)
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed a list of texts via the Gemini embedding API."""
+        from google.genai import types
+
+        all_embeddings: list[list[float]] = []
+        for chunk in batched(texts, _BATCH_SIZE):
+            chunk_list = list(chunk)
+            result = self._client.models.embed_content(
+                model=self._MODEL,
+                contents=chunk_list,
+                config=types.EmbedContentConfig(output_dimensionality=768),
+            )
+            all_embeddings.extend(emb.values for emb in result.embeddings)
         return all_embeddings
 
 

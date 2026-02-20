@@ -37,3 +37,7 @@ fileignoreconfig:
   checksum: f396d5b6dc845e7c9ecd792ff51f7077218169e59e1103576491676c77e00766
 - filename: scripts/embedding_direction_test.py
   checksum: d3d7f859a182f9c1cd907eb8c0da07b91ec336136113f1674d0d4714124b3732
+- filename: poetry.lock
+  checksum: 3380474ac626376d122496aed9e0599696c817742a10bbfd3d92a47d33226bac
+- filename: poetry.lock
+  checksum: 92238c3cb7eb89a104ea1fa77d6f741d6915a51102d8c08fc3de1b5eb2b70c28

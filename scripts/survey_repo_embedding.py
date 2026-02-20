@@ -1,15 +1,19 @@
 """Run the full survey pipeline using embedding-based concretisation.
 
 Identical to survey_repo.py up to the concretisation step, but instead of the
-TF-IDF + Logistic Regression classifier, uses nomic-embed-code embeddings and
-cosine similarity against 26 directional descriptions to classify each signal
-as DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE.
+TF-IDF + Logistic Regression classifier, uses code embeddings and cosine
+similarity against 26 directional descriptions to classify each signal as
+DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE.
 
-The ML-based and Ollama pipelines are preserved unchanged — this is a parallel
-approach.
+Supports two embedding backends via --backend:
+  - huggingface (default): nomic-embed-code via HuggingFace Inference Endpoint
+    Requires HUGGING_FACE_URL and HUGGING_FACE_API_TOKEN env vars.
+  - gemini: gemini-embedding-001 via Google Gemini API
+    Requires GEMINI_API_KEY env var.
 
 Usage:
     poetry run python scripts/survey_repo_embedding.py /path/to/repo
+    poetry run python scripts/survey_repo_embedding.py /path/to/repo --backend gemini
     poetry run python scripts/survey_repo_embedding.py /path/to/repo --languages Java
 """
 
@@ -26,12 +30,23 @@ from repo_surveyor import survey
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
     EmbeddingConcretiser,
+    GeminiEmbeddingClient,
 )
 from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.training.signal_classifier import NullSignalClassifier
 from repo_surveyor.training.types import TrainingLabel
 
 logger = logging.getLogger(__name__)
+
+
+def _create_client(backend: str) -> EmbeddingClient | GeminiEmbeddingClient:
+    """Create the appropriate embedding client based on the backend choice."""
+    if backend == "gemini":
+        api_key = os.environ["GEMINI_001_EMBEDDING_API_KEY"]
+        return GeminiEmbeddingClient(api_key=api_key)
+    endpoint_url = os.environ["HUGGING_FACE_URL"]
+    api_token = os.environ["HUGGING_FACE_API_TOKEN"]
+    return EmbeddingClient(endpoint_url=endpoint_url, token=api_token)
 
 
 def _signal_to_dict(s, label_map: dict) -> dict:
@@ -69,6 +84,12 @@ def _parse_args() -> argparse.Namespace:
         help="Languages to filter (e.g. Java Python). Defaults to all.",
     )
     parser.add_argument(
+        "--backend",
+        choices=["huggingface", "gemini"],
+        default="huggingface",
+        help="Embedding backend: huggingface (nomic-embed-code) or gemini (gemini-embedding-001). Default: huggingface.",
+    )
+    parser.add_argument(
         "--output-dir",
         default="data/survey_output_embedding",
         metavar="DIR",
@@ -86,12 +107,10 @@ def main() -> None:
         stream=sys.stdout,
     )
 
-    endpoint_url = os.environ["HUGGING_FACE_URL"]
-    api_token = os.environ["HUGGING_FACE_API_TOKEN"]
-
     logger.info("=== Embedding Survey Pipeline ===")
     logger.info("Repo:       %s", args.repo_path)
     logger.info("Languages:  %s", args.languages or "all")
+    logger.info("Backend:    %s", args.backend)
     logger.info("Output dir: %s", args.output_dir)
 
     # --- Phase 1: run the pre-concretisation pipeline ---
@@ -112,7 +131,7 @@ def main() -> None:
 
     # --- Phase 2: Embedding-based concretisation ---
     logger.info("--- Phase 2: Embedding-based concretisation ---")
-    client = EmbeddingClient(endpoint_url=endpoint_url, token=api_token)
+    client = _create_client(args.backend)
     concretiser = EmbeddingConcretiser(client)
     concretisation, embedding_metadata = concretiser.concretise(integration)
 
