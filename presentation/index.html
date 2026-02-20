@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codescry — Static Analysis of Technology Stacks &amp; Code Structure</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+  <style>
+    :root {
+      --r-background-color: #0f172a;
+      --r-main-color: #e2e8f0;
+      --r-heading-color: #38bdf8;
+      --r-link-color: #38bdf8;
+      --r-link-color-hover: #7dd3fc;
+      --r-selection-background-color: #1e40af;
+      --r-heading-font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --r-main-font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --r-code-font: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    .reveal h1, .reveal h2, .reveal h3 {
+      text-transform: none;
+      font-weight: 700;
+    }
+    .reveal h1 { font-size: 2.2em; }
+    .reveal h2 { font-size: 1.6em; }
+    .reveal h3 { font-size: 1.2em; color: #94a3b8; }
+    .reveal pre { font-size: 0.55em; box-shadow: none; }
+    .reveal pre code {
+      border-radius: 8px;
+      padding: 16px !important;
+      max-height: 520px;
+    }
+    .reveal ul, .reveal ol { font-size: 0.85em; }
+    .reveal li { margin-bottom: 0.4em; }
+    .reveal .small { font-size: 0.7em; color: #94a3b8; }
+    .reveal .accent { color: #38bdf8; }
+    .reveal .accent-green { color: #4ade80; }
+    .reveal .accent-amber { color: #fbbf24; }
+    .reveal .accent-pink { color: #f472b6; }
+    .reveal .accent-purple { color: #a78bfa; }
+    .reveal .dim { color: #64748b; }
+    .reveal .pill {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 999px;
+      font-size: 0.65em;
+      font-weight: 600;
+      margin: 2px;
+    }
+    .pill-blue { background: #1e3a5f; color: #7dd3fc; }
+    .pill-green { background: #14532d; color: #86efac; }
+    .pill-amber { background: #451a03; color: #fde68a; }
+    .pill-pink { background: #500724; color: #fbcfe8; }
+    .pill-purple { background: #2e1065; color: #c4b5fd; }
+    .reveal table { font-size: 0.65em; margin: 0 auto; }
+    .reveal table th { background: #1e293b; color: #38bdf8; font-weight: 600; }
+    .reveal table td { border-color: #334155; }
+    .reveal .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      text-align: left;
+    }
+    .reveal .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      text-align: left;
+    }
+    .reveal .card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #334155;
+    }
+    .reveal .card h3 { margin-top: 0; font-size: 1em; }
+    .reveal .card p, .reveal .card ul { font-size: 0.75em; }
+    .pipeline-box {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      padding: 12px 20px;
+      margin: 8px 0;
+      text-align: center;
+      font-size: 0.8em;
+      position: relative;
+    }
+    .pipeline-box.active {
+      border-color: #38bdf8;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+    .pipeline-arrow {
+      text-align: center;
+      font-size: 1.4em;
+      color: #475569;
+      margin: 2px 0;
+    }
+    .reveal .fragment.semi-fade-out.visible {
+      opacity: 0.3 !important;
+    }
+    .reveal section img {
+      border: none;
+      box-shadow: none;
+      background: none;
+    }
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      font-size: 0.7em;
+    }
+    .lang-grid .lang-item {
+      background: #1e293b;
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+    .section-divider {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    }
+    .reveal .title-slide h1 {
+      font-size: 2.8em;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- TITLE -->
+<!-- ============================================================ -->
+<section class="title-slide" data-background-gradient="linear-gradient(135deg, #0f172a, #1e1b4b)">
+  <h1>Codescry</h1>
+  <h3>Static Analysis of Technology Stacks<br>&amp; Code Structure</h3>
+  <p class="small" style="margin-top: 40px;">15 languages &middot; 13 integration types &middot; 90+ frameworks</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- THE PROBLEM -->
+<!-- ============================================================ -->
+<section>
+  <h2>The Problem</h2>
+  <div class="two-col">
+    <div>
+      <p>You inherit a large codebase. You need to answer:</p>
+      <ul>
+        <li>What languages and frameworks are in here?</li>
+        <li>Where are the <span class="accent">system boundaries</span>?</li>
+        <li>Which code symbols own which integration points?</li>
+        <li>What does the control flow look like?</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="accent-amber">Why not just grep?</h3>
+      <ul>
+        <li>Matches in <span class="accent-pink">comments and strings</span></li>
+        <li>No framework awareness &mdash; <code>Map.get()</code> isn't a Javalin route</li>
+        <li>No symbol-level attribution</li>
+        <li>No direction: <em>is this an API we expose or consume?</em></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- WHAT CODESCRY DOES - ONE SLIDE -->
+<!-- ============================================================ -->
+<section>
+  <h2>What Codescry Does</h2>
+  <p>A Python library that <strong>statically scans</strong> a repository and produces a structured understanding of its technology landscape &mdash; <em>without running any code</em>.</p>
+  <div class="three-col" style="margin-top: 30px;">
+    <div class="card">
+      <h3 class="accent">Detect</h3>
+      <p>Languages, frameworks, package managers, infrastructure, and <strong>13 types</strong> of system integration points</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">Resolve</h3>
+      <p>Map every integration signal to its <strong>owning code symbol</strong> (class, method, function)</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-amber">Classify</h3>
+      <p>Determine signal direction: <strong>inward</strong> (we expose), <strong>outward</strong> (we consume), or ambiguous</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION: THE PIPELINE -->
+<!-- ============================================================ -->
+<section class="section-divider">
+  <h2>The Pipeline</h2>
+  <h3>Five stages, one function call</h3>
+</section>
+
+<!-- PIPELINE OVERVIEW -->
+<section>
+  <h2>Pipeline at a Glance</h2>
+  <pre><code class="language-python">from repo_surveyor import survey
+
+report, symbols, signals, resolved, concretised = survey(
+    "/path/to/repo",
+    languages=["Java", "Python"],
+)</code></pre>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 25px; font-size: 0.55em;">
+    <div class="pipeline-box active">
+      <strong class="accent">1. Tech Stacks</strong><br>
+      <span class="dim">Indicator files,<br>glob patterns,<br>dependency parsing</span>
+    </div>
+    <div class="pipeline-box active">
+      <strong class="accent">2. Coarse Structure</strong><br>
+      <span class="dim">Universal CTags<br>symbol extraction</span>
+    </div>
+    <div class="pipeline-box active">
+      <strong class="accent">3. Integration Detection</strong><br>
+      <span class="dim">tree-sitter zones +<br>regex patterns</span>
+    </div>
+    <div class="pipeline-box active">
+      <strong class="accent">4. Symbol Resolution</strong><br>
+      <span class="dim">Spatial join:<br>signal &rarr; symbol</span>
+    </div>
+    <div class="pipeline-box active">
+      <strong class="accent">5. Concretisation</strong><br>
+      <span class="dim">ML classifier:<br>direction labelling</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- STAGE 1: TECH STACKS -->
+<!-- ============================================================ -->
+<section>
+  <h2>Stage 1: Tech Stack Detection</h2>
+  <div class="two-col">
+    <div>
+      <p>Walk the repo looking for <strong>indicator files</strong>:</p>
+      <ul>
+        <li><code>pom.xml</code> &rarr; Java + Maven</li>
+        <li><code>pyproject.toml</code> &rarr; Python + Poetry</li>
+        <li><code>Cargo.toml</code> &rarr; Rust + Cargo</li>
+        <li><code>*.csproj</code> &rarr; C# + NuGet</li>
+      </ul>
+      <p style="margin-top: 15px;">Then <strong>parse</strong> those files to extract framework dependencies (not naive substring matching).</p>
+    </div>
+    <div class="card">
+      <h3 class="accent">Per-directory association</h3>
+      <p>Each marker is scoped to its directory &mdash; critical for <strong>monorepos</strong> where <code>backend/</code> is Java/Spring and <code>frontend/</code> is TypeScript/React.</p>
+      <p class="dim" style="margin-top: 15px;">Also detects: Docker, Terraform, Kubernetes (via YAML <code>apiVersion:</code> markers)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- STAGE 2: COARSE STRUCTURE -->
+<!-- ============================================================ -->
+<section>
+  <h2>Stage 2: Coarse Structure (CTags)</h2>
+  <div class="two-col">
+    <div>
+      <p>Shell out to <strong>Universal CTags</strong> with JSON output:</p>
+      <pre><code class="language-bash">ctags --output-format=json \
+     --fields=*  --extras=+q -R .</code></pre>
+      <p style="margin-top: 15px;">Produces a list of <code>CTagsEntry</code> objects:</p>
+      <ul>
+        <li>Symbol name, kind (class, method, function)</li>
+        <li>File path, start line, end line</li>
+        <li>Scope (parent class/namespace)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">Why CTags?</h3>
+      <p>Fast, battle-tested, supports 100+ languages, and gives us <strong>line ranges</strong> for every symbol.</p>
+      <p style="margin-top: 10px;">These line ranges become the <strong>spatial index</strong> used in Stage 4 to resolve signals to symbols.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- STAGE 3: INTEGRATION DETECTION - OVERVIEW -->
+<!-- ============================================================ -->
+<section>
+  <h2>Stage 3: Integration Detection</h2>
+  <h3>The core of Codescry</h3>
+  <p style="margin-top: 20px;">Three sub-stages for each source file:</p>
+  <div style="max-width: 600px; margin: 20px auto;">
+    <div class="pipeline-box">
+      <strong class="accent-amber">A. Import Gating</strong><br>
+      <span class="dim">Filter framework patterns by actual imports in the file</span>
+    </div>
+    <div class="pipeline-arrow">&darr;</div>
+    <div class="pipeline-box">
+      <strong class="accent">B. Zone-Filtered Pattern Matching</strong><br>
+      <span class="dim">tree-sitter classifies lines &rarr; skip comments/strings &rarr; apply regex</span>
+    </div>
+    <div class="pipeline-arrow">&darr;</div>
+    <div class="pipeline-box">
+      <strong class="accent-green">C. Directory Classification</strong><br>
+      <span class="dim">Directory names like <code>controllers/</code>, <code>repositories/</code></span>
+    </div>
+  </div>
+</section>
+
+<!-- TREE-SITTER SYNTAX ZONES -->
+<section>
+  <h2>Syntax Zone Filtering</h2>
+  <h3>How tree-sitter prevents false positives</h3>
+  <div class="two-col">
+    <div>
+      <p>Before applying any regex, each line is classified into a <strong>syntax zone</strong>:</p>
+      <table>
+        <tr><th>Zone</th><th>Action</th></tr>
+        <tr><td><code>CODE</code></td><td class="accent-green">Scan</td></tr>
+        <tr><td><code>COMMENT</code></td><td class="accent-pink">Skip</td></tr>
+        <tr><td><code>STRING_LITERAL</code></td><td class="accent-pink">Skip</td></tr>
+        <tr><td><code>IMPORT</code></td><td class="accent-pink">Skip</td></tr>
+        <tr><td><code>PACKAGE_DECLARATION</code></td><td class="accent-pink">Skip</td></tr>
+      </table>
+    </div>
+    <div>
+      <pre><code class="language-python"># tree-sitter AST walk to build zone map
+def build_syntax_range_map(root_node, source_lines):
+    ranges = []
+    stack = [root_node]
+    while stack:
+        node = stack.pop()
+        zone = _classify_node(node.type)
+        if zone is not None:
+            effective = _effective_range(
+                node, zone, source_lines
+            )
+            if effective is not None:
+                ranges.append(effective)
+            continue  # don't recurse into matches
+        stack.extend(reversed(node.children))
+    ranges.sort(key=lambda r: r.start_row)
+    return SyntaxRangeMap(ranges=tuple(ranges))</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- THREE-LAYER PATTERN MERGING -->
+<section>
+  <h2>Three-Layer Pattern Merging</h2>
+  <div style="max-width: 700px; margin: 0 auto;">
+    <div class="pipeline-box" style="border-color: #475569;">
+      <strong class="dim">Layer 1: Common</strong> (cross-language, low confidence)<br>
+      <span class="small"><code>(?i)\bkafka\b</code>, <code>(?i)\bredis\b</code>, <code>(?i)\bwebsocket\b</code></span>
+    </div>
+    <div class="pipeline-arrow">&darr; merged with</div>
+    <div class="pipeline-box" style="border-color: #38bdf8;">
+      <strong class="accent">Layer 2: Language Base</strong> (always active for that language)<br>
+      <span class="small"><code>@WebService</code> (Java), <code>import grpc</code> (Python), <code>use actix_web::</code> (Rust)</span>
+    </div>
+    <div class="pipeline-arrow">&darr; merged with (if framework detected + import present)</div>
+    <div class="pipeline-box" style="border-color: #4ade80;">
+      <strong class="accent-green">Layer 3: Framework-Specific</strong> (import-gated)<br>
+      <span class="small"><code>@RestController</code> (Spring), <code>@app.get</code> (FastAPI), <code>Route::get</code> (Laravel)</span>
+    </div>
+  </div>
+  <p class="small" style="margin-top: 20px;">Double gating: framework must be in the directory's tech stack <strong>AND</strong> imported in the file</p>
+</section>
+
+<!-- PATTERN EXAMPLE: SPRING -->
+<section>
+  <h2>Pattern Anatomy: Spring</h2>
+  <pre><code class="language-python">FRAMEWORK = FrameworkPatternSpec(
+    name="Spring",
+    patterns={
+        IntegrationType.HTTP_REST: {
+            PatternKey.PATTERNS: [
+                (r"@RestController", Confidence.HIGH, SignalDirection.INWARD),
+                (r"@GetMapping",     Confidence.HIGH, SignalDirection.INWARD),
+                (r"@PostMapping",    Confidence.HIGH, SignalDirection.INWARD),
+            ],
+        },
+        IntegrationType.MESSAGING: {
+            PatternKey.PATTERNS: [
+                (r"@KafkaListener",  Confidence.HIGH, SignalDirection.INWARD),
+                (r"KafkaTemplate",   Confidence.HIGH, SignalDirection.OUTWARD),
+            ],
+        },
+        IntegrationType.DATABASE: {
+            PatternKey.PATTERNS: [
+                (r"@Repository",     Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"JdbcTemplate",    Confidence.HIGH, SignalDirection.OUTWARD),
+                (r"Neo4jRepository", Confidence.HIGH, SignalDirection.OUTWARD),
+            ],
+        },
+    },
+)</code></pre>
+  <p class="small">Each pattern carries: <span class="pill pill-blue">regex</span> <span class="pill pill-green">confidence</span> <span class="pill pill-amber">direction</span></p>
+</section>
+
+<!-- INTEGRATION SIGNAL -->
+<section>
+  <h2>The IntegrationSignal</h2>
+  <pre><code class="language-python">@dataclass(frozen=True)
+class IntegrationSignal:
+    match: FileMatch           # file, line number, line content, language
+    integration_type: IntegrationType  # one of 13 types
+    confidence: Confidence     # HIGH / MEDIUM / LOW
+    matched_pattern: str       # the regex that fired
+    entity_type: EntityType    # FILE_CONTENT or DIRECTORY
+    source: str                # "common", "Java", or "Spring"
+    direction: SignalDirection  # INWARD / OUTWARD / AMBIGUOUS</code></pre>
+  <div class="three-col" style="margin-top: 20px;">
+    <div class="card">
+      <h3 class="accent">13 Integration Types</h3>
+      <p>HTTP/REST, SOAP, messaging, database, gRPC, GraphQL, sockets, file I/O, email, caching, SSE, FTP/SFTP, scheduling</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">3 Confidence Levels</h3>
+      <p><strong>HIGH</strong>: framework annotation<br><strong>MEDIUM</strong>: directory name<br><strong>LOW</strong>: generic keyword</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-amber">3 Directions</h3>
+      <p><strong>INWARD</strong>: we expose it<br><strong>OUTWARD</strong>: we consume it<br><strong>AMBIGUOUS</strong>: can't tell from pattern alone</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- STAGE 4: SYMBOL RESOLUTION -->
+<!-- ============================================================ -->
+<section>
+  <h2>Stage 4: Symbol Resolution</h2>
+  <h3>Spatial join: signal &rarr; symbol</h3>
+  <div class="two-col">
+    <div>
+      <p>Each signal has a <strong>file + line number</strong>.<br>
+         Each symbol has a <strong>file + line range</strong>.</p>
+      <p style="margin-top: 15px;">Resolution = find the <strong>narrowest containing symbol</strong> for each signal.</p>
+      <pre><code class="language-python">@dataclass(frozen=True)
+class SymbolIntegrationProfile:
+    symbol_name: str
+    symbol_kind: str   # class, method, function
+    symbol_path: str
+    integrations: tuple[SymbolIntegration, ...]</code></pre>
+    </div>
+    <div class="card">
+      <h3 class="accent-purple">What this gives you</h3>
+      <p>Not just "there's a Kafka call on line 47" but:</p>
+      <p style="font-style: italic; color: #7dd3fc; margin-top: 10px;">
+        "<code>OrderService.processOrder()</code> has 3 integration points: Kafka outbound, REST inbound, and database outbound"
+      </p>
+      <p style="margin-top: 15px;">This is the <strong>per-symbol integration profile</strong>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- STAGE 5: CONCRETISATION -->
+<!-- ============================================================ -->
+<section>
+  <h2>Stage 5: Signal Concretisation</h2>
+  <h3>Resolving ambiguity with ML</h3>
+  <div class="two-col">
+    <div>
+      <p>Some patterns can't determine direction from regex alone. The concretiser labels each signal:</p>
+      <ul>
+        <li><span class="accent-green">DEFINITE_INWARD</span></li>
+        <li><span class="accent-amber">DEFINITE_OUTWARD</span></li>
+        <li><span class="dim">NOT_DEFINITE</span></li>
+      </ul>
+      <p style="margin-top: 15px;">Classifier: <strong>TF-IDF</strong> (word + char n-grams) + <strong>Logistic Regression</strong></p>
+      <p class="small">No API calls at inference. Serialised with joblib.</p>
+    </div>
+    <div class="card">
+      <h3 class="accent">Training Pipeline</h3>
+      <ol style="font-size: 0.75em;">
+        <li>Generate synthetic examples via <strong>Claude</strong> for each (language, type, label) triple</li>
+        <li>Harvest real code from <strong>GitHub code search</strong> using patterns as queries</li>
+        <li>Validate against the pattern registry</li>
+        <li>Export stratified train/val/test JSONL splits</li>
+        <li>Train TF-IDF + LR classifier</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION: LANGUAGE COVERAGE -->
+<!-- ============================================================ -->
+<section>
+  <h2>Language Coverage</h2>
+  <div class="lang-grid">
+    <div class="lang-item"><strong>Java</strong><br><span class="small">15 frameworks</span></div>
+    <div class="lang-item"><strong>Python</strong><br><span class="small">9 frameworks</span></div>
+    <div class="lang-item"><strong>TypeScript</strong><br><span class="small">shared w/ JS</span></div>
+    <div class="lang-item"><strong>JavaScript</strong><br><span class="small">13 frameworks</span></div>
+    <div class="lang-item"><strong>Go</strong><br><span class="small">6 frameworks</span></div>
+    <div class="lang-item"><strong>Rust</strong><br><span class="small">4 frameworks</span></div>
+    <div class="lang-item"><strong>C#</strong><br><span class="small">7 frameworks</span></div>
+    <div class="lang-item"><strong>C / C++</strong><br><span class="small">5 frameworks</span></div>
+    <div class="lang-item"><strong>Kotlin</strong><br><span class="small">shared + 2</span></div>
+    <div class="lang-item"><strong>Scala</strong><br><span class="small">11 frameworks</span></div>
+    <div class="lang-item"><strong>PHP</strong><br><span class="small">7 frameworks</span></div>
+    <div class="lang-item"><strong>Ruby</strong><br><span class="small">3 frameworks</span></div>
+    <div class="lang-item"><strong>COBOL</strong><br><span class="small">6 core types</span></div>
+    <div class="lang-item"><strong>PL/I</strong><br><span class="small">6 core types</span></div>
+    <div class="lang-item" style="border-color: #334155; opacity: 0.5;"><strong>+more</strong><br><span class="small">plugin system</span></div>
+  </div>
+  <p class="small" style="margin-top: 20px;">All 13 integration types covered for modern languages. COBOL/PL/I cover 6 mainframe-relevant types.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION: PLUGIN ARCHITECTURE -->
+<!-- ============================================================ -->
+<section>
+  <h2>Plugin Architecture</h2>
+  <h3>Adding a new language</h3>
+  <div class="two-col">
+    <div>
+      <p><code>languages.json</code> is the single source of truth:</p>
+      <pre><code class="language-json">{
+  "Ruby": {
+    "extensions": [".rb"],
+    "indicator_files": {
+      "Gemfile": {
+        "package_managers": ["Bundler"],
+        "parser": "gemfile"
+      }
+    },
+    "framework_patterns": {
+      "rails": "Rails",
+      "sinatra": "Sinatra"
+    },
+    "integration_module": "ruby"
+  }
+}</code></pre>
+    </div>
+    <div>
+      <p>Framework patterns auto-discovered via <code>pkgutil</code>:</p>
+      <pre style="font-size: 0.5em;"><code class="nohighlight">integration_patterns/
+  ruby/
+    __init__.py          # auto-discovers siblings
+    base.py              # BASE: BasePatternSpec
+    rails.py             # FRAMEWORK: FrameworkPatternSpec
+    sinatra.py           # FRAMEWORK: FrameworkPatternSpec
+    cfg_roles.json       # CFG node-type mappings</code></pre>
+      <p style="margin-top: 15px;">Drop in a new <code>.py</code> file exporting <code>FRAMEWORK</code> and it's automatically picked up.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION: CFG CONSTRUCTION -->
+<!-- ============================================================ -->
+<section class="section-divider">
+  <h2>CFG Construction</h2>
+  <h3>Language-independent control flow graphs</h3>
+</section>
+
+<!-- CFG ROLE SCHEMA -->
+<section>
+  <h2>The Role Schema</h2>
+  <p>Instead of writing a CFG builder per language, map <strong>tree-sitter node types</strong> to <strong>12 universal roles</strong>:</p>
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 20px; font-size: 0.65em;">
+    <div class="card" style="padding: 12px;">
+      <span class="accent">SEQUENCE</span><br>
+      <span class="dim">block, program</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-amber">BRANCH</span><br>
+      <span class="dim">if, ternary</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-amber">SWITCH</span><br>
+      <span class="dim">switch, match</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-green">LOOP</span><br>
+      <span class="dim">while, for</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-green">LOOP_POST</span><br>
+      <span class="dim">do...while</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-pink">RETURN</span><br>
+      <span class="dim">return, yield</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-pink">BREAK</span><br>
+      <span class="dim">break</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-pink">CONTINUE</span><br>
+      <span class="dim">continue</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-pink">THROW</span><br>
+      <span class="dim">throw, raise</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="accent-purple">TRY</span><br>
+      <span class="dim">try/catch/finally</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="dim">CALL</span><br>
+      <span class="dim">function call</span>
+    </div>
+    <div class="card" style="padding: 12px;">
+      <span class="dim">LEAF</span><br>
+      <span class="dim">default / atomic</span>
+    </div>
+  </div>
+</section>
+
+<!-- CFG ROLES JSON -->
+<section>
+  <h2>Per-Language Config: <code>cfg_roles.json</code></h2>
+  <div class="two-col">
+    <div>
+      <pre><code class="language-json">{
+  "_meta": {"switch_fallthrough": true},
+  "block": "sequence",
+  "if_statement": {
+    "role": "branch",
+    "condition": "condition",
+    "consequence": "consequence",
+    "alternative": "alternative"
+  },
+  "for_statement": {
+    "role": "loop",
+    "condition": "condition",
+    "body": "body",
+    "initializer": "init",
+    "update": "update"
+  },
+  "return_statement": "return",
+  "break_statement": "break"
+}</code></pre>
+    </div>
+    <div>
+      <p><strong>Simple form:</strong> <code>"break_statement": "break"</code></p>
+      <p style="margin-top: 15px;"><strong>Extended form:</strong> maps <em>semantic slots</em> to tree-sitter child field names:</p>
+      <table>
+        <tr><th>Slot</th><th>Purpose</th></tr>
+        <tr><td><code>condition</code></td><td>Branch/loop test</td></tr>
+        <tr><td><code>consequence</code></td><td>True branch</td></tr>
+        <tr><td><code>alternative</code></td><td>Else branch</td></tr>
+        <tr><td><code>body</code></td><td>Loop/switch body</td></tr>
+        <tr><td><code>handler</code></td><td>Catch block</td></tr>
+        <tr><td><code>finalizer</code></td><td>Finally block</td></tr>
+      </table>
+      <p class="small" style="margin-top: 15px;">Same algorithm, different JSON &rarr; different language</p>
+    </div>
+  </div>
+</section>
+
+<!-- CFG BUILDER ALGORITHM -->
+<section>
+  <h2>The Builder: Fragments</h2>
+  <div class="two-col">
+    <div>
+      <p>Core abstraction: <strong>Fragment</strong> &mdash; a mini-CFG produced by each subtree.</p>
+      <pre><code class="language-python">@dataclass(frozen=True)
+class Fragment:
+    entry: int           # entry node ID
+    exits: frozenset     # normal exit IDs
+    pending_breaks: tuple
+    pending_continues: tuple
+    pending_throws: tuple
+    pending_returns: tuple</code></pre>
+      <p style="margin-top: 10px;">Pending edges <strong>bubble up</strong> until an enclosing scope resolves them.</p>
+    </div>
+    <div>
+      <p><strong>Algorithm:</strong></p>
+      <ol>
+        <li>Parse source with tree-sitter</li>
+        <li>Recurse: <code>_build_fragment(node)</code></li>
+        <li>Dispatch on the node's <strong>role</strong></li>
+        <li>Each handler builds a Fragment</li>
+        <li><code>chain()</code> connects fragments sequentially</li>
+        <li>Pending breaks/continues resolved by enclosing loop</li>
+        <li>Top-level: wire ENTRY &rarr; fragment &rarr; EXIT</li>
+      </ol>
+      <p class="small" style="margin-top: 15px;">Unmapped node types = transparent containers (recurse into children)</p>
+    </div>
+  </div>
+</section>
+
+<!-- CFG VISUALIZATION -->
+<section>
+  <h2>CFG Visualisation</h2>
+  <div class="two-col">
+    <div>
+      <img src="../docs/images/cfg_example.svg" alt="CFG Example" style="max-height: 480px; background: white; border-radius: 8px; padding: 10px;">
+    </div>
+    <div>
+      <p>Exported as <strong>Graphviz DOT</strong>, rendered to SVG.</p>
+      <table style="margin-top: 15px;">
+        <tr><th>Shape</th><th>Role</th></tr>
+        <tr><td style="color: #fbbf24;">Diamond</td><td>Branch / Switch</td></tr>
+        <tr><td style="color: #2dd4bf;">Hexagon</td><td>Loop</td></tr>
+        <tr><td style="color: #f472b6;">Trapezium</td><td>Try</td></tr>
+        <tr><td>Box</td><td>Leaf / Call / Return</td></tr>
+      </table>
+      <table style="margin-top: 15px;">
+        <tr><th>Edge</th><th>Meaning</th></tr>
+        <tr><td style="color: #4ade80;">Green (T)</td><td>True branch</td></tr>
+        <tr><td style="color: #ef4444;">Red (F)</td><td>False branch</td></tr>
+        <tr><td style="color: #a78bfa;">Purple dashed</td><td>Back edge (loop)</td></tr>
+        <tr><td style="color: #ef4444;">Red dotted</td><td>Exception</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION: PIPELINE VARIATIONS -->
+<!-- ============================================================ -->
+<section class="section-divider">
+  <h2>Pipeline Variations</h2>
+  <h3>Same core, different execution modes</h3>
+</section>
+
+<!-- VARIATIONS OVERVIEW -->
+<section>
+  <h2>Execution Modes</h2>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.7em;">
+    <div class="card">
+      <h3 class="accent">survey()</h3>
+      <p>Full pipeline, in-memory results. No external dependencies beyond CTags + tree-sitter.</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">survey_and_persist()</h3>
+      <p>Same pipeline + writes all results to <strong>Neo4j</strong> as a graph (Repository &rarr; Directory &rarr; CodeSymbol &rarr; IntegrationSignal).</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-amber">ML Concretisation</h3>
+      <p>survey() with a trained <strong>TF-IDF + LR</strong> classifier. No API calls at inference. Outputs per-label JSONL.</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-purple">Ollama Concretisation</h3>
+      <p>Same pre-concretisation pipeline, then sends file context to a <strong>local LLM</strong> (Qwen 7B) for classification with confidence + reasoning.</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-pink">Datalog Emission</h3>
+      <p>tree-sitter &rarr; <strong>16-relation Souffl&eacute; facts</strong>. Enables structural queries: scope chains, transitive calls, visible declarations.</p>
+    </div>
+    <div class="card">
+      <h3 class="dim">CFG Construction</h3>
+      <p>Standalone <code>build_cfg()</code> &mdash; language-independent CFG from source, exportable as DOT/SVG.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEO4J GRAPH MODEL -->
+<section>
+  <h2>Neo4j Graph Model</h2>
+  <div style="font-size: 0.7em; max-width: 700px; margin: 0 auto;">
+    <pre><code class="nohighlight" style="background: #1e293b;">
+  (Repository)
+       |
+       |── CONTAINS_DIRECTORY ──▶ (Directory)
+       |                              |
+       |── CONTAINS ──────────▶ (CodeSymbol)
+                                      |
+                                      |── HAS_INTEGRATION ──▶ (IntegrationSignal)
+                                                                    |
+                                                                    |── OF_TYPE ──▶ (IntegrationType)
+                                                                    |
+                                                                    |── MATCHED_BY ──▶ (PatternMatch)
+    </code></pre>
+  </div>
+  <p style="margin-top: 15px;">Accessed via a <code>Neo4jDriver</code> <strong>Protocol</strong> &mdash; dependency-injected, not hardcoded.</p>
+  <p class="small">Enables graph queries: "show me all symbols that consume Kafka and expose REST endpoints"</p>
+</section>
+
+<!-- DATALOG SECTION DIVIDER -->
+<section class="section-divider">
+  <h2>Datalog Emission &amp; Query</h2>
+  <h3>Turning parse trees into a queryable database</h3>
+</section>
+
+<!-- DATALOG: FROM SOURCE TO FACTS -->
+<section>
+  <h2>Source &rarr; Facts &rarr; Queries</h2>
+  <p>Single-pass DFS over the tree-sitter AST emits <strong>16 Datalog relations</strong>. Souffl&eacute; evaluates derived rules. No custom tree walkers needed.</p>
+  <div class="two-col" style="margin-top: 15px;">
+    <div>
+      <pre><code class="language-java">public class OrderService {
+    private final OrderRepository repo;
+
+    public Order findById(long id) {
+        return repo.findById(id)
+            .orElseThrow(() ->
+                new OrderNotFoundException(id));
+    }
+}</code></pre>
+    </div>
+    <div>
+      <pre><code class="language-prolog">% Structure
+scope(1, "class_declaration").
+scope(5, "method_declaration").
+scope_parent(5, 1).
+
+% Identity
+name(12, "findById").
+declared_type(5, "Order").
+declares(5, 12).
+
+% Use-def
+refers_to(28, 3).  % "repo" ref → decl
+
+% Calls &amp; instantiations
+call(20, 18, "findById").
+call(22, 20, "orElseThrow").
+instantiation(25, "OrderNotFoundException").</code></pre>
+    </div>
+  </div>
+  <p class="small" style="margin-top: 8px;">Language-specific node types (e.g. <code>method_invocation</code> vs <code>call_expression</code>) are injected via <strong>bridge facts</strong> from a plugin &mdash; <code>analysis.dl</code> has zero hardcoded strings.</p>
+</section>
+
+<!-- DATALOG: QUERY EXAMPLES - STRUCTURAL -->
+<section>
+  <h2>Query: "What's visible inside findById()?"</h2>
+  <div class="two-col">
+    <div>
+      <p>The Datalog rule <span class="small">(defined once in <code>analysis.dl</code>)</span>:</p>
+      <pre style="font-size: 0.52em;"><code class="language-prolog">visible_from(S, D) :- declares(S, D).
+visible_from(S, D) :-
+    scope_chain(S, P), declares(P, D).</code></pre>
+      <p style="margin-top: 12px;">Two more used in this slide:</p>
+      <pre style="font-size: 0.52em;"><code class="language-prolog">method_decl(N, MName) :-
+    callable_node_type(T), node(N, T),
+    field(N, "name", NameNode),
+    name(NameNode, MName).
+
+typed_decl(D, VName, TText) :-
+    declaration(D), name(D, VName),
+    field(Parent, "name", D),
+    declared_type(Parent, TText).</code></pre>
+    </div>
+    <div>
+      <p><strong>Actual Souffl&eacute; output</strong> for <code>OrderService</code>:</p>
+      <pre style="font-size: 0.52em;"><code class="nohighlight">$ cat output/visible_from.csv | grep "^50"
+# scope 50 = findById() body
+50  5     ← OrderService  (from class scope)
+50  14    ← repo           (from class_body scope)
+50  42    ← findById        (own method name)
+50  48    ← id              (own parameter)
+
+$ cat output/method_decl.csv
+16  OrderService    ← constructor
+38  findById
+82  createOrder
+
+$ cat output/typed_decl.csv
+14   repo         OrderRepository
+48   id           long
+91   customerId   String
+100  items        List&lt;Item&gt;
+135  order        Order</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- DATALOG: QUERY EXAMPLES - CALLS AND CHAINS -->
+<section>
+  <h2>Query: "What does <code>repo</code> call &mdash; including chains?"</h2>
+  <div class="two-col">
+    <div>
+      <pre style="font-size: 0.52em;"><code class="language-prolog">% Direct calls on a named receiver
+call_on(RName, MName, Site) :-
+    call(Site, Recv, MName), Recv != -1,
+    name(Recv, RName).
+
+% Resolve repo.findById().orElseThrow()
+% back to "repo"
+chain_root(Site, Recv) :-
+    call(Site, Recv, _), Recv != -1,
+    !is_call_site(Recv).
+chain_root(Site, Base) :-
+    call(Site, Recv, _), Recv != -1,
+    chain_root(Recv, Base).
+
+chained_call(RootName, MName) :-
+    call(Site, _, MName),
+    chain_root(Site, Root),
+    name(Root, RootName).
+
+% Calls inside createOrder()'s scope
+call_in_scope(Scope, Site, MName) :-
+    call(Site, _, MName),
+    ancestor(Site, Scope), scope(Scope, _).</code></pre>
+    </div>
+    <div>
+      <p><strong>Actual Souffl&eacute; output:</strong></p>
+      <pre style="font-size: 0.52em;"><code class="nohighlight">$ cat output/call_on.csv
+repo    findById    55
+repo    save        148
+items   isEmpty     108
+
+$ cat output/chained_call.csv
+repo    findById       ← direct
+repo    orElseThrow    ← chained!
+repo    save
+items   isEmpty
+
+$ cat output/call_in_scope.csv | grep "^102"
+# scope 102 = createOrder() body
+102  108  isEmpty
+102  148  save</code></pre>
+      <div class="card" style="margin-top: 12px;">
+        <h3 class="accent-purple" style="font-size: 0.9em;">Why chain resolution matters</h3>
+        <p style="font-size: 0.75em;">Without it, <code>orElseThrow</code> is called on <em>some call result</em>. With <code>chain_root</code>: <strong>both calls trace to <code>repo</code></strong>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATALOG: RUNNING IT + COMPOSING QUERIES -->
+<section>
+  <h2>Running It &amp; Composing Queries</h2>
+  <div class="two-col">
+    <div>
+      <pre><code class="language-python"># Emit facts
+from query.treesitter_to_datalog import emit_datalog
+from query.datalog_plugins import make_default_registry
+
+plugin = make_default_registry().get(Language.JAVA)
+parser = get_parser("java")
+tree = parser.parse(source_bytes)
+facts = emit_datalog(tree.root_node, source_bytes,
+                     plugin=plugin)
+facts.to_souffle_facts(Path("out/facts"),
+                       plugin=plugin)</code></pre>
+      <pre style="margin-top: 8px;"><code class="language-bash"># Evaluate all rules at once
+souffle -F out/facts -D out/results \
+    query/analysis.dl</code></pre>
+    </div>
+    <div class="card">
+      <h3 class="accent">Composability</h3>
+      <p style="font-size: 0.75em;">Derived rules build on each other:</p>
+      <ul style="font-size: 0.7em;">
+        <li><code>scope_parent</code> &rarr; <code>scope_chain</code> (transitive)</li>
+        <li><code>scope_chain</code> + <code>declares</code> &rarr; <code>visible_from</code></li>
+        <li><code>call</code> + <code>is_call_site</code> &rarr; <code>chain_root</code></li>
+        <li><code>chain_root</code> + <code>name</code> &rarr; <code>chained_call</code></li>
+      </ul>
+      <p style="font-size: 0.75em; margin-top: 12px;">Want a new query? Add a rule that joins existing relations. No new Python code, no new tree walker.</p>
+      <p style="font-size: 0.75em; margin-top: 8px;"><strong>6 language plugins</strong> (Java, Python, JS, TS, Go, Rust) supply bridge facts so every rule works across languages.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DATALOG: TOWARD FORMAL REASONING -->
+<section>
+  <h2>Toward Formal Reasoning</h2>
+  <h3>Why Datalog facts are a foundation, not a destination</h3>
+  <div class="two-col">
+    <div>
+      <p>The 16-relation ontology gives us a <strong>normalised, language-neutral program representation</strong>. This is exactly the input that formal reasoning tools expect.</p>
+      <div class="card" style="margin-top: 15px;">
+        <h3 class="accent" style="font-size: 0.9em;">What we have today</h3>
+        <ul style="font-size: 0.7em;">
+          <li><code>scope_chain</code>, <code>visible_from</code> &mdash; lexical scoping model</li>
+          <li><code>refers_to</code> &mdash; approximate use-def chains</li>
+          <li><code>call</code>, <code>chain_root</code> &mdash; call graph with chain resolution</li>
+          <li><code>typed_decl</code> &mdash; type annotations on declarations</li>
+          <li>CFG construction &mdash; control flow for all 14 languages</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3 class="accent-green" style="font-size: 0.9em;">What this enables</h3>
+        <table style="font-size: 0.65em;">
+          <tr><th>Technique</th><th>Built on</th></tr>
+          <tr><td><strong>Points-to analysis</strong></td><td><code>call</code> + <code>refers_to</code> + <code>instantiation</code><br><span class="dim">cf. Doop &mdash; also Datalog-based</span></td></tr>
+          <tr><td><strong>Taint tracking</strong></td><td>CFG edges + <code>call</code> + <code>refers_to</code><br><span class="dim">Source/sink reachability over the graph</span></td></tr>
+          <tr><td><strong>Dead code detection</strong></td><td><code>declares</code> + <code>reference</code> + <code>refers_to</code><br><span class="dim">Declarations with no inbound references</span></td></tr>
+          <tr><td><strong>Security policy checking</strong></td><td>Integration signals + <code>scope_chain</code><br><span class="dim">e.g. "no DB call outside a service layer"</span></td></tr>
+          <tr><td><strong>SMT-backed verification</strong></td><td>CFG + <code>typed_decl</code> + branch conditions<br><span class="dim">Export constraints to Z3/CVC5</span></td></tr>
+        </table>
+      </div>
+      <p class="small" style="margin-top: 12px;">The key insight: Datalog facts are <strong>interoperable</strong>. Tools like Doop, CodeQL, and Souffl&eacute; all consume relational facts. The ontology is the interchange format.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SECTION: DESIGN DECISIONS -->
+<!-- ============================================================ -->
+<section class="section-divider">
+  <h2>Design Decisions</h2>
+  <h3>Patterns that hold the system together</h3>
+</section>
+
+<!-- DESIGN PATTERNS -->
+<section>
+  <h2>Key Design Patterns</h2>
+  <div class="three-col">
+    <div class="card">
+      <h3 class="accent">Protocol-Based DI</h3>
+      <p>Neo4j, LSP bridge, LLM models, file reading &mdash; all accessed through <code>typing.Protocol</code>. No concrete imports hardcoded.</p>
+      <pre><code class="language-python">class Neo4jDriver(Protocol):
+    def execute(self, query, params): ...
+    def close(self): ...</code></pre>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">Frozen Dataclasses</h3>
+      <p>Every DTO is <code>@dataclass(frozen=True)</code>. The entire pipeline is <strong>immutable data transformations</strong>.</p>
+      <pre><code class="language-python">@dataclass(frozen=True)
+class IntegrationSignal:
+    match: FileMatch
+    integration_type: IntegrationType
+    confidence: Confidence
+    ...</code></pre>
+    </div>
+    <div class="card">
+      <h3 class="accent-amber">Null Object Pattern</h3>
+      <p>No <code>None</code> returns. Sentinel objects satisfy the same interface:</p>
+      <pre><code class="language-python">NullSignalClassifier()
+NullPipelineTimer()
+EMPTY_FRAGMENT
+_EMPTY_RANGE_MAP</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- TRAINING PIPELINE -->
+<section>
+  <h2>Training Data: Two Sources</h2>
+  <div class="two-col">
+    <div class="card">
+      <h3 class="accent">Synthetic (Claude)</h3>
+      <ul>
+        <li>For each <code>(language, integration_type, label)</code> triple, prompt Claude to generate realistic code</li>
+        <li>Validate against pattern registry</li>
+        <li>Supports <strong>Batches API</strong> for 50% cost savings</li>
+        <li>Checkpoint/resume support</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">Real Code (GitHub Harvest)</h3>
+      <ul>
+        <li>Use patterns themselves as <strong>GitHub code search queries</strong></li>
+        <li>Pattern's <code>SignalDirection</code> provides the label automatically</li>
+        <li><code>--not-definite</code> mode harvests false-positive examples</li>
+        <li>No LLM needed for labelling</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top: 20px;">Both export stratified <strong>train/val/test JSONL</strong> splits for classifier training.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- INTEGRATION SIGNAL DIAGRAM -->
+<!-- ============================================================ -->
+<section>
+  <h2>Integration Signal Diagram</h2>
+  <p class="small">Codescry run against its own codebase</p>
+  <img src="../docs/images/integration_signals.svg" alt="Integration Signals" style="max-height: 450px; background: white; border-radius: 8px; padding: 10px;">
+  <p class="small" style="margin-top: 10px;">Symbols grouped by file (dashed clusters), integration types as teal nodes. Edge weight = confidence.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- TECH STACK -->
+<!-- ============================================================ -->
+<section>
+  <h2>Technology Stack</h2>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.7em;">
+    <div class="card">
+      <h3 class="accent">Core Analysis</h3>
+      <ul>
+        <li><strong>tree-sitter</strong> &mdash; syntax zone classification, CFG construction, AST walks, Datalog emission</li>
+        <li><strong>Universal CTags</strong> &mdash; symbol extraction with line ranges</li>
+        <li><strong>Regex</strong> &mdash; framework-aware pattern matching</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">ML / AI</h3>
+      <ul>
+        <li><strong>scikit-learn</strong> &mdash; TF-IDF + LR signal classifier (inference)</li>
+        <li><strong>Claude API</strong> &mdash; synthetic training data generation</li>
+        <li><strong>Ollama</strong> &mdash; local LLM concretisation (optional)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="accent-amber">Persistence &amp; Query</h3>
+      <ul>
+        <li><strong>Neo4j</strong> &mdash; graph database for analysis results</li>
+        <li><strong>Souffl&eacute;</strong> &mdash; Datalog engine for structural queries</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="accent-purple">Visualisation</h3>
+      <ul>
+        <li><strong>Graphviz</strong> &mdash; CFG and integration diagrams (DOT &rarr; SVG)</li>
+        <li><strong>Pydantic</strong> &mdash; structured JSON reports</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- SUMMARY -->
+<!-- ============================================================ -->
+<section data-background-gradient="linear-gradient(135deg, #0f172a, #1e1b4b)">
+  <h2>Summary</h2>
+  <div style="max-width: 700px; margin: 0 auto; text-align: left;">
+    <ul>
+      <li><strong class="accent">15 languages</strong>, 90+ frameworks, 13 integration types</li>
+      <li><strong class="accent-green">Five-stage pipeline</strong>: detect &rarr; extract &rarr; match &rarr; resolve &rarr; classify</li>
+      <li><strong class="accent-amber">tree-sitter</strong> for syntax-aware filtering and CFG construction</li>
+      <li><strong class="accent-purple">Language-independent CFG</strong> via 12-role schema &mdash; one algorithm, per-language JSON config</li>
+      <li><strong class="accent-pink">Multiple concretisation paths</strong>: ML classifier, local LLM, or raw signals</li>
+      <li><strong>Declarative plugin system</strong>: add a language with JSON + a pattern file</li>
+      <li>Output to <strong>JSON, Neo4j, Graphviz, or Datalog</strong></li>
+    </ul>
+  </div>
+  <pre style="margin-top: 30px;"><code class="language-bash">pip install codescry  # or: poetry install</code></pre>
+</section>
+
+<!-- END -->
+<section data-background-gradient="linear-gradient(135deg, #0f172a, #1e1b4b)">
+  <h1 style="background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Thank You</h1>
+  <p class="small" style="margin-top: 40px;">github.com/avishek-sen-gupta/codescry</p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'slide',
+  transitionSpeed: 'default',
+  backgroundTransition: 'fade',
+  center: true,
+  plugins: [RevealHighlight, RevealNotes],
+  width: 1280,
+  height: 720,
+});
+</script>
+</body>
+</html>

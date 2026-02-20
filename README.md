@@ -145,6 +145,7 @@ poetry run python scripts/generate_diagrams.py
 | [Architecture](docs/architecture.md) | Internal code flows, plugin system, subsystem internals, and design patterns |
 | [CFG Constructor](docs/cfg-constructor.md) | Control flow graph construction — role schema, graph types, builder algorithm, and per-language config |
 | [Testing & CI](docs/testing.md) | Running tests, coverage, local-repo tests, and CI pipeline |
+| [Presentation](presentation/index.html) | Reveal.js slide deck covering the pipeline, techniques, and architecture |
 
 ## License
 
