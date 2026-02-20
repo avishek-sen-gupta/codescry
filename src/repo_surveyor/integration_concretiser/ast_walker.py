@@ -124,6 +124,21 @@ def _walk_up_to_structural(node: Node) -> Node:
     return node
 
 
+def _walk_up_to_statement(node: Node) -> Node:
+    """Walk up the tree from node to the nearest statement or definition.
+
+    Unlike ``_walk_up_to_structural`` which prefers definitions over
+    statements, this returns the **first** structural ancestor encountered
+    (whichever is narrowest), stopping before root nodes.
+    """
+    current = node
+    while current is not None and not _is_root_node(current):
+        if _is_statement_node(current) or _is_definition_node(current):
+            return current
+        current = current.parent
+    return node
+
+
 def _node_text(node: Node, file_content: bytes) -> str:
     """Extract the text of a node from the file content."""
     return file_content[node.start_byte : node.end_byte].decode(
@@ -174,4 +189,50 @@ def extract_ast_context(
         node_text=_node_text(structural, file_content),
         start_line=structural.start_point.row + 1,
         end_line=structural.end_point.row + 1,
+    )
+
+
+def extract_statement_context(
+    file_content: bytes,
+    language: Language,
+    line_number: int,
+) -> ASTContext:
+    """Extract the narrowest enclosing statement-level AST context for a line.
+
+    Similar to ``extract_ast_context`` but walks up to the **nearest**
+    statement or definition node rather than preferring definitions.
+    This yields tighter context suitable for embedding-based classification.
+
+    Args:
+        file_content: Raw bytes of the source file.
+        language: Programming language of the file.
+        line_number: 1-indexed line number of the signal.
+
+    Returns:
+        ASTContext with the enclosing node's type, text, and line range.
+        Returns a fallback context if the language is unsupported or
+        the line cannot be resolved.
+    """
+    ts_name = LANGUAGE_TO_TS_NAME.get(language)
+    if ts_name is None:
+        return FALLBACK_AST_CONTEXT
+
+    parser = get_parser(ts_name)
+    tree = parser.parse(file_content)
+    line_0indexed = line_number - 1
+
+    deepest = _deepest_named_node_at_line(tree.root_node, line_0indexed)
+    if deepest is None:
+        return FALLBACK_AST_CONTEXT
+
+    statement = _walk_up_to_statement(deepest)
+
+    if _is_root_node(statement):
+        return FALLBACK_AST_CONTEXT
+
+    return ASTContext(
+        node_type=statement.type,
+        node_text=_node_text(statement, file_content),
+        start_line=statement.start_point.row + 1,
+        end_line=statement.end_point.row + 1,
     )
