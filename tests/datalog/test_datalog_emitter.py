@@ -30,7 +30,7 @@ _JAVA_PLUGIN = make_default_registry().get(Language.JAVA)
 # Constants
 # ---------------------------------------------------------------------------
 
-_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "query"
+_SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent / "query"
 _DL_FILE = _SCRIPTS_DIR / "analysis.dl"
 
 # A small Java class with:
