@@ -288,8 +288,8 @@ report, symbols, signals, resolved, concretised = survey(
 <section>
   <h2>Stage 3: Integration Detection</h2>
   <h3>The core of Codescry</h3>
-  <p style="margin-top: 20px;">Three sub-stages for each source file:</p>
-  <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px; margin-top: 20px;">
+  <p style="margin-top: 20px;">Two sub-stages for each source file:</p>
+  <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; margin-top: 20px;">
     <div class="pipeline-box">
       <strong class="accent-amber">A. Import Gating</strong><br>
       <span class="dim">Filter framework patterns by actual imports in the file</span>
@@ -298,11 +298,6 @@ report, symbols, signals, resolved, concretised = survey(
     <div class="pipeline-box">
       <strong class="accent">B. Zone-Filtered Pattern Matching</strong><br>
       <span class="dim">tree-sitter classifies lines &rarr; skip comments/strings &rarr; apply regex</span>
-    </div>
-    <div style="font-size: 1.4em; color: #475569;">&rarr;</div>
-    <div class="pipeline-box">
-      <strong class="accent-green">C. Directory Classification</strong><br>
-      <span class="dim">Directory names like <code>controllers/</code>, <code>repositories/</code></span>
     </div>
   </div>
 </section>
@@ -407,7 +402,7 @@ class IntegrationSignal:
     integration_type: IntegrationType  # one of 13 types
     confidence: Confidence     # HIGH / MEDIUM / LOW
     matched_pattern: str       # the regex that fired
-    entity_type: EntityType    # FILE_CONTENT or DIRECTORY
+    entity_type: EntityType    # FILE_CONTENT
     source: str                # "common", "Java", or "Spring"
     direction: SignalDirection  # INWARD / OUTWARD / AMBIGUOUS</code></pre>
   <div class="three-col" style="margin-top: 20px;">
@@ -417,7 +412,7 @@ class IntegrationSignal:
     </div>
     <div class="card">
       <h3 class="accent-green">3 Confidence Levels</h3>
-      <p><strong>HIGH</strong>: framework annotation<br><strong>MEDIUM</strong>: directory name<br><strong>LOW</strong>: generic keyword</p>
+      <p><strong>HIGH</strong>: framework annotation<br><strong>MEDIUM</strong>: language-level pattern<br><strong>LOW</strong>: generic keyword</p>
     </div>
     <div class="card">
       <h3 class="accent-amber">3 Directions</h3>
