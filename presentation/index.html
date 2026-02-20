@@ -141,7 +141,7 @@
 <section class="title-slide" data-background-gradient="linear-gradient(135deg, #0f172a, #1e1b4b)">
   <h1>Codescry</h1>
   <h3>Static Analysis of Technology Stacks<br>&amp; Code Structure</h3>
-  <p class="small" style="margin-top: 40px;">15 languages &middot; 13 integration types &middot; 90+ frameworks</p>
+  <p class="small" style="margin-top: 40px;">16 languages &middot; 13 integration types &middot; 90+ frameworks</p>
 </section>
 
 <!-- ============================================================ -->
@@ -213,9 +213,10 @@
     <div class="lang-item"><strong>Ruby</strong><br><span class="small">3 frameworks</span></div>
     <div class="lang-item"><strong>COBOL</strong><br><span class="small">6 core types</span></div>
     <div class="lang-item"><strong>PL/I</strong><br><span class="small">6 core types</span></div>
+    <div class="lang-item"><strong>Pascal</strong><br><span class="small">9 base types</span></div>
     <div class="lang-item" style="border-color: #334155; opacity: 0.5;"><strong>+more</strong><br><span class="small">plugin system</span></div>
   </div>
-  <p class="small" style="margin-top: 20px;">All 13 integration types covered for modern languages. COBOL/PL/I cover 6 mainframe-relevant types.</p>
+  <p class="small" style="margin-top: 20px;">All 13 integration types covered for modern languages. Pascal covers 9 base types. COBOL/PL/I cover 6 mainframe-relevant types.</p>
 </section>
 
 <!-- ============================================================ -->
@@ -958,7 +959,7 @@ souffle -F out/facts -D out/results \
         <li><code>refers_to</code> &mdash; approximate use-def chains</li>
         <li><code>call</code>, <code>chain_root</code> &mdash; call graph + chains</li>
         <li><code>typed_decl</code> &mdash; type annotations</li>
-        <li>CFG construction &mdash; 14 languages</li>
+        <li>CFG construction &mdash; 15 languages</li>
       </ul>
     </div>
     <div class="card">
@@ -1294,7 +1295,7 @@ _EMPTY_RANGE_MAP</code></pre>
   <h2>Summary</h2>
   <div style="max-width: 700px; margin: 0 auto; text-align: left;">
     <ul>
-      <li><strong class="accent">15 languages</strong>, 90+ frameworks, 13 integration types</li>
+      <li><strong class="accent">16 languages</strong>, 90+ frameworks, 13 integration types</li>
       <li><strong class="accent-green">Five-stage pipeline</strong>: detect &rarr; extract &rarr; match &rarr; resolve &rarr; classify</li>
       <li><strong class="accent-amber">tree-sitter</strong> for syntax-aware filtering, CFG construction, and Datalog emission</li>
       <li><strong class="accent-purple">Language-independent CFG</strong> via 12-role schema &mdash; one algorithm, per-language JSON</li>
