@@ -224,7 +224,7 @@
 <!-- ============================================================ -->
 <section class="section-divider">
   <h2>The Pipeline</h2>
-  <h3>Five stages, one function call</h3>
+  <h3>Six stages, one function call</h3>
 </section>
 
 <!-- PIPELINE OVERVIEW -->
@@ -236,7 +236,7 @@ report, symbols, signals, resolved, concretised = survey(
     "/path/to/repo",
     languages=["Java", "Python"],
 )</code></pre>
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 25px; font-size: 0.55em;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 25px; font-size: 0.5em;">
     <div class="pipeline-box active">
       <strong class="accent">1. Tech Stacks</strong><br>
       <span class="dim">Indicator files,<br>glob patterns,<br>dependency parsing</span>
@@ -250,11 +250,15 @@ report, symbols, signals, resolved, concretised = survey(
       <span class="dim">tree-sitter zones +<br>regex patterns</span>
     </div>
     <div class="pipeline-box active">
-      <strong class="accent">4. Symbol Resolution</strong><br>
+      <strong class="accent-green">4. Signal Dedup</strong><br>
+      <span class="dim">Merge duplicates<br>into composites<br>via SignalLike</span>
+    </div>
+    <div class="pipeline-box active">
+      <strong class="accent">5. Symbol Resolution</strong><br>
       <span class="dim">Spatial join:<br>signal &rarr; symbol</span>
     </div>
     <div class="pipeline-box active">
-      <strong class="accent">5. Concretisation</strong><br>
+      <strong class="accent">6. Concretisation</strong><br>
       <span class="dim">ML classifier:<br>direction labelling</span>
     </div>
   </div>
@@ -460,10 +464,44 @@ class IntegrationSignal:
 </section>
 
 <!-- ============================================================ -->
-<!-- STAGE 4: SYMBOL RESOLUTION -->
+<!-- STAGE 4: SIGNAL DEDUPLICATION -->
 <!-- ============================================================ -->
 <section>
-  <h2>Stage 4: Symbol Resolution</h2>
+  <h2>Stage 4: Signal Deduplication</h2>
+  <h3>Merging duplicates before downstream processing</h3>
+  <div class="two-col">
+    <div>
+      <p>A single source line can match <strong>multiple patterns</strong> (e.g. both <code>http_rest</code> and <code>database</code>). Before symbol resolution or concretisation, duplicates are merged:</p>
+      <pre><code class="language-python">def _deduplicate_detector_result(result):
+    file_content = [s for s in result.integration_points
+                    if s.entity_type == EntityType.FILE_CONTENT]
+    non_file_content = [s for s in result.integration_points
+                        if s.entity_type != EntityType.FILE_CONTENT]
+    composites = deduplicate_signals(file_content)
+    return IntegrationDetectorResult(
+        integration_points=non_file_content + composites,
+        files_scanned=result.files_scanned,
+    )</code></pre>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">SignalLike Protocol</h3>
+      <p>Both <code>IntegrationSignal</code> and <code>CompositeIntegrationSignal</code> satisfy the <code>SignalLike</code> protocol, so all downstream consumers work uniformly:</p>
+      <ul>
+        <li>Symbol resolution</li>
+        <li>AST grouper</li>
+        <li>ML concretiser</li>
+        <li>Ollama / Gemini / Embedding concretisers</li>
+      </ul>
+      <p style="margin-top: 10px;">Each composite preserves <strong>all original match metadata</strong> while eliminating redundant processing.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- STAGE 5: SYMBOL RESOLUTION -->
+<!-- ============================================================ -->
+<section>
+  <h2>Stage 5: Symbol Resolution</h2>
   <h3>Spatial join: signal &rarr; symbol</h3>
   <div class="two-col">
     <div>
@@ -492,7 +530,7 @@ class SymbolIntegrationProfile:
 <!-- STAGE 5: CONCRETISATION -->
 <!-- ============================================================ -->
 <section>
-  <h2>Stage 5: Signal Concretisation</h2>
+  <h2>Stage 6: Signal Concretisation</h2>
   <h3>Resolving ambiguity with ML</h3>
   <div class="two-col">
     <div>
@@ -1296,7 +1334,7 @@ _EMPTY_RANGE_MAP</code></pre>
   <div style="max-width: 700px; margin: 0 auto; text-align: left;">
     <ul>
       <li><strong class="accent">16 languages</strong>, 90+ frameworks, 13 integration types</li>
-      <li><strong class="accent-green">Five-stage pipeline</strong>: detect &rarr; extract &rarr; match &rarr; resolve &rarr; classify</li>
+      <li><strong class="accent-green">Six-stage pipeline</strong>: detect &rarr; extract &rarr; match &rarr; dedup &rarr; resolve &rarr; classify</li>
       <li><strong class="accent-amber">tree-sitter</strong> for syntax-aware filtering, CFG construction, and Datalog emission</li>
       <li><strong class="accent-purple">Language-independent CFG</strong> via 12-role schema &mdash; one algorithm, per-language JSON</li>
       <li><strong class="accent-pink">Datalog integration detection</strong>: structural AST queries replace regex with data-driven bridge facts</li>
