@@ -10,6 +10,8 @@ from repo_surveyor.detection.integration_detector import (
 )
 from repo_surveyor.integration_concretiser.gemini_concretiser import (
     GeminiClassificationClient,
+    _MAX_BATCH_PROMPT_CHARS,
+    _apply_line_map,
     _concretise_file,
     concretise_with_gemini,
 )
@@ -251,27 +253,26 @@ class TestConcretiseWithGemini:
 
         assert result.signals_submitted == 1
 
-    def test_processes_multiple_files(self, monkeypatch):
-        # Responses ordered by sorted file name: UserController.java < client.py
+    def test_processes_multiple_files_batched(self, monkeypatch):
+        """Two small files should be batched into a single API call."""
+        # Batched response includes "file" field
         responses = [
             {
                 "integrations": [
                     {
+                        "file": "UserController.java",
                         "line": 10,
                         "label": "DEFINITE_INWARD",
                         "confidence": 0.85,
                         "reason": "REST endpoint",
-                    }
-                ]
-            },
-            {
-                "integrations": [
+                    },
                     {
+                        "file": "client.py",
                         "line": 5,
                         "label": "DEFINITE_OUTWARD",
                         "confidence": 0.9,
                         "reason": "HTTP call",
-                    }
+                    },
                 ]
             },
         ]
@@ -305,3 +306,124 @@ class TestConcretiseWithGemini:
         labels = [s.label for s in result.concretised]
         assert TrainingLabel.DEFINITE_OUTWARD in labels
         assert TrainingLabel.DEFINITE_INWARD in labels
+        # Should have made only 1 API call (batched), not 2
+        assert len(mock_client.call_log) == 1
+
+    def test_single_file_batch_uses_single_file_prompt(self, monkeypatch):
+        """A batch with only 1 file should use the single-file prompt (no 'file' field needed)."""
+        responses = [
+            {
+                "integrations": [
+                    {
+                        "line": 5,
+                        "label": "DEFINITE_OUTWARD",
+                        "confidence": 0.9,
+                        "reason": "HTTP call",
+                    }
+                ]
+            },
+        ]
+        mock_client = _MockGeminiClient(responses)
+        monkeypatch.setattr(
+            "repo_surveyor.integration_concretiser.gemini_concretiser.GeminiClassificationClient",
+            lambda api_key, model: mock_client,
+        )
+
+        signals = [_make_signal("client.py", 5, "requests.get(url)")]
+        detector_result = IntegrationDetectorResult(
+            integration_points=signals, files_scanned=1
+        )
+
+        result, _ = concretise_with_gemini(
+            detector_result,
+            api_key="fake-key",
+            file_reader=_fake_reader,
+        )
+
+        assert result.signals_submitted == 1
+        assert result.signals_definite == 1
+        # Single-file prompt should NOT use batched system prompt
+        system_prompt_used = mock_client.call_log[0][0]
+        assert "MULTIPLE" not in system_prompt_used
+
+    def test_unreadable_file_returns_not_definite(self, monkeypatch):
+        """Files that can't be read should get NOT_DEFINITE labels."""
+        read_counts: dict[str, int] = {}
+
+        def _partial_reader(path: str) -> bytes:
+            read_counts[path] = read_counts.get(path, 0) + 1
+            # Allow first read (AST grouper) but fail on second (concretiser)
+            if path == "missing.py" and read_counts[path] > 1:
+                raise OSError("not found")
+            if path == "missing.py":
+                return b"some code\n"
+            return _FAKE_FILES[path]
+
+        mock_client = _MockGeminiClient(
+            [
+                {
+                    "integrations": [
+                        {
+                            "file": "client.py",
+                            "line": 5,
+                            "label": "DEFINITE_OUTWARD",
+                            "confidence": 0.9,
+                            "reason": "HTTP call",
+                        }
+                    ]
+                }
+            ]
+        )
+        monkeypatch.setattr(
+            "repo_surveyor.integration_concretiser.gemini_concretiser.GeminiClassificationClient",
+            lambda api_key, model: mock_client,
+        )
+
+        signals = [
+            _make_signal("client.py", 5, "requests.get(url)"),
+            _make_signal("missing.py", 1, "some code"),
+        ]
+        detector_result = IntegrationDetectorResult(
+            integration_points=signals, files_scanned=2
+        )
+
+        result, _ = concretise_with_gemini(
+            detector_result,
+            api_key="fake-key",
+            file_reader=_partial_reader,
+        )
+
+        assert result.signals_submitted == 2
+        labels = {
+            s.original_signal.match.file_path: s.label for s in result.concretised
+        }
+        assert labels["client.py"] == TrainingLabel.DEFINITE_OUTWARD
+        assert labels["missing.py"] == TrainingLabel.NOT_DEFINITE
+
+
+# ---------------------------------------------------------------------------
+# Tests: _apply_line_map
+# ---------------------------------------------------------------------------
+
+
+class TestApplyLineMap:
+    def test_applies_labels_from_line_map(self):
+        signal = _make_signal("client.py", 5, "requests.get(url)")
+        line_map = {5: (TrainingLabel.DEFINITE_OUTWARD, 0.95, "HTTP call")}
+        signal_to_ast = {("client.py", 5): ASTContext("call", "requests.get", 5, 5)}
+
+        concretised, metadata = _apply_line_map(
+            "client.py", [signal], line_map, signal_to_ast
+        )
+
+        assert len(concretised) == 1
+        assert concretised[0].label == TrainingLabel.DEFINITE_OUTWARD
+        assert metadata[("client.py", 5)]["confidence"] == pytest.approx(0.95)
+
+    def test_missing_line_defaults_to_not_definite(self):
+        signal = _make_signal("client.py", 5, "requests.get(url)")
+
+        concretised, metadata = _apply_line_map("client.py", [signal], {}, {})
+
+        assert concretised[0].label == TrainingLabel.NOT_DEFINITE
+        assert metadata[("client.py", 5)]["confidence"] is None

@@ -10,7 +10,10 @@ from repo_surveyor.detection.integration_detector import (
 from repo_surveyor.integration_concretiser.llm_shared import (
     MAX_FILE_CHARS,
     SYSTEM_PROMPT,
+    SYSTEM_PROMPT_BATCHED,
+    build_batched_classification_prompt,
     build_classification_prompt,
+    parse_batched_classification_response,
     parse_classification_response,
     read_file_bytes,
 )
@@ -101,6 +104,16 @@ class TestBuildClassificationPrompt:
             "Foo.java", "some code", [sig1, sig2], False
         )
         assert prompt.count("Line 10") == 1
+
+    def test_merges_different_types_on_same_line(self):
+        sig1 = _make_signal("Foo.java", 38, "conn.open()", IntegrationType.HTTP_REST)
+        sig2 = _make_signal("Foo.java", 38, "conn.open()", IntegrationType.DATABASE)
+        prompt = build_classification_prompt(
+            "Foo.java", "some code", [sig1, sig2], False
+        )
+        assert prompt.count("Line 38") == 1
+        assert "http_rest" in prompt
+        assert "database" in prompt
 
     def test_sorts_signals_by_line_number(self):
         sig_a = _make_signal("Foo.java", 20, "line 20")
@@ -216,3 +229,136 @@ class TestReadFileBytes:
     def test_raises_on_missing_file(self):
         with pytest.raises(OSError):
             read_file_bytes("/no/such/file/exists.txt")
+
+
+# ---------------------------------------------------------------------------
+# Tests: SYSTEM_PROMPT_BATCHED
+# ---------------------------------------------------------------------------
+
+
+class TestSystemPromptBatched:
+    def test_contains_valid_labels(self):
+        assert "DEFINITE_INWARD" in SYSTEM_PROMPT_BATCHED
+        assert "DEFINITE_OUTWARD" in SYSTEM_PROMPT_BATCHED
+        assert "NOT_DEFINITE" in SYSTEM_PROMPT_BATCHED
+
+    def test_requests_json_format(self):
+        assert "JSON" in SYSTEM_PROMPT_BATCHED
+
+    def test_mentions_file_field(self):
+        assert '"file"' in SYSTEM_PROMPT_BATCHED
+
+    def test_mentions_multiple_files(self):
+        assert "MULTIPLE" in SYSTEM_PROMPT_BATCHED
+
+
+# ---------------------------------------------------------------------------
+# Tests: build_batched_classification_prompt
+# ---------------------------------------------------------------------------
+
+
+class TestBuildBatchedClassificationPrompt:
+    def test_includes_file_delimiters(self):
+        sig_a = _make_signal("Foo.java", 10, "conn.open()")
+        sig_b = _make_signal("Bar.java", 5, "db.query()")
+        prompt = build_batched_classification_prompt(
+            [
+                ("Foo.java", "class Foo {}", [sig_a], False),
+                ("Bar.java", "class Bar {}", [sig_b], False),
+            ]
+        )
+        assert "===FILE: Foo.java===" in prompt
+        assert "===FILE: Bar.java===" in prompt
+
+    def test_includes_signals_from_all_files(self):
+        sig_a = _make_signal("Foo.java", 10, "conn.open()")
+        sig_b = _make_signal("Bar.java", 5, "db.query()")
+        prompt = build_batched_classification_prompt(
+            [
+                ("Foo.java", "class Foo {}", [sig_a], False),
+                ("Bar.java", "class Bar {}", [sig_b], False),
+            ]
+        )
+        assert "Line 10" in prompt
+        assert "Line 5" in prompt
+        assert "conn.open()" in prompt
+        assert "db.query()" in prompt
+
+    def test_includes_file_content(self):
+        sig = _make_signal("Foo.java", 1, "x")
+        prompt = build_batched_classification_prompt(
+            [("Foo.java", "class Foo { int x; }", [sig], False)]
+        )
+        assert "class Foo { int x; }" in prompt
+
+    def test_ends_with_classify_instruction(self):
+        sig = _make_signal("Foo.java", 1, "x")
+        prompt = build_batched_classification_prompt(
+            [("Foo.java", "code", [sig], False)]
+        )
+        assert "Classify ALL" in prompt
+
+
+# ---------------------------------------------------------------------------
+# Tests: parse_batched_classification_response
+# ---------------------------------------------------------------------------
+
+
+class TestParseBatchedClassificationResponse:
+    def test_parses_multi_file_response(self):
+        data = {
+            "integrations": [
+                {
+                    "file": "Foo.java",
+                    "line": 10,
+                    "label": "DEFINITE_OUTWARD",
+                    "confidence": 0.9,
+                    "reason": "HTTP call",
+                },
+                {
+                    "file": "Bar.java",
+                    "line": 5,
+                    "label": "DEFINITE_INWARD",
+                    "confidence": 0.85,
+                    "reason": "REST endpoint",
+                },
+            ]
+        }
+        result = parse_batched_classification_response(data)
+        assert "Foo.java" in result
+        assert "Bar.java" in result
+        assert result["Foo.java"][10][0] == TrainingLabel.DEFINITE_OUTWARD
+        assert result["Bar.java"][5][0] == TrainingLabel.DEFINITE_INWARD
+
+    def test_empty_response(self):
+        result = parse_batched_classification_response({})
+        assert result == {}
+
+    def test_missing_file_field_skipped(self):
+        data = {
+            "integrations": [
+                {
+                    "line": 10,
+                    "label": "DEFINITE_OUTWARD",
+                    "confidence": 0.9,
+                    "reason": "test",
+                }
+            ]
+        }
+        result = parse_batched_classification_response(data)
+        assert result == {}
+
+    def test_unknown_label_defaults_to_not_definite(self):
+        data = {
+            "integrations": [
+                {
+                    "file": "X.java",
+                    "line": 1,
+                    "label": "BOGUS",
+                    "confidence": 0.5,
+                    "reason": "unknown",
+                }
+            ]
+        }
+        result = parse_batched_classification_response(data)
+        assert result["X.java"][1][0] == TrainingLabel.NOT_DEFINITE

@@ -28,7 +28,10 @@ from repo_surveyor.integration_concretiser.llm_shared import (
     MAX_FILE_CHARS,
     MAX_RETRIES,
     SYSTEM_PROMPT,
+    SYSTEM_PROMPT_BATCHED,
+    build_batched_classification_prompt,
     build_classification_prompt,
+    parse_batched_classification_response,
     parse_classification_response,
     read_file_bytes,
 )
@@ -42,6 +45,7 @@ from repo_surveyor.training.types import TrainingLabel
 logger = logging.getLogger(__name__)
 
 _DEFAULT_MODEL = "gemini-2.5-flash"
+_MAX_BATCH_PROMPT_CHARS = 80_000
 
 
 class GeminiClassificationClient:
@@ -156,6 +160,16 @@ def _concretise_file(
     data = client.classify(SYSTEM_PROMPT, prompt)
     line_map = parse_classification_response(data)
 
+    return _apply_line_map(file_path, signals, line_map, signal_to_ast)
+
+
+def _apply_line_map(
+    file_path: str,
+    signals: list[IntegrationSignal],
+    line_map: dict[int, tuple[TrainingLabel, float, str]],
+    signal_to_ast: dict[tuple[str, int], ASTContext],
+) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
+    """Apply a line-level classification map to signals, producing concretised results."""
     concretised: list[ConcretisedSignal] = []
     metadata: dict[tuple[str, int], dict] = {}
     for sig in signals:
@@ -181,18 +195,19 @@ def _concretise_file(
             )
         else:
             label = TrainingLabel.NOT_DEFINITE
-            metadata[(sig.match.file_path, ln)] = {"confidence": None, "reason": None}
+            metadata[(sig.match.file_path, ln)] = {
+                "confidence": None,
+                "reason": None,
+            }
             logger.warning(
-                "  Line %4d  NOT in Gemini response — defaulting NOT_DEFINITE  [%s]  %s",
+                "  Line %4d  NOT in LLM response — defaulting NOT_DEFINITE  [%s]  %s",
                 ln,
                 sig.integration_type.value,
                 sig.match.line_content.strip()[:60],
             )
-
         concretised.append(
             ConcretisedSignal(original_signal=sig, ast_context=ast_ctx, label=label)
         )
-
     return concretised, metadata
 
 
@@ -252,22 +267,128 @@ def concretise_with_gemini(
         model,
     )
 
+    # --- Read all files and prepare (path, content, signals, truncated) ---
+    file_data: list[tuple[str, str, list[IntegrationSignal], bool]] = []
+    oversized_files: list[str] = []
+    unreadable: dict[str, list[IntegrationSignal]] = {}
+
+    for fp in unique_files:
+        try:
+            raw_bytes = file_reader(fp)
+            content = raw_bytes.decode("utf-8", errors="replace")
+        except OSError as exc:
+            logger.error("Cannot read %s: %s", fp, exc)
+            unreadable[fp] = by_file[fp]
+            continue
+        truncated = len(content) > MAX_FILE_CHARS
+        if truncated:
+            content = content[:MAX_FILE_CHARS]
+        file_data.append((fp, content, by_file[fp], truncated))
+
+    # --- Partition into solo (oversized) and batchable files ---
+    solo: list[tuple[str, str, list[IntegrationSignal], bool]] = []
+    batchable: list[tuple[str, str, list[IntegrationSignal], bool]] = []
+    for entry in file_data:
+        fp, content, sigs, trunc = entry
+        prompt_estimate = len(build_classification_prompt(fp, content, sigs, trunc))
+        if prompt_estimate > _MAX_BATCH_PROMPT_CHARS:
+            solo.append(entry)
+        else:
+            batchable.append(entry)
+
+    # --- Form batches from batchable files ---
+    batches: list[list[tuple[str, str, list[IntegrationSignal], bool]]] = []
+    current_batch: list[tuple[str, str, list[IntegrationSignal], bool]] = []
+    current_chars = 0
+    for entry in batchable:
+        fp, content, sigs, trunc = entry
+        entry_chars = len(build_classification_prompt(fp, content, sigs, trunc))
+        if current_batch and current_chars + entry_chars > _MAX_BATCH_PROMPT_CHARS:
+            batches.append(current_batch)
+            current_batch = []
+            current_chars = 0
+        current_batch.append(entry)
+        current_chars += entry_chars
+    if current_batch:
+        batches.append(current_batch)
+
+    logger.info(
+        "Batch plan: %d solo files, %d batches (%d batchable files), %d unreadable",
+        len(solo),
+        len(batches),
+        len(batchable),
+        len(unreadable),
+    )
+
     all_concretised: list[ConcretisedSignal] = []
     all_metadata: dict[tuple[str, int], dict] = {}
-    for idx, file_path in enumerate(unique_files, 1):
-        signals = by_file[file_path]
+    call_idx = 0
+    total_calls = len(solo) + len(batches)
+
+    # --- Process solo (oversized) files ---
+    for fp, content, sigs, trunc in solo:
+        call_idx += 1
         logger.info(
-            "[%d/%d] %s  (%d signals)",
-            idx,
-            len(unique_files),
-            file_path,
-            len(signals),
+            "[%d/%d] Solo file: %s  (%d signals)", call_idx, total_calls, fp, len(sigs)
         )
-        file_concretised, file_metadata = _concretise_file(
-            file_path, signals, signal_to_ast, client, file_reader
+        prompt = build_classification_prompt(fp, content, sigs, trunc)
+        data = client.classify(SYSTEM_PROMPT, prompt)
+        line_map = parse_classification_response(data)
+        file_concretised, file_metadata = _apply_line_map(
+            fp, sigs, line_map, signal_to_ast
         )
         all_concretised.extend(file_concretised)
         all_metadata.update(file_metadata)
+
+    # --- Process batched files ---
+    for batch in batches:
+        call_idx += 1
+        batch_paths = [fp for fp, _, _, _ in batch]
+        total_sigs = sum(len(sigs) for _, _, sigs, _ in batch)
+        logger.info(
+            "[%d/%d] Batch of %d files  (%d signals): %s",
+            call_idx,
+            total_calls,
+            len(batch),
+            total_sigs,
+            ", ".join(batch_paths),
+        )
+        if len(batch) == 1:
+            fp, content, sigs, trunc = batch[0]
+            prompt = build_classification_prompt(fp, content, sigs, trunc)
+            data = client.classify(SYSTEM_PROMPT, prompt)
+            line_map = parse_classification_response(data)
+            file_concretised, file_metadata = _apply_line_map(
+                fp, sigs, line_map, signal_to_ast
+            )
+            all_concretised.extend(file_concretised)
+            all_metadata.update(file_metadata)
+        else:
+            prompt = build_batched_classification_prompt(batch)
+            data = client.classify(SYSTEM_PROMPT_BATCHED, prompt)
+            batched_map = parse_batched_classification_response(data)
+            for fp, _, sigs, _ in batch:
+                line_map = batched_map.get(fp, {})
+                file_concretised, file_metadata = _apply_line_map(
+                    fp, sigs, line_map, signal_to_ast
+                )
+                all_concretised.extend(file_concretised)
+                all_metadata.update(file_metadata)
+
+    # --- Handle unreadable files ---
+    for fp, sigs in unreadable.items():
+        for sig in sigs:
+            ast_ctx = signal_to_ast.get(
+                (sig.match.file_path, sig.match.line_number),
+                ASTContext("unknown", "", sig.match.line_number, sig.match.line_number),
+            )
+            all_concretised.append(
+                ConcretisedSignal(
+                    original_signal=sig,
+                    ast_context=ast_ctx,
+                    label=TrainingLabel.NOT_DEFINITE,
+                )
+            )
 
     definite = sum(1 for s in all_concretised if s.is_definite)
     result = ConcretisationResult(
@@ -277,9 +398,10 @@ def concretise_with_gemini(
         signals_discarded=len(all_concretised) - definite,
     )
     logger.info(
-        "Gemini concretisation complete: submitted=%d  definite=%d  discarded=%d",
+        "Gemini concretisation complete: submitted=%d  definite=%d  discarded=%d  api_calls=%d",
         result.signals_submitted,
         result.signals_definite,
         result.signals_discarded,
+        total_calls,
     )
     return result, all_metadata
