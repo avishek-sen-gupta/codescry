@@ -8,7 +8,6 @@ from collections.abc import Callable
 
 from repo_surveyor.detection.integration_detector import (
     IntegrationDetectorResult,
-    IntegrationSignal,
     EntityType,
 )
 from repo_surveyor.training.signal_classifier import SignalClassifier
@@ -21,6 +20,7 @@ from repo_surveyor.integration_concretiser.types import (
     ASTContext,
     ConcretisedSignal,
     ConcretisationResult,
+    SignalLike,
 )
 
 
@@ -48,7 +48,7 @@ def concretise_integration_signals(
     Returns:
         ConcretisationResult with all signals labelled.
     """
-    file_content_signals: list[IntegrationSignal] = [
+    file_content_signals: list[SignalLike] = [
         s
         for s in detector_result.integration_points
         if s.entity_type == EntityType.FILE_CONTENT

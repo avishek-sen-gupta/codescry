@@ -6,10 +6,9 @@ from functools import reduce
 from itertools import groupby
 from operator import attrgetter
 
-from repo_surveyor.detection.integration_detector import IntegrationSignal
 from repo_surveyor.integration_patterns import Language
 from repo_surveyor.integration_concretiser.ast_walker import extract_ast_context
-from repo_surveyor.integration_concretiser.types import ASTContext
+from repo_surveyor.integration_concretiser.types import ASTContext, SignalLike
 
 
 @dataclass(frozen=True)
@@ -23,7 +22,7 @@ class SignalGroup:
     """
 
     ast_context: ASTContext
-    signals: tuple[IntegrationSignal, ...]
+    signals: tuple[SignalLike, ...]
     file_path: str
 
 
@@ -37,13 +36,13 @@ def _read_file_bytes(file_path: str) -> bytes:
 class _SignalWithContext:
     """A signal paired with its resolved AST context and grouping key."""
 
-    signal: IntegrationSignal
+    signal: SignalLike
     ast_context: ASTContext
     group_key: tuple[str, int, int]
 
 
 def _resolve_signal(
-    signal: IntegrationSignal,
+    signal: SignalLike,
     file_content: bytes,
     language: Language,
 ) -> _SignalWithContext:
@@ -58,7 +57,7 @@ def _resolve_signal(
 
 def _resolve_file_signals(
     file_path: str,
-    signals: list[IntegrationSignal],
+    signals: list[SignalLike],
     file_reader: Callable[[str], bytes],
 ) -> tuple[_SignalWithContext, ...]:
     """Resolve all signals in a single file to their AST contexts."""
@@ -73,8 +72,8 @@ def _resolve_file_signals(
 
 
 def _group_by_file(
-    signals: list[IntegrationSignal],
-) -> dict[str, list[IntegrationSignal]]:
+    signals: list[SignalLike],
+) -> dict[str, list[SignalLike]]:
     """Group signals by file path."""
     sorted_signals = sorted(signals, key=attrgetter("match.file_path"))
     return {
@@ -102,7 +101,7 @@ def _collect_into_groups(
 
 
 def group_signals_by_ast_context(
-    signals: list[IntegrationSignal],
+    signals: list[SignalLike],
     file_reader: Callable[[str], bytes] = _read_file_bytes,
 ) -> list[SignalGroup]:
     """Group signals by their enclosing AST node.

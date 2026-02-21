@@ -17,9 +17,11 @@ from repo_surveyor.integration_concretiser import (
     concretise_integration_signals,
 )
 from repo_surveyor.detection.integration_detector import (
+    EntityType,
     IntegrationDetectorResult,
     detect_integrations,
 )
+from repo_surveyor.integration_concretiser.llm_shared import deduplicate_signals
 from repo_surveyor.integration_patterns import Language
 from repo_surveyor.core.pipeline_timer import NullPipelineTimer, PipelineTimer
 from repo_surveyor.core.report import DirectoryMarker, SurveyReport
@@ -33,6 +35,28 @@ from repo_surveyor.training.signal_classifier import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _deduplicate_detector_result(
+    result: IntegrationDetectorResult,
+) -> IntegrationDetectorResult:
+    """Merge duplicate FILE_CONTENT signals into CompositeIntegrationSignals.
+
+    Non-FILE_CONTENT signals pass through unchanged. FILE_CONTENT signals
+    sharing the same (file_path, line_number, line_content) are merged into
+    a single CompositeIntegrationSignal.
+    """
+    file_content = [
+        s for s in result.integration_points if s.entity_type == EntityType.FILE_CONTENT
+    ]
+    non_file_content = [
+        s for s in result.integration_points if s.entity_type != EntityType.FILE_CONTENT
+    ]
+    composites = deduplicate_signals(file_content)
+    return IntegrationDetectorResult(
+        integration_points=non_file_content + composites,
+        files_scanned=result.files_scanned,
+    )
 
 
 def _normalise_languages(
@@ -266,6 +290,14 @@ def survey(
         "Integration detection completed: %d points in %d files",
         len(integration_result.integration_points),
         integration_result.files_scanned,
+    )
+
+    timer.stage_started("signal_deduplication")
+    integration_result = _deduplicate_detector_result(integration_result)
+    timer.stage_completed("signal_deduplication")
+    logger.info(
+        "Signal deduplication completed: %d points",
+        len(integration_result.integration_points),
     )
 
     timer.stage_started("symbol_resolution")

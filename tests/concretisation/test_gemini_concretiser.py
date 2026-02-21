@@ -404,8 +404,8 @@ class TestConcretiseWithGemini:
         assert labels["client.py"] == TrainingLabel.DEFINITE_OUTWARD
         assert labels["missing.py"] == TrainingLabel.NOT_DEFINITE
 
-    def test_deduplicates_signals_on_same_line(self, monkeypatch):
-        """Duplicate signals on the same line should be merged into one composite."""
+    def test_processes_duplicate_signals_individually(self, monkeypatch):
+        """Without upstream dedup, duplicate signals are processed individually."""
         responses = [
             {
                 "integrations": [
@@ -446,14 +446,9 @@ class TestConcretiseWithGemini:
             file_reader=_fake_reader,
         )
 
-        # Should produce 1 concretised signal (deduped), not 2
-        assert result.signals_submitted == 1
-        assert result.signals_definite == 1
-        # The original_signal should be a CompositeIntegrationSignal
-        assert isinstance(
-            result.concretised[0].original_signal, CompositeIntegrationSignal
-        )
-        assert len(result.concretised[0].original_signal.signals) == 2
+        # Both signals processed (dedup is now a separate pipeline stage)
+        assert result.signals_submitted == 2
+        assert result.signals_definite == 2
 
 
 # ---------------------------------------------------------------------------

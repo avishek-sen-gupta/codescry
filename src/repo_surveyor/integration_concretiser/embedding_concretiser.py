@@ -34,7 +34,6 @@ from itertools import batched
 from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
-    IntegrationSignal,
 )
 from repo_surveyor.integration_concretiser.ast_walker import (
     FALLBACK_AST_CONTEXT,
@@ -44,6 +43,7 @@ from repo_surveyor.integration_concretiser.types import (
     ASTContext,
     ConcretisationResult,
     ConcretisedSignal,
+    SignalLike,
 )
 from repo_surveyor.training.types import TrainingLabel
 
@@ -411,7 +411,7 @@ class EmbeddingConcretiser:
             Tuple of (ConcretisationResult, metadata) where metadata maps
             (file_path, line_number) to best_type, best_direction, and score.
         """
-        file_content_signals = [
+        file_content_signals: list[SignalLike] = [
             s
             for s in detector_result.integration_points
             if s.entity_type == EntityType.FILE_CONTENT
@@ -449,7 +449,7 @@ class EmbeddingConcretiser:
 
     def _extract_contexts(
         self,
-        signals: list[IntegrationSignal],
+        signals: list[SignalLike],
         file_reader: Callable[[str], bytes],
     ) -> list[ASTContext]:
         """Extract statement-level AST context for each signal."""
@@ -488,7 +488,7 @@ class EmbeddingConcretiser:
 
     def _classify_signals(
         self,
-        signals: list[IntegrationSignal],
+        signals: list[SignalLike],
         contexts: list[ASTContext],
         embeddings: list[list[float]],
     ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:

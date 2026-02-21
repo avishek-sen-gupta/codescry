@@ -1,17 +1,17 @@
 """ML-based concretisation of integration signals using SignalClassifier."""
 
 from repo_surveyor.training.signal_classifier import SignalClassifier
-from repo_surveyor.detection.integration_detector import IntegrationSignal
 from repo_surveyor.integration_concretiser.grouper import SignalGroup
 from repo_surveyor.integration_concretiser.types import (
     ASTContext,
     ConcretisedSignal,
     ConcretisationResult,
+    SignalLike,
 )
 
 
 def _concretise_signal(
-    signal: IntegrationSignal,
+    signal: SignalLike,
     ast_context: ASTContext,
     classifier: SignalClassifier,
 ) -> ConcretisedSignal:

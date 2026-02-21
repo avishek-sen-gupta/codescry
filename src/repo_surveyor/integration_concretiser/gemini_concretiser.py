@@ -20,7 +20,6 @@ from collections.abc import Callable
 from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
-    IntegrationSignal,
 )
 from repo_surveyor.integration_concretiser.grouper import group_signals_by_ast_context
 from repo_surveyor.integration_concretiser.llm_shared import (
@@ -31,7 +30,6 @@ from repo_surveyor.integration_concretiser.llm_shared import (
     SYSTEM_PROMPT_BATCHED,
     build_batched_classification_prompt,
     build_classification_prompt,
-    deduplicate_signals,
     parse_batched_classification_response,
     parse_classification_response,
     read_file_bytes,
@@ -238,7 +236,7 @@ def concretise_with_gemini(
     """
     client = GeminiClassificationClient(api_key=api_key, model=model)
 
-    file_content_signals: list[IntegrationSignal] = [
+    file_content_signals: list[SignalLike] = [
         s
         for s in detector_result.integration_points
         if s.entity_type == EntityType.FILE_CONTENT
@@ -249,10 +247,8 @@ def concretise_with_gemini(
         len(file_content_signals),
     )
 
-    composites = deduplicate_signals(file_content_signals)
-
     logger.info("Running AST walk-up grouping...")
-    groups = group_signals_by_ast_context(composites, file_reader)
+    groups = group_signals_by_ast_context(file_content_signals, file_reader)
     logger.info("AST grouping produced %d groups", len(groups))
 
     signal_to_ast: dict[tuple[str, int], ASTContext] = {
@@ -262,7 +258,7 @@ def concretise_with_gemini(
     }
 
     by_file: dict[str, list[SignalLike]] = defaultdict(list)
-    for sig in composites:
+    for sig in file_content_signals:
         by_file[sig.match.file_path].append(sig)
 
     unique_files = sorted(by_file)

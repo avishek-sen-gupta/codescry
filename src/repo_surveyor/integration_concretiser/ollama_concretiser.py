@@ -23,7 +23,6 @@ from urllib.request import Request, urlopen
 from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
-    IntegrationSignal,
 )
 from repo_surveyor.integration_concretiser.grouper import group_signals_by_ast_context
 from repo_surveyor.integration_concretiser.llm_shared import (
@@ -37,6 +36,7 @@ from repo_surveyor.integration_concretiser.types import (
     ASTContext,
     ConcretisedSignal,
     ConcretisationResult,
+    SignalLike,
 )
 from repo_surveyor.training.types import TrainingLabel
 
@@ -96,7 +96,7 @@ def _parse_ollama_response(raw: dict) -> dict[int, tuple[TrainingLabel, float, s
 
 def _concretise_file(
     file_path: str,
-    signals: list[IntegrationSignal],
+    signals: list[SignalLike],
     signal_to_ast: dict[tuple[str, int], ASTContext],
     model: str,
     base_url: str,
@@ -203,7 +203,7 @@ def concretise_with_ollama(
         Tuple of (ConcretisationResult, metadata) where metadata is a dict
         mapping (file_path, line_number) to {"confidence": float|None, "reason": str|None}.
     """
-    file_content_signals: list[IntegrationSignal] = [
+    file_content_signals: list[SignalLike] = [
         s
         for s in detector_result.integration_points
         if s.entity_type == EntityType.FILE_CONTENT
@@ -227,7 +227,7 @@ def concretise_with_ollama(
     }
 
     # Group signals by unique file.
-    by_file: dict[str, list[IntegrationSignal]] = defaultdict(list)
+    by_file: dict[str, list[SignalLike]] = defaultdict(list)
     for sig in file_content_signals:
         by_file[sig.match.file_path].append(sig)
 

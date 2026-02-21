@@ -4,9 +4,25 @@ from pathlib import Path
 
 import pytest
 
-from repo_surveyor.integration_patterns import Language
+from repo_surveyor.detection.integration_detector import (
+    EntityType,
+    FileMatch,
+    IntegrationDetectorResult,
+    IntegrationSignal,
+)
+from repo_surveyor.integration_concretiser.types import CompositeIntegrationSignal
+from repo_surveyor.integration_patterns import (
+    Confidence,
+    IntegrationType,
+    Language,
+)
 from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
-from repo_surveyor.core.surveyor import RepoSurveyor, _normalise_languages, survey
+from repo_surveyor.core.surveyor import (
+    RepoSurveyor,
+    _deduplicate_detector_result,
+    _normalise_languages,
+    survey,
+)
 from repo_surveyor.training.signal_classifier import NullSignalClassifier
 from repo_surveyor.training.types import TrainingLabel
 
@@ -246,6 +262,7 @@ class TestSurveyFunction:
         assert "integration_detection" in stage_names
         assert "integration_detection.file_scanning" in stage_names
         # directory_classification is currently disabled (no downstream consumer)
+        assert "signal_deduplication" in stage_names
         assert "symbol_resolution" in stage_names
         assert "signal_concretisation" in stage_names
 
@@ -361,3 +378,88 @@ class TestNormaliseLanguages:
 
         assert ctags == []
         assert integration == []
+
+
+def _make_signal(
+    file_path: str,
+    line_number: int,
+    line_content: str,
+    integration_type: IntegrationType = IntegrationType.HTTP_REST,
+    entity_type: EntityType = EntityType.FILE_CONTENT,
+) -> IntegrationSignal:
+    return IntegrationSignal(
+        match=FileMatch(
+            file_path=file_path,
+            line_number=line_number,
+            line_content=line_content,
+            language=None,
+        ),
+        integration_type=integration_type,
+        confidence=Confidence.HIGH,
+        matched_pattern="test_pattern",
+        entity_type=entity_type,
+        source="test",
+    )
+
+
+class TestDeduplicateDetectorResult:
+    """Tests for _deduplicate_detector_result pipeline stage."""
+
+    def test_merges_duplicate_file_content_signals(self) -> None:
+        """Signals sharing (file_path, line_number, line_content) are merged."""
+        sig1 = _make_signal("a.py", 5, "requests.get(url)", IntegrationType.HTTP_REST)
+        sig2 = _make_signal("a.py", 5, "requests.get(url)", IntegrationType.DATABASE)
+        result = IntegrationDetectorResult(
+            integration_points=[sig1, sig2], files_scanned=1
+        )
+
+        deduped = _deduplicate_detector_result(result)
+
+        file_content = [
+            s
+            for s in deduped.integration_points
+            if s.entity_type == EntityType.FILE_CONTENT
+        ]
+        assert len(file_content) == 1
+        assert isinstance(file_content[0], CompositeIntegrationSignal)
+        assert len(file_content[0].signals) == 2
+
+    def test_preserves_non_file_content_signals(self) -> None:
+        """DIRECTORY signals pass through unchanged."""
+        dir_sig = _make_signal("controllers/", 0, "", entity_type=EntityType.DIRECTORY)
+        file_sig = _make_signal("a.py", 5, "requests.get(url)")
+        result = IntegrationDetectorResult(
+            integration_points=[dir_sig, file_sig], files_scanned=1
+        )
+
+        deduped = _deduplicate_detector_result(result)
+
+        dir_signals = [
+            s
+            for s in deduped.integration_points
+            if s.entity_type == EntityType.DIRECTORY
+        ]
+        assert len(dir_signals) == 1
+        assert dir_signals[0] is dir_sig
+
+    def test_preserves_files_scanned(self) -> None:
+        """files_scanned count is preserved."""
+        result = IntegrationDetectorResult(integration_points=[], files_scanned=42)
+        deduped = _deduplicate_detector_result(result)
+        assert deduped.files_scanned == 42
+
+    def test_unique_signals_become_single_element_composites(self) -> None:
+        """Unique signals are wrapped in 1-element CompositeIntegrationSignals."""
+        sig = _make_signal("a.py", 5, "requests.get(url)")
+        result = IntegrationDetectorResult(integration_points=[sig], files_scanned=1)
+
+        deduped = _deduplicate_detector_result(result)
+
+        file_content = [
+            s
+            for s in deduped.integration_points
+            if s.entity_type == EntityType.FILE_CONTENT
+        ]
+        assert len(file_content) == 1
+        assert isinstance(file_content[0], CompositeIntegrationSignal)
+        assert len(file_content[0].signals) == 1

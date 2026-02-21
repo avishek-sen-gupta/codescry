@@ -14,8 +14,8 @@ from repo_surveyor.symbols.ctags import CTagsEntry, CTagsResult
 from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
-    IntegrationSignal,
 )
+from repo_surveyor.integration_concretiser.types import SignalLike
 
 
 @dataclass(frozen=True)
@@ -25,7 +25,7 @@ class SymbolIntegration:
     symbol_id: str
     symbol_name: str
     symbol_kind: str
-    signal: IntegrationSignal
+    signal: SignalLike
 
 
 @dataclass(frozen=True)
@@ -44,7 +44,7 @@ class ResolutionResult:
     """Result of resolving integration signals to symbols."""
 
     resolved: tuple[SymbolIntegration, ...]
-    unresolved: tuple[IntegrationSignal, ...]
+    unresolved: tuple[SignalLike, ...]
     profiles: tuple[SymbolIntegrationProfile, ...]
 
     def to_json(self, indent: int | None = 2) -> str:
@@ -205,7 +205,7 @@ def resolve_integration_signals(
 
     index = _SymbolLineIndex(ctags_result.entries)
     resolved: list[SymbolIntegration] = []
-    unresolved: list[IntegrationSignal] = []
+    unresolved: list[SignalLike] = []
 
     for signal in integration_result.integration_points:
         if signal.entity_type == EntityType.DIRECTORY:
