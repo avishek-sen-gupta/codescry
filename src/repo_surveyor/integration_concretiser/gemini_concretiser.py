@@ -1,24 +1,21 @@
-"""LLM-based integration signal concretisation via a local Ollama model.
+"""LLM-based integration signal concretisation via Google Gemini Flash.
 
-For each unique file that contains FILE_CONTENT integration signals, this
-module reads the full file, annotates it with the detected signal lines, and
-asks a local Ollama model to classify each signal as DEFINITE_INWARD,
-DEFINITE_OUTWARD, or NOT_DEFINITE.  The result is a ConcretisationResult
-identical in shape to the ML-based one so callers can use either approach.
+Mirrors the Ollama concretiser pattern (file-level batching, same system prompt,
+same JSON response shape) but calls the Gemini Flash API via the ``google-genai``
+SDK.  Combines LLM reasoning with cloud-speed inference for classification.
 
-Usage (standalone):
-    from repo_surveyor.integration_concretiser.ollama_concretiser import (
-        concretise_with_ollama,
+Usage:
+    from repo_surveyor.integration_concretiser.gemini_concretiser import (
+        concretise_with_gemini,
     )
-    result = concretise_with_ollama(detector_result, model="qwen2.5-coder:7b-instruct")
+    result, metadata = concretise_with_gemini(detector_result, api_key="...")
 """
 
 import json
 import logging
+import time
 from collections import defaultdict
 from collections.abc import Callable
-from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
 
 from repo_surveyor.detection.integration_detector import (
     EntityType,
@@ -27,7 +24,9 @@ from repo_surveyor.detection.integration_detector import (
 )
 from repo_surveyor.integration_concretiser.grouper import group_signals_by_ast_context
 from repo_surveyor.integration_concretiser.llm_shared import (
+    INITIAL_BACKOFF_SECONDS,
     MAX_FILE_CHARS,
+    MAX_RETRIES,
     SYSTEM_PROMPT,
     build_classification_prompt,
     parse_classification_response,
@@ -42,67 +41,84 @@ from repo_surveyor.training.types import TrainingLabel
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
-_DEFAULT_MODEL = "qwen2.5-coder:7b-instruct"
+_DEFAULT_MODEL = "gemini-2.0-flash"
 
 
-def _call_ollama(
-    prompt: str,
-    model: str,
-    base_url: str,
-) -> dict:
-    """POST to the Ollama /api/generate endpoint and return the parsed response."""
-    url = f"{base_url}/api/generate"
-    payload = json.dumps(
-        {
-            "model": model,
-            "system": SYSTEM_PROMPT,
-            "prompt": prompt,
-            "format": "json",
-            "stream": False,
-        }
-    ).encode("utf-8")
-    logger.debug("POST %s  model=%s  prompt_len=%d", url, model, len(prompt))
-    req = Request(url, data=payload, headers={"Content-Type": "application/json"})
-    try:
-        with urlopen(req, timeout=180) as resp:
-            raw = json.loads(resp.read())
-            logger.debug(
-                "Ollama response: done=%s  eval_count=%s",
-                raw.get("done"),
-                raw.get("eval_count"),
-            )
-            return raw
-    except HTTPError as exc:
-        logger.error("Ollama HTTP %d: %s", exc.code, exc.reason)
-        return {}
-    except URLError as exc:
-        logger.error("Ollama connection error: %s", exc)
-        return {}
+class GeminiClassificationClient:
+    """Thin wrapper over the Google GenAI SDK for classification calls."""
 
+    def __init__(self, api_key: str, model: str = _DEFAULT_MODEL) -> None:
+        from google import genai
 
-def _parse_ollama_response(raw: dict) -> dict[int, tuple[TrainingLabel, float, str]]:
-    """Parse an Ollama response into a {line_number: (label, confidence, reason)} map."""
-    response_text = raw.get("response", "{}")
-    logger.debug("Raw Ollama response text: %s", response_text[:500])
-    try:
-        data = json.loads(response_text)
-    except json.JSONDecodeError as exc:
-        logger.warning("Failed to JSON-decode Ollama response: %s", exc)
-        return {}
+        self._client = genai.Client(api_key=api_key)
+        self._model = model
 
-    return parse_classification_response(data)
+    def classify(self, system_prompt: str, user_prompt: str) -> dict:
+        """Call Gemini to classify signals, returning parsed JSON.
+
+        Retries with exponential backoff on 429 / RESOURCE_EXHAUSTED errors.
+        """
+        from google.genai import types
+
+        logger.debug(
+            "[Gemini] classify  model=%s  prompt_len=%d",
+            self._model,
+            len(user_prompt),
+        )
+        backoff = INITIAL_BACKOFF_SECONDS
+        for attempt in range(MAX_RETRIES):
+            try:
+                t0 = time.monotonic()
+                response = self._client.models.generate_content(
+                    model=self._model,
+                    contents=user_prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_prompt,
+                        response_mime_type="application/json",
+                    ),
+                )
+                elapsed = time.monotonic() - t0
+                logger.debug(
+                    "[Gemini] Response received in %.2fs (model=%s)",
+                    elapsed,
+                    self._model,
+                )
+                raw_text = response.text or "{}"
+                logger.debug("[Gemini] Raw response text: %s", raw_text[:500])
+                return json.loads(raw_text)
+            except json.JSONDecodeError as exc:
+                logger.warning(
+                    "[Gemini] Failed to JSON-decode response: %s  raw=%s",
+                    exc,
+                    (response.text or "")[:200],
+                )
+                return {}
+            except Exception as exc:
+                if "429" not in str(exc) and "RESOURCE_EXHAUSTED" not in str(exc):
+                    raise
+                logger.warning(
+                    "[Gemini] Rate-limited (attempt %d/%d), retrying in %.1fs...",
+                    attempt + 1,
+                    MAX_RETRIES,
+                    backoff,
+                )
+                time.sleep(backoff)
+                backoff *= 2
+
+        raise RuntimeError(
+            f"[Gemini] Classification failed after {MAX_RETRIES} retries "
+            "due to rate limiting"
+        )
 
 
 def _concretise_file(
     file_path: str,
     signals: list[IntegrationSignal],
     signal_to_ast: dict[tuple[str, int], ASTContext],
-    model: str,
-    base_url: str,
+    client: GeminiClassificationClient,
     file_reader: Callable[[str], bytes],
 ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
-    """Run Ollama classification for all signals in a single file."""
+    """Run Gemini classification for all signals in a single file."""
     logger.info("Processing file: %s  (%d signals)", file_path, len(signals))
 
     try:
@@ -137,8 +153,8 @@ def _concretise_file(
     prompt = build_classification_prompt(file_path, file_content, signals, truncated)
     logger.debug("Prompt length: %d chars", len(prompt))
 
-    raw_response = _call_ollama(prompt, model, base_url)
-    line_map = _parse_ollama_response(raw_response)
+    data = client.classify(SYSTEM_PROMPT, prompt)
+    line_map = parse_classification_response(data)
 
     concretised: list[ConcretisedSignal] = []
     metadata: dict[tuple[str, int], dict] = {}
@@ -167,7 +183,7 @@ def _concretise_file(
             label = TrainingLabel.NOT_DEFINITE
             metadata[(sig.match.file_path, ln)] = {"confidence": None, "reason": None}
             logger.warning(
-                "  Line %4d  NOT in Ollama response — defaulting NOT_DEFINITE  [%s]  %s",
+                "  Line %4d  NOT in Gemini response — defaulting NOT_DEFINITE  [%s]  %s",
                 ln,
                 sig.integration_type.value,
                 sig.match.line_content.strip()[:60],
@@ -180,29 +196,30 @@ def _concretise_file(
     return concretised, metadata
 
 
-def concretise_with_ollama(
+def concretise_with_gemini(
     detector_result: IntegrationDetectorResult,
+    api_key: str,
     model: str = _DEFAULT_MODEL,
-    base_url: str = _DEFAULT_OLLAMA_BASE_URL,
     file_reader: Callable[[str], bytes] = read_file_bytes,
 ) -> tuple[ConcretisationResult, dict[tuple[str, int], dict]]:
-    """Concretise FILE_CONTENT integration signals using a local Ollama LLM.
+    """Concretise FILE_CONTENT integration signals using Gemini Flash.
 
     For each unique file that contains signals, reads the file and asks the
-    Ollama model to classify each signal line as DEFINITE_INWARD,
-    DEFINITE_OUTWARD, or NOT_DEFINITE.  Returns a ConcretisationResult with
-    the same shape as the ML-based concretiser.
+    Gemini model to classify each signal line as DEFINITE_INWARD,
+    DEFINITE_OUTWARD, or NOT_DEFINITE.
 
     Args:
         detector_result: Output from the integration detector.
-        model: Ollama model name (default: qwen2.5-coder:7b-instruct).
-        base_url: Ollama API base URL (default: http://localhost:11434).
+        api_key: Google AI API key for the Gemini API.
+        model: Gemini model name (default: gemini-2.0-flash).
         file_reader: Callable that reads a file path to bytes (injectable for testing).
 
     Returns:
         Tuple of (ConcretisationResult, metadata) where metadata is a dict
         mapping (file_path, line_number) to {"confidence": float|None, "reason": str|None}.
     """
+    client = GeminiClassificationClient(api_key=api_key, model=model)
+
     file_content_signals: list[IntegrationSignal] = [
         s
         for s in detector_result.integration_points
@@ -210,33 +227,29 @@ def concretise_with_ollama(
     ]
 
     logger.info(
-        "Ollama concretiser: %d FILE_CONTENT signals across detector result",
+        "Gemini concretiser: %d FILE_CONTENT signals across detector result",
         len(file_content_signals),
     )
 
-    # Run AST grouping to get ASTContext for every signal.
     logger.info("Running AST walk-up grouping...")
     groups = group_signals_by_ast_context(file_content_signals, file_reader)
     logger.info("AST grouping produced %d groups", len(groups))
 
-    # Build a flat (file_path, line_number) -> ASTContext lookup.
     signal_to_ast: dict[tuple[str, int], ASTContext] = {
         (group.file_path, sig.match.line_number): group.ast_context
         for group in groups
         for sig in group.signals
     }
 
-    # Group signals by unique file.
     by_file: dict[str, list[IntegrationSignal]] = defaultdict(list)
     for sig in file_content_signals:
         by_file[sig.match.file_path].append(sig)
 
     unique_files = sorted(by_file)
     logger.info(
-        "Unique files to process: %d  (model=%s  base_url=%s)",
+        "Unique files to process: %d  (model=%s)",
         len(unique_files),
         model,
-        base_url,
     )
 
     all_concretised: list[ConcretisedSignal] = []
@@ -251,7 +264,7 @@ def concretise_with_ollama(
             len(signals),
         )
         file_concretised, file_metadata = _concretise_file(
-            file_path, signals, signal_to_ast, model, base_url, file_reader
+            file_path, signals, signal_to_ast, client, file_reader
         )
         all_concretised.extend(file_concretised)
         all_metadata.update(file_metadata)
@@ -264,7 +277,7 @@ def concretise_with_ollama(
         signals_discarded=len(all_concretised) - definite,
     )
     logger.info(
-        "Ollama concretisation complete: submitted=%d  definite=%d  discarded=%d",
+        "Gemini concretisation complete: submitted=%d  definite=%d  discarded=%d",
         result.signals_submitted,
         result.signals_definite,
         result.signals_discarded,

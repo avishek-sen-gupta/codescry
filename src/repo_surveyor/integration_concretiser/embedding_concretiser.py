@@ -53,6 +53,9 @@ _CONFIDENCE_THRESHOLD = 0.18
 
 _BATCH_SIZE = 32
 
+_MAX_RETRIES = 5
+_INITIAL_BACKOFF_SECONDS = 2.0
+
 _DIRECTIONAL_DESCRIPTIONS: dict[tuple[str, str], str] = {
     ("http_rest", "inward"): (
         "Exposes an HTTP or REST endpoint that listens for and routes"
@@ -211,27 +214,8 @@ class EmbeddingClient:
                 total_batches,
                 len(chunk_list),
             )
-            payload = json.dumps({"inputs": chunk_list}).encode("utf-8")
-            req = Request(
-                self._endpoint_url,
-                data=payload,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self._token}",
-                },
-            )
-            t0 = time.monotonic()
-            with urlopen(req, timeout=120) as resp:
-                result = json.loads(resp.read())
-            elapsed = time.monotonic() - t0
-            dim = len(result[0]) if result else 0
-            logger.info(
-                "[Nomic] Batch %d/%d: received %d embeddings (dim=%d) in %.2fs",
-                batch_idx,
-                total_batches,
-                len(result),
-                dim,
-                elapsed,
+            result = self._request_with_retry(
+                chunk_list, batch_idx, total_batches, json, Request, urlopen
             )
             all_embeddings.extend(result)
 
@@ -239,6 +223,65 @@ class EmbeddingClient:
             "[Nomic] Embedding complete: %d total embeddings", len(all_embeddings)
         )
         return all_embeddings
+
+    def _request_with_retry(
+        self,
+        texts: list[str],
+        batch_idx: int,
+        total_batches: int,
+        json_mod: object,
+        request_cls: type,
+        urlopen_fn: object,
+    ) -> list[list[float]]:
+        """Send an embedding request with exponential backoff on rate-limit errors."""
+        import time
+        from urllib.error import HTTPError
+
+        backoff = _INITIAL_BACKOFF_SECONDS
+        for attempt in range(_MAX_RETRIES):
+            payload = json_mod.dumps({"inputs": texts}).encode("utf-8")
+            req = request_cls(
+                self._endpoint_url,
+                data=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self._token}",
+                },
+            )
+            try:
+                t0 = time.monotonic()
+                with urlopen_fn(req, timeout=120) as resp:
+                    result = json_mod.loads(resp.read())
+                elapsed = time.monotonic() - t0
+                dim = len(result[0]) if result else 0
+                logger.info(
+                    "[Nomic] Batch %d/%d: received %d embeddings (dim=%d) in %.2fs",
+                    batch_idx,
+                    total_batches,
+                    len(result),
+                    dim,
+                    elapsed,
+                )
+                return result
+            except HTTPError as exc:
+                if exc.code != 429:
+                    raise
+                logger.warning(
+                    "[Nomic] Batch %d/%d: rate-limited (attempt %d/%d), "
+                    "retrying in %.1fs...",
+                    batch_idx,
+                    total_batches,
+                    attempt + 1,
+                    _MAX_RETRIES,
+                    backoff,
+                )
+                time.sleep(backoff)
+                backoff *= 2
+
+        raise RuntimeError(
+            f"[Nomic] Batch {batch_idx}/{total_batches}: "
+            f"failed after {_MAX_RETRIES} retries due to rate limiting"
+        )
 
 
 class GeminiEmbeddingClient:
@@ -276,22 +319,8 @@ class GeminiEmbeddingClient:
                 total_batches,
                 len(chunk_list),
             )
-            t0 = time.monotonic()
-            result = self._client.models.embed_content(
-                model=self._MODEL,
-                contents=chunk_list,
-                config=types.EmbedContentConfig(output_dimensionality=768),
-            )
-            elapsed = time.monotonic() - t0
-            batch_embeddings = [emb.values for emb in result.embeddings]
-            dim = len(batch_embeddings[0]) if batch_embeddings else 0
-            logger.info(
-                "[Gemini] Batch %d/%d: received %d embeddings (dim=%d) in %.2fs",
-                batch_idx,
-                total_batches,
-                len(batch_embeddings),
-                dim,
-                elapsed,
+            batch_embeddings = self._embed_with_retry(
+                chunk_list, batch_idx, total_batches, types
             )
             all_embeddings.extend(batch_embeddings)
 
@@ -299,6 +328,57 @@ class GeminiEmbeddingClient:
             "[Gemini] Embedding complete: %d total embeddings", len(all_embeddings)
         )
         return all_embeddings
+
+    def _embed_with_retry(
+        self,
+        texts: list[str],
+        batch_idx: int,
+        total_batches: int,
+        types: object,
+    ) -> list[list[float]]:
+        """Call embed_content with exponential backoff on rate-limit errors."""
+        import time
+
+        backoff = _INITIAL_BACKOFF_SECONDS
+        for attempt in range(_MAX_RETRIES):
+            try:
+                t0 = time.monotonic()
+                result = self._client.models.embed_content(
+                    model=self._MODEL,
+                    contents=texts,
+                    config=types.EmbedContentConfig(output_dimensionality=768),
+                )
+                elapsed = time.monotonic() - t0
+                batch_embeddings = [emb.values for emb in result.embeddings]
+                dim = len(batch_embeddings[0]) if batch_embeddings else 0
+                logger.info(
+                    "[Gemini] Batch %d/%d: received %d embeddings (dim=%d) in %.2fs",
+                    batch_idx,
+                    total_batches,
+                    len(batch_embeddings),
+                    dim,
+                    elapsed,
+                )
+                return batch_embeddings
+            except Exception as exc:
+                if "429" not in str(exc) and "RESOURCE_EXHAUSTED" not in str(exc):
+                    raise
+                logger.warning(
+                    "[Gemini] Batch %d/%d: rate-limited (attempt %d/%d), "
+                    "retrying in %.1fs...",
+                    batch_idx,
+                    total_batches,
+                    attempt + 1,
+                    _MAX_RETRIES,
+                    backoff,
+                )
+                time.sleep(backoff)
+                backoff *= 2
+
+        raise RuntimeError(
+            f"[Gemini] Batch {batch_idx}/{total_batches}: "
+            f"failed after {_MAX_RETRIES} retries due to rate limiting"
+        )
 
 
 class EmbeddingConcretiser:
