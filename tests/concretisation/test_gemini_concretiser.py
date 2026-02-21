@@ -19,9 +19,14 @@ from repo_surveyor.integration_concretiser.types import (
     ASTContext,
     CompositeIntegrationSignal,
     ConcretisedSignal,
+    SignalValidity,
 )
-from repo_surveyor.integration_patterns import Confidence, IntegrationType, Language
-from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.integration_patterns import (
+    Confidence,
+    IntegrationType,
+    Language,
+    SignalDirection,
+)
 
 # ---------------------------------------------------------------------------
 # Fixtures / Helpers
@@ -135,11 +140,12 @@ class TestConcretiseFile:
         )
 
         assert len(concretised) == 1
-        assert concretised[0].label == TrainingLabel.DEFINITE_OUTWARD
+        assert concretised[0].validity == SignalValidity.SIGNAL
+        assert concretised[0].direction == SignalDirection.OUTWARD
         assert metadata[("client.py", 5)]["confidence"] == pytest.approx(0.95)
         assert metadata[("client.py", 5)]["reason"] == "HTTP client call"
 
-    def test_missing_line_defaults_to_not_definite(self):
+    def test_missing_line_defaults_to_noise(self):
         mock_client = _MockGeminiClient([{"integrations": []}])
         signal = _make_signal("client.py", 5, "requests.get(url)")
         signal_to_ast = {}
@@ -148,10 +154,11 @@ class TestConcretiseFile:
             "client.py", [signal], signal_to_ast, mock_client, _fake_reader
         )
 
-        assert concretised[0].label == TrainingLabel.NOT_DEFINITE
+        assert concretised[0].validity == SignalValidity.NOISE
+        assert concretised[0].direction == SignalDirection.AMBIGUOUS
         assert metadata[("client.py", 5)]["confidence"] is None
 
-    def test_unreadable_file_returns_not_definite(self):
+    def test_unreadable_file_returns_noise(self):
         def _bad_reader(path: str) -> bytes:
             raise OSError("permission denied")
 
@@ -163,7 +170,8 @@ class TestConcretiseFile:
         )
 
         assert len(concretised) == 1
-        assert concretised[0].label == TrainingLabel.NOT_DEFINITE
+        assert concretised[0].validity == SignalValidity.NOISE
+        assert concretised[0].direction == SignalDirection.AMBIGUOUS
         assert metadata == {}
 
     def test_sends_prompt_to_client(self):
@@ -226,10 +234,12 @@ class TestConcretiseWithGemini:
         )
 
         assert result.signals_submitted == 2
-        assert result.signals_definite == 2
-        assert result.signals_discarded == 0
-        assert result.concretised[0].label == TrainingLabel.DEFINITE_OUTWARD
-        assert result.concretised[1].label == TrainingLabel.DEFINITE_OUTWARD
+        assert result.signals_classified == 2
+        assert result.signals_unclassified == 0
+        assert result.concretised[0].validity == SignalValidity.SIGNAL
+        assert result.concretised[0].direction == SignalDirection.OUTWARD
+        assert result.concretised[1].validity == SignalValidity.SIGNAL
+        assert result.concretised[1].direction == SignalDirection.OUTWARD
 
     def test_filters_non_file_content_signals(self, monkeypatch):
         mock_client = _MockGeminiClient([{"integrations": []}])
@@ -306,10 +316,12 @@ class TestConcretiseWithGemini:
         )
 
         assert result.signals_submitted == 2
-        assert result.signals_definite == 2
-        labels = [s.label for s in result.concretised]
-        assert TrainingLabel.DEFINITE_OUTWARD in labels
-        assert TrainingLabel.DEFINITE_INWARD in labels
+        assert result.signals_classified == 2
+        validities = [s.validity for s in result.concretised]
+        directions = [s.direction for s in result.concretised]
+        assert SignalValidity.SIGNAL in validities
+        assert SignalDirection.OUTWARD in directions
+        assert SignalDirection.INWARD in directions
         # Should have made only 1 API call (batched), not 2
         assert len(mock_client.call_log) == 1
 
@@ -345,7 +357,7 @@ class TestConcretiseWithGemini:
         )
 
         assert result.signals_submitted == 1
-        assert result.signals_definite == 1
+        assert result.signals_classified == 1
         # Single-file prompt should NOT use batched system prompt
         system_prompt_used = mock_client.call_log[0][0]
         assert "MULTIPLE" not in system_prompt_used
@@ -398,11 +410,11 @@ class TestConcretiseWithGemini:
         )
 
         assert result.signals_submitted == 2
-        labels = {
-            s.original_signal.match.file_path: s.label for s in result.concretised
+        validities = {
+            s.original_signal.match.file_path: s.validity for s in result.concretised
         }
-        assert labels["client.py"] == TrainingLabel.DEFINITE_OUTWARD
-        assert labels["missing.py"] == TrainingLabel.NOT_DEFINITE
+        assert validities["client.py"] == SignalValidity.SIGNAL
+        assert validities["missing.py"] == SignalValidity.NOISE
 
     def test_processes_duplicate_signals_individually(self, monkeypatch):
         """Without upstream dedup, duplicate signals are processed individually."""
@@ -448,7 +460,7 @@ class TestConcretiseWithGemini:
 
         # Both signals processed (dedup is now a separate pipeline stage)
         assert result.signals_submitted == 2
-        assert result.signals_definite == 2
+        assert result.signals_classified == 2
 
 
 # ---------------------------------------------------------------------------
@@ -459,7 +471,9 @@ class TestConcretiseWithGemini:
 class TestApplyLineMap:
     def test_applies_labels_from_line_map(self):
         signal = _make_signal("client.py", 5, "requests.get(url)")
-        line_map = {5: (TrainingLabel.DEFINITE_OUTWARD, 0.95, "HTTP call")}
+        line_map = {
+            5: (SignalValidity.SIGNAL, SignalDirection.OUTWARD, 0.95, "HTTP call")
+        }
         signal_to_ast = {("client.py", 5): ASTContext("call", "requests.get", 5, 5)}
 
         concretised, metadata = _apply_line_map(
@@ -467,13 +481,15 @@ class TestApplyLineMap:
         )
 
         assert len(concretised) == 1
-        assert concretised[0].label == TrainingLabel.DEFINITE_OUTWARD
+        assert concretised[0].validity == SignalValidity.SIGNAL
+        assert concretised[0].direction == SignalDirection.OUTWARD
         assert metadata[("client.py", 5)]["confidence"] == pytest.approx(0.95)
 
-    def test_missing_line_defaults_to_not_definite(self):
+    def test_missing_line_defaults_to_noise(self):
         signal = _make_signal("client.py", 5, "requests.get(url)")
 
         concretised, metadata = _apply_line_map("client.py", [signal], {}, {})
 
-        assert concretised[0].label == TrainingLabel.NOT_DEFINITE
+        assert concretised[0].validity == SignalValidity.NOISE
+        assert concretised[0].direction == SignalDirection.AMBIGUOUS
         assert metadata[("client.py", 5)]["confidence"] is None

@@ -33,8 +33,9 @@ from repo_surveyor.integration_concretiser.embedding_concretiser import (
     GeminiEmbeddingClient,
 )
 from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
+from repo_surveyor.integration_concretiser.types import SignalValidity
+from repo_surveyor.integration_patterns import SignalDirection
 from repo_surveyor.training.signal_classifier import NullSignalClassifier
-from repo_surveyor.training.types import TrainingLabel
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,8 @@ def _signal_to_dict(s, label_map: dict) -> dict:
     )
     base = s.original_signal.to_dict()
     return {
-        "label": s.label.value,
+        "validity": s.validity.value,
+        "direction": s.direction.value,
         "embedding_best_type": emb_meta.get("best_type"),
         "embedding_best_direction": emb_meta.get("best_direction"),
         "embedding_score": emb_meta.get("score"),
@@ -134,8 +136,8 @@ def main() -> None:
     print(f"\nFiles scanned:  {integration.files_scanned}")
     print(f"Signals found:  {len(integration.integration_points)}")
     print(f"\nSubmitted:      {concretisation.signals_submitted}")
-    print(f"Definite:       {concretisation.signals_definite}")
-    print(f"Discarded:      {concretisation.signals_discarded}")
+    print(f"Classified:     {concretisation.signals_classified}")
+    print(f"Unclassified:   {concretisation.signals_unclassified}")
 
     print("\n=== Timings ===")
     for r in timer.completed:
@@ -145,10 +147,22 @@ def main() -> None:
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
+    _OUTPUT_GROUPS = [
+        ("inward", SignalValidity.SIGNAL, SignalDirection.INWARD),
+        ("outward", SignalValidity.SIGNAL, SignalDirection.OUTWARD),
+        ("ambiguous", SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS),
+        ("noise", SignalValidity.NOISE, None),
+    ]
+
     print()
-    for label in TrainingLabel:
-        signals = [s for s in concretisation.concretised if s.label == label]
-        path = out / f"{label.value.lower()}.jsonl"
+    for filename, validity, direction in _OUTPUT_GROUPS:
+        signals = [
+            s
+            for s in concretisation.concretised
+            if s.validity == validity
+            and (direction is None or s.direction == direction)
+        ]
+        path = out / f"{filename}.jsonl"
         path.write_text(
             "\n".join(
                 json.dumps(_signal_to_dict(s, embedding_metadata)) for s in signals
@@ -156,7 +170,7 @@ def main() -> None:
             + "\n",
             encoding="utf-8",
         )
-        print(f"  {label.value}: {len(signals):4d} signals -> {path}")
+        print(f"  {filename}: {len(signals):4d} signals -> {path}")
 
 
 if __name__ == "__main__":

@@ -40,8 +40,9 @@ from repo_surveyor.integration_concretiser.types import (
     ConcretisedSignal,
     ConcretisationResult,
     SignalLike,
+    SignalValidity,
 )
-from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.integration_patterns import SignalDirection
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +141,8 @@ def _concretise_file(
                         "unknown", "", sig.match.line_number, sig.match.line_number
                     ),
                 ),
-                label=TrainingLabel.NOT_DEFINITE,
+                validity=SignalValidity.NOISE,
+                direction=SignalDirection.AMBIGUOUS,
             )
             for sig in signals
         ], {}
@@ -167,7 +169,7 @@ def _concretise_file(
 def _apply_line_map(
     file_path: str,
     signals: list[SignalLike],
-    line_map: dict[int, tuple[TrainingLabel, float, str]],
+    line_map: dict[int, tuple[SignalValidity, SignalDirection, float, str]],
     signal_to_ast: dict[tuple[str, int], ASTContext],
 ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
     """Apply a line-level classification map to signals, producing concretised results."""
@@ -180,34 +182,41 @@ def _apply_line_map(
             ASTContext("unknown", "", ln, ln),
         )
         if ln in line_map:
-            label, confidence, reason = line_map[ln]
+            validity, direction, confidence, reason = line_map[ln]
             metadata[(sig.match.file_path, ln)] = {
                 "confidence": confidence,
                 "reason": reason,
             }
             logger.info(
-                "  Line %4d  %-20s  conf=%.2f  [%s]  %s  → %s",
+                "  Line %4d  %-8s %-10s  conf=%.2f  [%s]  %s  → %s",
                 ln,
-                label.value,
+                validity.value,
+                direction.value,
                 confidence,
                 sig.integration_type.value,
                 sig.match.line_content.strip()[:60],
                 reason[:60],
             )
         else:
-            label = TrainingLabel.NOT_DEFINITE
+            validity = SignalValidity.NOISE
+            direction = SignalDirection.AMBIGUOUS
             metadata[(sig.match.file_path, ln)] = {
                 "confidence": None,
                 "reason": None,
             }
             logger.warning(
-                "  Line %4d  NOT in LLM response — defaulting NOT_DEFINITE  [%s]  %s",
+                "  Line %4d  NOT in LLM response — defaulting NOISE  [%s]  %s",
                 ln,
                 sig.integration_type.value,
                 sig.match.line_content.strip()[:60],
             )
         concretised.append(
-            ConcretisedSignal(original_signal=sig, ast_context=ast_ctx, label=label)
+            ConcretisedSignal(
+                original_signal=sig,
+                ast_context=ast_ctx,
+                validity=validity,
+                direction=direction,
+            )
         )
     return concretised, metadata
 
@@ -387,22 +396,23 @@ def concretise_with_gemini(
                 ConcretisedSignal(
                     original_signal=sig,
                     ast_context=ast_ctx,
-                    label=TrainingLabel.NOT_DEFINITE,
+                    validity=SignalValidity.NOISE,
+                    direction=SignalDirection.AMBIGUOUS,
                 )
             )
 
-    definite = sum(1 for s in all_concretised if s.is_definite)
+    classified = sum(1 for s in all_concretised if s.is_integration)
     result = ConcretisationResult(
         concretised=tuple(all_concretised),
         signals_submitted=len(all_concretised),
-        signals_definite=definite,
-        signals_discarded=len(all_concretised) - definite,
+        signals_classified=classified,
+        signals_unclassified=len(all_concretised) - classified,
     )
     logger.info(
-        "Gemini concretisation complete: submitted=%d  definite=%d  discarded=%d  api_calls=%d",
+        "Gemini concretisation complete: submitted=%d  classified=%d  unclassified=%d  api_calls=%d",
         result.signals_submitted,
-        result.signals_definite,
-        result.signals_discarded,
+        result.signals_classified,
+        result.signals_unclassified,
         total_calls,
     )
     return result, all_metadata

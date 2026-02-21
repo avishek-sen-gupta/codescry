@@ -10,11 +10,15 @@ from repo_surveyor.detection.integration_detector import (
     IntegrationDetectorResult,
     IntegrationSignal,
 )
-from repo_surveyor.integration_concretiser.types import CompositeIntegrationSignal
+from repo_surveyor.integration_concretiser.types import (
+    CompositeIntegrationSignal,
+    SignalValidity,
+)
 from repo_surveyor.integration_patterns import (
     Confidence,
     IntegrationType,
     Language,
+    SignalDirection,
 )
 from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.core.surveyor import (
@@ -306,15 +310,15 @@ class TestSurveyFunction:
         }
         assert scanned_languages <= {"Python"}
 
-    def test_default_classifier_labels_all_not_definite(self, tmp_path: Path) -> None:
-        """survey() with default NullSignalClassifier should label every signal NOT_DEFINITE."""
+    def test_default_classifier_labels_all_noise(self, tmp_path: Path) -> None:
+        """survey() with default NullSignalClassifier should classify every signal as NOISE."""
         repo = _create_python_repo(tmp_path)
         _, _, _, _, concretisation = survey(str(repo))
 
-        assert concretisation.signals_definite == 0
-        assert concretisation.signals_discarded == concretisation.signals_submitted
+        assert concretisation.signals_classified == 0
+        assert concretisation.signals_unclassified == concretisation.signals_submitted
         assert all(
-            s.label == TrainingLabel.NOT_DEFINITE for s in concretisation.concretised
+            s.validity == SignalValidity.NOISE for s in concretisation.concretised
         )
 
     def test_custom_classifier_is_used(self, tmp_path: Path) -> None:
@@ -335,9 +339,11 @@ class TestSurveyFunction:
             if p.entity_type.value == "file_content"
         )
         assert concretisation.signals_submitted == file_content_count
-        assert concretisation.signals_definite == file_content_count
+        assert concretisation.signals_classified == file_content_count
         assert all(
-            s.label == TrainingLabel.DEFINITE_INWARD for s in concretisation.concretised
+            s.validity == SignalValidity.SIGNAL
+            and s.direction == SignalDirection.INWARD
+            for s in concretisation.concretised
         )
 
 

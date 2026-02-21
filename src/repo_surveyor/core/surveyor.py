@@ -316,10 +316,10 @@ def survey(
     concretisation = concretise_integration_signals(integration_result, classifier)
     timer.stage_completed("signal_concretisation")
     logger.info(
-        "Signal concretisation completed: %d submitted, %d definite, %d discarded",
+        "Signal concretisation completed: %d submitted, %d classified, %d unclassified",
         concretisation.signals_submitted,
-        concretisation.signals_definite,
-        concretisation.signals_discarded,
+        concretisation.signals_classified,
+        concretisation.signals_unclassified,
     )
 
     return tech_report, structure_result, integration_result, resolution, concretisation

@@ -1,6 +1,7 @@
 """Data types for integration signal AST context extraction."""
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Protocol, runtime_checkable
 
 from repo_surveyor.detection.integration_detector import (
@@ -13,7 +14,13 @@ from repo_surveyor.integration_patterns import (
     SignalDirection,
 )
 from repo_surveyor.detection.integration_detector import EntityType
-from repo_surveyor.training.types import TrainingLabel
+
+
+class SignalValidity(Enum):
+    """Whether a concretised signal represents a real integration or noise."""
+
+    SIGNAL = "SIGNAL"
+    NOISE = "NOISE"
 
 
 @runtime_checkable
@@ -120,35 +127,38 @@ class ASTContext:
 
 @dataclass(frozen=True)
 class ConcretisedSignal:
-    """An integration signal with its ML-predicted direction label.
+    """An integration signal with its classified validity and direction.
 
     Attributes:
         original_signal: The original integration signal (or composite).
         ast_context: The enclosing AST node context.
-        label: ML-predicted label (DEFINITE_INWARD, DEFINITE_OUTWARD, NOT_DEFINITE, or REJECTED).
+        validity: Whether this is a real integration (SIGNAL) or noise (NOISE).
+        direction: Integration direction (INWARD, OUTWARD, AMBIGUOUS).
+                   AMBIGUOUS when validity is NOISE or scores are too close.
     """
 
     original_signal: SignalLike
     ast_context: ASTContext
-    label: TrainingLabel
+    validity: SignalValidity
+    direction: SignalDirection
 
     @property
-    def is_definite(self) -> bool:
-        return self.label not in (TrainingLabel.NOT_DEFINITE, TrainingLabel.REJECTED)
+    def is_integration(self) -> bool:
+        return self.validity == SignalValidity.SIGNAL
 
 
 @dataclass(frozen=True)
 class ConcretisationResult:
-    """Result of running ML concretisation over a set of signal groups.
+    """Result of running concretisation over a set of signal groups.
 
     Attributes:
-        concretised: All concretised signals (definite and non-definite).
+        concretised: All concretised signals (classified and unclassified).
         signals_submitted: Total number of signals processed.
-        signals_definite: Number of signals with a definite label.
-        signals_discarded: Number of signals labelled NOT_DEFINITE.
+        signals_classified: Number of signals classified as integrations (SIGNAL).
+        signals_unclassified: Number of signals classified as noise (NOISE).
     """
 
     concretised: tuple[ConcretisedSignal, ...]
     signals_submitted: int
-    signals_definite: int
-    signals_discarded: int
+    signals_classified: int
+    signals_unclassified: int

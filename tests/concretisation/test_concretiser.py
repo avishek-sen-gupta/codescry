@@ -7,14 +7,19 @@ from repo_surveyor.integration_concretiser import (
     concretise_integration_signals,
 )
 from repo_surveyor.integration_concretiser.concretiser import concretise_groups
-from repo_surveyor.integration_concretiser.types import ASTContext
+from repo_surveyor.integration_concretiser.types import ASTContext, SignalValidity
 from repo_surveyor.detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
     IntegrationSignal,
 )
-from repo_surveyor.integration_patterns import Confidence, IntegrationType, Language
+from repo_surveyor.integration_patterns import (
+    Confidence,
+    IntegrationType,
+    Language,
+    SignalDirection,
+)
 from repo_surveyor.training.types import TrainingLabel
 
 
@@ -112,11 +117,12 @@ class TestConcretiseGroups:
         result = concretise_groups([group], classifier)
 
         assert len(result.concretised) == 1
-        assert result.concretised[0].label == TrainingLabel.DEFINITE_INWARD
+        assert result.concretised[0].validity == SignalValidity.SIGNAL
+        assert result.concretised[0].direction == SignalDirection.INWARD
         assert result.concretised[0].original_signal is signal
         assert result.concretised[0].ast_context is ctx
 
-    def test_is_definite_true_for_inward(self):
+    def test_is_integration_true_for_inward(self):
         signal = _make_signal("client.py", 4, "requests.get(url)", Language.PYTHON)
         group = SignalGroup(
             ast_context=_make_ast_context(),
@@ -129,9 +135,9 @@ class TestConcretiseGroups:
 
         result = concretise_groups([group], classifier)
 
-        assert result.concretised[0].is_definite is True
+        assert result.concretised[0].is_integration is True
 
-    def test_is_definite_true_for_outward(self):
+    def test_is_integration_true_for_outward(self):
         signal = _make_signal("client.py", 8, "smtp.send(to, body)", Language.PYTHON)
         group = SignalGroup(
             ast_context=_make_ast_context(),
@@ -144,9 +150,9 @@ class TestConcretiseGroups:
 
         result = concretise_groups([group], classifier)
 
-        assert result.concretised[0].is_definite is True
+        assert result.concretised[0].is_integration is True
 
-    def test_is_definite_false_for_not_definite(self):
+    def test_is_integration_false_for_not_definite(self):
         signal = _make_signal("client.py", 4, "unknown_line", Language.PYTHON)
         group = SignalGroup(
             ast_context=_make_ast_context(),
@@ -157,7 +163,7 @@ class TestConcretiseGroups:
 
         result = concretise_groups([group], classifier)
 
-        assert result.concretised[0].is_definite is False
+        assert result.concretised[0].is_integration is False
 
     def test_counts_are_correct(self):
         inward_line = "requests.get(url)"
@@ -181,8 +187,8 @@ class TestConcretiseGroups:
         result = concretise_groups([group], classifier)
 
         assert result.signals_submitted == 3
-        assert result.signals_definite == 2
-        assert result.signals_discarded == 1
+        assert result.signals_classified == 2
+        assert result.signals_unclassified == 1
 
     def test_signals_from_multiple_groups_all_included(self):
         signal_a = _make_signal("client.py", 4, "requests.get(url)", Language.PYTHON)
@@ -208,16 +214,16 @@ class TestConcretiseGroups:
         result = concretise_groups(groups, classifier)
 
         assert result.signals_submitted == 2
-        assert result.signals_definite == 2
-        assert result.signals_discarded == 0
+        assert result.signals_classified == 2
+        assert result.signals_unclassified == 0
         assert len(result.concretised) == 2
 
     def test_empty_groups_returns_empty_result(self):
         classifier = _StubClassifier({})
         result = concretise_groups([], classifier)
         assert result.signals_submitted == 0
-        assert result.signals_definite == 0
-        assert result.signals_discarded == 0
+        assert result.signals_classified == 0
+        assert result.signals_unclassified == 0
         assert result.concretised == ()
 
 
@@ -262,5 +268,6 @@ class TestConcretiseIntegrationSignals:
         )
 
         assert result.signals_submitted == 1
-        assert result.signals_definite == 1
-        assert result.concretised[0].label == TrainingLabel.DEFINITE_INWARD
+        assert result.signals_classified == 1
+        assert result.concretised[0].validity == SignalValidity.SIGNAL
+        assert result.concretised[0].direction == SignalDirection.INWARD

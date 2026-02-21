@@ -44,8 +44,9 @@ from repo_surveyor.integration_concretiser.types import (
     ConcretisationResult,
     ConcretisedSignal,
     SignalLike,
+    SignalValidity,
 )
-from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.integration_patterns import SignalDirection
 
 logger = logging.getLogger(__name__)
 
@@ -162,10 +163,12 @@ _DIRECTIONAL_DESCRIPTIONS: dict[tuple[str, str], str] = {
     ),
 }
 
-_DIRECTION_TO_LABEL: dict[str, TrainingLabel] = {
-    "inward": TrainingLabel.DEFINITE_INWARD,
-    "outward": TrainingLabel.DEFINITE_OUTWARD,
+_DIRECTION_STR_TO_ENUM: dict[str, SignalDirection] = {
+    "inward": SignalDirection.INWARD,
+    "outward": SignalDirection.OUTWARD,
 }
+
+_AMBIGUITY_RATIO = 1.2
 
 
 def cosine(a: list[float], b: list[float]) -> float:
@@ -432,18 +435,18 @@ class EmbeddingConcretiser:
             file_content_signals, signal_contexts, signal_embeddings
         )
 
-        definite = sum(1 for s in concretised if s.is_definite)
+        classified = sum(1 for s in concretised if s.is_integration)
         result = ConcretisationResult(
             concretised=tuple(concretised),
             signals_submitted=len(concretised),
-            signals_definite=definite,
-            signals_discarded=len(concretised) - definite,
+            signals_classified=classified,
+            signals_unclassified=len(concretised) - classified,
         )
         logger.info(
-            "Embedding concretisation complete: submitted=%d definite=%d discarded=%d",
+            "Embedding concretisation complete: submitted=%d classified=%d unclassified=%d",
             result.signals_submitted,
-            result.signals_definite,
-            result.signals_discarded,
+            result.signals_classified,
+            result.signals_unclassified,
         )
         return result, metadata
 
@@ -492,7 +495,7 @@ class EmbeddingConcretiser:
         contexts: list[ASTContext],
         embeddings: list[list[float]],
     ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
-        """Classify each signal by argmax cosine similarity over descriptions."""
+        """Classify each signal using two-stage gate + direction logic."""
         logger.info(
             "Classifying %d signals against %d directional descriptions (threshold=%.3f)",
             len(signals),
@@ -509,12 +512,17 @@ class EmbeddingConcretiser:
             best_score = scores[best_idx]
             best_type, best_direction = self._desc_keys[best_idx]
 
+            # Stage 1: gate — below threshold means NOISE
             if best_score < self._threshold:
-                label = TrainingLabel.REJECTED
+                validity = SignalValidity.NOISE
+                direction = SignalDirection.AMBIGUOUS
             else:
-                label = _DIRECTION_TO_LABEL[best_direction]
+                # Stage 2: direction by score ratio
+                validity = SignalValidity.SIGNAL
+                direction = self._resolve_direction(scores)
 
-            label_counts[label.value] = label_counts.get(label.value, 0) + 1
+            tag = f"{validity.value}:{direction.value}"
+            label_counts[tag] = label_counts.get(tag, 0) + 1
 
             key = (sig.match.file_path, sig.match.line_number)
             metadata[key] = {
@@ -524,7 +532,7 @@ class EmbeddingConcretiser:
             }
 
             logger.debug(
-                "  [%d/%d] %s:%d  score=%.3f  type=%s  dir=%s  label=%s",
+                "  [%d/%d] %s:%d  score=%.3f  type=%s  dir=%s  validity=%s  direction=%s",
                 idx + 1,
                 len(signals),
                 sig.match.file_path,
@@ -532,14 +540,16 @@ class EmbeddingConcretiser:
                 best_score,
                 best_type,
                 best_direction,
-                label.value,
+                validity.value,
+                direction.value,
             )
 
             concretised.append(
                 ConcretisedSignal(
                     original_signal=sig,
                     ast_context=ctx,
-                    label=label,
+                    validity=validity,
+                    direction=direction,
                 )
             )
 
@@ -548,3 +558,21 @@ class EmbeddingConcretiser:
             ", ".join(f"{k}={v}" for k, v in sorted(label_counts.items())),
         )
         return concretised, metadata
+
+    def _resolve_direction(self, scores: list[float]) -> SignalDirection:
+        """Determine direction from per-description scores using ratio threshold."""
+        best_inward = max(
+            (scores[i] for i, k in enumerate(self._desc_keys) if k[1] == "inward"),
+            default=0.0,
+        )
+        best_outward = max(
+            (scores[i] for i, k in enumerate(self._desc_keys) if k[1] == "outward"),
+            default=0.0,
+        )
+        if best_inward == 0.0 and best_outward == 0.0:
+            return SignalDirection.AMBIGUOUS
+        if best_inward > best_outward * _AMBIGUITY_RATIO:
+            return SignalDirection.INWARD
+        if best_outward > best_inward * _AMBIGUITY_RATIO:
+            return SignalDirection.OUTWARD
+        return SignalDirection.AMBIGUOUS

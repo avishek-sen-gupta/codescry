@@ -534,11 +534,10 @@ class SymbolIntegrationProfile:
   <h3>Resolving ambiguity with ML</h3>
   <div class="two-col">
     <div>
-      <p>Some patterns can't determine direction from regex alone. The concretiser labels each signal:</p>
+      <p>Some patterns can't determine direction from regex alone. The concretiser classifies each signal in two stages:</p>
       <ul>
-        <li><span class="accent-green">DEFINITE_INWARD</span></li>
-        <li><span class="accent-amber">DEFINITE_OUTWARD</span></li>
-        <li><span class="dim">NOT_DEFINITE</span></li>
+        <li><strong>Validity:</strong> <span class="accent-green">SIGNAL</span> or <span class="dim">NOISE</span></li>
+        <li><strong>Direction:</strong> <span class="accent-green">INWARD</span> / <span class="accent-amber">OUTWARD</span> / <span class="dim">AMBIGUOUS</span></li>
       </ul>
       <p style="margin-top: 15px;">Classifier: <strong>TF-IDF</strong> (word + char n-grams) + <strong>Logistic Regression</strong></p>
       <p class="small">No API calls at inference. Serialised with joblib.</p>

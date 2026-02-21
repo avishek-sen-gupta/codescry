@@ -14,13 +14,21 @@ from repo_surveyor.integration_concretiser.llm_shared import (
     build_batched_classification_prompt,
     build_classification_prompt,
     deduplicate_signals,
+    map_label_to_validity_direction,
     parse_batched_classification_response,
     parse_classification_response,
     read_file_bytes,
 )
-from repo_surveyor.integration_concretiser.types import CompositeIntegrationSignal
-from repo_surveyor.integration_patterns import Confidence, IntegrationType, Language
-from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.integration_concretiser.types import (
+    CompositeIntegrationSignal,
+    SignalValidity,
+)
+from repo_surveyor.integration_patterns import (
+    Confidence,
+    IntegrationType,
+    Language,
+    SignalDirection,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -147,8 +155,9 @@ class TestParseClassificationResponse:
         }
         result = parse_classification_response(data)
         assert 10 in result
-        label, conf, reason = result[10]
-        assert label == TrainingLabel.DEFINITE_OUTWARD
+        validity, direction, conf, reason = result[10]
+        assert validity == SignalValidity.SIGNAL
+        assert direction == SignalDirection.OUTWARD
         assert conf == pytest.approx(0.9)
         assert reason == "HTTP client call"
 
@@ -171,10 +180,12 @@ class TestParseClassificationResponse:
         }
         result = parse_classification_response(data)
         assert len(result) == 2
-        assert result[5][0] == TrainingLabel.DEFINITE_INWARD
-        assert result[15][0] == TrainingLabel.NOT_DEFINITE
+        assert result[5][0] == SignalValidity.SIGNAL
+        assert result[5][1] == SignalDirection.INWARD
+        assert result[15][0] == SignalValidity.NOISE
+        assert result[15][1] == SignalDirection.AMBIGUOUS
 
-    def test_unknown_label_defaults_to_not_definite(self):
+    def test_unknown_label_defaults_to_noise(self):
         data = {
             "integrations": [
                 {
@@ -186,7 +197,8 @@ class TestParseClassificationResponse:
             ]
         }
         result = parse_classification_response(data)
-        assert result[1][0] == TrainingLabel.NOT_DEFINITE
+        assert result[1][0] == SignalValidity.NOISE
+        assert result[1][1] == SignalDirection.AMBIGUOUS
 
     def test_missing_integrations_key_returns_empty(self):
         result = parse_classification_response({})
@@ -209,12 +221,12 @@ class TestParseClassificationResponse:
     def test_defaults_confidence_to_half(self):
         data = {"integrations": [{"line": 10, "label": "DEFINITE_OUTWARD"}]}
         result = parse_classification_response(data)
-        assert result[10][1] == pytest.approx(0.5)
+        assert result[10][2] == pytest.approx(0.5)
 
     def test_defaults_reason_to_empty_string(self):
         data = {"integrations": [{"line": 10, "label": "DEFINITE_OUTWARD"}]}
         result = parse_classification_response(data)
-        assert result[10][2] == ""
+        assert result[10][3] == ""
 
 
 # ---------------------------------------------------------------------------
@@ -329,8 +341,10 @@ class TestParseBatchedClassificationResponse:
         result = parse_batched_classification_response(data)
         assert "Foo.java" in result
         assert "Bar.java" in result
-        assert result["Foo.java"][10][0] == TrainingLabel.DEFINITE_OUTWARD
-        assert result["Bar.java"][5][0] == TrainingLabel.DEFINITE_INWARD
+        assert result["Foo.java"][10][0] == SignalValidity.SIGNAL
+        assert result["Foo.java"][10][1] == SignalDirection.OUTWARD
+        assert result["Bar.java"][5][0] == SignalValidity.SIGNAL
+        assert result["Bar.java"][5][1] == SignalDirection.INWARD
 
     def test_empty_response(self):
         result = parse_batched_classification_response({})
@@ -350,7 +364,7 @@ class TestParseBatchedClassificationResponse:
         result = parse_batched_classification_response(data)
         assert result == {}
 
-    def test_unknown_label_defaults_to_not_definite(self):
+    def test_unknown_label_defaults_to_noise(self):
         data = {
             "integrations": [
                 {
@@ -363,7 +377,8 @@ class TestParseBatchedClassificationResponse:
             ]
         }
         result = parse_batched_classification_response(data)
-        assert result["X.java"][1][0] == TrainingLabel.NOT_DEFINITE
+        assert result["X.java"][1][0] == SignalValidity.NOISE
+        assert result["X.java"][1][1] == SignalDirection.AMBIGUOUS
 
 
 # ---------------------------------------------------------------------------

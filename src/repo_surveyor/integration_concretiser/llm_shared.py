@@ -12,7 +12,9 @@ from repo_surveyor.detection.integration_detector import IntegrationSignal
 from repo_surveyor.integration_concretiser.types import (
     CompositeIntegrationSignal,
     SignalLike,
+    SignalValidity,
 )
+from repo_surveyor.integration_patterns import SignalDirection
 from repo_surveyor.training.types import TrainingLabel
 
 logger = logging.getLogger(__name__)
@@ -66,6 +68,27 @@ The "file" field MUST match the path shown in the ===FILE: <path>=== header exac
 
 Classify ALL signal lines listed across ALL files. If a line number is not in the file or cannot be
 determined, still include it with label NOT_DEFINITE."""
+
+_LABEL_TO_VALIDITY_DIRECTION: dict[str, tuple[SignalValidity, SignalDirection]] = {
+    "DEFINITE_INWARD": (SignalValidity.SIGNAL, SignalDirection.INWARD),
+    "DEFINITE_OUTWARD": (SignalValidity.SIGNAL, SignalDirection.OUTWARD),
+    "NOT_DEFINITE": (SignalValidity.NOISE, SignalDirection.AMBIGUOUS),
+}
+
+
+def map_label_to_validity_direction(
+    label_str: str,
+) -> tuple[SignalValidity, SignalDirection]:
+    """Map an LLM label string to a (validity, direction) pair."""
+    result = _LABEL_TO_VALIDITY_DIRECTION.get(label_str)
+    if result is not None:
+        return result
+    logger.warning(
+        "Unknown label %r — defaulting to (NOISE, AMBIGUOUS)",
+        label_str,
+    )
+    return (SignalValidity.NOISE, SignalDirection.AMBIGUOUS)
+
 
 MAX_FILE_CHARS = 12_000
 
@@ -156,8 +179,8 @@ def build_batched_classification_prompt(
 
 def parse_classification_response(
     data: dict,
-) -> dict[int, tuple[TrainingLabel, float, str]]:
-    """Parse a classification JSON response into a {line: (label, confidence, reason)} map.
+) -> dict[int, tuple[SignalValidity, SignalDirection, float, str]]:
+    """Parse a classification JSON response into a {line: (validity, direction, confidence, reason)} map.
 
     Expects a dict with an ``"integrations"`` key containing a list of entries,
     each with ``line``, ``label``, ``confidence``, and ``reason`` fields.
@@ -165,29 +188,22 @@ def parse_classification_response(
     entries = data.get("integrations", [])
     logger.debug("Parsed %d integration entries from LLM response", len(entries))
 
-    result: dict[int, tuple[TrainingLabel, float, str]] = {}
+    result: dict[int, tuple[SignalValidity, SignalDirection, float, str]] = {}
     for entry in entries:
         line = entry.get("line")
         label_str = entry.get("label", "NOT_DEFINITE")
         confidence = float(entry.get("confidence", 0.5))
         reason = entry.get("reason", "")
 
-        try:
-            label = TrainingLabel(label_str)
-        except ValueError:
-            logger.warning(
-                "Unknown label %r for line %s — defaulting to NOT_DEFINITE",
-                label_str,
-                line,
-            )
-            label = TrainingLabel.NOT_DEFINITE
+        validity, direction = map_label_to_validity_direction(label_str)
 
         if line is not None:
-            result[int(line)] = (label, confidence, reason)
+            result[int(line)] = (validity, direction, confidence, reason)
             logger.debug(
-                "  Line %4d  %-20s  conf=%.2f  %s",
+                "  Line %4d  %-20s  %-10s  conf=%.2f  %s",
                 int(line),
-                label.value,
+                validity.value,
+                direction.value,
                 confidence,
                 reason[:60],
             )
@@ -197,17 +213,19 @@ def parse_classification_response(
 
 def parse_batched_classification_response(
     data: dict,
-) -> dict[str, dict[int, tuple[TrainingLabel, float, str]]]:
+) -> dict[str, dict[int, tuple[SignalValidity, SignalDirection, float, str]]]:
     """Parse a batched classification JSON response.
 
-    Returns ``{file_path: {line: (label, confidence, reason)}}``.
+    Returns ``{file_path: {line: (validity, direction, confidence, reason)}}``.
     """
     entries = data.get("integrations", [])
     logger.debug(
         "Parsed %d integration entries from batched LLM response", len(entries)
     )
 
-    result: dict[str, dict[int, tuple[TrainingLabel, float, str]]] = defaultdict(dict)
+    result: dict[str, dict[int, tuple[SignalValidity, SignalDirection, float, str]]] = (
+        defaultdict(dict)
+    )
     for entry in entries:
         file_path = entry.get("file", "")
         line = entry.get("line")
@@ -215,19 +233,10 @@ def parse_batched_classification_response(
         confidence = float(entry.get("confidence", 0.5))
         reason = entry.get("reason", "")
 
-        try:
-            label = TrainingLabel(label_str)
-        except ValueError:
-            logger.warning(
-                "Unknown label %r for %s:%s — defaulting to NOT_DEFINITE",
-                label_str,
-                file_path,
-                line,
-            )
-            label = TrainingLabel.NOT_DEFINITE
+        validity, direction = map_label_to_validity_direction(label_str)
 
         if line is not None and file_path:
-            result[file_path][int(line)] = (label, confidence, reason)
+            result[file_path][int(line)] = (validity, direction, confidence, reason)
 
     return dict(result)
 

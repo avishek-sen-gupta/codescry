@@ -14,15 +14,19 @@ from repo_surveyor.integration_concretiser.embedding_concretiser import (
     _DIRECTIONAL_DESCRIPTIONS,
     cosine,
 )
-from repo_surveyor.integration_concretiser.types import ASTContext
+from repo_surveyor.integration_concretiser.types import ASTContext, SignalValidity
 from repo_surveyor.detection.integration_detector import (
     EntityType,
     FileMatch,
     IntegrationDetectorResult,
     IntegrationSignal,
 )
-from repo_surveyor.integration_patterns import Confidence, IntegrationType, Language
-from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.integration_patterns import (
+    Confidence,
+    IntegrationType,
+    Language,
+    SignalDirection,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -199,9 +203,9 @@ class TestCosine:
 
 
 class TestThresholdLogic:
-    """Signals below threshold become REJECTED."""
+    """Signals below threshold become NOISE."""
 
-    def test_below_threshold_is_rejected(self):
+    def test_below_threshold_is_noise(self):
         dim = 26
         desc_embeddings = [_unit_vector(dim, i) for i in range(26)]
         low_score_vec = [0.01] * dim
@@ -219,11 +223,12 @@ class TestThresholdLogic:
 
         result, metadata = concretiser.concretise(detector_result, _fake_reader)
 
-        assert result.concretised[0].label == TrainingLabel.REJECTED
+        assert result.concretised[0].validity == SignalValidity.NOISE
+        assert result.concretised[0].direction == SignalDirection.AMBIGUOUS
         key = ("client.py", 5)
         assert metadata[key]["score"] < 0.40
 
-    def test_above_threshold_is_definite(self):
+    def test_above_threshold_is_signal(self):
         dim = 26
         desc_embeddings = [_unit_vector(dim, i) for i in range(26)]
         high_score_vec = _unit_vector(dim, 0)
@@ -241,7 +246,7 @@ class TestThresholdLogic:
 
         result, _ = concretiser.concretise(detector_result, _fake_reader)
 
-        assert result.concretised[0].label != TrainingLabel.REJECTED
+        assert result.concretised[0].validity == SignalValidity.SIGNAL
 
 
 # ---------------------------------------------------------------------------
@@ -250,7 +255,7 @@ class TestThresholdLogic:
 
 
 class TestDirectionClassification:
-    """Verify correct INWARD/OUTWARD labels from argmax."""
+    """Verify correct INWARD/OUTWARD direction from score ratio."""
 
     def test_inward_when_best_match_is_inward(self):
         desc_keys = list(_DIRECTIONAL_DESCRIPTIONS.keys())
@@ -271,7 +276,8 @@ class TestDirectionClassification:
 
         result, metadata = concretiser.concretise(detector_result, _fake_reader)
 
-        assert result.concretised[0].label == TrainingLabel.DEFINITE_INWARD
+        assert result.concretised[0].validity == SignalValidity.SIGNAL
+        assert result.concretised[0].direction == SignalDirection.INWARD
         assert metadata[("client.py", 5)]["best_direction"] == "inward"
 
     def test_outward_when_best_match_is_outward(self):
@@ -293,7 +299,8 @@ class TestDirectionClassification:
 
         result, metadata = concretiser.concretise(detector_result, _fake_reader)
 
-        assert result.concretised[0].label == TrainingLabel.DEFINITE_OUTWARD
+        assert result.concretised[0].validity == SignalValidity.SIGNAL
+        assert result.concretised[0].direction == SignalDirection.OUTWARD
         assert metadata[("client.py", 5)]["best_direction"] == "outward"
 
 
@@ -439,7 +446,7 @@ class TestFilterDirectorySignals:
 class TestEndToEnd:
     """Full pipeline with mock client and known vectors."""
 
-    def test_full_pipeline_produces_expected_labels(self):
+    def test_full_pipeline_produces_expected_classifications(self):
         desc_keys = list(_DIRECTIONAL_DESCRIPTIONS.keys())
         dim = len(desc_keys)
         desc_embeddings = [_unit_vector(dim, i) for i in range(dim)]
@@ -476,13 +483,17 @@ class TestEndToEnd:
         result, metadata = concretiser.concretise(detector_result, _fake_reader)
 
         assert result.signals_submitted == 3
-        assert result.signals_definite == 2
-        assert result.signals_discarded == 1
+        assert result.signals_classified == 2
+        assert result.signals_unclassified == 1
 
-        labels = [s.label for s in result.concretised]
-        assert labels[0] == TrainingLabel.DEFINITE_OUTWARD
-        assert labels[1] == TrainingLabel.DEFINITE_INWARD
-        assert labels[2] == TrainingLabel.REJECTED
+        validities = [s.validity for s in result.concretised]
+        directions = [s.direction for s in result.concretised]
+        assert validities[0] == SignalValidity.SIGNAL
+        assert directions[0] == SignalDirection.OUTWARD
+        assert validities[1] == SignalValidity.SIGNAL
+        assert directions[1] == SignalDirection.INWARD
+        assert validities[2] == SignalValidity.NOISE
+        assert directions[2] == SignalDirection.AMBIGUOUS
 
         assert metadata[("client.py", 5)]["best_type"] == "http_rest"
         assert metadata[("client.py", 5)]["best_direction"] == "outward"

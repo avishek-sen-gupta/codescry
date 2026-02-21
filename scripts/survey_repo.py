@@ -1,4 +1,4 @@
-"""Run the full survey pipeline on a repository and export concretised signals by label."""
+"""Run the full survey pipeline on a repository and export concretised signals by validity+direction."""
 
 import argparse
 import json
@@ -6,6 +6,8 @@ from pathlib import Path
 
 from repo_surveyor import survey
 from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
+from repo_surveyor.integration_concretiser.types import SignalValidity
+from repo_surveyor.integration_patterns import SignalDirection
 from repo_surveyor.training.signal_classifier import (
     NullSignalClassifier,
     SignalClassifier,
@@ -15,10 +17,13 @@ from repo_surveyor.training.types import TrainingLabel
 
 def _signal_to_dict(s, classifier: SignalClassifier) -> dict:
     proba = classifier.predict_proba(s.original_signal.match.line_content)
-    ml_confidence = round(proba[s.label], 4)
+    # Map (validity, direction) back to TrainingLabel for proba lookup
+    _label_key = _validity_direction_to_training_label(s.validity, s.direction)
+    ml_confidence = round(proba[_label_key], 4)
     base = s.original_signal.to_dict()
     return {
-        "label": s.label.value,
+        "validity": s.validity.value,
+        "direction": s.direction.value,
         "ml_confidence": ml_confidence,
         **base,
         "ast_node_type": s.ast_context.node_type,
@@ -26,6 +31,19 @@ def _signal_to_dict(s, classifier: SignalClassifier) -> dict:
         "ast_end_line": s.ast_context.end_line,
         "ast_node_text": s.ast_context.node_text,
     }
+
+
+def _validity_direction_to_training_label(
+    validity: SignalValidity, direction: SignalDirection
+) -> TrainingLabel:
+    """Map (validity, direction) back to TrainingLabel for proba lookup."""
+    if validity == SignalValidity.NOISE:
+        return TrainingLabel.NOT_DEFINITE
+    if direction == SignalDirection.INWARD:
+        return TrainingLabel.DEFINITE_INWARD
+    if direction == SignalDirection.OUTWARD:
+        return TrainingLabel.DEFINITE_OUTWARD
+    return TrainingLabel.NOT_DEFINITE
 
 
 def _parse_args() -> argparse.Namespace:
@@ -80,8 +98,8 @@ def main() -> None:
     print(f"Signals found:  {len(integration.integration_points)}")
     print()
     print(f"Submitted:      {concretisation.signals_submitted}")
-    print(f"Definite:       {concretisation.signals_definite}")
-    print(f"Discarded:      {concretisation.signals_discarded}")
+    print(f"Classified:     {concretisation.signals_classified}")
+    print(f"Unclassified:   {concretisation.signals_unclassified}")
     print()
 
     print("=== Timings ===")
@@ -94,15 +112,27 @@ def main() -> None:
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    for label in TrainingLabel:
-        signals = [s for s in concretisation.concretised if s.label == label]
-        path = out / f"{label.value.lower()}.jsonl"
+    _OUTPUT_GROUPS = [
+        ("inward", SignalValidity.SIGNAL, SignalDirection.INWARD),
+        ("outward", SignalValidity.SIGNAL, SignalDirection.OUTWARD),
+        ("ambiguous", SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS),
+        ("noise", SignalValidity.NOISE, None),
+    ]
+
+    for filename, validity, direction in _OUTPUT_GROUPS:
+        signals = [
+            s
+            for s in concretisation.concretised
+            if s.validity == validity
+            and (direction is None or s.direction == direction)
+        ]
+        path = out / f"{filename}.jsonl"
         path.write_text(
             "\n".join(json.dumps(_signal_to_dict(s, classifier)) for s in signals)
             + "\n",
             encoding="utf-8",
         )
-        print(f"  {label.value}: {len(signals):4d} signals → {path}")
+        print(f"  {filename}: {len(signals):4d} signals → {path}")
 
 
 if __name__ == "__main__":
