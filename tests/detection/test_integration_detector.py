@@ -3649,7 +3649,9 @@ class TestCppBasePatterns:
         def strip_source(
             patterns: dict,
         ) -> dict:
-            return {k: [(p, c) for p, c, _s, _d in v] for k, v in patterns.items()}
+            return {
+                k: [(p, c) for p, c, _s, _d, _descs in v] for k, v in patterns.items()
+            }
 
         assert strip_source(c_patterns) == strip_source(cpp_patterns)
 

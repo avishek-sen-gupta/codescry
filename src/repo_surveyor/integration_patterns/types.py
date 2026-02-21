@@ -93,6 +93,20 @@ class FrameworkPatternSpec:
     import_patterns: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class PatternDescription:
+    """A single description string tied to its pattern metadata.
+
+    Used by the pattern-embedding concretiser to build nearest-neighbor
+    lookup targets from per-pattern descriptions.
+    """
+
+    text: str
+    integration_type: IntegrationType
+    direction: SignalDirection
+    source: str
+
+
 class PatternKey:
     """Dict keys inside integration pattern dicts."""
 

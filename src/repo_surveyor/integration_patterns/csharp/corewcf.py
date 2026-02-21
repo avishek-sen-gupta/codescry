@@ -13,8 +13,24 @@ FRAMEWORK = FrameworkPatternSpec(
     patterns={
         IntegrationType.SOAP: {
             PatternKey.PATTERNS: [
-                (r"using CoreWCF", Confidence.HIGH, SignalDirection.INWARD),
-                (r"CoreWCF\.Http", Confidence.HIGH, SignalDirection.INWARD),
+                (
+                    r"using CoreWCF",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                    (
+                        "CoreWCF namespace import enabling a CoreWCF SOAP service",
+                        "This code uses CoreWCF to expose an inbound SOAP service",
+                    ),
+                ),
+                (
+                    r"CoreWCF\.Http",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                    (
+                        "CoreWCF.Http namespace configuring HTTP transport for a CoreWCF service",
+                        "This code uses CoreWCF to expose an inbound SOAP service over HTTP",
+                    ),
+                ),
             ],
         },
     },

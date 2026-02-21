@@ -157,7 +157,7 @@ def _validate_regex(example: TrainingExample) -> list[tuple[ValidationFailure, s
 
     has_match = any(
         _safe_regex_search(regex, example.signal_line_content)
-        for regex, _confidence, _source, _direction in registered_patterns
+        for regex, _confidence, _source, _direction, _descs in registered_patterns
     )
 
     if not has_match:

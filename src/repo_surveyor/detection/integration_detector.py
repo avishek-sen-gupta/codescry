@@ -259,7 +259,7 @@ def scan_file_for_integrations(
         if classify_line(range_map, line_num) in _SKIP_ZONES:
             continue
         for integration_type, type_patterns in patterns.items():
-            for pattern, confidence, source, direction in type_patterns:
+            for pattern, confidence, source, direction, _descs in type_patterns:
                 if re.search(pattern, line):
                     match = FileMatch(
                         file_path=str(file_path),

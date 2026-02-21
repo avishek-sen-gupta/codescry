@@ -13,7 +13,15 @@ FRAMEWORK = FrameworkPatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"from aiohttp import", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (
+                    r"from aiohttp import",
+                    Confidence.MEDIUM,
+                    SignalDirection.AMBIGUOUS,
+                    (
+                        "aiohttp framework import for async HTTP client and server operations",
+                        "This code uses aiohttp to interact with an HTTP endpoint",
+                    ),
+                ),
             ],
         },
     },

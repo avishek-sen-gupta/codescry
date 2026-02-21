@@ -189,7 +189,7 @@ def _build_harvest_specs(
         for itype, pattern_tuples in patterns_by_type.items():
             if target_types and itype not in target_types:
                 continue
-            for regex, confidence, source, direction in pattern_tuples:
+            for regex, confidence, source, direction, _descs in pattern_tuples:
                 if direction == SignalDirection.AMBIGUOUS:
                     continue
                 if confidence not in (Confidence.HIGH,):
@@ -242,11 +242,7 @@ def _build_not_definite_specs(languages: list[Language]) -> list[NotDefiniteSpec
     target_langs = (
         languages
         if languages
-        else [
-            lang
-            for lang in Language
-            if lang.value in _NOT_DEFINITE_SEARCH_TERMS
-        ]
+        else [lang for lang in Language if lang.value in _NOT_DEFINITE_SEARCH_TERMS]
     )
     return [
         NotDefiniteSpec(language=lang, search_term=term)
@@ -286,9 +282,7 @@ class GitHubClient:
             logger.warning("URL error for %s: %s", url, exc)
             return None
 
-    def search_code(
-        self, term: str, language: str, per_page: int = 10
-    ) -> list[dict]:
+    def search_code(self, term: str, language: str, per_page: int = 10) -> list[dict]:
         """Search GitHub code for a literal term in files of a given language."""
         query = quote(f"{term} language:{language}", safe=":")
         url = f"{self._BASE}/search/code?q={query}&per_page={per_page}"
@@ -335,7 +329,9 @@ def _extract_snippet(
 
 
 def _make_example_id(spec: HarvestSpec, file_url: str, line_idx: int) -> str:
-    raw = f"{spec.language.value}__{spec.integration_type.value}__{line_idx}__{file_url}"
+    raw = (
+        f"{spec.language.value}__{spec.integration_type.value}__{line_idx}__{file_url}"
+    )
     digest = hashlib.sha1(raw.encode()).hexdigest()[:8]
     return f"github__{spec.language.value}__{spec.integration_type.value}__{spec.label.value}__{spec.source}__{digest}"
 
@@ -381,7 +377,9 @@ def _examples_from_file_not_definite(
     file_url: str,
     context: int,
     seen: set[tuple[str, int]],
-    integration_patterns: dict[IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]],
+    integration_patterns: dict[
+        IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]
+    ],
 ) -> list[TrainingExample]:
     """Extract NOT_DEFINITE examples from a non-integration file.
 
@@ -427,7 +425,9 @@ def _harvest_not_definite_spec(
     max_files: int,
     context: int,
     seen_dedup: set[tuple[str, int]],
-    integration_patterns: dict[IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]],
+    integration_patterns: dict[
+        IntegrationType, list[tuple[str, Confidence, str, SignalDirection]]
+    ],
 ) -> list[TrainingExample]:
     """Harvest NOT_DEFINITE examples for a single NotDefiniteSpec."""
     github_lang = _GITHUB_LANGUAGE[spec.language.value]
@@ -477,9 +477,7 @@ def _harvest_spec(
         content = client.fetch_file_content(url)
         if not content:
             continue
-        examples.extend(
-            _examples_from_file(content, spec, url, context, seen_dedup)
-        )
+        examples.extend(_examples_from_file(content, spec, url, context, seen_dedup))
     return examples
 
 
@@ -556,6 +554,7 @@ def _resolve_token(args: argparse.Namespace) -> str:
     if args.token:
         return args.token
     import os
+
     token = os.environ.get("GITHUB_TOKEN", "")
     if not token:
         print("Error: provide --token or set GITHUB_TOKEN.", file=sys.stderr)
@@ -605,7 +604,9 @@ def main() -> None:
 
     inward = sum(1 for s in specs if s.direction == SignalDirection.INWARD)
     outward = sum(1 for s in specs if s.direction == SignalDirection.OUTWARD)
-    print(f"\nHarvest plan: {len(specs)} INWARD/OUTWARD patterns + {len(nd_specs)} NOT_DEFINITE search terms")
+    print(
+        f"\nHarvest plan: {len(specs)} INWARD/OUTWARD patterns + {len(nd_specs)} NOT_DEFINITE search terms"
+    )
     print(f"  INWARD:       {inward}")
     print(f"  OUTWARD:      {outward}")
     print(f"  NOT_DEFINITE: {len(nd_specs)}")
@@ -647,7 +648,9 @@ def main() -> None:
     # Pre-compute integration patterns once for NOT_DEFINITE scanning.
     nd_integration_patterns = (
         {
-            lang: get_patterns_for_language(lang, list(LANGUAGE_MODULES[lang].FRAMEWORK_PATTERNS.keys()))
+            lang: get_patterns_for_language(
+                lang, list(LANGUAGE_MODULES[lang].FRAMEWORK_PATTERNS.keys())
+            )
             for lang in {s.language for s in pending_nd}
             if lang in LANGUAGE_MODULES
         }
@@ -661,7 +664,9 @@ def main() -> None:
                 f"[{i}/{len(pending)}] {spec.language.value}/{spec.integration_type.value} "
                 f"{spec.direction.value!r:8s} — {spec.search_term!r} (source: {spec.source})"
             )
-            examples = _harvest_spec(spec, client, args.max_files, args.context_lines, seen_dedup)
+            examples = _harvest_spec(
+                spec, client, args.max_files, args.context_lines, seen_dedup
+            )
             for ex in examples:
                 raw_fp.write(json.dumps(ex.to_dict(), ensure_ascii=False) + "\n")
             raw_fp.flush()
@@ -677,7 +682,12 @@ def main() -> None:
             )
             lang_patterns = nd_integration_patterns.get(nd_spec.language, {})
             examples = _harvest_not_definite_spec(
-                nd_spec, client, args.max_files, args.context_lines, seen_dedup, lang_patterns
+                nd_spec,
+                client,
+                args.max_files,
+                args.context_lines,
+                seen_dedup,
+                lang_patterns,
             )
             for ex in examples:
                 raw_fp.write(json.dumps(ex.to_dict(), ensure_ascii=False) + "\n")
@@ -691,7 +701,9 @@ def main() -> None:
 
     # Read everything from raw.jsonl (includes prior runs when resuming).
     raw_lines = [
-        line for line in raw_path.read_text(encoding="utf-8").splitlines() if line.strip()
+        line
+        for line in raw_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
     ]
     print(f"\nTotal raw examples (this + prior runs): {len(raw_lines)}")
 

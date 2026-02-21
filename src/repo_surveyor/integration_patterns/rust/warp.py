@@ -13,7 +13,15 @@ FRAMEWORK = FrameworkPatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"use warp::", Confidence.HIGH, SignalDirection.AMBIGUOUS),
+                (
+                    r"use warp::",
+                    Confidence.HIGH,
+                    SignalDirection.AMBIGUOUS,
+                    (
+                        "Warp library import for composable HTTP server framework",
+                        "This code uses Warp to interact with an HTTP server",
+                    ),
+                ),
             ],
         },
     },

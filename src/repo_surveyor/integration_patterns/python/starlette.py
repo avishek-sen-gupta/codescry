@@ -13,7 +13,15 @@ FRAMEWORK = FrameworkPatternSpec(
     patterns={
         IntegrationType.HTTP_REST: {
             PatternKey.PATTERNS: [
-                (r"from starlette", Confidence.MEDIUM, SignalDirection.AMBIGUOUS),
+                (
+                    r"from starlette",
+                    Confidence.MEDIUM,
+                    SignalDirection.AMBIGUOUS,
+                    (
+                        "Starlette framework import for building lightweight ASGI web applications",
+                        "This code uses Starlette to interact with an HTTP endpoint",
+                    ),
+                ),
             ],
         },
     },

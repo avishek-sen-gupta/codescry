@@ -17,9 +17,29 @@ FRAMEWORK = FrameworkPatternSpec(
                     r"require\(['\"]@hapi/hapi['\"]\)",
                     Confidence.HIGH,
                     SignalDirection.INWARD,
+                    (
+                        "Node.js Hapi framework require for HTTP server",
+                        "This code uses Node.js Hapi to handle inbound HTTP server requests",
+                    ),
                 ),
-                (r"Hapi\.server\(", Confidence.HIGH, SignalDirection.INWARD),
-                (r"server\.route\(", Confidence.HIGH, SignalDirection.INWARD),
+                (
+                    r"Hapi\.server\(",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                    (
+                        "Hapi Hapi.server call for HTTP server instantiation",
+                        "This code uses Node.js Hapi to expose an inbound HTTP server",
+                    ),
+                ),
+                (
+                    r"server\.route\(",
+                    Confidence.HIGH,
+                    SignalDirection.INWARD,
+                    (
+                        "Hapi server.route call for HTTP route registration",
+                        "This code uses Node.js Hapi to handle inbound HTTP routes",
+                    ),
+                ),
             ],
         },
     },
