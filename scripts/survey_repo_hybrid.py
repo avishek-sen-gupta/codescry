@@ -18,7 +18,7 @@ Supports two embedding backends via --backend:
   - gemini: gemini-embedding-001 via Google Gemini API
     Requires GEMINI_001_EMBEDDING_API_KEY env var.
 
-Requires GEMINI_API_KEY env var for the Gemini Flash direction classifier.
+Requires GEMINI_001_EMBEDDING_API_KEY env var for both Gemini embedding and Flash.
 
 Usage:
     poetry run python scripts/survey_repo_hybrid.py /path/to/repo
@@ -56,8 +56,7 @@ from repo_surveyor.training.signal_classifier import NullSignalClassifier
 
 logger = logging.getLogger(__name__)
 
-_ENV_VAR_GEMINI_API_KEY = "GEMINI_API_KEY"
-_ENV_VAR_GEMINI_EMBEDDING_API_KEY = "GEMINI_001_EMBEDDING_API_KEY"
+_ENV_VAR_GEMINI_API_KEY = "GEMINI_001_EMBEDDING_API_KEY"
 
 
 def _create_embedding_client(
@@ -65,7 +64,7 @@ def _create_embedding_client(
 ) -> EmbeddingClient | GeminiEmbeddingClient:
     """Create the appropriate embedding client based on the backend choice."""
     if backend == "gemini":
-        api_key = os.environ[_ENV_VAR_GEMINI_EMBEDDING_API_KEY]
+        api_key = os.environ[_ENV_VAR_GEMINI_API_KEY]
         return GeminiEmbeddingClient(api_key=api_key)
     endpoint_url = os.environ["HUGGING_FACE_URL"]
     api_token = os.environ["HUGGING_FACE_API_TOKEN"]
