@@ -199,9 +199,9 @@ class TestCosine:
 
 
 class TestThresholdLogic:
-    """Signals below threshold become NOT_DEFINITE."""
+    """Signals below threshold become REJECTED."""
 
-    def test_below_threshold_is_not_definite(self):
+    def test_below_threshold_is_rejected(self):
         dim = 26
         desc_embeddings = [_unit_vector(dim, i) for i in range(26)]
         low_score_vec = [0.01] * dim
@@ -219,7 +219,7 @@ class TestThresholdLogic:
 
         result, metadata = concretiser.concretise(detector_result, _fake_reader)
 
-        assert result.concretised[0].label == TrainingLabel.NOT_DEFINITE
+        assert result.concretised[0].label == TrainingLabel.REJECTED
         key = ("client.py", 5)
         assert metadata[key]["score"] < 0.40
 
@@ -241,7 +241,7 @@ class TestThresholdLogic:
 
         result, _ = concretiser.concretise(detector_result, _fake_reader)
 
-        assert result.concretised[0].label != TrainingLabel.NOT_DEFINITE
+        assert result.concretised[0].label != TrainingLabel.REJECTED
 
 
 # ---------------------------------------------------------------------------
@@ -482,7 +482,7 @@ class TestEndToEnd:
         labels = [s.label for s in result.concretised]
         assert labels[0] == TrainingLabel.DEFINITE_OUTWARD
         assert labels[1] == TrainingLabel.DEFINITE_INWARD
-        assert labels[2] == TrainingLabel.NOT_DEFINITE
+        assert labels[2] == TrainingLabel.REJECTED
 
         assert metadata[("client.py", 5)]["best_type"] == "http_rest"
         assert metadata[("client.py", 5)]["best_direction"] == "outward"

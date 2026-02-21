@@ -13,7 +13,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from repo_surveyor.training.types import TrainingExample, TrainingLabel
+from repo_surveyor.training.types import TRAINING_LABELS, TrainingExample, TrainingLabel
 
 
 class _ModelConfig:
@@ -174,7 +174,7 @@ class NullSignalClassifier(SignalClassifier):
         return TrainingLabel.NOT_DEFINITE
 
     def predict_proba(self, signal_line: str) -> dict[TrainingLabel, float]:
-        return {label: 0.0 for label in TrainingLabel}
+        return {label: 0.0 for label in TRAINING_LABELS}
 
     @property
     def model_id(self) -> str:

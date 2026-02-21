@@ -10,6 +10,14 @@ class TrainingLabel(Enum):
     DEFINITE_INWARD = "DEFINITE_INWARD"
     DEFINITE_OUTWARD = "DEFINITE_OUTWARD"
     NOT_DEFINITE = "NOT_DEFINITE"
+    REJECTED = "REJECTED"
+
+
+TRAINING_LABELS = (
+    TrainingLabel.DEFINITE_INWARD,
+    TrainingLabel.DEFINITE_OUTWARD,
+    TrainingLabel.NOT_DEFINITE,
+)
 
 
 @dataclass(frozen=True)

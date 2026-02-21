@@ -49,7 +49,7 @@ from repo_surveyor.training.types import TrainingLabel
 
 logger = logging.getLogger(__name__)
 
-_CONFIDENCE_THRESHOLD = 0.18
+_CONFIDENCE_THRESHOLD = 0.56
 
 _BATCH_SIZE = 32
 
@@ -510,7 +510,7 @@ class EmbeddingConcretiser:
             best_type, best_direction = self._desc_keys[best_idx]
 
             if best_score < self._threshold:
-                label = TrainingLabel.NOT_DEFINITE
+                label = TrainingLabel.REJECTED
             else:
                 label = _DIRECTION_TO_LABEL[best_direction]
 

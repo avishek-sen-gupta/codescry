@@ -6,7 +6,7 @@ from repo_surveyor.training.coverage import (
     CoverageMatrix,
     build_coverage_matrix,
 )
-from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.training.types import TRAINING_LABELS
 
 
 class TestBuildCoverageMatrix:
@@ -47,7 +47,7 @@ class TestBuildCoverageMatrix:
 
     def test_total_triples_is_entries_times_labels(self):
         matrix = build_coverage_matrix(languages=[Language.JAVA])
-        assert matrix.total_triples == len(matrix.entries) * len(TrainingLabel)
+        assert matrix.total_triples == len(matrix.entries) * len(TRAINING_LABELS)
 
     def test_java_has_http_rest(self):
         matrix = build_coverage_matrix(

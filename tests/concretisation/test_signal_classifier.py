@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from repo_surveyor.training.types import TrainingExample, TrainingLabel
+from repo_surveyor.training.types import TRAINING_LABELS, TrainingExample, TrainingLabel
 from repo_surveyor.training.signal_classifier import (
     NullSignalClassifier,
     SignalClassifier,
@@ -88,7 +88,7 @@ class TestSignalClassifierTraining:
         proba = classifier.predict_proba(
             "restTemplate.postForObject(url, body, Resp.class)"
         )
-        assert set(proba.keys()) == set(TrainingLabel)
+        assert set(proba.keys()) == set(TRAINING_LABELS)
 
     def test_predict_proba_sums_to_one(self):
         examples = _synthetic_examples()
@@ -142,7 +142,7 @@ class TestSignalClassifierSerialisation:
         line = '@PutMapping("/update")'
         orig = classifier.predict_proba(line)
         restored = loaded.predict_proba(line)
-        for label in TrainingLabel:
+        for label in TRAINING_LABELS:
             assert abs(orig[label] - restored[label]) < 1e-9
 
 
@@ -195,7 +195,7 @@ class TestEvaluationResult:
         examples = _synthetic_examples()
         classifier = SignalClassifier.train(examples, examples)
         result = evaluate(classifier, examples)
-        expected_keys = {label.value for label in TrainingLabel}
+        expected_keys = {label.value for label in TRAINING_LABELS}
         assert set(result.per_class_f1.keys()) == expected_keys
         assert set(result.per_class_precision.keys()) == expected_keys
         assert set(result.per_class_recall.keys()) == expected_keys
@@ -227,7 +227,7 @@ class TestNullSignalClassifier:
     def test_predict_proba_covers_all_labels(self):
         null = NullSignalClassifier()
         proba = null.predict_proba("anything")
-        assert set(proba.keys()) == set(TrainingLabel)
+        assert set(proba.keys()) == set(TRAINING_LABELS)
 
     def test_predict_proba_all_zero(self):
         null = NullSignalClassifier()

@@ -9,7 +9,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from repo_surveyor.training.types import TrainingExample, TrainingLabel
+from repo_surveyor.training.types import TRAINING_LABELS, TrainingExample, TrainingLabel
 from repo_surveyor.training.signal_classifier import SignalClassifier
 
 
@@ -80,7 +80,7 @@ def evaluate(
 
     accuracy = float(accuracy_score(true_labels, pred_labels))
 
-    label_values = [label.value for label in TrainingLabel]
+    label_values = [label.value for label in TRAINING_LABELS]
     precision_arr, recall_arr, f1_arr, _ = precision_recall_fscore_support(
         true_labels,
         pred_labels,

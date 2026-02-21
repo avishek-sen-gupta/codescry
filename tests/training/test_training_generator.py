@@ -21,7 +21,7 @@ from repo_surveyor.training.generator import (
     generate_all_batch,
 )
 from repo_surveyor.training.coverage import CoverageEntry
-from repo_surveyor.training.types import TrainingExample, TrainingLabel
+from repo_surveyor.training.types import TRAINING_LABELS, TrainingExample, TrainingLabel
 from repo_surveyor.integration_patterns.types import IntegrationType, Language
 from repo_surveyor.ml_classifier.types import CompletionResult
 from repo_surveyor.ml_classifier.claude_model import BatchResult, BatchStatus
@@ -297,10 +297,10 @@ class TestGenerateAllResume:
             resume=False,
         )
 
-        assert len(results) == len(TrainingLabel)
+        assert len(results) == len(TRAINING_LABELS)
         assert checkpoint_path.exists()
         loaded = _load_checkpoint(checkpoint_path)
-        assert len(loaded) == len(TrainingLabel)
+        assert len(loaded) == len(TRAINING_LABELS)
 
     def test_resume_skips_completed_triples(self, tmp_path):
         model = _FakeLLMModel()
@@ -327,14 +327,14 @@ class TestGenerateAllResume:
         )
 
         assert model.call_count == calls_after_first_run  # No new API calls
-        assert len(results) == len(TrainingLabel)
+        assert len(results) == len(TRAINING_LABELS)
 
     def test_resume_generates_remaining_triples(self, tmp_path):
         entry = self._make_entry(Language.JAVA, IntegrationType.HTTP_REST)
         checkpoint_path = tmp_path / "checkpoint.jsonl"
 
         # Manually checkpoint only the first label
-        first_label = list(TrainingLabel)[0]
+        first_label = list(TRAINING_LABELS)[0]
         _append_checkpoint(
             checkpoint_path,
             _make_test_result("Java", "http_rest", first_label.value),
@@ -349,9 +349,9 @@ class TestGenerateAllResume:
             resume=True,
         )
 
-        remaining_labels = len(TrainingLabel) - 1
+        remaining_labels = len(TRAINING_LABELS) - 1
         assert model.call_count == remaining_labels
-        assert len(results) == len(TrainingLabel)
+        assert len(results) == len(TRAINING_LABELS)
 
     def test_fresh_run_truncates_existing_checkpoint(self, tmp_path):
         checkpoint_path = tmp_path / "checkpoint.jsonl"
@@ -371,9 +371,9 @@ class TestGenerateAllResume:
             resume=False,
         )
 
-        assert model.call_count == len(TrainingLabel)  # All generated fresh
+        assert model.call_count == len(TRAINING_LABELS)  # All generated fresh
         loaded = _load_checkpoint(checkpoint_path)
-        assert len(loaded) == len(TrainingLabel)
+        assert len(loaded) == len(TRAINING_LABELS)
 
 
 class TestBatchCustomId:
@@ -420,7 +420,7 @@ class TestBuildBatchRequests:
         )
         requests = _build_batch_requests([entry], examples_per_triple=3)
 
-        assert len(requests) == len(TrainingLabel)
+        assert len(requests) == len(TRAINING_LABELS)
         custom_ids = [r[0] for r in requests]
         assert "java__http_rest__DEFINITE_INWARD" in custom_ids
         assert "java__http_rest__DEFINITE_OUTWARD" in custom_ids
@@ -464,7 +464,7 @@ class TestBuildBatchRequests:
             ),
         ]
         requests = _build_batch_requests(entries, examples_per_triple=5)
-        assert len(requests) == 2 * len(TrainingLabel)
+        assert len(requests) == 2 * len(TRAINING_LABELS)
 
 
 class TestBatchCheckpoint:
@@ -524,11 +524,11 @@ class TestParseBatchResults:
             _batch_custom_id("Java", "http_rest", label.value): self._make_batch_result(
                 _batch_custom_id("Java", "http_rest", label.value)
             )
-            for label in TrainingLabel
+            for label in TRAINING_LABELS
         }
 
         results = _parse_batch_results(batch_results, [entry])
-        assert len(results) == len(TrainingLabel)
+        assert len(results) == len(TRAINING_LABELS)
         for r in results:
             assert r.language == "Java"
             assert r.integration_type == "http_rest"
@@ -536,7 +536,7 @@ class TestParseBatchResults:
 
     def test_skips_failed_results(self):
         entry = self._make_entry(Language.JAVA, IntegrationType.HTTP_REST)
-        labels = list(TrainingLabel)
+        labels = list(TRAINING_LABELS)
         batch_results = {
             _batch_custom_id(
                 "Java", "http_rest", labels[0].value
@@ -556,11 +556,11 @@ class TestParseBatchResults:
         }
 
         results = _parse_batch_results(batch_results, [entry])
-        assert len(results) == len(TrainingLabel) - 1
+        assert len(results) == len(TRAINING_LABELS) - 1
 
     def test_skips_missing_results(self):
         entry = self._make_entry(Language.JAVA, IntegrationType.HTTP_REST)
-        first_label = list(TrainingLabel)[0]
+        first_label = list(TRAINING_LABELS)[0]
         batch_results = {
             _batch_custom_id(
                 "Java", "http_rest", first_label.value
@@ -643,8 +643,8 @@ class TestGenerateAllBatch:
             examples_per_triple=1,
         )
 
-        assert len(results) == len(TrainingLabel)
-        assert len(model.created_requests) == len(TrainingLabel)
+        assert len(results) == len(TRAINING_LABELS)
+        assert len(model.created_requests) == len(TRAINING_LABELS)
         assert model.poll_count == 1
 
     def test_saves_batch_checkpoint(self, tmp_path):
@@ -670,7 +670,7 @@ class TestGenerateAllBatch:
         model = _FakeBatchModel()
         model.created_requests = [
             (_batch_custom_id("Java", "http_rest", label.value), "", "")
-            for label in TrainingLabel
+            for label in TRAINING_LABELS
         ]
         entry = self._make_entry(Language.JAVA, IntegrationType.HTTP_REST)
 
@@ -682,7 +682,7 @@ class TestGenerateAllBatch:
             resume=True,
         )
 
-        assert len(results) == len(TrainingLabel)
+        assert len(results) == len(TRAINING_LABELS)
         assert model.poll_count == 1
 
 

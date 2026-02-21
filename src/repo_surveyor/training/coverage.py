@@ -16,7 +16,7 @@ from repo_surveyor.integration_patterns.types import (
     PatternKey,
 )
 
-from repo_surveyor.training.types import TrainingLabel
+from repo_surveyor.training.types import TRAINING_LABELS, TrainingLabel
 
 
 @dataclass(frozen=True)
@@ -43,7 +43,7 @@ class CoverageMatrix:
         return [
             (entry.language.value, entry.integration_type.value, label.value)
             for entry in self.entries
-            for label in TrainingLabel
+            for label in TRAINING_LABELS
         ]
 
     def entries_for_language(self, language: Language) -> tuple[CoverageEntry, ...]:
@@ -132,7 +132,7 @@ def build_coverage_matrix(
             languages_seen.add(language)
             types_seen.add(itype)
 
-    total_triples = len(entries) * len(TrainingLabel)
+    total_triples = len(entries) * len(TRAINING_LABELS)
 
     return CoverageMatrix(
         entries=tuple(entries),

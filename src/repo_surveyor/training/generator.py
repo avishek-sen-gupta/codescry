@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 from repo_surveyor.ml_classifier.types import CompletionResult
 from repo_surveyor.ml_classifier.model_protocol import LLMModel
-from repo_surveyor.training.types import TrainingExample, TrainingLabel
+from repo_surveyor.training.types import TRAINING_LABELS, TrainingExample, TrainingLabel
 from repo_surveyor.training.coverage import CoverageEntry
 
 if TYPE_CHECKING:
@@ -360,12 +360,14 @@ def generate_all(
     }
 
     results: list[GenerationResult] = list(completed_results)
-    total = len(entries) * len(TrainingLabel)
+    total = len(entries) * len(TRAINING_LABELS)
     skipped = 0
 
     for i, entry in enumerate(entries):
-        for label in TrainingLabel:
-            triple_index = i * len(TrainingLabel) + list(TrainingLabel).index(label) + 1
+        for label in TRAINING_LABELS:
+            triple_index = (
+                i * len(TRAINING_LABELS) + list(TRAINING_LABELS).index(label) + 1
+            )
             key = _triple_key(
                 entry.language.value, entry.integration_type.value, label.value
             )
@@ -426,7 +428,7 @@ def _build_batch_requests(
             ),
         )
         for entry in entries
-        for label in TrainingLabel
+        for label in TRAINING_LABELS
     ]
 
 
@@ -470,7 +472,7 @@ def _parse_batch_results(
     results: list[GenerationResult] = []
 
     for entry in entries:
-        for label in TrainingLabel:
+        for label in TRAINING_LABELS:
             key = _batch_custom_id(
                 entry.language.value, entry.integration_type.value, label.value
             )
@@ -550,7 +552,7 @@ def generate_all_batch(
     logger.info(
         "Batch complete: %d/%d triples succeeded",
         len(results),
-        len(entries) * len(TrainingLabel),
+        len(entries) * len(TRAINING_LABELS),
     )
 
     return results

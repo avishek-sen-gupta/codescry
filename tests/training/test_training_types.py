@@ -6,8 +6,8 @@ from repo_surveyor.training.types import TrainingExample, TrainingLabel
 
 
 class TestTrainingLabel:
-    def test_has_3_members(self):
-        assert len(TrainingLabel) == 3
+    def test_has_4_members(self):
+        assert len(TrainingLabel) == 4
 
     def test_values(self):
         assert TrainingLabel.DEFINITE_INWARD.value == "DEFINITE_INWARD"

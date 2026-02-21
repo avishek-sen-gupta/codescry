@@ -125,7 +125,7 @@ class ConcretisedSignal:
     Attributes:
         original_signal: The original integration signal (or composite).
         ast_context: The enclosing AST node context.
-        label: ML-predicted label (DEFINITE_INWARD, DEFINITE_OUTWARD, NOT_DEFINITE).
+        label: ML-predicted label (DEFINITE_INWARD, DEFINITE_OUTWARD, NOT_DEFINITE, or REJECTED).
     """
 
     original_signal: SignalLike
@@ -134,7 +134,7 @@ class ConcretisedSignal:
 
     @property
     def is_definite(self) -> bool:
-        return self.label != TrainingLabel.NOT_DEFINITE
+        return self.label not in (TrainingLabel.NOT_DEFINITE, TrainingLabel.REJECTED)
 
 
 @dataclass(frozen=True)
