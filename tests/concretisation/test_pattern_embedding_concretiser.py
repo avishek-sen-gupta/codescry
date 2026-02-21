@@ -1,10 +1,16 @@
 """Tests for pattern-description embedding concretisation."""
 
+import json
+from pathlib import Path
+
 import pytest
 
 from repo_surveyor.integration_concretiser.embedding_concretiser import cosine
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
     PatternEmbeddingConcretiser,
+    _compute_content_hash,
+    _load_cached_embeddings,
+    _save_cache,
 )
 from repo_surveyor.integration_concretiser.types import SignalValidity
 from repo_surveyor.detection.integration_detector import (
@@ -344,3 +350,97 @@ class TestEndToEnd:
         assert "score" in meta
         assert isinstance(meta["nearest_description"], str)
         assert isinstance(meta["score"], float)
+
+
+# ---------------------------------------------------------------------------
+# Tests: Embedding cache
+# ---------------------------------------------------------------------------
+
+
+class TestEmbeddingCache:
+    """Verify cache save/load round-trip and invalidation."""
+
+    def test_cache_round_trip(self, tmp_path: Path):
+        descriptions = get_all_pattern_descriptions()
+        num_descs = len(descriptions)
+        dim = 10
+        embeddings = [[float(i + j) for j in range(dim)] for i in range(num_descs)]
+
+        cache_file = tmp_path / "cache.json"
+        _save_cache(cache_file, descriptions, embeddings, backend="test")
+
+        loaded = _load_cached_embeddings(cache_file, descriptions)
+        assert len(loaded) == num_descs
+        assert loaded[0] == embeddings[0]
+        assert loaded[-1] == embeddings[-1]
+
+    def test_cache_invalidation_on_hash_mismatch(self, tmp_path: Path):
+        descriptions = get_all_pattern_descriptions()
+        num_descs = len(descriptions)
+        dim = 10
+        embeddings = [[float(i)] * dim for i in range(num_descs)]
+
+        cache_file = tmp_path / "cache.json"
+        _save_cache(cache_file, descriptions, embeddings, backend="test")
+
+        # Tamper with the content hash
+        data = json.loads(cache_file.read_text(encoding="utf-8"))
+        data["content_hash"] = "bogus_hash"
+        cache_file.write_text(json.dumps(data), encoding="utf-8")
+
+        loaded = _load_cached_embeddings(cache_file, descriptions)
+        assert loaded == []
+
+    def test_cache_miss_falls_through_to_api(self, tmp_path: Path):
+        descriptions = get_all_pattern_descriptions()
+        num_descs = len(descriptions)
+        dim = 10
+
+        desc_embeddings = [[float(i)] * dim for i in range(num_descs)]
+        signal_embeddings = [[0.5] * dim]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+
+        cache_file = tmp_path / "nonexistent_cache.json"
+        concretiser = PatternEmbeddingConcretiser(
+            mock_client, threshold=0.40, cache_path=cache_file
+        )
+
+        # Client should have been called to embed descriptions
+        assert len(mock_client.call_log) == 1
+        assert len(mock_client.call_log[0]) == num_descs
+
+        # Cache file should now exist
+        assert cache_file.exists()
+
+    def test_cache_hit_skips_api_call(self, tmp_path: Path):
+        descriptions = get_all_pattern_descriptions()
+        num_descs = len(descriptions)
+        dim = 10
+        embeddings = [[float(i)] * dim for i in range(num_descs)]
+
+        cache_file = tmp_path / "cache.json"
+        _save_cache(cache_file, descriptions, embeddings, backend="test")
+
+        mock_client = _MockEmbeddingClient(embeddings_by_call=[])
+        concretiser = PatternEmbeddingConcretiser(
+            mock_client, threshold=0.40, cache_path=cache_file
+        )
+
+        # Client should NOT have been called for descriptions
+        assert len(mock_client.call_log) == 0
+
+    def test_content_hash_deterministic(self):
+        descriptions = get_all_pattern_descriptions()
+        hash1 = _compute_content_hash(descriptions)
+        hash2 = _compute_content_hash(descriptions)
+        assert hash1 == hash2
+        assert len(hash1) == 64  # SHA-256 hex digest
+
+    def test_cache_file_missing_returns_empty(self, tmp_path: Path):
+        descriptions = get_all_pattern_descriptions()
+        missing = tmp_path / "does_not_exist.json"
+        loaded = _load_cached_embeddings(missing, descriptions)
+        assert loaded == []

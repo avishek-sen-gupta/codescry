@@ -6,6 +6,11 @@ against pre-embedded per-pattern descriptions.  Unlike the generic
 concretiser builds embedding targets from the description strings attached
 to every individual regex pattern, yielding much richer semantic targets.
 
+Supports caching of the static pattern description embeddings to avoid
+redundant API calls on repeated runs.  The cache is keyed by a SHA-256
+content hash of all description texts, so it auto-invalidates when
+patterns change.
+
 Usage:
     from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
         PatternEmbeddingConcretiser,
@@ -14,12 +19,15 @@ Usage:
         GeminiEmbeddingClient,
     )
     client = GeminiEmbeddingClient(api_key=...)
-    concretiser = PatternEmbeddingConcretiser(client, threshold=0.56)
+    concretiser = PatternEmbeddingConcretiser(client, threshold=0.56, cache_path=Path("data/embeddings/cache.json"))
     result, metadata = concretiser.concretise(detector_result)
 """
 
+import hashlib
+import json
 import logging
 from collections.abc import Callable
+from pathlib import Path
 
 from repo_surveyor.detection.integration_detector import (
     EntityType,
@@ -50,23 +58,145 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_THRESHOLD = 0.56
 
+_EMPTY_PATH = Path()
+
+
+def _default_cache_path(backend: str) -> Path:
+    """Return the conventional cache file path for a given backend."""
+    return Path(f"data/embeddings/pattern_description_embeddings_{backend}.json")
+
+
+def _compute_content_hash(descriptions: tuple[PatternDescription, ...]) -> str:
+    """Compute a SHA-256 hash over all description texts for cache invalidation."""
+    joined = "\n".join(d.text for d in descriptions)
+    return hashlib.sha256(joined.encode("utf-8")).hexdigest()
+
+
+def _load_cached_embeddings(
+    cache_path: Path, descriptions: tuple[PatternDescription, ...]
+) -> list[list[float]]:
+    """Load cached embeddings if the cache file exists and matches current descriptions.
+
+    Args:
+        cache_path: Path to the JSON cache file.
+        descriptions: Current pattern descriptions for hash validation.
+
+    Returns:
+        List of embedding vectors on cache hit, empty list on cache miss.
+    """
+    if not cache_path.exists():
+        return []
+
+    try:
+        data = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.warning("Failed to read cache file %s: %s", cache_path, exc)
+        return []
+
+    expected_hash = _compute_content_hash(descriptions)
+    if data.get("content_hash") != expected_hash:
+        logger.info(
+            "Cache content hash mismatch (expected %s, got %s) — rebuilding",
+            expected_hash,
+            data.get("content_hash"),
+        )
+        return []
+
+    if data.get("description_count") != len(descriptions):
+        logger.info(
+            "Cache description count mismatch (expected %d, got %s) — rebuilding",
+            len(descriptions),
+            data.get("description_count"),
+        )
+        return []
+
+    embeddings = data.get("embeddings", [])
+    if len(embeddings) != len(descriptions):
+        logger.info(
+            "Cache embeddings count mismatch (expected %d, got %d) — rebuilding",
+            len(descriptions),
+            len(embeddings),
+        )
+        return []
+
+    return embeddings
+
+
+def _save_cache(
+    cache_path: Path,
+    descriptions: tuple[PatternDescription, ...],
+    embeddings: list[list[float]],
+    backend: str = "",
+) -> None:
+    """Save pattern description embeddings to a JSON cache file.
+
+    Args:
+        cache_path: Path to write the cache file.
+        descriptions: The pattern descriptions that were embedded.
+        embeddings: The embedding vectors to cache.
+        backend: Name of the embedding backend used.
+    """
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    data = {
+        "backend": backend,
+        "content_hash": _compute_content_hash(descriptions),
+        "description_count": len(descriptions),
+        "embedding_dim": len(embeddings[0]) if embeddings else 0,
+        "descriptions": [
+            {
+                "text": d.text,
+                "integration_type": d.integration_type.value,
+                "direction": d.direction.value,
+                "source": d.source,
+            }
+            for d in descriptions
+        ],
+        "embeddings": embeddings,
+    }
+    cache_path.write_text(json.dumps(data), encoding="utf-8")
+    logger.info("Saved embedding cache to %s", cache_path)
+
 
 class PatternEmbeddingConcretiser:
     """Classify integration signals via nearest-neighbor pattern descriptions."""
 
-    def __init__(self, client: object, threshold: float = _DEFAULT_THRESHOLD) -> None:
+    def __init__(
+        self,
+        client: object,
+        threshold: float = _DEFAULT_THRESHOLD,
+        cache_path: Path = _EMPTY_PATH,
+    ) -> None:
         self._client = client
         self._threshold = threshold
         self._descriptions = get_all_pattern_descriptions()
+        self._desc_embeddings = self._load_or_embed(cache_path)
+
+    def _load_or_embed(self, cache_path: Path) -> list[list[float]]:
+        """Load cached description embeddings or embed via client and save."""
+        if cache_path != _EMPTY_PATH:
+            cached = _load_cached_embeddings(cache_path, self._descriptions)
+            if cached:
+                logger.info(
+                    "Using cached embeddings (%d vectors) from %s",
+                    len(cached),
+                    cache_path,
+                )
+                return cached
+
         desc_texts = [d.text for d in self._descriptions]
         logger.info("Pre-embedding %d pattern descriptions...", len(desc_texts))
-        self._desc_embeddings: list[list[float]] = (
-            client.embed_batch(desc_texts) if desc_texts else []
+        embeddings: list[list[float]] = (
+            self._client.embed_batch(desc_texts) if desc_texts else []
         )
         logger.info(
             "Pre-embedded %d pattern description embeddings",
-            len(self._desc_embeddings),
+            len(embeddings),
         )
+
+        if cache_path != _EMPTY_PATH and embeddings:
+            _save_cache(cache_path, self._descriptions, embeddings)
+
+        return embeddings
 
     def concretise(
         self,

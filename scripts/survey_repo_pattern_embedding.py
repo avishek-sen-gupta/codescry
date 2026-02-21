@@ -33,6 +33,7 @@ from repo_surveyor.integration_concretiser.embedding_concretiser import (
 )
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
     PatternEmbeddingConcretiser,
+    _default_cache_path,
 )
 from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.integration_concretiser.types import SignalValidity
@@ -147,7 +148,11 @@ def main() -> None:
     # --- Phase 2: Pattern-embedding concretisation ---
     logger.info("--- Phase 2: Pattern-embedding concretisation ---")
     client = _create_client(args.backend)
-    concretiser = PatternEmbeddingConcretiser(client, threshold=args.threshold)
+    cache_path = _default_cache_path(args.backend)
+    logger.info("Embedding cache path: %s", cache_path)
+    concretiser = PatternEmbeddingConcretiser(
+        client, threshold=args.threshold, cache_path=cache_path
+    )
     concretisation, embedding_metadata = concretiser.concretise(integration)
 
     # Print summary
