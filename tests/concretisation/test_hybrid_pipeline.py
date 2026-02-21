@@ -189,16 +189,16 @@ class TestSignalMissingFromGemini:
 
 
 class TestGeminiNotDefinite:
-    """When Gemini marks a signal as NOT_DEFINITE (NOISE), keep SIGNAL validity
-    but set direction to AMBIGUOUS."""
+    """When Gemini marks a signal as NOT_DEFINITE (SIGNAL, AMBIGUOUS), keep
+    SIGNAL validity and set direction to AMBIGUOUS."""
 
-    def test_gemini_noise_keeps_signal_validity(self):
+    def test_gemini_not_definite_keeps_signal_validity_ambiguous_direction(self):
         sig = _make_signal("Ambig.java", 42)
         emb_cs = _make_concretised(
             sig, SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS
         )
         gemini_cs = _make_concretised(
-            sig, SignalValidity.NOISE, SignalDirection.AMBIGUOUS
+            sig, SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS
         )
 
         merged, _ = merge_results(
@@ -207,6 +207,32 @@ class TestGeminiNotDefinite:
 
         assert merged.concretised[0].validity == SignalValidity.SIGNAL
         assert merged.concretised[0].direction == SignalDirection.AMBIGUOUS
+
+
+# ---------------------------------------------------------------------------
+# Tests: SIGNAL where Gemini says NOT_INTEGRATION
+# ---------------------------------------------------------------------------
+
+
+class TestGeminiNotIntegration:
+    """When Gemini marks a signal as NOT_INTEGRATION, keep SIGNAL validity
+    but set direction to NOT_INTEGRATION."""
+
+    def test_gemini_not_integration_keeps_signal_validity(self):
+        sig = _make_signal("FalsePos.java", 42)
+        emb_cs = _make_concretised(
+            sig, SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS
+        )
+        gemini_cs = _make_concretised(
+            sig, SignalValidity.NOISE, SignalDirection.NOT_INTEGRATION
+        )
+
+        merged, _ = merge_results(
+            _make_result([emb_cs]), _make_result([gemini_cs]), {}, {}
+        )
+
+        assert merged.concretised[0].validity == SignalValidity.SIGNAL
+        assert merged.concretised[0].direction == SignalDirection.NOT_INTEGRATION
 
 
 # ---------------------------------------------------------------------------
@@ -324,6 +350,7 @@ class TestEndToEndMixed:
         outward_sig = _make_signal("Outward.java", 3)
         missing_sig = _make_signal("Missing.java", 4)
         not_definite_sig = _make_signal("NotDef.java", 5)
+        not_integration_sig = _make_signal("FalsePos.java", 6)
 
         emb_signals = [
             _make_concretised(
@@ -341,6 +368,9 @@ class TestEndToEndMixed:
             _make_concretised(
                 not_definite_sig, SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS
             ),
+            _make_concretised(
+                not_integration_sig, SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS
+            ),
         ]
         gemini_signals = [
             _make_concretised(
@@ -351,7 +381,12 @@ class TestEndToEndMixed:
             ),
             # missing_sig is not in Gemini results
             _make_concretised(
-                not_definite_sig, SignalValidity.NOISE, SignalDirection.AMBIGUOUS
+                not_definite_sig, SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS
+            ),
+            _make_concretised(
+                not_integration_sig,
+                SignalValidity.NOISE,
+                SignalDirection.NOT_INTEGRATION,
             ),
         ]
 
@@ -384,7 +419,11 @@ class TestEndToEndMixed:
             SignalValidity.SIGNAL,
             SignalDirection.AMBIGUOUS,
         )
+        assert results["FalsePos.java"] == (
+            SignalValidity.SIGNAL,
+            SignalDirection.NOT_INTEGRATION,
+        )
 
-        assert merged.signals_submitted == 5
-        assert merged.signals_classified == 4
+        assert merged.signals_submitted == 6
+        assert merged.signals_classified == 5
         assert merged.signals_unclassified == 1

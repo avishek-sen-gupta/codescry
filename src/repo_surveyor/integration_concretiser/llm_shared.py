@@ -27,7 +27,9 @@ Valid labels:
   DEFINITE_OUTWARD  — the code calls an external system:
                        HTTP client call, database connection/query, file write,
                        message publish/send, cache store, SMTP send, FTP upload.
-  NOT_DEFINITE      — the match is incidental and not a real integration boundary:
+  NOT_DEFINITE      — the code IS a real integration boundary, but the direction
+                       (inward vs outward) cannot be determined from context alone.
+  NOT_INTEGRATION   — the match is incidental and not a real integration boundary:
                        variable/field named 'file' or 'cache', string literal containing
                        a URL, test assertion, generated parser code, log statement,
                        import statement, or any other false positive."""
@@ -47,7 +49,7 @@ Respond ONLY with a JSON object — no prose, no markdown fences — in this exa
 {_LABEL_INSTRUCTIONS}
 
 Classify ALL signal lines listed. If a line number is not in the file or cannot be
-determined, still include it with label NOT_DEFINITE."""
+determined, still include it with label NOT_INTEGRATION."""
 
 SYSTEM_PROMPT_BATCHED = f"""You are an expert code analyst specialising in detecting integration boundaries in software systems.
 
@@ -67,12 +69,13 @@ The "file" field MUST match the path shown in the ===FILE: <path>=== header exac
 {_LABEL_INSTRUCTIONS}
 
 Classify ALL signal lines listed across ALL files. If a line number is not in the file or cannot be
-determined, still include it with label NOT_DEFINITE."""
+determined, still include it with label NOT_INTEGRATION."""
 
 _LABEL_TO_VALIDITY_DIRECTION: dict[str, tuple[SignalValidity, SignalDirection]] = {
     "DEFINITE_INWARD": (SignalValidity.SIGNAL, SignalDirection.INWARD),
     "DEFINITE_OUTWARD": (SignalValidity.SIGNAL, SignalDirection.OUTWARD),
-    "NOT_DEFINITE": (SignalValidity.NOISE, SignalDirection.AMBIGUOUS),
+    "NOT_DEFINITE": (SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS),
+    "NOT_INTEGRATION": (SignalValidity.NOISE, SignalDirection.NOT_INTEGRATION),
 }
 
 
@@ -84,10 +87,10 @@ def map_label_to_validity_direction(
     if result is not None:
         return result
     logger.warning(
-        "Unknown label %r — defaulting to (NOISE, AMBIGUOUS)",
+        "Unknown label %r — defaulting to (NOISE, NOT_INTEGRATION)",
         label_str,
     )
-    return (SignalValidity.NOISE, SignalDirection.AMBIGUOUS)
+    return (SignalValidity.NOISE, SignalDirection.NOT_INTEGRATION)
 
 
 MAX_FILE_CHARS = 12_000
@@ -191,7 +194,7 @@ def parse_classification_response(
     result: dict[int, tuple[SignalValidity, SignalDirection, float, str]] = {}
     for entry in entries:
         line = entry.get("line")
-        label_str = entry.get("label", "NOT_DEFINITE")
+        label_str = entry.get("label", "NOT_INTEGRATION")
         confidence = float(entry.get("confidence", 0.5))
         reason = entry.get("reason", "")
 
@@ -229,7 +232,7 @@ def parse_batched_classification_response(
     for entry in entries:
         file_path = entry.get("file", "")
         line = entry.get("line")
-        label_str = entry.get("label", "NOT_DEFINITE")
+        label_str = entry.get("label", "NOT_INTEGRATION")
         confidence = float(entry.get("confidence", 0.5))
         reason = entry.get("reason", "")
 

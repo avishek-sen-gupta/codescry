@@ -1,16 +1,25 @@
 """ML-based concretisation of integration signals using SignalClassifier."""
 
-from repo_surveyor.integration_concretiser.llm_shared import (
-    map_label_to_validity_direction,
-)
-from repo_surveyor.training.signal_classifier import SignalClassifier
-from repo_surveyor.integration_concretiser.grouper import SignalGroup
 from repo_surveyor.integration_concretiser.types import (
     ASTContext,
     ConcretisedSignal,
     ConcretisationResult,
     SignalLike,
+    SignalValidity,
 )
+from repo_surveyor.integration_concretiser.grouper import SignalGroup
+from repo_surveyor.integration_patterns import SignalDirection
+from repo_surveyor.training.signal_classifier import SignalClassifier
+from repo_surveyor.training.types import TrainingLabel
+
+_ML_LABEL_TO_VALIDITY_DIRECTION: dict[
+    TrainingLabel, tuple[SignalValidity, SignalDirection]
+] = {
+    TrainingLabel.DEFINITE_INWARD: (SignalValidity.SIGNAL, SignalDirection.INWARD),
+    TrainingLabel.DEFINITE_OUTWARD: (SignalValidity.SIGNAL, SignalDirection.OUTWARD),
+    TrainingLabel.NOT_DEFINITE: (SignalValidity.NOISE, SignalDirection.AMBIGUOUS),
+    TrainingLabel.REJECTED: (SignalValidity.NOISE, SignalDirection.AMBIGUOUS),
+}
 
 
 def _concretise_signal(
@@ -19,7 +28,7 @@ def _concretise_signal(
     classifier: SignalClassifier,
 ) -> ConcretisedSignal:
     label = classifier.predict(signal.match.line_content)
-    validity, direction = map_label_to_validity_direction(label.value)
+    validity, direction = _ML_LABEL_TO_VALIDITY_DIRECTION[label]
     return ConcretisedSignal(
         original_signal=signal,
         ast_context=ast_context,

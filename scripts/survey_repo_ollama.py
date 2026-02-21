@@ -145,6 +145,7 @@ def main() -> None:
         ("inward", SignalValidity.SIGNAL, SignalDirection.INWARD),
         ("outward", SignalValidity.SIGNAL, SignalDirection.OUTWARD),
         ("ambiguous", SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS),
+        ("not_integration", SignalValidity.NOISE, SignalDirection.NOT_INTEGRATION),
         ("noise", SignalValidity.NOISE, None),
     ]
 

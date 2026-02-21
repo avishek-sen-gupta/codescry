@@ -74,6 +74,7 @@ class SignalDirection(Enum):
     INWARD = "inward"
     OUTWARD = "outward"
     AMBIGUOUS = "ambiguous"
+    NOT_INTEGRATION = "not_integration"
 
 
 @dataclass(frozen=True)

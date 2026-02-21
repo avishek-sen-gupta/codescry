@@ -83,6 +83,8 @@ def merge_results(
     Gemini's direction is authoritative for SIGNALs.
     If Gemini returned NOT_DEFINITE for a SIGNAL, keep validity=SIGNAL
     but set direction=AMBIGUOUS.
+    If Gemini returned NOT_INTEGRATION, keep validity=SIGNAL but set
+    direction=NOT_INTEGRATION.
 
     Args:
         embedding_result: Full concretisation result from embedding gate.
@@ -132,6 +134,8 @@ def _merge_single(
 
     if gemini_signal is None:
         direction = SignalDirection.AMBIGUOUS
+    elif gemini_signal.direction == SignalDirection.NOT_INTEGRATION:
+        direction = SignalDirection.NOT_INTEGRATION
     elif gemini_signal.validity == SignalValidity.NOISE:
         direction = SignalDirection.AMBIGUOUS
     else:
@@ -207,6 +211,7 @@ _OUTPUT_GROUPS = [
     ("inward", SignalValidity.SIGNAL, SignalDirection.INWARD),
     ("outward", SignalValidity.SIGNAL, SignalDirection.OUTWARD),
     ("ambiguous", SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS),
+    ("not_integration", SignalValidity.SIGNAL, SignalDirection.NOT_INTEGRATION),
     ("noise", SignalValidity.NOISE, None),
 ]
 

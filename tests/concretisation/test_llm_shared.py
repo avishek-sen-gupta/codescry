@@ -66,6 +66,7 @@ class TestSystemPrompt:
         assert "DEFINITE_INWARD" in SYSTEM_PROMPT
         assert "DEFINITE_OUTWARD" in SYSTEM_PROMPT
         assert "NOT_DEFINITE" in SYSTEM_PROMPT
+        assert "NOT_INTEGRATION" in SYSTEM_PROMPT
 
     def test_requests_json_format(self):
         assert "JSON" in SYSTEM_PROMPT
@@ -182,7 +183,7 @@ class TestParseClassificationResponse:
         assert len(result) == 2
         assert result[5][0] == SignalValidity.SIGNAL
         assert result[5][1] == SignalDirection.INWARD
-        assert result[15][0] == SignalValidity.NOISE
+        assert result[15][0] == SignalValidity.SIGNAL
         assert result[15][1] == SignalDirection.AMBIGUOUS
 
     def test_unknown_label_defaults_to_noise(self):
@@ -198,7 +199,7 @@ class TestParseClassificationResponse:
         }
         result = parse_classification_response(data)
         assert result[1][0] == SignalValidity.NOISE
-        assert result[1][1] == SignalDirection.AMBIGUOUS
+        assert result[1][1] == SignalDirection.NOT_INTEGRATION
 
     def test_missing_integrations_key_returns_empty(self):
         result = parse_classification_response({})
@@ -255,6 +256,7 @@ class TestSystemPromptBatched:
         assert "DEFINITE_INWARD" in SYSTEM_PROMPT_BATCHED
         assert "DEFINITE_OUTWARD" in SYSTEM_PROMPT_BATCHED
         assert "NOT_DEFINITE" in SYSTEM_PROMPT_BATCHED
+        assert "NOT_INTEGRATION" in SYSTEM_PROMPT_BATCHED
 
     def test_requests_json_format(self):
         assert "JSON" in SYSTEM_PROMPT_BATCHED
@@ -378,7 +380,7 @@ class TestParseBatchedClassificationResponse:
         }
         result = parse_batched_classification_response(data)
         assert result["X.java"][1][0] == SignalValidity.NOISE
-        assert result["X.java"][1][1] == SignalDirection.AMBIGUOUS
+        assert result["X.java"][1][1] == SignalDirection.NOT_INTEGRATION
 
 
 # ---------------------------------------------------------------------------
