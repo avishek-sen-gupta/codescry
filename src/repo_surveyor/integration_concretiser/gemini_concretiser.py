@@ -41,7 +41,7 @@ from repo_surveyor.training.types import TrainingLabel
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_MODEL = "gemini-2.0-flash"
+_DEFAULT_MODEL = "gemini-2.5-flash"
 
 
 class GeminiClassificationClient:

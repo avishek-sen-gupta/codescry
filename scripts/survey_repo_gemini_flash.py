@@ -7,7 +7,7 @@ Usage:
     poetry run python scripts/survey_repo_gemini_flash.py /path/to/repo
     poetry run python scripts/survey_repo_gemini_flash.py /path/to/repo --languages Java
     poetry run python scripts/survey_repo_gemini_flash.py /path/to/repo \\
-        --model gemini-2.0-flash
+        --model gemini-2.5-flash
 """
 
 import argparse
@@ -24,7 +24,7 @@ from repo_surveyor.integration_concretiser.gemini_concretiser import (
     _DEFAULT_MODEL,
     concretise_with_gemini,
 )
-from repo_surveyor.pipeline_timer import PipelineTimingObserver
+from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.training.signal_classifier import NullSignalClassifier
 from repo_surveyor.training.types import TrainingLabel
 
