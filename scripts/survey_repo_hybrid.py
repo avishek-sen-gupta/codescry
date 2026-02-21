@@ -187,6 +187,13 @@ def _parse_args() -> argparse.Namespace:
         "(gemini-embedding-001). Default: huggingface.",
     )
     parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.56,
+        metavar="T",
+        help="Embedding cosine similarity threshold for SIGNAL/NOISE gate (default: 0.56).",
+    )
+    parser.add_argument(
         "--output-dir",
         default="data/survey_output_hybrid",
         metavar="DIR",
@@ -246,7 +253,7 @@ def main() -> None:
     # --- Phase 2a: embedding gate ---
     logger.info("--- Phase 2a: Embedding-based SIGNAL/NOISE gate ---")
     embedding_client = _create_embedding_client(args.backend)
-    concretiser = EmbeddingConcretiser(embedding_client)
+    concretiser = EmbeddingConcretiser(embedding_client, threshold=args.threshold)
     embedding_result, embedding_metadata = concretiser.concretise(integration)
 
     signal_count = sum(
