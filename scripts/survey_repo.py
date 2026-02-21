@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from repo_surveyor import survey
-from repo_surveyor.pipeline_timer import PipelineTimingObserver
+from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.training.signal_classifier import (
     NullSignalClassifier,
     SignalClassifier,
