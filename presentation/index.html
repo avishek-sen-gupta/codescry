@@ -264,6 +264,64 @@ report, symbols, signals, resolved, concretised = survey(
   </div>
 </section>
 
+<!-- PIPELINE FLOW DIAGRAM -->
+<section>
+  <h2>Pipeline Flow</h2>
+  <div style="display: grid; grid-template-columns: auto 1fr; gap: 0 18px; align-items: center; max-width: 820px; margin: 0 auto; font-size: 0.62em;">
+    <!-- Stage 1 -->
+    <div class="pipeline-box" style="width: 260px; border-color: #38bdf8;">
+      <strong class="accent">1. Tech Stacks</strong>
+    </div>
+    <div><span class="dim">Indicator files, globs, dependency parsing</span> &rarr; <code>SurveyReport</code></div>
+
+    <div class="pipeline-arrow">&darr;</div><div></div>
+
+    <!-- Stage 2 -->
+    <div class="pipeline-box" style="width: 260px; border-color: #38bdf8;">
+      <strong class="accent">2. Coarse Structure</strong>
+    </div>
+    <div><span class="dim">Universal CTags symbol extraction</span> &rarr; <code>CTagsResult</code></div>
+
+    <div class="pipeline-arrow">&darr;</div><div></div>
+
+    <!-- Stage 3 -->
+    <div class="pipeline-box" style="width: 260px; border-color: #38bdf8;">
+      <strong class="accent">3. Integration Detection</strong>
+    </div>
+    <div><span class="dim">tree-sitter zones + regex patterns</span> &rarr; <code>IntegrationDetectorResult</code></div>
+
+    <div class="pipeline-arrow">&darr;</div><div></div>
+
+    <!-- Stage 4 -->
+    <div class="pipeline-box" style="width: 260px; border-color: #4ade80;">
+      <strong class="accent-green">4. Signal Deduplication</strong>
+    </div>
+    <div><span class="dim">Merge (file, line, content) duplicates</span> &rarr; <code>CompositeIntegrationSignal</code></div>
+
+    <div class="pipeline-arrow">&darr;</div><div></div>
+
+    <!-- Stage 5 -->
+    <div class="pipeline-box" style="width: 260px; border-color: #a78bfa;">
+      <strong class="accent-purple">5. Symbol Resolution</strong>
+    </div>
+    <div><span class="dim">Spatial join: signal &rarr; owning symbol</span> &rarr; <code>ResolutionResult</code></div>
+
+    <div class="pipeline-arrow">&darr;</div><div></div>
+
+    <!-- Stage 6 -->
+    <div class="pipeline-box" style="width: 260px; border-color: #fbbf24;">
+      <strong class="accent-amber">6. Concretisation</strong>
+    </div>
+    <div>
+      <span class="dim">Two-stage:</span>
+      <span class="pill pill-green" style="font-size: 0.85em;">SIGNAL</span> / <span class="pill pill-blue" style="font-size: 0.85em;">NOISE</span>
+      then
+      <span class="pill pill-green" style="font-size: 0.85em;">INWARD</span> / <span class="pill pill-amber" style="font-size: 0.85em;">OUTWARD</span> / <span class="pill pill-blue" style="font-size: 0.85em;">AMBIGUOUS</span>
+    </div>
+  </div>
+  <p class="small" style="margin-top: 14px;">Stages 1&ndash;2 feed context into 3&ndash;6. Stage 4 reduces duplicates before the expensive downstream stages.</p>
+</section>
+
 <!-- ============================================================ -->
 <!-- STAGE 1: TECH STACKS -->
 <!-- ============================================================ -->
@@ -787,6 +845,18 @@ class Fragment:
     <div class="card">
       <h3 class="accent-purple">Ollama Concretisation</h3>
       <p>Same pre-concretisation pipeline, then sends file context to a <strong>local LLM</strong> (Qwen 7B) for classification with confidence + reasoning.</p>
+    </div>
+    <div class="card">
+      <h3 class="accent">Gemini Flash Concretisation</h3>
+      <p>Same pre-concretisation pipeline, then sends file context to <strong>Gemini Flash API</strong> with multi-file batching for direction classification.</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-green">Embedding Concretisation</h3>
+      <p>Cosine similarity against <strong>26 directional descriptions</strong> for SIGNAL/NOISE gating + direction via score ratio. No LLM calls.</p>
+    </div>
+    <div class="card">
+      <h3 class="accent-amber">Hybrid Concretisation</h3>
+      <p><strong>Embedding gate</strong> (fast SIGNAL/NOISE) + <strong>Gemini Flash</strong> (accurate direction) on SIGNALs only. Best of both worlds.</p>
     </div>
     <div class="card">
       <h3 class="accent-pink">Datalog Emission</h3>
