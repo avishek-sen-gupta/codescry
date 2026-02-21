@@ -37,18 +37,15 @@ logger = logging.getLogger(__name__)
 
 def _signal_to_dict(s, label_map: dict) -> dict:
     """Serialise a ConcretisedSignal to a JSON-friendly dict."""
-    ollama_meta = label_map.get((s.original_signal.match.file_path, s.original_signal.match.line_number), {})
+    ollama_meta = label_map.get(
+        (s.original_signal.match.file_path, s.original_signal.match.line_number), {}
+    )
+    base = s.original_signal.to_dict()
     return {
         "label": s.label.value,
         "ollama_confidence": ollama_meta.get("confidence"),
         "ollama_reason": ollama_meta.get("reason"),
-        "integration_type": s.original_signal.integration_type.value,
-        "confidence": s.original_signal.confidence.value,
-        "line_content": s.original_signal.match.line_content.strip(),
-        "file_path": s.original_signal.match.file_path,
-        "line_number": s.original_signal.match.line_number,
-        "matched_pattern": s.original_signal.matched_pattern,
-        "source": s.original_signal.source,
+        **base,
         "ast_node_type": s.ast_context.node_type,
         "ast_start_line": s.ast_context.start_line,
         "ast_end_line": s.ast_context.end_line,
@@ -147,7 +144,8 @@ def main() -> None:
         signals = [s for s in concretisation.concretised if s.label == label]
         path = out / f"{label.value.lower()}.jsonl"
         path.write_text(
-            "\n".join(json.dumps(_signal_to_dict(s, ollama_metadata)) for s in signals) + "\n",
+            "\n".join(json.dumps(_signal_to_dict(s, ollama_metadata)) for s in signals)
+            + "\n",
             encoding="utf-8",
         )
         print(f"  {label.value}: {len(signals):4d} signals → {path}")

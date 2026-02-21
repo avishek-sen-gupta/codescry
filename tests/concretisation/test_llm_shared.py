@@ -13,10 +13,12 @@ from repo_surveyor.integration_concretiser.llm_shared import (
     SYSTEM_PROMPT_BATCHED,
     build_batched_classification_prompt,
     build_classification_prompt,
+    deduplicate_signals,
     parse_batched_classification_response,
     parse_classification_response,
     read_file_bytes,
 )
+from repo_surveyor.integration_concretiser.types import CompositeIntegrationSignal
 from repo_surveyor.integration_patterns import Confidence, IntegrationType, Language
 from repo_surveyor.training.types import TrainingLabel
 
@@ -362,3 +364,81 @@ class TestParseBatchedClassificationResponse:
         }
         result = parse_batched_classification_response(data)
         assert result["X.java"][1][0] == TrainingLabel.NOT_DEFINITE
+
+
+# ---------------------------------------------------------------------------
+# Tests: deduplicate_signals
+# ---------------------------------------------------------------------------
+
+
+class TestDeduplicateSignals:
+    def test_single_signal_wrapped_in_composite(self):
+        sig = _make_signal("Foo.java", 10, "conn.open()")
+        composites = deduplicate_signals([sig])
+
+        assert len(composites) == 1
+        assert isinstance(composites[0], CompositeIntegrationSignal)
+        assert len(composites[0].signals) == 1
+        assert composites[0].signals[0] is sig
+
+    def test_duplicates_merged_into_single_composite(self):
+        sig1 = _make_signal("Foo.java", 10, "conn.open()", IntegrationType.HTTP_REST)
+        sig2 = _make_signal("Foo.java", 10, "conn.open()", IntegrationType.DATABASE)
+        composites = deduplicate_signals([sig1, sig2])
+
+        assert len(composites) == 1
+        assert len(composites[0].signals) == 2
+
+    def test_different_lines_remain_separate(self):
+        sig1 = _make_signal("Foo.java", 10, "conn.open()")
+        sig2 = _make_signal("Foo.java", 20, "db.query()")
+        composites = deduplicate_signals([sig1, sig2])
+
+        assert len(composites) == 2
+
+    def test_different_files_remain_separate(self):
+        sig1 = _make_signal("Foo.java", 10, "conn.open()")
+        sig2 = _make_signal("Bar.java", 10, "conn.open()")
+        composites = deduplicate_signals([sig1, sig2])
+
+        assert len(composites) == 2
+
+    def test_composite_delegates_properties(self):
+        sig = _make_signal("Foo.java", 10, "conn.open()", IntegrationType.HTTP_REST)
+        composites = deduplicate_signals([sig])
+
+        composite = composites[0]
+        assert composite.match.file_path == "Foo.java"
+        assert composite.match.line_number == 10
+        assert composite.integration_type == IntegrationType.HTTP_REST
+
+    def test_empty_list_returns_empty(self):
+        composites = deduplicate_signals([])
+        assert composites == []
+
+    def test_whitespace_normalisation_in_key(self):
+        sig1 = _make_signal("Foo.java", 10, "  conn.open()  ")
+        sig2 = _make_signal("Foo.java", 10, "conn.open()")
+        composites = deduplicate_signals([sig1, sig2])
+
+        assert len(composites) == 1
+        assert len(composites[0].signals) == 2
+
+    def test_composite_to_dict_includes_all_match_details(self):
+        sig1 = _make_signal("Foo.java", 10, "conn.open()", IntegrationType.HTTP_REST)
+        sig2 = _make_signal("Foo.java", 10, "conn.open()", IntegrationType.DATABASE)
+        composites = deduplicate_signals([sig1, sig2])
+
+        d = composites[0].to_dict()
+        assert d["file_path"] == "Foo.java"
+        assert d["line_number"] == 10
+        assert d["line_content"] == "conn.open()"
+        assert len(d["match_details"]) == 2
+        types = {md["integration_type"] for md in d["match_details"]}
+        assert types == {"http_rest", "database"}
+
+    def test_single_signal_to_dict_has_one_match_detail(self):
+        sig = _make_signal("Foo.java", 10, "conn.open()")
+        d = sig.to_dict()
+        assert len(d["match_details"]) == 1
+        assert d["match_details"][0]["integration_type"] == "http_rest"

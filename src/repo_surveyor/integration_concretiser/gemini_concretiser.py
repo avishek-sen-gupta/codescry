@@ -31,14 +31,17 @@ from repo_surveyor.integration_concretiser.llm_shared import (
     SYSTEM_PROMPT_BATCHED,
     build_batched_classification_prompt,
     build_classification_prompt,
+    deduplicate_signals,
     parse_batched_classification_response,
     parse_classification_response,
     read_file_bytes,
 )
 from repo_surveyor.integration_concretiser.types import (
     ASTContext,
+    CompositeIntegrationSignal,
     ConcretisedSignal,
     ConcretisationResult,
+    SignalLike,
 )
 from repo_surveyor.training.types import TrainingLabel
 
@@ -117,7 +120,7 @@ class GeminiClassificationClient:
 
 def _concretise_file(
     file_path: str,
-    signals: list[IntegrationSignal],
+    signals: list[SignalLike],
     signal_to_ast: dict[tuple[str, int], ASTContext],
     client: GeminiClassificationClient,
     file_reader: Callable[[str], bytes],
@@ -165,7 +168,7 @@ def _concretise_file(
 
 def _apply_line_map(
     file_path: str,
-    signals: list[IntegrationSignal],
+    signals: list[SignalLike],
     line_map: dict[int, tuple[TrainingLabel, float, str]],
     signal_to_ast: dict[tuple[str, int], ASTContext],
 ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
@@ -246,8 +249,10 @@ def concretise_with_gemini(
         len(file_content_signals),
     )
 
+    composites = deduplicate_signals(file_content_signals)
+
     logger.info("Running AST walk-up grouping...")
-    groups = group_signals_by_ast_context(file_content_signals, file_reader)
+    groups = group_signals_by_ast_context(composites, file_reader)
     logger.info("AST grouping produced %d groups", len(groups))
 
     signal_to_ast: dict[tuple[str, int], ASTContext] = {
@@ -256,8 +261,8 @@ def concretise_with_gemini(
         for sig in group.signals
     }
 
-    by_file: dict[str, list[IntegrationSignal]] = defaultdict(list)
-    for sig in file_content_signals:
+    by_file: dict[str, list[SignalLike]] = defaultdict(list)
+    for sig in composites:
         by_file[sig.match.file_path].append(sig)
 
     unique_files = sorted(by_file)
@@ -268,9 +273,9 @@ def concretise_with_gemini(
     )
 
     # --- Read all files and prepare (path, content, signals, truncated) ---
-    file_data: list[tuple[str, str, list[IntegrationSignal], bool]] = []
+    file_data: list[tuple[str, str, list[SignalLike], bool]] = []
     oversized_files: list[str] = []
-    unreadable: dict[str, list[IntegrationSignal]] = {}
+    unreadable: dict[str, list[SignalLike]] = {}
 
     for fp in unique_files:
         try:
@@ -286,8 +291,8 @@ def concretise_with_gemini(
         file_data.append((fp, content, by_file[fp], truncated))
 
     # --- Partition into solo (oversized) and batchable files ---
-    solo: list[tuple[str, str, list[IntegrationSignal], bool]] = []
-    batchable: list[tuple[str, str, list[IntegrationSignal], bool]] = []
+    solo: list[tuple[str, str, list[SignalLike], bool]] = []
+    batchable: list[tuple[str, str, list[SignalLike], bool]] = []
     for entry in file_data:
         fp, content, sigs, trunc = entry
         prompt_estimate = len(build_classification_prompt(fp, content, sigs, trunc))
@@ -297,8 +302,8 @@ def concretise_with_gemini(
             batchable.append(entry)
 
     # --- Form batches from batchable files ---
-    batches: list[list[tuple[str, str, list[IntegrationSignal], bool]]] = []
-    current_batch: list[tuple[str, str, list[IntegrationSignal], bool]] = []
+    batches: list[list[tuple[str, str, list[SignalLike], bool]]] = []
+    current_batch: list[tuple[str, str, list[SignalLike], bool]] = []
     current_chars = 0
     for entry in batchable:
         fp, content, sigs, trunc = entry

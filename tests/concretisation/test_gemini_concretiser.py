@@ -15,7 +15,11 @@ from repo_surveyor.integration_concretiser.gemini_concretiser import (
     _concretise_file,
     concretise_with_gemini,
 )
-from repo_surveyor.integration_concretiser.types import ASTContext, ConcretisedSignal
+from repo_surveyor.integration_concretiser.types import (
+    ASTContext,
+    CompositeIntegrationSignal,
+    ConcretisedSignal,
+)
 from repo_surveyor.integration_patterns import Confidence, IntegrationType, Language
 from repo_surveyor.training.types import TrainingLabel
 
@@ -399,6 +403,57 @@ class TestConcretiseWithGemini:
         }
         assert labels["client.py"] == TrainingLabel.DEFINITE_OUTWARD
         assert labels["missing.py"] == TrainingLabel.NOT_DEFINITE
+
+    def test_deduplicates_signals_on_same_line(self, monkeypatch):
+        """Duplicate signals on the same line should be merged into one composite."""
+        responses = [
+            {
+                "integrations": [
+                    {
+                        "line": 5,
+                        "label": "DEFINITE_OUTWARD",
+                        "confidence": 0.9,
+                        "reason": "HTTP client",
+                    },
+                ]
+            }
+        ]
+        mock_client = _MockGeminiClient(responses)
+        monkeypatch.setattr(
+            "repo_surveyor.integration_concretiser.gemini_concretiser.GeminiClassificationClient",
+            lambda api_key, model: mock_client,
+        )
+
+        sig1 = _make_signal(
+            "client.py",
+            5,
+            "requests.get(url)",
+            integration_type=IntegrationType.HTTP_REST,
+        )
+        sig2 = _make_signal(
+            "client.py",
+            5,
+            "requests.get(url)",
+            integration_type=IntegrationType.DATABASE,
+        )
+        detector_result = IntegrationDetectorResult(
+            integration_points=[sig1, sig2], files_scanned=1
+        )
+
+        result, metadata = concretise_with_gemini(
+            detector_result,
+            api_key="fake-key",
+            file_reader=_fake_reader,
+        )
+
+        # Should produce 1 concretised signal (deduped), not 2
+        assert result.signals_submitted == 1
+        assert result.signals_definite == 1
+        # The original_signal should be a CompositeIntegrationSignal
+        assert isinstance(
+            result.concretised[0].original_signal, CompositeIntegrationSignal
+        )
+        assert len(result.concretised[0].original_signal.signals) == 2
 
 
 # ---------------------------------------------------------------------------

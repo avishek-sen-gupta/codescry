@@ -9,6 +9,10 @@ import logging
 from collections import defaultdict
 
 from repo_surveyor.detection.integration_detector import IntegrationSignal
+from repo_surveyor.integration_concretiser.types import (
+    CompositeIntegrationSignal,
+    SignalLike,
+)
 from repo_surveyor.training.types import TrainingLabel
 
 logger = logging.getLogger(__name__)
@@ -76,7 +80,7 @@ def read_file_bytes(file_path: str) -> bytes:
 
 
 def _merge_signal_lines(
-    signals: list[IntegrationSignal],
+    signals: list[SignalLike],
 ) -> list[tuple[int, str, str]]:
     """Deduplicate signals by (line_number, line_content), merging integration types.
 
@@ -95,7 +99,7 @@ def _merge_signal_lines(
     )
 
 
-def _build_signal_summary(signals: list[IntegrationSignal]) -> str:
+def _build_signal_summary(signals: list[SignalLike]) -> str:
     """Build the signal-lines block for a prompt."""
     return "\n".join(
         f"  Line {ln}: [{types}] {content}"
@@ -115,7 +119,7 @@ def _truncation_note(truncated: bool) -> str:
 def build_classification_prompt(
     file_path: str,
     file_content: str,
-    signals: list[IntegrationSignal],
+    signals: list[SignalLike],
     truncated: bool,
 ) -> str:
     """Build the user prompt for LLM-based classification of a single file."""
@@ -129,7 +133,7 @@ def build_classification_prompt(
 
 
 def build_batched_classification_prompt(
-    files: list[tuple[str, str, list[IntegrationSignal], bool]],
+    files: list[tuple[str, str, list[SignalLike], bool]],
 ) -> str:
     """Build a batched prompt covering multiple files.
 
@@ -226,3 +230,39 @@ def parse_batched_classification_response(
             result[file_path][int(line)] = (label, confidence, reason)
 
     return dict(result)
+
+
+def deduplicate_signals(
+    signals: list[IntegrationSignal],
+) -> list[CompositeIntegrationSignal]:
+    """Merge duplicate signals sharing (file_path, line_number, line_content).
+
+    Groups all signals with the same source line into a single
+    CompositeIntegrationSignal, preserving all original match metadata.
+    Single-match lines are wrapped in a 1-element composite.
+
+    Args:
+        signals: Raw integration signals, potentially with duplicates.
+
+    Returns:
+        Deduplicated list of CompositeIntegrationSignals, one per unique line.
+    """
+    groups: dict[tuple[str, int, str], list[IntegrationSignal]] = defaultdict(list)
+    for sig in signals:
+        key = (
+            sig.match.file_path,
+            sig.match.line_number,
+            sig.match.line_content.strip(),
+        )
+        groups[key].append(sig)
+
+    original_count = len(signals)
+    composites = [
+        CompositeIntegrationSignal(signals=tuple(group)) for group in groups.values()
+    ]
+    logger.info(
+        "Deduplication: %d signals → %d unique lines",
+        original_count,
+        len(composites),
+    )
+    return composites

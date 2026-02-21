@@ -87,6 +87,23 @@ class IntegrationSignal:
     source: str
     direction: SignalDirection = SignalDirection.AMBIGUOUS
 
+    def to_dict(self) -> dict:
+        """Serialise to a JSON-friendly dict with a match_details list."""
+        return {
+            "line_content": self.match.line_content.strip(),
+            "file_path": self.match.file_path,
+            "line_number": self.match.line_number,
+            "match_details": [
+                {
+                    "integration_type": self.integration_type.value,
+                    "confidence": self.confidence.value,
+                    "matched_pattern": self.matched_pattern,
+                    "source": self.source,
+                    "direction": self.direction.value,
+                }
+            ],
+        }
+
 
 @dataclass(frozen=True)
 class IntegrationDetectorResult:

@@ -1,9 +1,104 @@
 """Data types for integration signal AST context extraction."""
 
 from dataclasses import dataclass
+from typing import Protocol, runtime_checkable
 
+from repo_surveyor.detection.integration_detector import (
+    FileMatch,
+    IntegrationSignal,
+)
+from repo_surveyor.integration_patterns import (
+    Confidence,
+    IntegrationType,
+    SignalDirection,
+)
+from repo_surveyor.detection.integration_detector import EntityType
 from repo_surveyor.training.types import TrainingLabel
-from repo_surveyor.detection.integration_detector import IntegrationSignal
+
+
+@runtime_checkable
+class SignalLike(Protocol):
+    """Structural protocol unifying IntegrationSignal and CompositeIntegrationSignal."""
+
+    @property
+    def match(self) -> FileMatch: ...
+
+    @property
+    def integration_type(self) -> IntegrationType: ...
+
+    @property
+    def confidence(self) -> Confidence: ...
+
+    @property
+    def matched_pattern(self) -> str: ...
+
+    @property
+    def entity_type(self) -> EntityType: ...
+
+    @property
+    def source(self) -> str: ...
+
+    @property
+    def direction(self) -> SignalDirection: ...
+
+    def to_dict(self) -> dict: ...
+
+
+@dataclass(frozen=True)
+class CompositeIntegrationSignal:
+    """Multiple IntegrationSignals merged for the same source line.
+
+    Delegates all scalar properties to the first signal in the group,
+    preserving all original match metadata in the signals tuple.
+    """
+
+    signals: tuple[IntegrationSignal, ...]
+
+    @property
+    def match(self) -> FileMatch:
+        return self.signals[0].match
+
+    @property
+    def integration_type(self) -> IntegrationType:
+        return self.signals[0].integration_type
+
+    @property
+    def confidence(self) -> Confidence:
+        return self.signals[0].confidence
+
+    @property
+    def matched_pattern(self) -> str:
+        return self.signals[0].matched_pattern
+
+    @property
+    def entity_type(self) -> EntityType:
+        return self.signals[0].entity_type
+
+    @property
+    def source(self) -> str:
+        return self.signals[0].source
+
+    @property
+    def direction(self) -> SignalDirection:
+        return self.signals[0].direction
+
+    def to_dict(self) -> dict:
+        """Serialise to a JSON-friendly dict with all match details."""
+        return {
+            "line_content": self.match.line_content.strip(),
+            "file_path": self.match.file_path,
+            "line_number": self.match.line_number,
+            "match_details": [
+                {
+                    "integration_type": sig.integration_type.value,
+                    "confidence": sig.confidence.value,
+                    "matched_pattern": sig.matched_pattern,
+                    "source": sig.source,
+                    "direction": sig.direction.value,
+                }
+                for sig in self.signals
+            ],
+        }
 
 
 @dataclass(frozen=True)
@@ -28,12 +123,12 @@ class ConcretisedSignal:
     """An integration signal with its ML-predicted direction label.
 
     Attributes:
-        original_signal: The original integration signal.
+        original_signal: The original integration signal (or composite).
         ast_context: The enclosing AST node context.
         label: ML-predicted label (DEFINITE_INWARD, DEFINITE_OUTWARD, NOT_DEFINITE).
     """
 
-    original_signal: IntegrationSignal
+    original_signal: SignalLike
     ast_context: ASTContext
     label: TrainingLabel
 
