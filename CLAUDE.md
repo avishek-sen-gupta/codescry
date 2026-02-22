@@ -42,6 +42,7 @@
 - If a function returns a non-None type in its signature, but cannot return an object of that type because of some condition, use null object pattern. Do not return None.
 - Prefer small, composable functions. Do not write massive functions.
 - Do not use static methods. EVER.
+- Add copious helpful logs to track progress of tasks, especially long-running ones, or ones which involve loops.
 
 ## Code Review Patterns
 

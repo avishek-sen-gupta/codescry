@@ -157,7 +157,9 @@ def _concretise_file(
         )
         file_content = file_content[:MAX_FILE_CHARS]
 
-    prompt = build_classification_prompt(file_path, file_content, signals, truncated)
+    prompt = build_classification_prompt(
+        file_path, file_content, signals, truncated, signal_to_ast
+    )
     logger.debug("Prompt length: %d chars", len(prompt))
 
     data = client.classify(SYSTEM_PROMPT, prompt)
@@ -300,7 +302,9 @@ def concretise_with_gemini(
     batchable: list[tuple[str, str, list[SignalLike], bool]] = []
     for entry in file_data:
         fp, content, sigs, trunc = entry
-        prompt_estimate = len(build_classification_prompt(fp, content, sigs, trunc))
+        prompt_estimate = len(
+            build_classification_prompt(fp, content, sigs, trunc, signal_to_ast)
+        )
         if prompt_estimate > _MAX_BATCH_PROMPT_CHARS:
             solo.append(entry)
         else:
@@ -312,7 +316,9 @@ def concretise_with_gemini(
     current_chars = 0
     for entry in batchable:
         fp, content, sigs, trunc = entry
-        entry_chars = len(build_classification_prompt(fp, content, sigs, trunc))
+        entry_chars = len(
+            build_classification_prompt(fp, content, sigs, trunc, signal_to_ast)
+        )
         if current_batch and current_chars + entry_chars > _MAX_BATCH_PROMPT_CHARS:
             batches.append(current_batch)
             current_batch = []
@@ -341,7 +347,7 @@ def concretise_with_gemini(
         logger.info(
             "[%d/%d] Solo file: %s  (%d signals)", call_idx, total_calls, fp, len(sigs)
         )
-        prompt = build_classification_prompt(fp, content, sigs, trunc)
+        prompt = build_classification_prompt(fp, content, sigs, trunc, signal_to_ast)
         data = client.classify(SYSTEM_PROMPT, prompt)
         line_map = parse_classification_response(data)
         file_concretised, file_metadata = _apply_line_map(
@@ -365,7 +371,9 @@ def concretise_with_gemini(
         )
         if len(batch) == 1:
             fp, content, sigs, trunc = batch[0]
-            prompt = build_classification_prompt(fp, content, sigs, trunc)
+            prompt = build_classification_prompt(
+                fp, content, sigs, trunc, signal_to_ast
+            )
             data = client.classify(SYSTEM_PROMPT, prompt)
             line_map = parse_classification_response(data)
             file_concretised, file_metadata = _apply_line_map(
@@ -374,7 +382,7 @@ def concretise_with_gemini(
             all_concretised.extend(file_concretised)
             all_metadata.update(file_metadata)
         else:
-            prompt = build_batched_classification_prompt(batch)
+            prompt = build_batched_classification_prompt(batch, signal_to_ast)
             data = client.classify(SYSTEM_PROMPT_BATCHED, prompt)
             batched_map = parse_batched_classification_response(data)
             for fp, _, sigs, _ in batch:

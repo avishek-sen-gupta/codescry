@@ -98,8 +98,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--threshold",
         type=float,
-        default=0.56,
-        help="Cosine similarity threshold for signal vs noise (default: 0.56).",
+        default=0.62,
+        help="Cosine similarity threshold for signal vs noise (default: 0.62).",
     )
     parser.add_argument(
         "--output-dir",

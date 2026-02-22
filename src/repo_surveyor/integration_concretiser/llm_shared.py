@@ -10,6 +10,7 @@ from collections import defaultdict
 
 from repo_surveyor.detection.integration_detector import IntegrationSignal
 from repo_surveyor.integration_concretiser.types import (
+    ASTContext,
     CompositeIntegrationSignal,
     SignalLike,
     SignalValidity,
@@ -107,30 +108,48 @@ def read_file_bytes(file_path: str) -> bytes:
 
 def _merge_signal_lines(
     signals: list[SignalLike],
-) -> list[tuple[int, str, str]]:
+) -> list[tuple[int, str, str, str]]:
     """Deduplicate signals by (line_number, line_content), merging integration types.
 
-    Returns sorted list of (line_number, merged_types_str, line_content).
+    Returns sorted list of (line_number, merged_types_str, line_content, file_path).
     """
     types_by_line: dict[tuple[int, str], list[str]] = defaultdict(list)
+    path_by_line: dict[tuple[int, str], str] = {}
     for s in signals:
         key = (s.match.line_number, s.match.line_content.strip())
         itype = s.integration_type.value
         if itype not in types_by_line[key]:
             types_by_line[key].append(itype)
+        path_by_line[key] = s.match.file_path
 
     return sorted(
-        (ln, ", ".join(types), content)
+        (ln, ", ".join(types), content, path_by_line[(ln, content)])
         for (ln, content), types in types_by_line.items()
     )
 
 
-def _build_signal_summary(signals: list[SignalLike]) -> str:
-    """Build the signal-lines block for a prompt."""
-    return "\n".join(
-        f"  Line {ln}: [{types}] {content}"
-        for ln, types, content in _merge_signal_lines(signals)
-    )
+def _build_signal_summary(
+    signals: list[SignalLike],
+    signal_to_ast: dict[tuple[str, int], ASTContext] = {},
+) -> str:
+    """Build the signal-lines block for a prompt.
+
+    When ``signal_to_ast`` is provided, each signal line includes its
+    enclosing AST statement context so the LLM can make better-informed
+    classification decisions.
+    """
+    lines: list[str] = []
+    for ln, types, content, file_path in _merge_signal_lines(signals):
+        ast_ctx = signal_to_ast.get((file_path, ln))
+        if ast_ctx and ast_ctx.node_text:
+            lines.append(
+                f"  Line {ln}: [{types}] {content}\n"
+                f"    AST context ({ast_ctx.node_type}, lines {ast_ctx.start_line}-{ast_ctx.end_line}):\n"
+                f"    ```\n    {ast_ctx.node_text}\n    ```"
+            )
+        else:
+            lines.append(f"  Line {ln}: [{types}] {content}")
+    return "\n".join(lines)
 
 
 def _truncation_note(truncated: bool) -> str:
@@ -147,9 +166,10 @@ def build_classification_prompt(
     file_content: str,
     signals: list[SignalLike],
     truncated: bool,
+    signal_to_ast: dict[tuple[str, int], ASTContext] = {},
 ) -> str:
     """Build the user prompt for LLM-based classification of a single file."""
-    signal_summary = _build_signal_summary(signals)
+    signal_summary = _build_signal_summary(signals, signal_to_ast)
     return (
         f"File: {file_path}{_truncation_note(truncated)}\n\n"
         f"Detected signal lines to classify:\n{signal_summary}\n\n"
@@ -160,6 +180,7 @@ def build_classification_prompt(
 
 def build_batched_classification_prompt(
     files: list[tuple[str, str, list[SignalLike], bool]],
+    signal_to_ast: dict[tuple[str, int], ASTContext] = {},
 ) -> str:
     """Build a batched prompt covering multiple files.
 
@@ -169,7 +190,7 @@ def build_batched_classification_prompt(
         (
             f"===FILE: {file_path}===\n"
             f"{_truncation_note(truncated)}\n"
-            f"Detected signal lines to classify:\n{_build_signal_summary(signals)}\n\n"
+            f"Detected signal lines to classify:\n{_build_signal_summary(signals, signal_to_ast)}\n\n"
             f"File content:\n```\n{file_content}\n```"
         )
         for file_path, file_content, signals, truncated in files

@@ -19,7 +19,7 @@ Usage:
         GeminiEmbeddingClient,
     )
     client = GeminiEmbeddingClient(api_key=...)
-    concretiser = PatternEmbeddingConcretiser(client, threshold=0.56, cache_path=Path("data/embeddings/cache.json"))
+    concretiser = PatternEmbeddingConcretiser(client, threshold=0.62, cache_path=Path("data/embeddings/cache.json"))
     result, metadata = concretiser.concretise(detector_result)
 """
 
@@ -35,7 +35,7 @@ from repo_surveyor.detection.integration_detector import (
 )
 from repo_surveyor.integration_concretiser.ast_walker import (
     FALLBACK_AST_CONTEXT,
-    extract_invocation_context,
+    extract_statement_context,
 )
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     cosine,
@@ -56,7 +56,7 @@ from repo_surveyor.integration_patterns import (
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_THRESHOLD = 0.56
+_DEFAULT_THRESHOLD = 0.62
 
 _EMPTY_PATH = Path()
 
@@ -225,10 +225,13 @@ class PatternEmbeddingConcretiser:
         )
 
         signal_contexts = self._extract_contexts(file_content_signals, file_reader)
-        line_texts = [sig.match.line_content.strip() for sig in file_content_signals]
+        embed_texts = [
+            ctx.node_text if ctx.node_text else sig.match.line_content.strip()
+            for sig, ctx in zip(file_content_signals, signal_contexts)
+        ]
 
-        logger.info("Embedding %d signal line texts...", len(line_texts))
-        signal_embeddings = self._client.embed_batch(line_texts) if line_texts else []
+        logger.info("Embedding %d signal texts (with AST context)...", len(embed_texts))
+        signal_embeddings = self._client.embed_batch(embed_texts) if embed_texts else []
 
         concretised, metadata = self._classify_signals(
             file_content_signals, signal_contexts, signal_embeddings
@@ -276,7 +279,7 @@ class PatternEmbeddingConcretiser:
                 contexts.append(FALLBACK_AST_CONTEXT)
                 continue
 
-            ctx = extract_invocation_context(
+            ctx = extract_statement_context(
                 file_cache[fp], language, sig.match.line_number
             )
             contexts.append(ctx)
