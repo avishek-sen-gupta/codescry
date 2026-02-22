@@ -26,7 +26,7 @@ from repo_surveyor.integration_patterns import (
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "pipeline"))
 from survey_repo_hybrid import merge_results
 
 # ---------------------------------------------------------------------------

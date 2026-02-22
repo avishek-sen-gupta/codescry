@@ -8,9 +8,9 @@ DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE.
 The ML-based pipeline is preserved unchanged — this is a parallel approach.
 
 Usage:
-    poetry run python scripts/survey_repo_ollama.py /path/to/repo
-    poetry run python scripts/survey_repo_ollama.py /path/to/repo --languages Java
-    poetry run python scripts/survey_repo_ollama.py /path/to/repo \\
+    poetry run python pipeline/survey_repo_ollama.py /path/to/repo
+    poetry run python pipeline/survey_repo_ollama.py /path/to/repo --languages Java
+    poetry run python pipeline/survey_repo_ollama.py /path/to/repo \\
         --model qwen2.5-coder:7b-instruct --ollama-url http://localhost:11434
 """
 
@@ -28,7 +28,7 @@ from repo_surveyor.integration_concretiser.ollama_concretiser import (
     _DEFAULT_OLLAMA_BASE_URL,
     concretise_with_ollama,
 )
-from repo_surveyor.pipeline_timer import PipelineTimingObserver
+from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.integration_concretiser.types import SignalValidity
 from repo_surveyor.integration_patterns import SignalDirection
 from repo_surveyor.training.signal_classifier import NullSignalClassifier

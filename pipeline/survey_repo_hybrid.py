@@ -21,9 +21,9 @@ Supports two embedding backends via --backend:
 Requires GEMINI_001_EMBEDDING_API_KEY env var for both Gemini embedding and Flash.
 
 Usage:
-    poetry run python scripts/survey_repo_hybrid.py /path/to/repo
-    poetry run python scripts/survey_repo_hybrid.py /path/to/repo --backend gemini
-    poetry run python scripts/survey_repo_hybrid.py /path/to/repo --languages Java
+    poetry run python pipeline/survey_repo_hybrid.py /path/to/repo
+    poetry run python pipeline/survey_repo_hybrid.py /path/to/repo --backend gemini
+    poetry run python pipeline/survey_repo_hybrid.py /path/to/repo --languages Java
 """
 
 import argparse
