@@ -29,6 +29,19 @@ from repo_surveyor.integration_patterns import (
 )
 
 # ---------------------------------------------------------------------------
+# Module-level cached descriptions — loaded once across all tests.
+# ---------------------------------------------------------------------------
+
+_CACHED_DESCRIPTIONS = get_all_pattern_descriptions()
+
+# Embedding dimension for mock vectors.  Kept small (50) to avoid the
+# O(num_descs × dim) pure-Python cosine cost that made tests ~45 s each
+# when dim == num_descs (~3 430).  Unit-vector indices wrap around via
+# modulo, which is fine: tests only need the *nearest* match to work, not
+# all 3 430 vectors to be mutually orthogonal.
+_MOCK_DIM = 50
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
@@ -103,11 +116,11 @@ class TestPatternDescriptionRegistry:
     """Verify get_all_pattern_descriptions() returns valid entries."""
 
     def test_returns_non_empty(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         assert len(descriptions) > 0
 
     def test_entries_have_valid_metadata(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         for desc in descriptions:
             assert isinstance(desc, PatternDescription)
             assert isinstance(desc.text, str)
@@ -118,23 +131,23 @@ class TestPatternDescriptionRegistry:
             assert len(desc.source) > 0
 
     def test_contains_common_descriptions(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         sources = {d.source for d in descriptions}
         assert "common" in sources
 
     def test_contains_framework_descriptions(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         sources = {d.source for d in descriptions}
         # At least some framework sources should be present
         assert len(sources) > 1
 
     def test_descriptions_cover_multiple_integration_types(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         types = {d.integration_type for d in descriptions}
         assert len(types) >= 5
 
     def test_descriptions_cover_multiple_directions(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         directions = {d.direction for d in descriptions}
         assert SignalDirection.INWARD in directions
         assert SignalDirection.OUTWARD in directions
@@ -149,9 +162,9 @@ class TestNearestNeighborClassification:
     """Verify nearest-neighbor classification logic."""
 
     def test_below_threshold_is_noise(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
-        dim = max(num_descs, 10)
+        dim = _MOCK_DIM
 
         desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
         low_score_vec = [0.01] * dim
@@ -174,9 +187,9 @@ class TestNearestNeighborClassification:
         assert metadata[("client.py", 5)]["score"] < 0.40
 
     def test_above_threshold_returns_nearest_metadata(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
-        dim = max(num_descs, 10)
+        dim = _MOCK_DIM
 
         desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
         # Match exactly the first description
@@ -204,9 +217,9 @@ class TestNearestNeighborClassification:
         assert meta["score"] >= 0.40
 
     def test_direction_comes_from_nearest_description(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
-        dim = max(num_descs, 10)
+        dim = _MOCK_DIM
 
         # Find an OUTWARD description
         outward_idx = next(
@@ -244,9 +257,9 @@ class TestEndToEnd:
     """Full pipeline with mock client and multiple signals."""
 
     def test_multiple_signals_classified_correctly(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
-        dim = max(num_descs, 10)
+        dim = _MOCK_DIM
 
         desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
 
@@ -294,9 +307,9 @@ class TestEndToEnd:
         assert validities[2] == SignalValidity.NOISE
 
     def test_directory_signals_excluded(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
-        dim = max(num_descs, 10)
+        dim = _MOCK_DIM
 
         desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
         signal_vecs = [_unit_vector(dim, 0)]
@@ -323,9 +336,9 @@ class TestEndToEnd:
         assert result.signals_submitted == 1
 
     def test_metadata_contains_expected_fields(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
-        dim = max(num_descs, 10)
+        dim = _MOCK_DIM
 
         desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
         signal_vecs = [_unit_vector(dim, 0)]
@@ -361,7 +374,7 @@ class TestEmbeddingCache:
     """Verify cache save/load round-trip and invalidation."""
 
     def test_cache_round_trip(self, tmp_path: Path):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
         dim = 10
         embeddings = [[float(i + j) for j in range(dim)] for i in range(num_descs)]
@@ -375,7 +388,7 @@ class TestEmbeddingCache:
         assert loaded[-1] == embeddings[-1]
 
     def test_cache_invalidation_on_hash_mismatch(self, tmp_path: Path):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
         dim = 10
         embeddings = [[float(i)] * dim for i in range(num_descs)]
@@ -392,7 +405,7 @@ class TestEmbeddingCache:
         assert loaded == []
 
     def test_cache_miss_falls_through_to_api(self, tmp_path: Path):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
         dim = 10
 
@@ -416,7 +429,7 @@ class TestEmbeddingCache:
         assert cache_file.exists()
 
     def test_cache_hit_skips_api_call(self, tmp_path: Path):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         num_descs = len(descriptions)
         dim = 10
         embeddings = [[float(i)] * dim for i in range(num_descs)]
@@ -433,14 +446,14 @@ class TestEmbeddingCache:
         assert len(mock_client.call_log) == 0
 
     def test_content_hash_deterministic(self):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         hash1 = _compute_content_hash(descriptions)
         hash2 = _compute_content_hash(descriptions)
         assert hash1 == hash2
         assert len(hash1) == 64  # SHA-256 hex digest
 
     def test_cache_file_missing_returns_empty(self, tmp_path: Path):
-        descriptions = get_all_pattern_descriptions()
+        descriptions = _CACHED_DESCRIPTIONS
         missing = tmp_path / "does_not_exist.json"
         loaded = _load_cached_embeddings(missing, descriptions)
         assert loaded == []
