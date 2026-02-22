@@ -28,6 +28,7 @@ Usage:
 
 import logging
 import math
+import time
 from collections.abc import Callable
 from itertools import batched
 
@@ -414,6 +415,7 @@ class EmbeddingConcretiser:
             Tuple of (ConcretisationResult, metadata) where metadata maps
             (file_path, line_number) to best_type, best_direction, and score.
         """
+        t0_all = time.monotonic()
         file_content_signals: list[SignalLike] = [
             s
             for s in detector_result.integration_points
@@ -442,11 +444,14 @@ class EmbeddingConcretiser:
             signals_classified=classified,
             signals_unclassified=len(concretised) - classified,
         )
+        elapsed_total = time.monotonic() - t0_all
         logger.info(
-            "Embedding concretisation complete: submitted=%d classified=%d unclassified=%d",
+            "Embedding concretisation complete: submitted=%d classified=%d "
+            "unclassified=%d elapsed=%.2fs",
             result.signals_submitted,
             result.signals_classified,
             result.signals_unclassified,
+            elapsed_total,
         )
         return result, metadata
 
@@ -505,6 +510,9 @@ class EmbeddingConcretiser:
         concretised: list[ConcretisedSignal] = []
         metadata: dict[tuple[str, int], dict] = {}
         label_counts: dict[str, int] = {}
+        total = len(signals)
+        t0_classify = time.monotonic()
+        progress_interval = max(1, total // 10)
 
         for idx, (sig, ctx, emb) in enumerate(zip(signals, contexts, embeddings)):
             scores = [cosine(emb, desc_emb) for desc_emb in self._desc_embeddings]
@@ -534,7 +542,7 @@ class EmbeddingConcretiser:
             logger.debug(
                 "  [%d/%d] %s:%d  score=%.3f  type=%s  dir=%s  validity=%s  direction=%s",
                 idx + 1,
-                len(signals),
+                total,
                 sig.match.file_path,
                 sig.match.line_number,
                 best_score,
@@ -543,6 +551,14 @@ class EmbeddingConcretiser:
                 validity.value,
                 direction.value,
             )
+
+            if (idx + 1) % progress_interval == 0 or idx + 1 == total:
+                logger.info(
+                    "Classification progress: %d/%d signals (%.2fs elapsed)",
+                    idx + 1,
+                    total,
+                    time.monotonic() - t0_classify,
+                )
 
             concretised.append(
                 ConcretisedSignal(

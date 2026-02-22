@@ -340,6 +340,9 @@ def concretise_with_gemini(
     all_metadata: dict[tuple[str, int], dict] = {}
     call_idx = 0
     total_calls = len(solo) + len(batches)
+    total_signal_count = sum(len(sigs) for _, _, sigs, _ in file_data)
+    signals_processed = 0
+    t0_all = time.monotonic()
 
     # --- Process solo (oversized) files ---
     for fp, content, sigs, trunc in solo:
@@ -347,6 +350,7 @@ def concretise_with_gemini(
         logger.info(
             "[%d/%d] Solo file: %s  (%d signals)", call_idx, total_calls, fp, len(sigs)
         )
+        t0_call = time.monotonic()
         prompt = build_classification_prompt(fp, content, sigs, trunc, signal_to_ast)
         data = client.classify(SYSTEM_PROMPT, prompt)
         line_map = parse_classification_response(data)
@@ -355,6 +359,15 @@ def concretise_with_gemini(
         )
         all_concretised.extend(file_concretised)
         all_metadata.update(file_metadata)
+        signals_processed += len(sigs)
+        logger.info(
+            "[%d/%d] Solo file done in %.2fs  (%d/%d signals processed)",
+            call_idx,
+            total_calls,
+            time.monotonic() - t0_call,
+            signals_processed,
+            total_signal_count,
+        )
 
     # --- Process batched files ---
     for batch in batches:
@@ -369,6 +382,7 @@ def concretise_with_gemini(
             total_sigs,
             ", ".join(batch_paths),
         )
+        t0_call = time.monotonic()
         if len(batch) == 1:
             fp, content, sigs, trunc = batch[0]
             prompt = build_classification_prompt(
@@ -392,8 +406,24 @@ def concretise_with_gemini(
                 )
                 all_concretised.extend(file_concretised)
                 all_metadata.update(file_metadata)
+        signals_processed += total_sigs
+        logger.info(
+            "[%d/%d] Batch done in %.2fs  (%d/%d signals processed)",
+            call_idx,
+            total_calls,
+            time.monotonic() - t0_call,
+            signals_processed,
+            total_signal_count,
+        )
 
     # --- Handle unreadable files ---
+    if unreadable:
+        unreadable_signal_count = sum(len(sigs) for sigs in unreadable.values())
+        logger.warning(
+            "%d unreadable files (%d signals defaulted to NOISE)",
+            len(unreadable),
+            unreadable_signal_count,
+        )
     for fp, sigs in unreadable.items():
         for sig in sigs:
             ast_ctx = signal_to_ast.get(
@@ -416,11 +446,14 @@ def concretise_with_gemini(
         signals_classified=classified,
         signals_unclassified=len(all_concretised) - classified,
     )
+    elapsed_total = time.monotonic() - t0_all
     logger.info(
-        "Gemini concretisation complete: submitted=%d  classified=%d  unclassified=%d  api_calls=%d",
+        "Gemini concretisation complete: submitted=%d  classified=%d  "
+        "unclassified=%d  api_calls=%d  elapsed=%.2fs",
         result.signals_submitted,
         result.signals_classified,
         result.signals_unclassified,
         total_calls,
+        elapsed_total,
     )
     return result, all_metadata

@@ -26,6 +26,7 @@ Usage:
 import hashlib
 import json
 import logging
+import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -213,6 +214,7 @@ class PatternEmbeddingConcretiser:
             Tuple of (ConcretisationResult, metadata) where metadata maps
             (file_path, line_number) to nearest description info and score.
         """
+        t0_all = time.monotonic()
         file_content_signals: list[SignalLike] = [
             s
             for s in detector_result.integration_points
@@ -244,12 +246,14 @@ class PatternEmbeddingConcretiser:
             signals_classified=classified,
             signals_unclassified=len(concretised) - classified,
         )
+        elapsed_total = time.monotonic() - t0_all
         logger.info(
             "Pattern-embedding concretisation complete: "
-            "submitted=%d classified=%d unclassified=%d",
+            "submitted=%d classified=%d unclassified=%d elapsed=%.2fs",
             result.signals_submitted,
             result.signals_classified,
             result.signals_unclassified,
+            elapsed_total,
         )
         return result, metadata
 
@@ -310,6 +314,9 @@ class PatternEmbeddingConcretiser:
         concretised: list[ConcretisedSignal] = []
         metadata: dict[tuple[str, int], dict] = {}
         label_counts: dict[str, int] = {}
+        total = len(signals)
+        t0_classify = time.monotonic()
+        progress_interval = max(1, total // 10)
 
         for idx, (sig, ctx, emb) in enumerate(zip(signals, contexts, embeddings)):
             best_desc, best_score = self._find_nearest(emb)
@@ -336,7 +343,7 @@ class PatternEmbeddingConcretiser:
             logger.debug(
                 "  [%d/%d] %s:%d  score=%.3f  type=%s  dir=%s  src=%s",
                 idx + 1,
-                len(signals),
+                total,
                 sig.match.file_path,
                 sig.match.line_number,
                 best_score,
@@ -344,6 +351,14 @@ class PatternEmbeddingConcretiser:
                 best_desc.direction.value,
                 best_desc.source,
             )
+
+            if (idx + 1) % progress_interval == 0 or idx + 1 == total:
+                logger.info(
+                    "Classification progress: %d/%d signals (%.2fs elapsed)",
+                    idx + 1,
+                    total,
+                    time.monotonic() - t0_classify,
+                )
 
             concretised.append(
                 ConcretisedSignal(

@@ -15,6 +15,7 @@ Usage (standalone):
 
 import json
 import logging
+import time
 from collections import defaultdict
 from collections.abc import Callable
 from urllib.error import HTTPError, URLError
@@ -66,19 +67,22 @@ def _call_ollama(
     logger.debug("POST %s  model=%s  prompt_len=%d", url, model, len(prompt))
     req = Request(url, data=payload, headers={"Content-Type": "application/json"})
     try:
+        t0 = time.monotonic()
         with urlopen(req, timeout=180) as resp:
             raw = json.loads(resp.read())
-            logger.debug(
-                "Ollama response: done=%s  eval_count=%s",
+            elapsed = time.monotonic() - t0
+            logger.info(
+                "[Ollama] Response received in %.2fs  (done=%s, eval_count=%s)",
+                elapsed,
                 raw.get("done"),
                 raw.get("eval_count"),
             )
             return raw
     except HTTPError as exc:
-        logger.error("Ollama HTTP %d: %s", exc.code, exc.reason)
+        logger.error("Ollama HTTP %d: %s  url=%s", exc.code, exc.reason, url)
         return {}
     except URLError as exc:
-        logger.error("Ollama connection error: %s", exc)
+        logger.error("Ollama connection error: %s  url=%s", exc, url)
         return {}
 
 
@@ -252,6 +256,9 @@ def concretise_with_ollama(
 
     all_concretised: list[ConcretisedSignal] = []
     all_metadata: dict[tuple[str, int], dict] = {}
+    total_signal_count = sum(len(sigs) for sigs in by_file.values())
+    signals_processed = 0
+    t0_all = time.monotonic()
     for idx, file_path in enumerate(unique_files, 1):
         signals = by_file[file_path]
         logger.info(
@@ -266,6 +273,15 @@ def concretise_with_ollama(
         )
         all_concretised.extend(file_concretised)
         all_metadata.update(file_metadata)
+        signals_processed += len(signals)
+        logger.info(
+            "[%d/%d] File done  (%d/%d signals processed, %.2fs elapsed)",
+            idx,
+            len(unique_files),
+            signals_processed,
+            total_signal_count,
+            time.monotonic() - t0_all,
+        )
 
     classified = sum(1 for s in all_concretised if s.is_integration)
     result = ConcretisationResult(
@@ -274,10 +290,13 @@ def concretise_with_ollama(
         signals_classified=classified,
         signals_unclassified=len(all_concretised) - classified,
     )
+    elapsed_total = time.monotonic() - t0_all
     logger.info(
-        "Ollama concretisation complete: submitted=%d  classified=%d  unclassified=%d",
+        "Ollama concretisation complete: submitted=%d  classified=%d  "
+        "unclassified=%d  elapsed=%.2fs",
         result.signals_submitted,
         result.signals_classified,
         result.signals_unclassified,
+        elapsed_total,
     )
     return result, all_metadata

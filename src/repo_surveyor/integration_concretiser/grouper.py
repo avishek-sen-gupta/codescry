@@ -1,5 +1,7 @@
 """Group integration signals by their enclosing AST context."""
 
+import logging
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from functools import reduce
@@ -9,6 +11,8 @@ from operator import attrgetter
 from repo_surveyor.integration_patterns import Language
 from repo_surveyor.integration_concretiser.ast_walker import extract_ast_context
 from repo_surveyor.integration_concretiser.types import ASTContext, SignalLike
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -118,12 +122,34 @@ def group_signals_by_ast_context(
     Returns:
         List of SignalGroups, one per unique enclosing AST node.
     """
+    t0 = time.monotonic()
     by_file = _group_by_file(signals)
-
-    all_resolved = reduce(
-        lambda acc, item: acc + _resolve_file_signals(item[0], item[1], file_reader),
-        by_file.items(),
-        (),
+    total_files = len(by_file)
+    logger.info(
+        "AST grouping: resolving %d signals across %d unique files",
+        len(signals),
+        total_files,
     )
 
-    return _collect_into_groups(all_resolved)
+    all_resolved: tuple[_SignalWithContext, ...] = ()
+    for file_idx, (file_path, file_signals) in enumerate(by_file.items(), 1):
+        resolved = _resolve_file_signals(file_path, file_signals, file_reader)
+        all_resolved = all_resolved + resolved
+        if file_idx % 50 == 0 or file_idx == total_files:
+            logger.info(
+                "AST grouping: processed %d/%d files (%d signals resolved so far)",
+                file_idx,
+                total_files,
+                len(all_resolved),
+            )
+
+    groups = _collect_into_groups(all_resolved)
+    elapsed = time.monotonic() - t0
+    logger.info(
+        "AST grouping complete: %d groups from %d signals in %d files (%.2fs)",
+        len(groups),
+        len(all_resolved),
+        total_files,
+        elapsed,
+    )
+    return groups
