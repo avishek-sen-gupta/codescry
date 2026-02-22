@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
   <style>
+    .reveal .slides section {
+      overflow-y: auto;
+      max-height: 100%;
+    }
     :root {
       --r-background-color: #0f172a;
       --r-main-color: #e2e8f0;
@@ -2070,7 +2074,7 @@ Reveal.initialize({
   transition: 'slide',
   transitionSpeed: 'default',
   backgroundTransition: 'fade',
-  center: true,
+  center: false,
   plugins: [RevealHighlight, RevealNotes],
   width: 1280,
   height: 720,
