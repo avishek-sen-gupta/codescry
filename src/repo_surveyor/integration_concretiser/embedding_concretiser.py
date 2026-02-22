@@ -31,6 +31,7 @@ import math
 import time
 from collections.abc import Callable
 from itertools import batched
+from typing import Protocol, runtime_checkable
 
 from repo_surveyor.detection.integration_detector import (
     EntityType,
@@ -185,6 +186,13 @@ def cosine(a: list[float], b: list[float]) -> float:
 def _read_file_bytes(file_path: str) -> bytes:
     with open(file_path, "rb") as f:
         return f.read()
+
+
+@runtime_checkable
+class EmbeddingClientProtocol(Protocol):
+    """Structural interface for embedding clients."""
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]: ...
 
 
 class EmbeddingClient:
@@ -389,7 +397,7 @@ class EmbeddingConcretiser:
     """Classify integration signals using embedding similarity."""
 
     def __init__(
-        self, client: EmbeddingClient, threshold: float = _CONFIDENCE_THRESHOLD
+        self, client: EmbeddingClientProtocol, threshold: float = _CONFIDENCE_THRESHOLD
     ) -> None:
         self._client = client
         self._threshold = threshold

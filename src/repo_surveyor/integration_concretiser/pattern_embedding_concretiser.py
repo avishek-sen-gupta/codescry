@@ -39,6 +39,7 @@ from repo_surveyor.integration_concretiser.ast_walker import (
     extract_statement_context,
 )
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
+    EmbeddingClientProtocol,
     cosine,
     _read_file_bytes,
 )
@@ -163,7 +164,7 @@ class PatternEmbeddingConcretiser:
 
     def __init__(
         self,
-        client: object,
+        client: EmbeddingClientProtocol,
         threshold: float = _DEFAULT_THRESHOLD,
         cache_path: Path = _EMPTY_PATH,
     ) -> None:
