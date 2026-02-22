@@ -819,52 +819,690 @@ class Fragment:
 </section>
 
 <!-- ============================================================ -->
-<!-- SECTION: PIPELINE VARIATIONS -->
+<!-- SECTION: PIPELINE EXPERIMENTS -->
 <!-- ============================================================ -->
 <section class="section-divider">
-  <h2>Pipeline Variations</h2>
-  <h3>Same core, different execution modes</h3>
+  <h2>Concretisation Experiments</h2>
+  <h3>Six approaches to the same classification problem</h3>
 </section>
 
-<!-- VARIATIONS OVERVIEW -->
+<!-- EXPERIMENT LANDSCAPE -->
 <section>
-  <h2>Execution Modes</h2>
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.7em;">
-    <div class="card">
-      <h3 class="accent">survey()</h3>
-      <p>Full pipeline, in-memory results. No external dependencies beyond CTags + tree-sitter.</p>
+  <h2>The Experiment Landscape</h2>
+  <p>All six pipelines share stages 1&ndash;5. They differ only in <strong>Stage 6: Concretisation</strong> &mdash; how to classify each signal's validity and direction.</p>
+  <!-- 2x3 positioning diagram -->
+  <div style="display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 0; margin-top: 18px; font-size: 0.55em; text-align: center;">
+    <!-- header row -->
+    <div></div>
+    <div style="padding: 6px; color: #94a3b8; font-weight: 600;">Embedding-Based</div>
+    <div style="padding: 6px; color: #94a3b8; font-weight: 600;">LLM-Based</div>
+    <div style="padding: 6px; color: #94a3b8; font-weight: 600;">Hybrid</div>
+    <!-- row: local -->
+    <div style="padding: 10px 12px; color: #94a3b8; font-weight: 600; text-align: right;">Local</div>
+    <div class="card" style="margin: 4px; padding: 10px;">
+      <span class="accent-amber">ML Classifier</span><br>
+      <span class="dim">TF-IDF + LR<br>No API calls</span>
     </div>
-    <div class="card">
-      <h3 class="accent-green">survey_and_persist()</h3>
-      <p>Same pipeline + writes all results to <strong>Neo4j</strong> as a graph (Repository &rarr; Directory &rarr; CodeSymbol &rarr; IntegrationSignal).</p>
+    <div class="card" style="margin: 4px; padding: 10px;">
+      <span class="accent-purple">Ollama</span><br>
+      <span class="dim">Local LLM<br>Qwen 7B</span>
     </div>
-    <div class="card">
-      <h3 class="accent-amber">ML Concretisation</h3>
-      <p>survey() with a trained <strong>TF-IDF + LR</strong> classifier. No API calls at inference. Outputs per-label JSONL.</p>
+    <div style="margin: 4px; padding: 10px; opacity: 0.2;"></div>
+    <!-- row: cloud -->
+    <div style="padding: 10px 12px; color: #94a3b8; font-weight: 600; text-align: right;">Cloud</div>
+    <div class="card" style="margin: 4px; padding: 10px;">
+      <span class="accent">Generic Embedding</span><br>
+      <span class="dim">26 descriptions<br>Cosine similarity</span>
     </div>
-    <div class="card">
-      <h3 class="accent-purple">Ollama Concretisation</h3>
-      <p>Same pre-concretisation pipeline, then sends file context to a <strong>local LLM</strong> (Qwen 7B) for classification with confidence + reasoning.</p>
+    <div class="card" style="margin: 4px; padding: 10px;">
+      <span class="accent-green">Gemini Flash</span><br>
+      <span class="dim">Cloud LLM<br>Multi-file batching</span>
     </div>
-    <div class="card">
-      <h3 class="accent">Gemini Flash Concretisation</h3>
-      <p>Same pre-concretisation pipeline, then sends file context to <strong>Gemini Flash API</strong> with multi-file batching for direction classification.</p>
+    <div class="card" style="margin: 4px; padding: 10px; border-color: #fbbf24;">
+      <span class="accent-amber">Hybrid</span><br>
+      <span class="dim">Embedding gate +<br>Gemini direction</span>
     </div>
-    <div class="card">
-      <h3 class="accent-green">Embedding Concretisation</h3>
-      <p>Cosine similarity against <strong>26 directional descriptions</strong> for SIGNAL/NOISE gating + direction via score ratio. No LLM calls.</p>
+    <!-- row: cloud cached -->
+    <div style="padding: 10px 12px; color: #94a3b8; font-weight: 600; text-align: right;">Cached</div>
+    <div class="card" style="margin: 4px; padding: 10px;">
+      <span class="accent-pink">Pattern Embedding</span><br>
+      <span class="dim">~3,430 descriptions<br>SHA-256 cache</span>
     </div>
-    <div class="card">
-      <h3 class="accent-amber">Hybrid Concretisation</h3>
-      <p><strong>Embedding gate</strong> (fast SIGNAL/NOISE) + <strong>Gemini Flash</strong> (accurate direction) on SIGNALs only. Best of both worlds.</p>
+    <div style="margin: 4px;"></div>
+    <div style="margin: 4px;"></div>
+  </div>
+</section>
+
+<!-- SHARED PIPELINE DIAGRAM -->
+<section>
+  <h2>Shared Pre-Concretisation Pipeline</h2>
+  <p>Every experiment runs the same first five stages, then diverges:</p>
+  <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 20px; font-size: 0.52em; flex-wrap: nowrap;">
+    <div class="pipeline-box" style="border-color: #334155; min-width: 100px;">
+      <strong class="dim">1. Tech Stacks</strong>
     </div>
-    <div class="card">
-      <h3 class="accent-pink">Datalog Emission</h3>
-      <p>tree-sitter &rarr; <strong>16-relation Souffl&eacute; facts</strong>. Enables structural queries: scope chains, transitive calls, visible declarations, and <strong>framework integration detection</strong>.</p>
+    <div style="color: #475569;">&rarr;</div>
+    <div class="pipeline-box" style="border-color: #334155; min-width: 100px;">
+      <strong class="dim">2. CTags</strong>
     </div>
-    <div class="card">
-      <h3 class="dim">CFG Construction</h3>
-      <p>Standalone <code>build_cfg()</code> &mdash; language-independent CFG from source, exportable as DOT/SVG.</p>
+    <div style="color: #475569;">&rarr;</div>
+    <div class="pipeline-box" style="border-color: #334155; min-width: 100px;">
+      <strong class="dim">3. Detection</strong>
+    </div>
+    <div style="color: #475569;">&rarr;</div>
+    <div class="pipeline-box" style="border-color: #334155; min-width: 100px;">
+      <strong class="dim">4. Dedup</strong>
+    </div>
+    <div style="color: #475569;">&rarr;</div>
+    <div class="pipeline-box" style="border-color: #334155; min-width: 100px;">
+      <strong class="dim">5. Resolve</strong>
+    </div>
+    <div style="color: #475569;">&rarr;</div>
+    <div class="pipeline-box active" style="min-width: 140px; border-color: #fbbf24;">
+      <strong class="accent-amber">6. Concretise</strong><br>
+      <span class="dim" style="font-size: 0.85em;">(varies)</span>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; font-size: 0.6em;">
+    <div class="card" style="padding: 14px;">
+      <h3 class="accent" style="font-size: 0.8em;">Two-Stage Classification</h3>
+      <p style="font-size: 0.9em;">Every concretiser outputs the same structure:</p>
+      <p style="font-size: 0.9em;"><strong>1. Validity:</strong> <span class="pill pill-green" style="font-size: 0.85em;">SIGNAL</span> or <span class="pill pill-blue" style="font-size: 0.85em;">NOISE</span></p>
+      <p style="font-size: 0.9em;"><strong>2. Direction:</strong> <span class="pill pill-green" style="font-size: 0.85em;">INWARD</span> <span class="pill pill-amber" style="font-size: 0.85em;">OUTWARD</span> <span class="pill pill-blue" style="font-size: 0.85em;">AMBIGUOUS</span> <span class="pill pill-pink" style="font-size: 0.85em;">NOT_INTEGRATION</span></p>
+    </div>
+    <div class="card" style="padding: 14px;">
+      <h3 class="accent-green" style="font-size: 0.8em;">Uniform Output</h3>
+      <p style="font-size: 0.9em;">All pipelines return <code>ConcretisationResult</code> with:</p>
+      <ul style="font-size: 0.85em; margin-top: 4px;">
+        <li><code>concretised</code>: tuple of <code>ConcretisedSignal</code></li>
+        <li><code>signals_submitted</code> / <code>classified</code> / <code>unclassified</code></li>
+        <li>Per-signal metadata dict</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIMENT 1: ML CLASSIFIER -->
+<section>
+  <h2>Experiment 1: ML Classifier</h2>
+  <h3>TF-IDF + Logistic Regression</h3>
+  <div class="two-col">
+    <div>
+      <!-- flow diagram -->
+      <div style="font-size: 0.55em; max-width: 340px;">
+        <div class="pipeline-box" style="border-color: #fbbf24;">
+          <strong class="accent-amber">Signal line content</strong><br>
+          <code class="dim">"httpClient.get(url)"</code>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div class="pipeline-box" style="border-color: #38bdf8;">
+          <strong class="accent">TF-IDF Vectoriser</strong><br>
+          <span class="dim">Word + char n-grams</span>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div class="pipeline-box" style="border-color: #a78bfa;">
+          <strong class="accent-purple">Logistic Regression</strong><br>
+          <span class="dim">predict_proba()</span>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px;">
+          <div class="pipeline-box" style="border-color: #4ade80; padding: 6px;"><span class="accent-green" style="font-size: 0.85em;">INWARD</span></div>
+          <div class="pipeline-box" style="border-color: #fbbf24; padding: 6px;"><span class="accent-amber" style="font-size: 0.85em;">OUTWARD</span></div>
+          <div class="pipeline-box" style="border-color: #64748b; padding: 6px;"><span class="dim" style="font-size: 0.85em;">NOT_DEF</span></div>
+          <div class="pipeline-box" style="border-color: #f472b6; padding: 6px;"><span class="accent-pink" style="font-size: 0.85em;">NOT_INT</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3 class="accent">Characteristics</h3>
+        <ul>
+          <li><strong>No API calls</strong> at inference &mdash; sklearn model serialised with joblib</li>
+          <li>Trained on synthetic (Claude) + real (GitHub harvest) examples</li>
+          <li>Falls back to <code>NullSignalClassifier</code> if model absent</li>
+          <li>Outputs confidence via <code>predict_proba()</code></li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent-green">Trade-offs</h3>
+        <table style="font-size: 0.75em;">
+          <tr><td>Speed</td><td class="accent-green">Very fast (local sklearn)</td></tr>
+          <tr><td>Cost</td><td class="accent-green">Free</td></tr>
+          <tr><td>Accuracy</td><td class="accent-amber">Limited by training data</td></tr>
+          <tr><td>Context</td><td class="accent-pink">Single line only</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIMENT 2: GENERIC EMBEDDING -->
+<section>
+  <h2>Experiment 2: Generic Embedding</h2>
+  <h3>Cosine similarity against 26 directional descriptions</h3>
+  <div class="two-col">
+    <div>
+      <!-- architecture diagram -->
+      <div style="font-size: 0.5em; max-width: 380px;">
+        <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;">
+          <div class="pipeline-box" style="border-color: #38bdf8;">
+            <strong class="accent">Signal line</strong><br>
+            <code class="dim" style="font-size: 0.8em;">app.get("/users")</code>
+          </div>
+          <div></div>
+          <div class="pipeline-box" style="border-color: #4ade80;">
+            <strong class="accent-green">26 Descriptions</strong><br>
+            <span class="dim" style="font-size: 0.8em;">13 types &times; 2 dirs</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-top: 6px;">
+          <div class="pipeline-arrow">&darr;</div>
+          <div></div>
+          <div class="pipeline-arrow">&darr;</div>
+        </div>
+        <div class="pipeline-box" style="border-color: #a78bfa; margin-top: 2px;">
+          <strong class="accent-purple">Embedding API</strong><br>
+          <span class="dim">HuggingFace (nomic-embed-code) or Gemini (gemini-embedding-001)</span>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div class="pipeline-box" style="border-color: #fbbf24;">
+          <strong class="accent-amber">Cosine Similarity Matrix</strong><br>
+          <span class="dim">signal &times; 26 descriptions</span>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div class="pipeline-box" style="border-color: #38bdf8; padding: 8px;">
+            <strong class="accent" style="font-size: 0.9em;">Gate</strong><br>
+            <span class="dim">best_score &lt; 0.56<br>&rarr; NOISE</span>
+          </div>
+          <div class="pipeline-box" style="border-color: #4ade80; padding: 8px;">
+            <strong class="accent-green" style="font-size: 0.9em;">Direction</strong><br>
+            <span class="dim">inward / outward<br>score ratio &gt; 1.2&times;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3 class="accent">How it works</h3>
+        <ol style="font-size: 0.75em;">
+          <li>Pre-embed 26 natural-language descriptions<br><span class="dim">"Exposes an HTTP REST endpoint for incoming requests"</span></li>
+          <li>Embed each signal's raw line content</li>
+          <li>Compute cosine similarity: signal &times; 26 descriptions</li>
+          <li><strong>Gate:</strong> best score &lt; 0.56 &rarr; NOISE</li>
+          <li><strong>Direction:</strong> if inward_score &gt; outward_score &times; 1.2 &rarr; INWARD (and vice versa), else AMBIGUOUS</li>
+        </ol>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent-green">Trade-offs</h3>
+        <table style="font-size: 0.75em;">
+          <tr><td>Speed</td><td class="accent-green">Fast (batch 32 texts/call)</td></tr>
+          <tr><td>Cost</td><td class="accent-green">Low (embedding API only)</td></tr>
+          <tr><td>Gate accuracy</td><td class="accent-green">Good (clear threshold)</td></tr>
+          <tr><td>Direction</td><td class="accent-amber">Weak (ratio heuristic)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIMENT 3: PATTERN EMBEDDING -->
+<section>
+  <h2>Experiment 3: Pattern Embedding</h2>
+  <h3>Nearest-neighbor against ~3,430 pattern descriptions</h3>
+  <div class="two-col">
+    <div>
+      <!-- comparison diagram: generic vs pattern -->
+      <div style="font-size: 0.5em;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="card" style="padding: 10px; border-color: #475569;">
+            <h3 class="dim" style="font-size: 0.9em; margin-bottom: 6px;">Generic (Exp. 2)</h3>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 3px;">
+              <div style="background: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">"Exposes HTTP REST endpoint"</div>
+              <div style="background: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">"Consumes HTTP REST service"</div>
+              <div class="dim" style="text-align: center;">&hellip; 24 more</div>
+            </div>
+            <p class="dim" style="margin-top: 6px; text-align: center;">26 targets</p>
+          </div>
+          <div class="card" style="padding: 10px; border-color: #f472b6;">
+            <h3 class="accent-pink" style="font-size: 0.9em; margin-bottom: 6px;">Pattern (Exp. 3)</h3>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 3px;">
+              <div style="background: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">"Spring @GetMapping handler"</div>
+              <div style="background: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">"FastAPI route decorator"</div>
+              <div style="background: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">"KafkaTemplate send call"</div>
+              <div class="dim" style="text-align: center;">&hellip; ~3,427 more</div>
+            </div>
+            <p class="accent-pink" style="margin-top: 6px; text-align: center;">~3,430 targets</p>
+          </div>
+        </div>
+        <div class="pipeline-arrow" style="margin-top: 8px;">&darr;</div>
+        <div class="pipeline-box" style="border-color: #f472b6; margin-top: 2px;">
+          <strong class="accent-pink">Nearest Neighbour</strong><br>
+          <span class="dim">Direction = nearest description's <code>SignalDirection</code></span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3 class="accent-pink">Key Insight</h3>
+        <p>Each regex pattern carries two descriptions (inward + outward). Embedding against <strong>pattern-specific semantics</strong> captures framework-level nuance that generic descriptions miss.</p>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent">Embedding Cache</h3>
+        <ul style="font-size: 0.75em;">
+          <li>Pre-build: <code>pipeline/build_pattern_embeddings.py</code></li>
+          <li>Saved as JSON with <strong>SHA-256 content hash</strong></li>
+          <li>Auto-invalidates when patterns change</li>
+          <li>Skips ~2 min API warm-up on subsequent runs</li>
+        </ul>
+        <pre style="font-size: 0.6em; margin-top: 6px;"><code class="language-bash">poetry run python pipeline/build_pattern_embeddings.py \
+    --backend gemini</code></pre>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent-green">Trade-offs</h3>
+        <table style="font-size: 0.75em;">
+          <tr><td>Targets</td><td class="accent-green">~3,430 (vs 26)</td></tr>
+          <tr><td>Direction</td><td class="accent-green">Nearest-neighbor (no ratio)</td></tr>
+          <tr><td>Warm-up</td><td class="accent-green">Cached (skip on re-run)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIMENT 4: OLLAMA (LOCAL LLM) -->
+<section>
+  <h2>Experiment 4: Ollama</h2>
+  <h3>Local LLM with full file context</h3>
+  <div class="two-col">
+    <div>
+      <div style="font-size: 0.5em; max-width: 360px;">
+        <div class="pipeline-box" style="border-color: #a78bfa;">
+          <strong class="accent-purple">Signals grouped by file</strong>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div class="pipeline-box" style="border-color: #a78bfa; text-align: left; padding: 10px 16px;">
+          <strong class="accent-purple">Prompt per file</strong><br>
+          <span class="dim" style="font-size: 0.85em; display: block; margin-top: 4px;">
+            File: <code>OrderService.java</code><br>
+            Signal lines to classify:<br>
+            &nbsp;&nbsp;Line 12: [http_rest] @GetMapping<br>
+            &nbsp;&nbsp;Line 45: [messaging] kafkaTemplate.send()<br>
+            File content: <span style="opacity: 0.5;">&lt;full file, &le;12K chars&gt;</span>
+          </span>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div class="pipeline-box" style="border-color: #a78bfa;">
+          <strong class="accent-purple">Ollama HTTP API</strong><br>
+          <span class="dim">qwen2.5-coder:7b-instruct<br>localhost:11434 &middot; 180s timeout</span>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div class="pipeline-box" style="border-color: #4ade80; text-align: left; padding: 10px 16px;">
+          <strong class="accent-green">JSON response</strong><br>
+          <span class="dim" style="font-size: 0.85em; display: block; margin-top: 4px;">
+            { label: "DEFINITE_INWARD",<br>
+            &nbsp;&nbsp;confidence: 0.92,<br>
+            &nbsp;&nbsp;reason: "REST endpoint via Spring" }
+          </span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3 class="accent-purple">Approach</h3>
+        <ul>
+          <li>Sends <strong>entire file content</strong> (truncated at 12K chars) plus signal line markers</li>
+          <li>LLM reasons about imports, class structure, and surrounding code</li>
+          <li>Returns structured JSON: <code>label</code>, <code>confidence</code>, <code>reason</code></li>
+          <li>One API call per file (not per signal)</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent">Label Mapping</h3>
+        <table style="font-size: 0.7em;">
+          <tr><th>LLM Label</th><th>Validity</th><th>Direction</th></tr>
+          <tr><td><code>DEFINITE_INWARD</code></td><td class="accent-green">SIGNAL</td><td class="accent-green">INWARD</td></tr>
+          <tr><td><code>DEFINITE_OUTWARD</code></td><td class="accent-green">SIGNAL</td><td class="accent-amber">OUTWARD</td></tr>
+          <tr><td><code>NOT_DEFINITE</code></td><td class="accent-green">SIGNAL</td><td class="dim">AMBIGUOUS</td></tr>
+          <tr><td><code>NOT_INTEGRATION</code></td><td class="dim">NOISE</td><td class="accent-pink">NOT_INT</td></tr>
+        </table>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent-green">Trade-offs</h3>
+        <table style="font-size: 0.75em;">
+          <tr><td>Speed</td><td class="accent-pink">Slow (local inference)</td></tr>
+          <tr><td>Cost</td><td class="accent-green">Free (local)</td></tr>
+          <tr><td>Context</td><td class="accent-green">Full file</td></tr>
+          <tr><td>Setup</td><td class="accent-amber">Requires Ollama server</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIMENT 5: GEMINI FLASH -->
+<section>
+  <h2>Experiment 5: Gemini Flash</h2>
+  <h3>Cloud LLM with multi-file batching</h3>
+  <div class="two-col">
+    <div>
+      <!-- batching diagram -->
+      <div style="font-size: 0.5em; max-width: 380px;">
+        <div class="pipeline-box" style="border-color: #4ade80;">
+          <strong class="accent-green">Files with signals</strong>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+          <div class="pipeline-box" style="border-color: #fbbf24; padding: 8px;">
+            <strong class="accent-amber" style="font-size: 0.9em;">Solo files</strong><br>
+            <span class="dim" style="font-size: 0.85em;">&gt; 80K chars<br>1 API call each</span>
+          </div>
+          <div class="pipeline-box" style="border-color: #4ade80; padding: 8px;">
+            <strong class="accent-green" style="font-size: 0.9em;">Batchable files</strong><br>
+            <span class="dim" style="font-size: 0.85em;">&le; 80K combined<br>N files &rarr; 1 call</span>
+          </div>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div class="pipeline-box" style="border-color: #4ade80; text-align: left; padding: 10px 16px;">
+          <strong class="accent-green">Batched prompt</strong><br>
+          <span class="dim" style="font-size: 0.85em; display: block; margin-top: 4px;">
+            ===FILE: OrderService.java===<br>
+            &nbsp;&nbsp;Line 12: [http_rest] @GetMapping<br>
+            &nbsp;&nbsp;<span style="opacity: 0.5;">&lt;file content&gt;</span><br>
+            ===FILE: UserController.java===<br>
+            &nbsp;&nbsp;Line 5: [http_rest] @PostMapping<br>
+            &nbsp;&nbsp;<span style="opacity: 0.5;">&lt;file content&gt;</span>
+          </span>
+        </div>
+        <div class="pipeline-arrow">&darr;</div>
+        <div class="pipeline-box" style="border-color: #4ade80;">
+          <strong class="accent-green">Gemini Flash API</strong><br>
+          <span class="dim">gemini-2.5-flash &middot; structured JSON &middot; exponential backoff</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3 class="accent-green">Smart Batching</h3>
+        <p>Files are partitioned into three categories:</p>
+        <ol style="font-size: 0.75em;">
+          <li><strong>Solo</strong>: File + prompt &gt; 80K chars &rarr; own API call</li>
+          <li><strong>Batchable</strong>: Multiple files grouped until 80K limit</li>
+          <li><strong>Unreadable</strong>: Marked as NOISE automatically</li>
+        </ol>
+        <p class="dim" style="margin-top: 8px;">Reduces API round-trips by <strong>5&ndash;7&times;</strong> on typical repos.</p>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent">vs. Ollama</h3>
+        <ul style="font-size: 0.75em;">
+          <li>Same prompt format and label mapping</li>
+          <li>Shared prompt/parsing logic in <code>llm_shared.py</code></li>
+          <li>Adds <strong>multi-file batching</strong> (Ollama is per-file only)</li>
+          <li>Exponential backoff on rate limits (5 retries)</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent-green">Trade-offs</h3>
+        <table style="font-size: 0.75em;">
+          <tr><td>Speed</td><td class="accent-green">Fast (cloud + batching)</td></tr>
+          <tr><td>Cost</td><td class="accent-amber">Medium (LLM API)</td></tr>
+          <tr><td>Context</td><td class="accent-green">Full file + batched</td></tr>
+          <tr><td>Accuracy</td><td class="accent-green">High (LLM reasoning)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIMENT 6: HYBRID - THE KEY INSIGHT -->
+<section>
+  <h2>Experiment 6: Hybrid Pipeline</h2>
+  <h3>Embedding gate + Gemini Flash direction</h3>
+  <p style="font-size: 0.65em; margin-top: 10px;">Observation: embeddings are <strong>good at SIGNAL/NOISE gating</strong> but poor at direction. Gemini is <strong>excellent at direction</strong> but expensive. Combine them.</p>
+  <!-- three-phase flow diagram -->
+  <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: start; gap: 8px; margin-top: 16px; font-size: 0.5em;">
+    <div>
+      <div class="pipeline-box" style="border-color: #38bdf8;">
+        <strong class="accent">Phase 2a: Embedding Gate</strong>
+      </div>
+      <div style="padding: 8px; margin-top: 4px;">
+        <span class="dim">All signals &rarr; EmbeddingConcretiser</span><br><br>
+        <span class="pill pill-green" style="font-size: 0.9em;">SIGNAL (42)</span><br>
+        <span class="pill pill-blue" style="font-size: 0.9em;">NOISE (158)</span>
+      </div>
+    </div>
+    <div style="font-size: 2em; color: #475569; margin-top: 20px;">&rarr;</div>
+    <div>
+      <div class="pipeline-box" style="border-color: #4ade80;">
+        <strong class="accent-green">Phase 2b: Gemini Direction</strong>
+      </div>
+      <div style="padding: 8px; margin-top: 4px;">
+        <span class="dim">Only SIGNALs &rarr; Gemini Flash</span><br><br>
+        <span class="pill pill-green" style="font-size: 0.9em;">INWARD (18)</span><br>
+        <span class="pill pill-amber" style="font-size: 0.9em;">OUTWARD (15)</span><br>
+        <span class="pill pill-blue" style="font-size: 0.9em;">AMBIGUOUS (5)</span><br>
+        <span class="pill pill-pink" style="font-size: 0.9em;">NOT_INT (4)</span>
+      </div>
+    </div>
+    <div style="font-size: 2em; color: #475569; margin-top: 20px;">&rarr;</div>
+    <div>
+      <div class="pipeline-box" style="border-color: #fbbf24;">
+        <strong class="accent-amber">Phase 2c: Merge</strong>
+      </div>
+      <div style="padding: 8px; margin-top: 4px;">
+        <span class="dim">Embedding validity<br>+ Gemini direction</span><br><br>
+        <span class="dim" style="font-size: 0.85em;">Embedding: <strong>authority on validity</strong><br>Gemini: <strong>authority on direction</strong></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HYBRID: MERGE LOGIC DETAIL -->
+<section>
+  <h2>Hybrid: Merge Logic</h2>
+  <h3>How embedding validity and Gemini direction combine</h3>
+  <div class="two-col">
+    <div>
+      <!-- decision tree diagram -->
+      <div style="font-size: 0.5em; max-width: 400px;">
+        <div class="pipeline-box" style="border-color: #38bdf8;">
+          <strong class="accent">Embedding says?</strong>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;">
+          <!-- NOISE branch -->
+          <div>
+            <div style="text-align: center; color: #ef4444; font-weight: 600; margin-bottom: 4px;">NOISE</div>
+            <div class="pipeline-box" style="border-color: #64748b; background: #0f172a;">
+              <span class="dim">Keep as NOISE<br>Direction = AMBIGUOUS</span><br>
+              <span style="color: #64748b; font-size: 0.85em;">Gemini result ignored</span>
+            </div>
+          </div>
+          <!-- SIGNAL branch -->
+          <div>
+            <div style="text-align: center; color: #4ade80; font-weight: 600; margin-bottom: 4px;">SIGNAL</div>
+            <div class="pipeline-box" style="border-color: #4ade80;">
+              <strong class="accent-green">Gemini says?</strong>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; font-size: 0.9em;">
+              <div class="pipeline-box" style="padding: 6px; border-color: #4ade80;">
+                <span class="accent-green">INWARD<br>OUTWARD</span><br>
+                <span class="dim" style="font-size: 0.8em;">Use Gemini's direction</span>
+              </div>
+              <div class="pipeline-box" style="padding: 6px; border-color: #f472b6;">
+                <span class="accent-pink">NOT_INT</span><br>
+                <span class="dim" style="font-size: 0.8em;">Keep NOT_INTEGRATION</span>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px; font-size: 0.9em;">
+              <div class="pipeline-box" style="padding: 6px; border-color: #64748b;">
+                <span class="dim">NOT_DEF</span><br>
+                <span class="dim" style="font-size: 0.8em;">dir = AMBIGUOUS</span>
+              </div>
+              <div class="pipeline-box" style="padding: 6px; border-color: #64748b;">
+                <span class="dim">Missing</span><br>
+                <span class="dim" style="font-size: 0.8em;">dir = AMBIGUOUS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3 class="accent-amber">Merge Rules</h3>
+        <table style="font-size: 0.65em;">
+          <tr><th>Embedding</th><th>Gemini</th><th>Result</th></tr>
+          <tr><td>NOISE</td><td><span class="dim">(any)</span></td><td>NOISE / AMBIGUOUS</td></tr>
+          <tr><td>SIGNAL</td><td>INWARD</td><td>SIGNAL / <span class="accent-green">INWARD</span></td></tr>
+          <tr><td>SIGNAL</td><td>OUTWARD</td><td>SIGNAL / <span class="accent-amber">OUTWARD</span></td></tr>
+          <tr><td>SIGNAL</td><td>NOT_DEFINITE</td><td>SIGNAL / <span class="dim">AMBIGUOUS</span></td></tr>
+          <tr><td>SIGNAL</td><td>NOT_INT</td><td>SIGNAL / <span class="accent-pink">NOT_INT</span></td></tr>
+          <tr><td>SIGNAL</td><td><span class="dim">missing</span></td><td>SIGNAL / <span class="dim">AMBIGUOUS</span></td></tr>
+        </table>
+      </div>
+      <div class="card" style="margin-top: 10px;">
+        <h3 class="accent-green">Cost Optimisation</h3>
+        <p style="font-size: 0.75em;">In a typical repo with 200 signals:</p>
+        <ul style="font-size: 0.7em;">
+          <li>Embedding gate classifies 158 as NOISE (cheap)</li>
+          <li>Only <strong>42 SIGNALs</strong> sent to Gemini (expensive)</li>
+          <li>&rarr; <strong>79% fewer</strong> LLM API calls</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON TABLE -->
+<section>
+  <h2>Experiment Comparison</h2>
+  <table style="font-size: 0.52em;">
+    <tr>
+      <th></th>
+      <th>ML Classifier</th>
+      <th>Generic Emb.</th>
+      <th>Pattern Emb.</th>
+      <th>Ollama</th>
+      <th>Gemini Flash</th>
+      <th>Hybrid</th>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Inference</td>
+      <td>Local (sklearn)</td>
+      <td>API (embeddings)</td>
+      <td>API (cached)</td>
+      <td>Local HTTP</td>
+      <td>Cloud HTTP</td>
+      <td>API + Cloud</td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Targets</td>
+      <td>Learned features</td>
+      <td>26 descriptions</td>
+      <td class="accent-green">~3,430 descriptions</td>
+      <td>Full file context</td>
+      <td>Full file context</td>
+      <td>26 + full file</td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Direction</td>
+      <td>Logistic regression</td>
+      <td>Score ratio (1.2&times;)</td>
+      <td class="accent-green">Nearest neighbour</td>
+      <td class="accent-green">LLM reasoning</td>
+      <td class="accent-green">LLM reasoning</td>
+      <td class="accent-green">LLM reasoning</td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Speed</td>
+      <td class="accent-green">Very fast</td>
+      <td class="accent-green">Fast</td>
+      <td class="accent-green">Fast</td>
+      <td class="accent-pink">Slow</td>
+      <td class="accent-amber">Medium</td>
+      <td class="accent-amber">Medium</td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Cost</td>
+      <td class="accent-green">Free</td>
+      <td class="accent-green">Low</td>
+      <td class="accent-green">Low (cached)</td>
+      <td class="accent-green">Free</td>
+      <td class="accent-amber">Medium</td>
+      <td class="accent-green">Low&ndash;Med</td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Batching</td>
+      <td>&mdash;</td>
+      <td>32 texts</td>
+      <td>32 texts</td>
+      <td>Per-file</td>
+      <td class="accent-green">Multi-file (80K)</td>
+      <td>32 + multi-file</td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Context</td>
+      <td class="accent-pink">Single line</td>
+      <td class="accent-pink">Single line</td>
+      <td class="accent-pink">Single line</td>
+      <td class="accent-green">Full file</td>
+      <td class="accent-green">Full file</td>
+      <td class="accent-green">Line + file</td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Caching</td>
+      <td>Model on disk</td>
+      <td>&mdash;</td>
+      <td class="accent-green">SHA-256 JSON</td>
+      <td>&mdash;</td>
+      <td>&mdash;</td>
+      <td>&mdash;</td>
+    </tr>
+  </table>
+  <p class="small" style="margin-top: 12px;">All pipelines output identical <code>ConcretisationResult</code> objects &mdash; consumers are agnostic to the classification method.</p>
+</section>
+
+<!-- PIPELINE EVOLUTION DIAGRAM -->
+<section>
+  <h2>Evolution of the Approach</h2>
+  <h3>Each experiment addressed a weakness of the previous one</h3>
+  <div style="font-size: 0.52em; max-width: 900px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: auto 1fr auto 1fr auto; align-items: center; gap: 4px;">
+      <div class="pipeline-box" style="border-color: #fbbf24; min-width: 130px;">
+        <strong class="accent-amber">ML Classifier</strong><br>
+        <span class="dim">Fast, free, but<br>limited by training data</span>
+      </div>
+      <div style="text-align: center; color: #475569;">&xrarr;</div>
+      <div class="pipeline-box" style="border-color: #a78bfa; min-width: 130px;">
+        <strong class="accent-purple">Ollama</strong><br>
+        <span class="dim">Full context, but<br>slow &amp; local only</span>
+      </div>
+      <div style="text-align: center; color: #475569;">&xrarr;</div>
+      <div class="pipeline-box" style="border-color: #4ade80; min-width: 130px;">
+        <strong class="accent-green">Gemini Flash</strong><br>
+        <span class="dim">Fast cloud LLM +<br>batching, but costly</span>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 14px;">
+      <div style="text-align: center;">
+        <div style="color: #475569; margin-bottom: 4px;">&darr; <span class="dim">Can we avoid LLM calls entirely?</span></div>
+        <div class="pipeline-box" style="border-color: #38bdf8;">
+          <strong class="accent">Generic Embedding</strong><br>
+          <span class="dim">Cheap embedding API, good gate,<br>but weak direction</span>
+        </div>
+        <div style="color: #475569; margin-top: 4px;">&darr; <span class="dim">Richer targets?</span></div>
+        <div class="pipeline-box" style="border-color: #f472b6;">
+          <strong class="accent-pink">Pattern Embedding</strong><br>
+          <span class="dim">~3,430 targets, cached,<br>better direction via nearest-neighbor</span>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <div style="color: #475569; margin-bottom: 4px;">&darr; <span class="dim">Can we get LLM accuracy cheaply?</span></div>
+        <div class="pipeline-box" style="border-color: #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);">
+          <strong class="accent-amber">Hybrid</strong><br>
+          <span class="dim">Embedding gate (cheap) filters noise,<br>Gemini (expensive) on SIGNALs only<br><strong>Best of both worlds</strong></span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1404,7 +2042,7 @@ _EMPTY_RANGE_MAP</code></pre>
     <ul>
       <li><strong class="accent">16 languages</strong>, 90+ frameworks, 13 integration types</li>
       <li><strong class="accent-green">Six-stage pipeline</strong>: detect &rarr; extract &rarr; match &rarr; dedup &rarr; resolve &rarr; classify</li>
-      <li><strong class="accent-amber">tree-sitter</strong> for syntax-aware filtering, CFG construction, and Datalog emission</li>
+      <li><strong class="accent-amber">Six concretisation experiments</strong>: ML, embedding (generic + pattern), Ollama, Gemini Flash, and hybrid</li>
       <li><strong class="accent-purple">Language-independent CFG</strong> via 12-role schema &mdash; one algorithm, per-language JSON</li>
       <li><strong class="accent-pink">Datalog integration detection</strong>: structural AST queries replace regex with data-driven bridge facts</li>
       <li><strong>Declarative plugin system</strong>: add a language with JSON + a pattern file</li>
