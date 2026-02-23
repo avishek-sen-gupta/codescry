@@ -14,6 +14,7 @@ from repo_surveyor.integration_concretiser.ast_walker import (
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
     EmbeddingConcretiser,
+    HuggingFaceLocalEmbeddingClient,
     OllamaEmbeddingClient,
     _BATCH_SIZE,
     _DIRECTIONAL_DESCRIPTIONS,
@@ -640,3 +641,122 @@ class TestOllamaRetry:
 
         with pytest.raises(RuntimeError, match="failed after .* retries"):
             client.embed_batch(["test"])
+
+
+# ---------------------------------------------------------------------------
+# Helpers for HuggingFaceLocalEmbeddingClient tests
+# ---------------------------------------------------------------------------
+
+
+class _FakeTensor:
+    """Minimal tensor-like object returned by the fake model."""
+
+    def __init__(self, values: list[float]) -> None:
+        self._values = values
+
+    def detach(self):
+        return self
+
+    def cpu(self):
+        return self
+
+    def tolist(self) -> list[float]:
+        return self._values
+
+    def __getitem__(self, idx):
+        return self
+
+
+class _FakeTokenizer:
+    """Injectable fake tokenizer that records calls and returns input IDs."""
+
+    def __init__(self) -> None:
+        self.encode_calls: list[str] = []
+
+    def encode(self, text: str, return_tensors: str = "pt"):
+        self.encode_calls.append(text)
+        return [hash(text) % 1000]
+
+
+class _FakeModel:
+    """Injectable fake model that returns pre-configured embeddings."""
+
+    def __init__(self, embedding_dim: int = 3) -> None:
+        self._dim = embedding_dim
+        self.call_count = 0
+
+    def __call__(self, inputs):
+        self.call_count += 1
+        embedding = [float(self.call_count * 10 + i) for i in range(self._dim)]
+        return [_FakeTensor(embedding)]
+
+
+# ---------------------------------------------------------------------------
+# Tests: HuggingFaceLocalEmbeddingClient
+# ---------------------------------------------------------------------------
+
+
+class TestHuggingFaceLocalEmbedBatch:
+    """Verify HuggingFaceLocalEmbeddingClient.embed_batch returns correct embeddings."""
+
+    def test_single_text_returns_embedding(self):
+        tokenizer = _FakeTokenizer()
+        model = _FakeModel(embedding_dim=4)
+        client = HuggingFaceLocalEmbeddingClient(model=model, tokenizer=tokenizer)
+
+        result = client.embed_batch(["hello world"])
+
+        assert len(result) == 1
+        assert len(result[0]) == 4
+        assert tokenizer.encode_calls == ["hello world"]
+        assert model.call_count == 1
+
+    def test_multiple_texts_returns_all_embeddings(self):
+        tokenizer = _FakeTokenizer()
+        model = _FakeModel(embedding_dim=3)
+        client = HuggingFaceLocalEmbeddingClient(model=model, tokenizer=tokenizer)
+
+        result = client.embed_batch(["foo", "bar", "baz"])
+
+        assert len(result) == 3
+        assert model.call_count == 3
+        assert tokenizer.encode_calls == ["foo", "bar", "baz"]
+
+    def test_empty_input_returns_empty(self):
+        tokenizer = _FakeTokenizer()
+        model = _FakeModel(embedding_dim=3)
+        client = HuggingFaceLocalEmbeddingClient(model=model, tokenizer=tokenizer)
+
+        result = client.embed_batch([])
+
+        assert result == []
+        assert model.call_count == 0
+        assert tokenizer.encode_calls == []
+
+    def test_custom_model_name_stored(self):
+        tokenizer = _FakeTokenizer()
+        model = _FakeModel()
+        client = HuggingFaceLocalEmbeddingClient(
+            model_name="custom/model",
+            model=model,
+            tokenizer=tokenizer,
+        )
+
+        assert client._model_name == "custom/model"
+
+
+class TestHuggingFaceLocalBatching:
+    """Verify batching splits texts into chunks of _BATCH_SIZE."""
+
+    def test_texts_split_into_correct_batches(self):
+        num_texts = _BATCH_SIZE + 10
+        tokenizer = _FakeTokenizer()
+        model = _FakeModel(embedding_dim=2)
+        client = HuggingFaceLocalEmbeddingClient(model=model, tokenizer=tokenizer)
+
+        texts = [f"text_{i}" for i in range(num_texts)]
+        result = client.embed_batch(texts)
+
+        assert len(result) == num_texts
+        assert model.call_count == num_texts
+        assert len(tokenizer.encode_calls) == num_texts

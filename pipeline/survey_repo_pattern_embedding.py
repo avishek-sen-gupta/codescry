@@ -5,18 +5,21 @@ per-pattern descriptions attached to every regex pattern.  A nearest-neighbor
 lookup against these pre-embedded descriptions classifies each signal,
 capturing framework-specific semantics.
 
-Supports three embedding backends via --backend:
+Supports four embedding backends via --backend:
   - huggingface (default): nomic-embed-code via HuggingFace Inference Endpoint
     Requires HUGGING_FACE_URL and HUGGING_FACE_API_TOKEN env vars.
   - gemini: gemini-embedding-001 via Google Gemini API
     Requires GEMINI_001_EMBEDDING_API_KEY env var.
   - ollama: jina/jina-embeddings-v2-base-code via local Ollama server
     No API key required.  Use --model and --ollama-url to customise.
+  - hf-local: Salesforce/codet5p-110m-embedding via local HuggingFace transformers
+    No API server needed.  Use --model to customise.
 
 Usage:
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend gemini
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend ollama
+    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend hf-local
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --languages Java
 """
 
@@ -33,6 +36,7 @@ from repo_surveyor import survey
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
     GeminiEmbeddingClient,
+    HuggingFaceLocalEmbeddingClient,
     OllamaEmbeddingClient,
 )
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
@@ -49,8 +53,15 @@ logger = logging.getLogger(__name__)
 
 def _create_client(
     args: argparse.Namespace,
-) -> EmbeddingClient | GeminiEmbeddingClient | OllamaEmbeddingClient:
+) -> (
+    EmbeddingClient
+    | GeminiEmbeddingClient
+    | OllamaEmbeddingClient
+    | HuggingFaceLocalEmbeddingClient
+):
     """Create the appropriate embedding client based on the backend choice."""
+    if args.backend == "hf-local":
+        return HuggingFaceLocalEmbeddingClient(model_name=args.model)
     if args.backend == "ollama":
         return OllamaEmbeddingClient(model=args.model, base_url=args.ollama_url)
     if args.backend == "gemini":
@@ -96,12 +107,14 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--backend",
-        choices=["huggingface", "gemini", "ollama"],
+        choices=["huggingface", "gemini", "ollama", "hf-local"],
         default="huggingface",
         help=(
             "Embedding backend: huggingface (nomic-embed-code), "
-            "gemini (gemini-embedding-001), or "
-            "ollama (local, default model jina/jina-embeddings-v2-base-code). "
+            "gemini (gemini-embedding-001), "
+            "ollama (local, default model jina/jina-embeddings-v2-base-code), or "
+            "hf-local (local HuggingFace transformers, default model "
+            "Salesforce/codet5p-110m-embedding). "
             "Default: huggingface."
         ),
     )
@@ -109,8 +122,9 @@ def _parse_args() -> argparse.Namespace:
         "--model",
         default="unclemusclez/jina-embeddings-v2-base-code",
         help=(
-            "Ollama model name (only used with --backend ollama). "
-            "Default: unclemusclez/jina-embeddings-v2-base-code."
+            "Model name (used with --backend ollama or --backend hf-local). "
+            "Default: unclemusclez/jina-embeddings-v2-base-code for ollama, "
+            "Salesforce/codet5p-110m-embedding for hf-local."
         ),
     )
     parser.add_argument(

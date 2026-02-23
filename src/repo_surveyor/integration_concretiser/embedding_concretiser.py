@@ -5,10 +5,11 @@ DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE by computing cosine
 similarity against 26 directional description embeddings (13 integration
 types x 2 directions).
 
-Supports three embedding backends:
+Supports four embedding backends:
   - HuggingFace Inference Endpoint (nomic-embed-code) via ``EmbeddingClient``
   - Google Gemini (gemini-embedding-001) via ``GeminiEmbeddingClient``
   - Local Ollama (unclemusclez/jina-embeddings-v2-base-code) via ``OllamaEmbeddingClient``
+  - Local HuggingFace transformers (Salesforce/codet5p-110m-embedding) via ``HuggingFaceLocalEmbeddingClient``
 
 All implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
 is backend-agnostic.
@@ -18,14 +19,17 @@ Usage:
         EmbeddingClient,
         GeminiEmbeddingClient,
         OllamaEmbeddingClient,
+        HuggingFaceLocalEmbeddingClient,
         EmbeddingConcretiser,
     )
-    # HuggingFace backend
+    # HuggingFace Inference Endpoint backend
     client = EmbeddingClient(endpoint_url=..., token=...)
     # -- or Gemini backend --
     client = GeminiEmbeddingClient(api_key=...)
     # -- or Ollama backend (local, no API key needed) --
     client = OllamaEmbeddingClient()
+    # -- or HuggingFace local backend (no API server needed) --
+    client = HuggingFaceLocalEmbeddingClient()
     concretiser = EmbeddingConcretiser(client)
     result, metadata = concretiser.concretise(detector_result, file_reader)
 """
@@ -401,6 +405,99 @@ class GeminiEmbeddingClient:
             f"[Gemini] Batch {batch_idx}/{total_batches}: "
             f"failed after {_MAX_RETRIES} retries due to rate limiting"
         )
+
+
+_HF_LOCAL_DEFAULT_MODEL = "Salesforce/codet5p-110m-embedding"
+
+
+class HuggingFaceLocalEmbeddingClient:
+    """Embedding client using a local HuggingFace transformers model.
+
+    Loads the model and tokenizer once at construction time and runs
+    inference locally — no API server or network calls required.
+    Default model: ``Salesforce/codet5p-110m-embedding`` (256-dim, L2-normalised).
+    """
+
+    def __init__(
+        self,
+        model_name: str = _HF_LOCAL_DEFAULT_MODEL,
+        device: str = "cpu",
+        model: object = None,
+        tokenizer: object = None,
+    ) -> None:
+        self._model_name = model_name
+        self._device = device
+
+        if model is not None and tokenizer is not None:
+            self._model = model
+            self._tokenizer = tokenizer
+        else:
+            from transformers import AutoModel, AutoTokenizer
+
+            logger.info(
+                "[HF-Local] Loading tokenizer and model: %s (device=%s)",
+                model_name,
+                device,
+            )
+            self._tokenizer = AutoTokenizer.from_pretrained(
+                model_name, trust_remote_code=True
+            )
+            self._model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
+            import torch  # noqa: F811
+
+            if device != "cpu" and torch.cuda.is_available():
+                self._model = self._model.to(device)
+            logger.info("[HF-Local] Model loaded successfully")
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed a list of texts using the local HuggingFace model."""
+        import time
+
+        total_texts = len(texts)
+        total_batches = math.ceil(total_texts / _BATCH_SIZE) if total_texts else 0
+        logger.info(
+            "[HF-Local] Embedding %d texts in %d batches (batch_size=%d, model=%s)",
+            total_texts,
+            total_batches,
+            _BATCH_SIZE,
+            self._model_name,
+        )
+
+        all_embeddings: list[list[float]] = []
+        for batch_idx, chunk in enumerate(batched(texts, _BATCH_SIZE), start=1):
+            chunk_list = list(chunk)
+            logger.info(
+                "[HF-Local] Batch %d/%d: embedding %d texts",
+                batch_idx,
+                total_batches,
+                len(chunk_list),
+            )
+            t0 = time.monotonic()
+            batch_embeddings = [self._embed_single(text) for text in chunk_list]
+            elapsed = time.monotonic() - t0
+            dim = len(batch_embeddings[0]) if batch_embeddings else 0
+            logger.info(
+                "[HF-Local] Batch %d/%d: produced %d embeddings (dim=%d) in %.2fs",
+                batch_idx,
+                total_batches,
+                len(batch_embeddings),
+                dim,
+                elapsed,
+            )
+            all_embeddings.extend(batch_embeddings)
+
+        logger.info(
+            "[HF-Local] Embedding complete: %d total embeddings", len(all_embeddings)
+        )
+        return all_embeddings
+
+    def _embed_single(self, text: str) -> list[float]:
+        """Tokenize and embed a single text string."""
+        inputs = self._tokenizer.encode(text, return_tensors="pt")
+        if hasattr(inputs, "to"):
+            inputs = inputs.to(self._device)
+        output = self._model(inputs)[0]
+        return output.detach().cpu().tolist()
 
 
 _OLLAMA_DEFAULT_MODEL = "unclemusclez/jina-embeddings-v2-base-code"

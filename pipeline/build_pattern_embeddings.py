@@ -8,6 +8,7 @@ Usage:
     poetry run python pipeline/build_pattern_embeddings.py --backend gemini
     poetry run python pipeline/build_pattern_embeddings.py --backend huggingface
     poetry run python pipeline/build_pattern_embeddings.py --backend ollama
+    poetry run python pipeline/build_pattern_embeddings.py --backend hf-local
 """
 
 import argparse
@@ -21,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
     GeminiEmbeddingClient,
+    HuggingFaceLocalEmbeddingClient,
     OllamaEmbeddingClient,
 )
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
@@ -35,8 +37,15 @@ logger = logging.getLogger(__name__)
 
 def _create_client(
     args: argparse.Namespace,
-) -> EmbeddingClient | GeminiEmbeddingClient | OllamaEmbeddingClient:
+) -> (
+    EmbeddingClient
+    | GeminiEmbeddingClient
+    | OllamaEmbeddingClient
+    | HuggingFaceLocalEmbeddingClient
+):
     """Create the appropriate embedding client based on the backend choice."""
+    if args.backend == "hf-local":
+        return HuggingFaceLocalEmbeddingClient(model_name=args.model)
     if args.backend == "ollama":
         return OllamaEmbeddingClient(model=args.model, base_url=args.ollama_url)
     if args.backend == "gemini":
@@ -51,12 +60,14 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--backend",
-        choices=["huggingface", "gemini", "ollama"],
+        choices=["huggingface", "gemini", "ollama", "hf-local"],
         default="huggingface",
         help=(
             "Embedding backend: huggingface (nomic-embed-code), "
-            "gemini (gemini-embedding-001), or "
-            "ollama (local, default model unclemusclez/jina-embeddings-v2-base-code). "
+            "gemini (gemini-embedding-001), "
+            "ollama (local, default model unclemusclez/jina-embeddings-v2-base-code), or "
+            "hf-local (local HuggingFace transformers, default model "
+            "Salesforce/codet5p-110m-embedding). "
             "Default: huggingface."
         ),
     )
@@ -64,8 +75,9 @@ def _parse_args() -> argparse.Namespace:
         "--model",
         default="unclemusclez/jina-embeddings-v2-base-code",
         help=(
-            "Ollama model name (only used with --backend ollama). "
-            "Default: unclemusclez/jina-embeddings-v2-base-code."
+            "Model name (used with --backend ollama or --backend hf-local). "
+            "Default: unclemusclez/jina-embeddings-v2-base-code for ollama, "
+            "Salesforce/codet5p-110m-embedding for hf-local."
         ),
     )
     parser.add_argument(
