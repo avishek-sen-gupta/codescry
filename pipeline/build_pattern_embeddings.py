@@ -7,6 +7,7 @@ will load these cached embeddings instead of re-calling the embedding API.
 Usage:
     poetry run python pipeline/build_pattern_embeddings.py --backend gemini
     poetry run python pipeline/build_pattern_embeddings.py --backend huggingface
+    poetry run python pipeline/build_pattern_embeddings.py --backend ollama
 """
 
 import argparse
@@ -20,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
     GeminiEmbeddingClient,
+    OllamaEmbeddingClient,
 )
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
     _compute_content_hash,
@@ -31,9 +33,13 @@ from repo_surveyor.integration_patterns import get_all_pattern_descriptions
 logger = logging.getLogger(__name__)
 
 
-def _create_client(backend: str) -> EmbeddingClient | GeminiEmbeddingClient:
+def _create_client(
+    args: argparse.Namespace,
+) -> EmbeddingClient | GeminiEmbeddingClient | OllamaEmbeddingClient:
     """Create the appropriate embedding client based on the backend choice."""
-    if backend == "gemini":
+    if args.backend == "ollama":
+        return OllamaEmbeddingClient(model=args.model, base_url=args.ollama_url)
+    if args.backend == "gemini":
         api_key = os.environ["GEMINI_001_EMBEDDING_API_KEY"]
         return GeminiEmbeddingClient(api_key=api_key)
     endpoint_url = os.environ["HUGGING_FACE_URL"]
@@ -45,11 +51,29 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--backend",
-        choices=["huggingface", "gemini"],
+        choices=["huggingface", "gemini", "ollama"],
         default="huggingface",
         help=(
-            "Embedding backend: huggingface (nomic-embed-code) or "
-            "gemini (gemini-embedding-001). Default: huggingface."
+            "Embedding backend: huggingface (nomic-embed-code), "
+            "gemini (gemini-embedding-001), or "
+            "ollama (local, default model unclemusclez/jina-embeddings-v2-base-code). "
+            "Default: huggingface."
+        ),
+    )
+    parser.add_argument(
+        "--model",
+        default="unclemusclez/jina-embeddings-v2-base-code",
+        help=(
+            "Ollama model name (only used with --backend ollama). "
+            "Default: unclemusclez/jina-embeddings-v2-base-code."
+        ),
+    )
+    parser.add_argument(
+        "--ollama-url",
+        default="http://localhost:11434",
+        help=(
+            "Ollama server base URL (only used with --backend ollama). "
+            "Default: http://localhost:11434."
         ),
     )
     parser.add_argument(
@@ -76,7 +100,7 @@ def main() -> None:
     logger.info("Collected %d pattern descriptions", len(descriptions))
     logger.info("Content hash: %s", _compute_content_hash(descriptions))
 
-    client = _create_client(args.backend)
+    client = _create_client(args)
     desc_texts = [d.text for d in descriptions]
 
     logger.info("Embedding %d descriptions via %s...", len(desc_texts), args.backend)
