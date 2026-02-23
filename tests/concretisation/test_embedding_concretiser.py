@@ -673,7 +673,7 @@ class _FakeTokenizer:
     def __init__(self) -> None:
         self.encode_calls: list[str] = []
 
-    def encode(self, text: str, return_tensors: str = "pt"):
+    def encode(self, text: str, return_tensors: str = "pt", **kwargs):
         self.encode_calls.append(text)
         return [hash(text) % 1000]
 

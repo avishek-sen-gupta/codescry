@@ -492,8 +492,10 @@ class HuggingFaceLocalEmbeddingClient:
         return all_embeddings
 
     def _embed_single(self, text: str) -> list[float]:
-        """Tokenize and embed a single text string."""
-        inputs = self._tokenizer.encode(text, return_tensors="pt")
+        """Tokenize and embed a single text string, truncating to model max length."""
+        inputs = self._tokenizer.encode(
+            text, return_tensors="pt", truncation=True, max_length=512
+        )
         if hasattr(inputs, "to"):
             inputs = inputs.to(self._device)
         output = self._model(inputs)[0]
