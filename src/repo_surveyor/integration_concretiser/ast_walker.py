@@ -1,11 +1,16 @@
 """Walk up the tree-sitter AST to find the enclosing structural node for a line."""
 
+import logging
+from collections.abc import Callable
+
 from tree_sitter import Node
 from tree_sitter_language_pack import get_parser
 
 from repo_surveyor.integration_patterns import Language
 from repo_surveyor.detection.syntax_zone import LANGUAGE_TO_TS_NAME
 from repo_surveyor.integration_concretiser.types import ASTContext
+
+logger = logging.getLogger(__name__)
 
 
 class _DefinitionNodes:
@@ -256,6 +261,40 @@ def _deepest_named_node_at_line(root: Node, line_0indexed: int) -> Node | None:
     return best
 
 
+def _deepest_named_nodes_at_lines(root: Node, lines: frozenset[int]) -> dict[int, Node]:
+    """Find the deepest named node for each line in a single AST traversal.
+
+    Args:
+        root: The root node of the parsed AST.
+        lines: Set of 0-indexed line numbers to resolve.
+
+    Returns:
+        Mapping from line number to the deepest named node covering that line.
+        Lines with no covering named node are absent from the result.
+    """
+    if not lines:
+        return {}
+
+    min_line = min(lines)
+    max_line = max(lines)
+    best: dict[int, Node] = {}
+    stack: list[Node] = [root]
+
+    while stack:
+        node = stack.pop()
+        node_start = node.start_point.row
+        node_end = node.end_point.row
+        if node_end < min_line or node_start > max_line:
+            continue
+        if node.is_named:
+            for line in lines:
+                if node_start <= line <= node_end:
+                    best[line] = node
+        stack.extend(reversed(node.children))
+
+    return best
+
+
 def _walk_up_to_structural(
     node: Node, language_extras: frozenset[str] = frozenset()
 ) -> Node:
@@ -473,3 +512,126 @@ def extract_invocation_context(
         start_line=invocation.start_point.row + 1,
         end_line=invocation.end_point.row + 1,
     )
+
+
+def _batch_extract(
+    file_content: bytes,
+    language: Language,
+    line_numbers: frozenset[int],
+    walk_up_fn: Callable[[Node, frozenset[str]], Node],
+) -> dict[int, ASTContext]:
+    """Shared batch extraction: parse once, walk once, resolve all lines.
+
+    Args:
+        file_content: Raw bytes of the source file.
+        language: Programming language of the file.
+        line_numbers: Set of 1-indexed line numbers to resolve.
+        walk_up_fn: Walk-up function to apply to each deepest node.
+
+    Returns:
+        Mapping from 1-indexed line number to ASTContext.
+        Lines that cannot be resolved map to FALLBACK_AST_CONTEXT.
+    """
+    ts_name = LANGUAGE_TO_TS_NAME.get(language)
+    if ts_name is None:
+        return {line: FALLBACK_AST_CONTEXT for line in line_numbers}
+
+    parser = get_parser(ts_name)
+    tree = parser.parse(file_content)
+    lines_0indexed = frozenset(ln - 1 for ln in line_numbers)
+
+    deepest_by_line = _deepest_named_nodes_at_lines(tree.root_node, lines_0indexed)
+    language_extras = _LanguageStatementNodes.MAPPING.get(language, frozenset())
+
+    # Walk up once per unique deepest node (many lines may share the same node)
+    walked_cache: dict[int, ASTContext] = {}
+    results: dict[int, ASTContext] = {}
+
+    for line_1indexed in line_numbers:
+        line_0indexed = line_1indexed - 1
+        deepest = deepest_by_line.get(line_0indexed)
+        if deepest is None:
+            results[line_1indexed] = FALLBACK_AST_CONTEXT
+            continue
+
+        node_id = id(deepest)
+        if node_id not in walked_cache:
+            structural = walk_up_fn(deepest, language_extras)
+            if _is_root_node(structural):
+                walked_cache[node_id] = FALLBACK_AST_CONTEXT
+            else:
+                walked_cache[node_id] = ASTContext(
+                    node_type=structural.type,
+                    node_text=_node_text(structural, file_content),
+                    start_line=structural.start_point.row + 1,
+                    end_line=structural.end_point.row + 1,
+                )
+        results[line_1indexed] = walked_cache[node_id]
+
+    return results
+
+
+def batch_extract_ast_contexts(
+    file_content: bytes,
+    language: Language,
+    line_numbers: frozenset[int],
+) -> dict[int, ASTContext]:
+    """Extract enclosing AST contexts for multiple lines in a single parse.
+
+    Parses the file once, walks the AST once to find deepest nodes for all
+    requested lines, then walks up to the nearest definition/declaration
+    (or statement fallback) once per unique deepest node.
+
+    Args:
+        file_content: Raw bytes of the source file.
+        language: Programming language of the file.
+        line_numbers: Set of 1-indexed line numbers.
+
+    Returns:
+        Mapping from line number to ASTContext.
+    """
+    return _batch_extract(file_content, language, line_numbers, _walk_up_to_structural)
+
+
+def batch_extract_statement_contexts(
+    file_content: bytes,
+    language: Language,
+    line_numbers: frozenset[int],
+) -> dict[int, ASTContext]:
+    """Extract statement-level AST contexts for multiple lines in a single parse.
+
+    Parses the file once, walks the AST once to find deepest nodes for all
+    requested lines, then walks up to the nearest statement or definition
+    once per unique deepest node.
+
+    Args:
+        file_content: Raw bytes of the source file.
+        language: Programming language of the file.
+        line_numbers: Set of 1-indexed line numbers.
+
+    Returns:
+        Mapping from line number to ASTContext.
+    """
+    return _batch_extract(file_content, language, line_numbers, _walk_up_to_statement)
+
+
+def batch_extract_invocation_contexts(
+    file_content: bytes,
+    language: Language,
+    line_numbers: frozenset[int],
+) -> dict[int, ASTContext]:
+    """Extract invocation-level AST contexts for multiple lines in a single parse.
+
+    Parses the file once, walks the AST once to find deepest nodes for all
+    requested lines, then walks up to the nearest invocation (or statement/
+    definition fallback) once per unique deepest node.
+
+    Args:
+        file_content: Raw bytes of the source file.
+        language: Programming language of the file.
+        line_numbers: Set of 1-indexed line numbers.
+
+    Returns:
+        Mapping from line number to ASTContext.
+    """
+    return _batch_extract(file_content, language, line_numbers, _walk_up_to_invocation)

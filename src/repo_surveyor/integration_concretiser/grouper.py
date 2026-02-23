@@ -9,7 +9,7 @@ from itertools import groupby
 from operator import attrgetter
 
 from repo_surveyor.integration_patterns import Language
-from repo_surveyor.integration_concretiser.ast_walker import extract_ast_context
+from repo_surveyor.integration_concretiser.ast_walker import batch_extract_ast_contexts
 from repo_surveyor.integration_concretiser.types import ASTContext, SignalLike
 
 logger = logging.getLogger(__name__)
@@ -45,33 +45,36 @@ class _SignalWithContext:
     group_key: tuple[str, int, int]
 
 
-def _resolve_signal(
-    signal: SignalLike,
-    file_content: bytes,
-    language: Language,
-) -> _SignalWithContext:
-    """Resolve a single signal to its AST context."""
-    ctx = extract_ast_context(file_content, language, signal.match.line_number)
-    return _SignalWithContext(
-        signal=signal,
-        ast_context=ctx,
-        group_key=(signal.match.file_path, ctx.start_line, ctx.end_line),
-    )
-
-
 def _resolve_file_signals(
     file_path: str,
     signals: list[SignalLike],
     file_reader: Callable[[str], bytes],
 ) -> tuple[_SignalWithContext, ...]:
-    """Resolve all signals in a single file to their AST contexts."""
+    """Resolve all signals in a single file to their AST contexts.
+
+    Parses the file once and extracts AST contexts for all signal lines
+    in a single traversal via batch_extract_ast_contexts.
+    """
     first_language = signals[0].match.language
     if first_language is None:
         return ()
 
     file_content = file_reader(file_path)
+    line_numbers = frozenset(sig.match.line_number for sig in signals)
+    contexts_by_line = batch_extract_ast_contexts(
+        file_content, first_language, line_numbers
+    )
     return tuple(
-        _resolve_signal(signal, file_content, first_language) for signal in signals
+        _SignalWithContext(
+            signal=sig,
+            ast_context=contexts_by_line[sig.match.line_number],
+            group_key=(
+                sig.match.file_path,
+                contexts_by_line[sig.match.line_number].start_line,
+                contexts_by_line[sig.match.line_number].end_line,
+            ),
+        )
+        for sig in signals
     )
 
 

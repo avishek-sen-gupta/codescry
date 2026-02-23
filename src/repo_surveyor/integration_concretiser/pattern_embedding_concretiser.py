@@ -36,7 +36,7 @@ from repo_surveyor.detection.integration_detector import (
 )
 from repo_surveyor.integration_concretiser.ast_walker import (
     FALLBACK_AST_CONTEXT,
-    extract_statement_context,
+    batch_extract_statement_contexts,
 )
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClientProtocol,
@@ -263,12 +263,19 @@ class PatternEmbeddingConcretiser:
         signals: list[SignalLike],
         file_reader: Callable[[str], bytes],
     ) -> list[ASTContext]:
-        """Extract statement-level AST context for each signal."""
+        """Extract statement-level AST context for each signal.
+
+        Groups signals by file and language, then calls
+        batch_extract_statement_contexts once per (file, language) pair
+        to avoid redundant parses and AST walks.
+        """
         logger.info("Extracting AST contexts for %d signals...", len(signals))
         file_cache: dict[str, bytes] = {}
-        contexts: list[ASTContext] = []
-        fallback_count = 0
-        for sig in signals:
+        # Group signals by (file_path, language) for batch extraction
+        groups: dict[tuple[str, Language], list[int]] = {}
+        fallback_indices: list[int] = []
+
+        for idx, sig in enumerate(signals):
             fp = sig.match.file_path
             if fp not in file_cache:
                 try:
@@ -280,15 +287,26 @@ class PatternEmbeddingConcretiser:
 
             language = sig.match.language
             if language is None:
-                fallback_count += 1
-                contexts.append(FALLBACK_AST_CONTEXT)
+                fallback_indices.append(idx)
                 continue
 
-            ctx = extract_statement_context(
-                file_cache[fp], language, sig.match.line_number
-            )
-            contexts.append(ctx)
+            key = (fp, language)
+            groups.setdefault(key, []).append(idx)
 
+        # Batch extract per (file, language) group
+        context_by_index: dict[int, ASTContext] = {
+            idx: FALLBACK_AST_CONTEXT for idx in fallback_indices
+        }
+        for (fp, language), indices in groups.items():
+            line_numbers = frozenset(signals[idx].match.line_number for idx in indices)
+            contexts_by_line = batch_extract_statement_contexts(
+                file_cache[fp], language, line_numbers
+            )
+            for idx in indices:
+                context_by_index[idx] = contexts_by_line[signals[idx].match.line_number]
+
+        contexts = [context_by_index[i] for i in range(len(signals))]
+        fallback_count = len(fallback_indices)
         logger.info(
             "AST context extraction complete: %d contexts from %d unique files "
             "(%d fallbacks)",
