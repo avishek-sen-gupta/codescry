@@ -58,6 +58,7 @@ _BATCH_SIZE = 32
 
 _MAX_RETRIES = 5
 _INITIAL_BACKOFF_SECONDS = 2.0
+_INTER_BATCH_DELAY_SECONDS = 0.5
 
 _DIRECTIONAL_DESCRIPTIONS: dict[tuple[str, str], str] = {
     ("http_rest", "inward"): (
@@ -230,6 +231,8 @@ class EmbeddingClient:
                 chunk_list, batch_idx, total_batches, json, Request, urlopen
             )
             all_embeddings.extend(result)
+            if batch_idx < total_batches:
+                time.sleep(_INTER_BATCH_DELAY_SECONDS)
 
         logger.info(
             "[Nomic] Embedding complete: %d total embeddings", len(all_embeddings)
@@ -335,6 +338,8 @@ class GeminiEmbeddingClient:
                 chunk_list, batch_idx, total_batches, types
             )
             all_embeddings.extend(batch_embeddings)
+            if batch_idx < total_batches:
+                time.sleep(_INTER_BATCH_DELAY_SECONDS)
 
         logger.info(
             "[Gemini] Embedding complete: %d total embeddings", len(all_embeddings)
