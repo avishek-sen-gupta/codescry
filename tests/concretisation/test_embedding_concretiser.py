@@ -575,7 +575,9 @@ class TestOllamaEmbedBatch:
 
         assert result == expected
         assert len(server.requests) == 1
-        assert server.requests[0]["model"] == "jina/jina-embeddings-v2-base-code"
+        assert (
+            server.requests[0]["model"] == "unclemusclez/jina-embeddings-v2-base-code"
+        )
         assert server.requests[0]["input"] == ["hello", "world"]
 
     def test_custom_model_and_url(self):

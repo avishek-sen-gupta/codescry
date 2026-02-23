@@ -8,7 +8,7 @@ types x 2 directions).
 Supports three embedding backends:
   - HuggingFace Inference Endpoint (nomic-embed-code) via ``EmbeddingClient``
   - Google Gemini (gemini-embedding-001) via ``GeminiEmbeddingClient``
-  - Local Ollama (jina/jina-embeddings-v2-base-code) via ``OllamaEmbeddingClient``
+  - Local Ollama (unclemusclez/jina-embeddings-v2-base-code) via ``OllamaEmbeddingClient``
 
 All implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
 is backend-agnostic.
@@ -403,7 +403,7 @@ class GeminiEmbeddingClient:
         )
 
 
-_OLLAMA_DEFAULT_MODEL = "jina/jina-embeddings-v2-base-code"
+_OLLAMA_DEFAULT_MODEL = "unclemusclez/jina-embeddings-v2-base-code"
 _OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434"
 
 

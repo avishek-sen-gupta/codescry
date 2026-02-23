@@ -107,10 +107,10 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default="jina/jina-embeddings-v2-base-code",
+        default="unclemusclez/jina-embeddings-v2-base-code",
         help=(
             "Ollama model name (only used with --backend ollama). "
-            "Default: jina/jina-embeddings-v2-base-code."
+            "Default: unclemusclez/jina-embeddings-v2-base-code."
         ),
     )
     parser.add_argument(
