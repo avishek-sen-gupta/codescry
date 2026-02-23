@@ -5,15 +5,18 @@ per-pattern descriptions attached to every regex pattern.  A nearest-neighbor
 lookup against these pre-embedded descriptions classifies each signal,
 capturing framework-specific semantics.
 
-Supports two embedding backends via --backend:
+Supports three embedding backends via --backend:
   - huggingface (default): nomic-embed-code via HuggingFace Inference Endpoint
     Requires HUGGING_FACE_URL and HUGGING_FACE_API_TOKEN env vars.
   - gemini: gemini-embedding-001 via Google Gemini API
     Requires GEMINI_001_EMBEDDING_API_KEY env var.
+  - ollama: jina/jina-embeddings-v2-base-code via local Ollama server
+    No API key required.  Use --model and --ollama-url to customise.
 
 Usage:
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend gemini
+    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend ollama
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --languages Java
 """
 
@@ -30,6 +33,7 @@ from repo_surveyor import survey
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
     GeminiEmbeddingClient,
+    OllamaEmbeddingClient,
 )
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
     PatternEmbeddingConcretiser,
@@ -43,9 +47,13 @@ from repo_surveyor.training.signal_classifier import NullSignalClassifier
 logger = logging.getLogger(__name__)
 
 
-def _create_client(backend: str) -> EmbeddingClient | GeminiEmbeddingClient:
+def _create_client(
+    args: argparse.Namespace,
+) -> EmbeddingClient | GeminiEmbeddingClient | OllamaEmbeddingClient:
     """Create the appropriate embedding client based on the backend choice."""
-    if backend == "gemini":
+    if args.backend == "ollama":
+        return OllamaEmbeddingClient(model=args.model, base_url=args.ollama_url)
+    if args.backend == "gemini":
         api_key = os.environ["GEMINI_001_EMBEDDING_API_KEY"]
         return GeminiEmbeddingClient(api_key=api_key)
     endpoint_url = os.environ["HUGGING_FACE_URL"]
@@ -88,11 +96,29 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--backend",
-        choices=["huggingface", "gemini"],
+        choices=["huggingface", "gemini", "ollama"],
         default="huggingface",
         help=(
-            "Embedding backend: huggingface (nomic-embed-code) or "
-            "gemini (gemini-embedding-001). Default: huggingface."
+            "Embedding backend: huggingface (nomic-embed-code), "
+            "gemini (gemini-embedding-001), or "
+            "ollama (local, default model jina/jina-embeddings-v2-base-code). "
+            "Default: huggingface."
+        ),
+    )
+    parser.add_argument(
+        "--model",
+        default="jina/jina-embeddings-v2-base-code",
+        help=(
+            "Ollama model name (only used with --backend ollama). "
+            "Default: jina/jina-embeddings-v2-base-code."
+        ),
+    )
+    parser.add_argument(
+        "--ollama-url",
+        default="http://localhost:11434",
+        help=(
+            "Ollama server base URL (only used with --backend ollama). "
+            "Default: http://localhost:11434."
         ),
     )
     parser.add_argument(
@@ -147,7 +173,7 @@ def main() -> None:
 
     # --- Phase 2: Pattern-embedding concretisation ---
     logger.info("--- Phase 2: Pattern-embedding concretisation ---")
-    client = _create_client(args.backend)
+    client = _create_client(args)
     cache_path = _default_cache_path(args.backend)
     logger.info("Embedding cache path: %s", cache_path)
     concretiser = PatternEmbeddingConcretiser(

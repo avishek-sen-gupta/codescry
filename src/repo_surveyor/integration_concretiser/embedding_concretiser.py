@@ -5,23 +5,27 @@ DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE by computing cosine
 similarity against 26 directional description embeddings (13 integration
 types x 2 directions).
 
-Supports two embedding backends:
+Supports three embedding backends:
   - HuggingFace Inference Endpoint (nomic-embed-code) via ``EmbeddingClient``
   - Google Gemini (gemini-embedding-001) via ``GeminiEmbeddingClient``
+  - Local Ollama (jina/jina-embeddings-v2-base-code) via ``OllamaEmbeddingClient``
 
-Both implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
+All implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
 is backend-agnostic.
 
 Usage:
     from repo_surveyor.integration_concretiser.embedding_concretiser import (
         EmbeddingClient,
         GeminiEmbeddingClient,
+        OllamaEmbeddingClient,
         EmbeddingConcretiser,
     )
     # HuggingFace backend
     client = EmbeddingClient(endpoint_url=..., token=...)
     # -- or Gemini backend --
     client = GeminiEmbeddingClient(api_key=...)
+    # -- or Ollama backend (local, no API key needed) --
+    client = OllamaEmbeddingClient()
     concretiser = EmbeddingConcretiser(client)
     result, metadata = concretiser.concretise(detector_result, file_reader)
 """
@@ -54,11 +58,11 @@ logger = logging.getLogger(__name__)
 
 _CONFIDENCE_THRESHOLD = 0.56
 
-_BATCH_SIZE = 32
+_BATCH_SIZE = 100
 
 _MAX_RETRIES = 5
 _INITIAL_BACKOFF_SECONDS = 2.0
-_INTER_BATCH_DELAY_SECONDS = 0.5
+_INTER_BATCH_DELAY_SECONDS = 1.0
 
 _DIRECTIONAL_DESCRIPTIONS: dict[tuple[str, str], str] = {
     ("http_rest", "inward"): (
@@ -382,12 +386,13 @@ class GeminiEmbeddingClient:
                     raise
                 logger.warning(
                     "[Gemini] Batch %d/%d: rate-limited (attempt %d/%d), "
-                    "retrying in %.1fs...",
+                    "retrying in %.1fs... error: %s",
                     batch_idx,
                     total_batches,
                     attempt + 1,
                     _MAX_RETRIES,
                     backoff,
+                    exc,
                 )
                 time.sleep(backoff)
                 backoff *= 2
@@ -395,6 +400,123 @@ class GeminiEmbeddingClient:
         raise RuntimeError(
             f"[Gemini] Batch {batch_idx}/{total_batches}: "
             f"failed after {_MAX_RETRIES} retries due to rate limiting"
+        )
+
+
+_OLLAMA_DEFAULT_MODEL = "jina/jina-embeddings-v2-base-code"
+_OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434"
+
+
+class OllamaEmbeddingClient:
+    """Embedding client using a local Ollama server.
+
+    Calls the ``/api/embed`` endpoint which accepts multiple texts in a single
+    request and returns their embeddings.  Runs entirely locally so there are
+    no API quotas or rate limits to worry about.
+    """
+
+    def __init__(
+        self,
+        model: str = _OLLAMA_DEFAULT_MODEL,
+        base_url: str = _OLLAMA_DEFAULT_BASE_URL,
+        request_fn: object = None,
+    ) -> None:
+        self._model = model
+        self._base_url = base_url.rstrip("/")
+        self._request_fn = request_fn
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed a list of texts via the local Ollama /api/embed endpoint."""
+        import json
+        import time
+        from urllib.request import Request, urlopen
+
+        request_fn = self._request_fn if self._request_fn is not None else urlopen
+
+        total_texts = len(texts)
+        total_batches = math.ceil(total_texts / _BATCH_SIZE)
+        logger.info(
+            "[Ollama] Embedding %d texts in %d batches (batch_size=%d, model=%s)",
+            total_texts,
+            total_batches,
+            _BATCH_SIZE,
+            self._model,
+        )
+
+        all_embeddings: list[list[float]] = []
+        for batch_idx, chunk in enumerate(batched(texts, _BATCH_SIZE), start=1):
+            chunk_list = list(chunk)
+            logger.info(
+                "[Ollama] Batch %d/%d: sending %d texts",
+                batch_idx,
+                total_batches,
+                len(chunk_list),
+            )
+            batch_embeddings = self._embed_with_retry(
+                chunk_list, batch_idx, total_batches, json, Request, request_fn
+            )
+            all_embeddings.extend(batch_embeddings)
+
+        logger.info(
+            "[Ollama] Embedding complete: %d total embeddings", len(all_embeddings)
+        )
+        return all_embeddings
+
+    def _embed_with_retry(
+        self,
+        texts: list[str],
+        batch_idx: int,
+        total_batches: int,
+        json_mod: object,
+        request_cls: type,
+        urlopen_fn: object,
+    ) -> list[list[float]]:
+        """Call Ollama /api/embed with exponential backoff on connection errors."""
+        import time
+        from urllib.error import URLError
+
+        url = f"{self._base_url}/api/embed"
+        backoff = _INITIAL_BACKOFF_SECONDS
+        for attempt in range(_MAX_RETRIES):
+            payload = json_mod.dumps({"model": self._model, "input": texts}).encode(
+                "utf-8"
+            )
+            req = request_cls(
+                url, data=payload, headers={"Content-Type": "application/json"}
+            )
+            try:
+                t0 = time.monotonic()
+                with urlopen_fn(req, timeout=300) as resp:
+                    result = json_mod.loads(resp.read())
+                elapsed = time.monotonic() - t0
+                embeddings = result["embeddings"]
+                dim = len(embeddings[0]) if embeddings else 0
+                logger.info(
+                    "[Ollama] Batch %d/%d: received %d embeddings (dim=%d) in %.2fs",
+                    batch_idx,
+                    total_batches,
+                    len(embeddings),
+                    dim,
+                    elapsed,
+                )
+                return embeddings
+            except URLError as exc:
+                logger.warning(
+                    "[Ollama] Batch %d/%d: connection error (attempt %d/%d), "
+                    "retrying in %.1fs... error: %s",
+                    batch_idx,
+                    total_batches,
+                    attempt + 1,
+                    _MAX_RETRIES,
+                    backoff,
+                    exc,
+                )
+                time.sleep(backoff)
+                backoff *= 2
+
+        raise RuntimeError(
+            f"[Ollama] Batch {batch_idx}/{total_batches}: "
+            f"failed after {_MAX_RETRIES} retries due to connection errors"
         )
 
 

@@ -1,6 +1,9 @@
 """Tests for embedding-based integration signal concretisation."""
 
+import io
+import json
 import math
+from urllib.error import URLError
 
 import pytest
 
@@ -11,7 +14,10 @@ from repo_surveyor.integration_concretiser.ast_walker import (
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
     EmbeddingConcretiser,
+    OllamaEmbeddingClient,
+    _BATCH_SIZE,
     _DIRECTIONAL_DESCRIPTIONS,
+    _MAX_RETRIES,
     cosine,
 )
 from repo_surveyor.integration_concretiser.types import ASTContext, SignalValidity
@@ -499,3 +505,136 @@ class TestEndToEnd:
         assert metadata[("client.py", 5)]["best_direction"] == "outward"
         assert metadata[("UserController.java", 10)]["best_type"] == "http_rest"
         assert metadata[("UserController.java", 10)]["best_direction"] == "inward"
+
+
+# ---------------------------------------------------------------------------
+# Helpers for OllamaEmbeddingClient tests
+# ---------------------------------------------------------------------------
+
+
+class _FakeOllamaResponse:
+    """Fake HTTP response that acts as a context manager and returns JSON."""
+
+    def __init__(self, embeddings: list[list[float]]) -> None:
+        self._data = json.dumps({"embeddings": embeddings}).encode("utf-8")
+
+    def read(self) -> bytes:
+        return self._data
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+
+class _FakeOllamaServer:
+    """Injectable fake that records calls and returns pre-configured embeddings."""
+
+    def __init__(self, embeddings_per_call: list[list[list[float]]]) -> None:
+        self._queue = list(embeddings_per_call)
+        self.requests: list[dict] = []
+
+    def __call__(self, req, timeout=300):
+        body = json.loads(req.data.decode("utf-8"))
+        self.requests.append(body)
+        if not self._queue:
+            return _FakeOllamaResponse([[0.0] * 10] * len(body["input"]))
+        return _FakeOllamaResponse(self._queue.pop(0))
+
+
+class _FailThenSucceedServer:
+    """Raises URLError for the first N calls, then succeeds."""
+
+    def __init__(self, fail_count: int, embeddings: list[list[float]]) -> None:
+        self._fail_count = fail_count
+        self._embeddings = embeddings
+        self.call_count = 0
+
+    def __call__(self, req, timeout=300):
+        self.call_count += 1
+        if self.call_count <= self._fail_count:
+            raise URLError("Connection refused")
+        return _FakeOllamaResponse(self._embeddings)
+
+
+# ---------------------------------------------------------------------------
+# Tests: OllamaEmbeddingClient
+# ---------------------------------------------------------------------------
+
+
+class TestOllamaEmbedBatch:
+    """Verify OllamaEmbeddingClient.embed_batch returns correct embeddings."""
+
+    def test_single_batch_returns_embeddings(self):
+        expected = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
+        server = _FakeOllamaServer(embeddings_per_call=[expected])
+        client = OllamaEmbeddingClient(request_fn=server)
+
+        result = client.embed_batch(["hello", "world"])
+
+        assert result == expected
+        assert len(server.requests) == 1
+        assert server.requests[0]["model"] == "jina/jina-embeddings-v2-base-code"
+        assert server.requests[0]["input"] == ["hello", "world"]
+
+    def test_custom_model_and_url(self):
+        server = _FakeOllamaServer(embeddings_per_call=[[[1.0]]])
+        client = OllamaEmbeddingClient(
+            model="custom-model", base_url="http://myhost:9999", request_fn=server
+        )
+
+        client.embed_batch(["test"])
+
+        assert server.requests[0]["model"] == "custom-model"
+
+    def test_empty_input_returns_empty(self):
+        server = _FakeOllamaServer(embeddings_per_call=[])
+        client = OllamaEmbeddingClient(request_fn=server)
+
+        result = client.embed_batch([])
+
+        assert result == []
+        assert len(server.requests) == 0
+
+
+class TestOllamaBatching:
+    """Verify batching splits texts into chunks of _BATCH_SIZE."""
+
+    def test_texts_split_into_correct_batches(self):
+        num_texts = _BATCH_SIZE + 10
+        batch1_embeddings = [[float(i)] for i in range(_BATCH_SIZE)]
+        batch2_embeddings = [[float(i)] for i in range(10)]
+        server = _FakeOllamaServer(
+            embeddings_per_call=[batch1_embeddings, batch2_embeddings]
+        )
+        client = OllamaEmbeddingClient(request_fn=server)
+
+        texts = [f"text_{i}" for i in range(num_texts)]
+        result = client.embed_batch(texts)
+
+        assert len(result) == num_texts
+        assert len(server.requests) == 2
+        assert len(server.requests[0]["input"]) == _BATCH_SIZE
+        assert len(server.requests[1]["input"]) == 10
+
+
+class TestOllamaRetry:
+    """Verify retry with backoff on connection errors."""
+
+    def test_retries_on_connection_error_then_succeeds(self):
+        expected = [[1.0, 2.0]]
+        server = _FailThenSucceedServer(fail_count=2, embeddings=expected)
+        client = OllamaEmbeddingClient(request_fn=server)
+
+        result = client.embed_batch(["test"])
+
+        assert result == expected
+        assert server.call_count == 3
+
+    def test_raises_after_max_retries(self):
+        server = _FailThenSucceedServer(fail_count=_MAX_RETRIES + 1, embeddings=[[1.0]])
+        client = OllamaEmbeddingClient(request_fn=server)
+
+        with pytest.raises(RuntimeError, match="failed after .* retries"):
+            client.embed_batch(["test"])
