@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Fastify framework require for HTTP server",
-                        "This code uses Node.js Fastify to handle inbound HTTP server requests",
+                        "HTTP server is imported via Fastify",
+                        "HTTP server is handled for inbound requests",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Koa framework require for HTTP server",
-                        "This code uses Node.js Koa to handle inbound HTTP server requests",
+                        "HTTP server is imported via Koa",
+                        "HTTP server is handled for inbound requests",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Axios library require for HTTP client requests",
-                        "This code uses Node.js Axios to send outbound HTTP requests",
+                        "HTTP client is imported for outbound requests",
+                        "HTTP request is sent via Axios",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "JavaScript fetch API call for HTTP client requests",
-                        "This code uses JavaScript fetch to send outbound HTTP requests",
+                        "HTTP requests are made with fetch API",
+                        "HTTP requests are sent via fetch",
                     ),
                 ),
             ],
@@ -57,8 +57,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js soap library require for SOAP web service integration",
-                        "This code uses Node.js soap to interact with SOAP web services",
+                        "SOAP web service is integrated",
+                        "SOAP service is accessed for web communication",
                     ),
                 ),
             ],
@@ -70,8 +70,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js KafkaJS library require for Kafka messaging",
-                        "This code uses Node.js KafkaJS to interact with a Kafka message broker",
+                        "Kafka messaging is imported for stream processing",
+                        "Kafka broker is accessed via KafkaJS",
                     ),
                 ),
                 (
@@ -79,8 +79,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js amqplib library require for AMQP/RabbitMQ messaging",
-                        "This code uses Node.js amqplib to interact with an AMQP message broker",
+                        "AMQP messaging is imported for RabbitMQ",
+                        "AMQP broker is accessed via amqplib",
                     ),
                 ),
                 (
@@ -88,8 +88,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js Bull library require for Redis-backed job queue",
-                        "This code uses Node.js Bull to interact with a job queue",
+                        "Job queue is imported with Redis backend",
+                        "Job queue is accessed via Bull",
                     ),
                 ),
                 (
@@ -97,8 +97,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js KafkaJS consumer.run for Kafka message consumption",
-                        "This code uses Node.js KafkaJS to receive inbound Kafka messages",
+                        "Kafka messages are consumed by consumer",
+                        "Kafka message is received for inbound",
                     ),
                 ),
                 (
@@ -106,8 +106,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js KafkaJS producer.send for Kafka message publishing",
-                        "This code uses Node.js KafkaJS to produce outgoing Kafka messages",
+                        "Kafka messages are published by producer",
+                        "Kafka message is produced for outbound",
                     ),
                 ),
                 (
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js AWS SDK SQS client require for SQS messaging",
-                        "This code uses Node.js AWS SDK to interact with an SQS message queue",
+                        "SQS client is imported for message queue",
+                        "SQS queue is accessed via SDK",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js AWS SDK SNS client require for SNS notifications",
-                        "This code uses Node.js AWS SDK to interact with SNS notifications",
+                        "SNS client is imported for notification service",
+                        "SNS notifications are accessed via SDK",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js Google Cloud Pub/Sub require for GCP messaging",
-                        "This code uses Node.js Google Cloud to interact with Pub/Sub messaging",
+                        "Pub/Sub messaging is imported for GCP",
+                        "Pub/Sub messaging is accessed via Cloud SDK",
                     ),
                 ),
             ],
@@ -146,8 +146,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Socket.IO library require for WebSocket server",
-                        "This code uses Node.js Socket.IO to handle inbound WebSocket connections",
+                        "WebSocket server is imported via Socket.IO",
+                        "WebSocket connection is handled for inbound",
                     ),
                 ),
                 (
@@ -155,8 +155,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js ws library require for WebSocket communication",
-                        "This code uses Node.js ws to interact with WebSocket connections",
+                        "WebSocket communication is imported",
+                        "WebSocket connections are handled with message exchange",
                     ),
                 ),
                 (
@@ -164,8 +164,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Socket.IO io.on for event listener registration",
-                        "This code uses Node.js Socket.IO to listen for inbound socket events",
+                        "Socket event listener is registered for connections",
+                        "Socket event is listened for inbound",
                     ),
                 ),
                 (
@@ -173,8 +173,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js WebSocket socket.on for event listener registration",
-                        "This code uses Node.js to listen for inbound WebSocket events",
+                        "WebSocket event listener is registered",
+                        "WebSocket events are listened for inbound connections",
                     ),
                 ),
                 (
@@ -182,8 +182,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "JavaScript WebSocket constructor for outbound WebSocket client",
-                        "This code uses JavaScript to connect to an outbound WebSocket server",
+                        "WebSocket client is created for outbound connection",
+                        "WebSocket server is connected for outbound communication",
                     ),
                 ),
             ],
@@ -195,8 +195,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Sequelize ORM require for SQL database access",
-                        "This code uses Node.js Sequelize to query a relational database",
+                        "SQL database is accessed via Sequelize ORM",
+                        "Database is queried via Sequelize",
                     ),
                 ),
                 (
@@ -204,8 +204,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Mongoose ODM require for MongoDB",
-                        "This code uses Node.js Mongoose to interact with a MongoDB database",
+                        "MongoDB ODM is imported for data modeling",
+                        "MongoDB database is accessed via Mongoose",
                     ),
                 ),
                 (
@@ -213,8 +213,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Knex query builder require for SQL database access",
-                        "This code uses Node.js Knex to query a relational database",
+                        "SQL database is accessed via query builder",
+                        "Database is queried via Knex",
                     ),
                 ),
                 (
@@ -222,8 +222,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js MongoDB driver require for MongoDB database access",
-                        "This code uses Node.js MongoDB driver to query a MongoDB database",
+                        "MongoDB database is accessed by driver",
+                        "MongoDB database is queried via driver",
                     ),
                 ),
                 (
@@ -231,8 +231,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Mongoose Schema definition for MongoDB data modelling",
-                        "This code uses Node.js Mongoose to query a MongoDB database schema",
+                        "MongoDB schema is defined for data structure",
+                        "MongoDB schema is queried via database",
                     ),
                 ),
                 (
@@ -240,8 +240,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Mongoose model registration for MongoDB collection",
-                        "This code uses Node.js Mongoose to query a MongoDB collection model",
+                        "MongoDB model is registered for collection",
+                        "MongoDB collection is queried via model",
                     ),
                 ),
                 (
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Sequelize define call for SQL model definition",
-                        "This code uses Node.js Sequelize to query a relational database model",
+                        "SQL model is defined by Sequelize",
+                        "Database model is queried via Sequelize",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js AWS SDK DynamoDB client require for DynamoDB access",
-                        "This code uses Node.js AWS SDK to query a DynamoDB database",
+                        "DynamoDB client is imported for database access",
+                        "DynamoDB database is queried via SDK",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Firebase Admin SDK require for Firebase database access",
-                        "This code uses Node.js Firebase Admin to query a Firebase database",
+                        "Firebase database is imported via Admin SDK",
+                        "Firebase database is queried via Admin SDK",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Neo4j driver require for graph database access",
-                        "This code uses Node.js Neo4j driver to query a graph database",
+                        "Graph database is accessed via Neo4j driver",
+                        "Graph database is queried via Neo4j driver",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Neo4j driver instantiation for graph database connectivity",
-                        "This code uses Node.js Neo4j to connect to a graph database",
+                        "Graph database connection is created for Neo4j",
+                        "Graph database is connected via Neo4j",
                     ),
                 ),
             ],
@@ -298,8 +298,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js fs module require for file system access",
-                        "This code uses Node.js fs to interact with the file system",
+                        "File system is accessed by fs module",
+                        "File system is accessed via fs",
                     ),
                 ),
                 (
@@ -307,8 +307,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js fs.readFileSync call for synchronous file reading",
-                        "This code uses Node.js fs to read from the file system",
+                        "File is read synchronously from system",
+                        "File system is read via fs",
                     ),
                 ),
                 (
@@ -316,8 +316,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js AWS SDK require for AWS service access",
-                        "This code uses Node.js AWS SDK to interact with AWS cloud services",
+                        "AWS SDK is imported for cloud service access",
+                        "AWS services are accessed via SDK",
                     ),
                 ),
                 (
@@ -325,8 +325,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Multer middleware require for file upload handling",
-                        "This code uses Node.js Multer to accept inbound file uploads",
+                        "File uploads are handled by Multer middleware",
+                        "File upload is accepted for inbound",
                     ),
                 ),
                 (
@@ -334,8 +334,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Azure Blob Storage require for blob storage access",
-                        "This code uses Node.js Azure SDK to write to Azure Blob Storage",
+                        "Blob storage is imported for Azure access",
+                        "Azure Blob Storage is written via SDK",
                     ),
                 ),
                 (
@@ -343,8 +343,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Google Cloud Storage require for GCS object storage access",
-                        "This code uses Node.js Google Cloud to write to GCS object storage",
+                        "Cloud storage is imported for GCS access",
+                        "GCS storage is written via Cloud SDK",
                     ),
                 ),
             ],
@@ -356,8 +356,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js gRPC library require for RPC communication",
-                        "This code uses Node.js gRPC to interact with a remote procedure call service",
+                        "RPC communication is imported via gRPC",
+                        "RPC service is accessed via gRPC",
                     ),
                 ),
                 (
@@ -365,8 +365,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js gRPC proto-loader require for Protobuf definition loading",
-                        "This code uses Node.js gRPC to interact with Protobuf-defined services",
+                        "Protobuf definitions are loaded for gRPC",
+                        "RPC service is accessed via gRPC",
                     ),
                 ),
             ],
@@ -378,8 +378,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Apollo Server require for GraphQL server",
-                        "This code uses Node.js Apollo Server to expose inbound GraphQL APIs",
+                        "GraphQL server is imported for API",
+                        "GraphQL API is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -387,8 +387,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js TypeGraphQL require for GraphQL schema-first server",
-                        "This code uses Node.js TypeGraphQL to expose inbound GraphQL APIs",
+                        "GraphQL server is imported schema-first",
+                        "GraphQL API is exposed via TypeGraphQL",
                     ),
                 ),
                 (
@@ -396,8 +396,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js graphql-tools require for GraphQL utilities",
-                        "This code uses Node.js graphql-tools to interact with GraphQL schemas",
+                        "GraphQL utilities are imported for tooling",
+                        "GraphQL schema is accessed via graphql-tools",
                     ),
                 ),
             ],
@@ -409,8 +409,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js Nodemailer require for email sending",
-                        "This code uses Node.js Nodemailer to send outbound email messages",
+                        "Email sending is imported via Nodemailer",
+                        "Email message is sent via Nodemailer",
                     ),
                 ),
                 (
@@ -418,8 +418,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js SendGrid mail require for transactional email sending",
-                        "This code uses Node.js SendGrid to send outbound transactional emails",
+                        "Transactional email is sent via SendGrid",
+                        "Email is sent via SendGrid",
                     ),
                 ),
             ],
@@ -431,8 +431,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js ioredis require for Redis cache access",
-                        "This code uses Node.js ioredis to write to a Redis cache",
+                        "Redis cache is accessed via ioredis",
+                        "Redis cache is written via ioredis",
                     ),
                 ),
                 (
@@ -440,8 +440,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js redis client require for Redis cache access",
-                        "This code uses Node.js redis to write to a Redis cache",
+                        "Redis cache is accessed by client",
+                        "Redis cache is written to with data",
                     ),
                 ),
                 (
@@ -449,8 +449,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js memcached client require for Memcached cache access",
-                        "This code uses Node.js memcached to write to a Memcached cache",
+                        "Memcached cache is accessed by client",
+                        "Memcached cache is written via memcached",
                     ),
                 ),
             ],
@@ -462,8 +462,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "JavaScript EventSource API for server-sent event client",
-                        "This code uses JavaScript EventSource to connect to outbound SSE streams",
+                        "Server-sent events are received by client",
+                        "SSE stream is connected for outbound events",
                     ),
                 ),
                 (
@@ -471,8 +471,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "JavaScript SSE content type for event stream",
-                        "This code uses JavaScript to interact with server-sent event streams",
+                        "Event stream is received with content type",
+                        "Event streams are accessed for server-sent events",
                     ),
                 ),
             ],
@@ -484,8 +484,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js ssh2-sftp-client require for SFTP file transfer",
-                        "This code uses Node.js ssh2-sftp-client to connect to an SFTP server",
+                        "SFTP file transfer is imported",
+                        "SFTP server is connected to with credentials",
                     ),
                 ),
                 (
@@ -493,8 +493,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js basic-ftp require for FTP file transfer",
-                        "This code uses Node.js basic-ftp to connect to an FTP server",
+                        "FTP file transfer is imported",
+                        "FTP server is connected via basic-ftp",
                     ),
                 ),
                 (
@@ -502,8 +502,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js ftp require for FTP file transfer",
-                        "This code uses Node.js ftp to connect to an FTP server",
+                        "FTP file transfer is imported",
+                        "FTP server is connected via ftp",
                     ),
                 ),
                 (
@@ -511,8 +511,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js ssh2 SFTPWrapper for SFTP file operations",
-                        "This code uses Node.js ssh2 to write to an SFTP server",
+                        "SFTP file operations are handled by wrapper",
+                        "SFTP server is written to via connection",
                     ),
                 ),
                 (
@@ -520,8 +520,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Node.js SFTP Client instantiation for SFTP connectivity",
-                        "This code uses Node.js to connect to an SFTP server",
+                        "SFTP connection is created for file transfer",
+                        "SFTP server is connected to with credentials",
                     ),
                 ),
             ],
@@ -533,8 +533,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js node-cron require for cron-based task scheduling",
-                        "This code uses Node.js node-cron to interact with scheduled cron tasks",
+                        "Cron tasks are scheduled by node-cron",
+                        "Cron task is scheduled via node-cron",
                     ),
                 ),
                 (
@@ -542,8 +542,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js cron require for cron-based task scheduling",
-                        "This code uses Node.js cron to interact with scheduled cron tasks",
+                        "Cron tasks are scheduled by scheduler",
+                        "Cron task is scheduled via cron",
                     ),
                 ),
                 (
@@ -551,8 +551,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Node.js Agenda require for MongoDB-backed job scheduling",
-                        "This code uses Node.js Agenda to interact with scheduled background jobs",
+                        "Job scheduler is imported with MongoDB backend",
+                        "Background jobs are scheduled via Agenda",
                     ),
                 ),
             ],

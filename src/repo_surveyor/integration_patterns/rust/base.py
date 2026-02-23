@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust Json extractor handling HTTP JSON request or response",
-                        "This code uses Rust to interact with HTTP JSON data",
+                        "JSON request is extracted from HTTP",
+                        "HTTP JSON data is processed",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust Path extractor handling HTTP route path parameters",
-                        "This code uses Rust to interact with HTTP route parameters",
+                        "HTTP path parameters are extracted",
+                        "HTTP route parameters are processed",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust Query extractor handling HTTP query string parameters",
-                        "This code uses Rust to interact with HTTP query parameters",
+                        "HTTP query parameters are extracted",
+                        "HTTP query parameters are processed",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust State extractor sharing application state in HTTP handlers",
-                        "This code uses Rust to interact with shared HTTP application state",
+                        "Application state is extracted for HTTP handlers",
+                        "HTTP application state is shared",
                     ),
                 ),
                 (
@@ -53,8 +53,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust hyper library import for HTTP client and server",
-                        "This code uses Rust hyper to interact with an HTTP endpoint",
+                        "HTTP communication is imported for client server",
+                        "HTTP endpoint is accessed via hyper client",
                     ),
                 ),
                 (
@@ -62,8 +62,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust reqwest HTTP client library import",
-                        "This code uses Rust reqwest to make outbound HTTP requests",
+                        "HTTP client is imported for outbound requests",
+                        "HTTP request is sent via reqwest client",
                     ),
                 ),
             ],
@@ -75,8 +75,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust yaserde library import for XML/SOAP serialization",
-                        "This code uses Rust yaserde to interact with XML/SOAP data",
+                        "XML serialization is enabled for SOAP messages",
+                        "XML data is processed via yaserde",
                     ),
                 ),
                 (
@@ -84,8 +84,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust quick_xml library import for XML parsing and writing",
-                        "This code uses Rust quick_xml to interact with XML/SOAP data",
+                        "XML processing is imported for parsing writing",
+                        "XML data is processed via quick_xml parser",
                     ),
                 ),
             ],
@@ -97,8 +97,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust rdkafka library import for Kafka messaging client",
-                        "This code uses Rust rdkafka to interact with a Kafka broker",
+                        "Kafka client is imported for messaging",
+                        "Kafka broker is accessed via rdkafka client",
                     ),
                 ),
                 (
@@ -106,8 +106,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust lapin library import for AMQP/RabbitMQ messaging client",
-                        "This code uses Rust lapin to interact with an AMQP broker",
+                        "AMQP messaging is imported for RabbitMQ",
+                        "AMQP broker is accessed via lapin client",
                     ),
                 ),
                 (
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rust Kafka StreamConsumer type consuming inbound Kafka messages",
-                        "This code uses Rust rdkafka to receive inbound Kafka messages",
+                        "Kafka messages are consumed by StreamConsumer",
+                        "Kafka message is consumed via rdkafka consumer",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Kafka FutureProducer type producing outbound Kafka messages",
-                        "This code uses Rust rdkafka to produce outbound Kafka messages",
+                        "Kafka messages are produced by FutureProducer",
+                        "Kafka message is produced via rdkafka producer",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Rust Kafka BaseConsumer type consuming inbound Kafka messages",
-                        "This code uses Rust rdkafka to receive inbound Kafka messages",
+                        "Kafka messages are consumed by BaseConsumer",
+                        "Kafka message is consumed via rdkafka consumer",
                     ),
                 ),
                 (
@@ -142,8 +142,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Kafka BaseProducer type producing outbound Kafka messages",
-                        "This code uses Rust rdkafka to produce outbound Kafka messages",
+                        "Kafka messages are produced by BaseProducer",
+                        "Kafka message is produced via rdkafka producer",
                     ),
                 ),
                 (
@@ -151,8 +151,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust AWS SDK SQS crate for queue messaging",
-                        "This code uses Rust AWS SDK to interact with an SQS queue",
+                        "SQS client is imported for queue messaging",
+                        "SQS queue is accessed for messaging",
                     ),
                 ),
                 (
@@ -160,8 +160,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust AWS SDK SNS crate for pub/sub notifications",
-                        "This code uses Rust AWS SDK to produce outbound SNS notifications",
+                        "SNS client is imported for pub/sub notifications",
+                        "SNS notification is published via SDK",
                     ),
                 ),
             ],
@@ -173,8 +173,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rust TcpListener type accepting inbound TCP connections",
-                        "This code uses Rust to accept inbound TCP connections",
+                        "TCP connections are accepted by listener",
+                        "TCP connection is accepted for inbound requests",
                     ),
                 ),
                 (
@@ -182,8 +182,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust TcpStream type for TCP stream communication",
-                        "This code uses Rust to interact with a TCP stream socket",
+                        "TCP communication is handled by stream",
+                        "TCP socket stream is accessed",
                     ),
                 ),
                 (
@@ -191,8 +191,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust UdpSocket type for UDP socket communication",
-                        "This code uses Rust to interact with a UDP socket",
+                        "UDP communication is handled by socket",
+                        "UDP socket is accessed",
                     ),
                 ),
                 (
@@ -200,8 +200,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust Tokio net module import for async network I/O",
-                        "This code uses Rust Tokio to interact with async network sockets",
+                        "Async network I/O is imported",
+                        "Network socket is accessed asynchronously",
                     ),
                 ),
                 (
@@ -209,8 +209,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust async-std net module import for async network I/O",
-                        "This code uses Rust async-std to interact with async network sockets",
+                        "Async network I/O is imported",
+                        "Network socket is accessed asynchronously",
                     ),
                 ),
                 (
@@ -218,8 +218,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust tungstenite library import for WebSocket communication",
-                        "This code uses Rust tungstenite to interact with a WebSocket connection",
+                        "WebSocket communication is enabled by library import",
+                        "WebSocket connection is accessed via tungstenite",
                     ),
                 ),
                 (
@@ -227,8 +227,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rust WebSocketStream type accepting inbound WebSocket connections",
-                        "This code uses Rust to accept inbound WebSocket connections",
+                        "WebSocket connections are accepted by stream",
+                        "WebSocket connection is accepted for inbound requests",
                     ),
                 ),
             ],
@@ -240,8 +240,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Diesel ORM library import",
-                        "This code uses Rust Diesel ORM to interact with a relational database",
+                        "ORM library is imported",
+                        "Database is accessed via ORM",
                     ),
                 ),
                 (
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust sqlx library import for async SQL database access",
-                        "This code uses Rust sqlx to query a relational database",
+                        "SQL database is imported for async access",
+                        "Database is queried via sqlx interface",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust SeaORM library import for async ORM database access",
-                        "This code uses Rust SeaORM to interact with a relational database",
+                        "Async ORM is imported for database access",
+                        "Database is accessed via ORM",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust tokio-postgres library import for async PostgreSQL client",
-                        "This code uses Rust tokio-postgres to connect to a PostgreSQL database",
+                        "PostgreSQL client is imported for async access",
+                        "PostgreSQL database connection is opened via tokio-postgres",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust rusqlite library import for SQLite database access",
-                        "This code uses Rust rusqlite to connect to a SQLite database",
+                        "SQLite database is imported",
+                        "SQLite database connection is opened via rusqlite",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Diesel Queryable derive macro for database query result mapping",
-                        "This code uses Rust Diesel ORM to query a relational database",
+                        "Database query mapping is derived with macro",
+                        "Database is queried via ORM",
                     ),
                 ),
                 (
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Diesel Insertable derive macro for database insert mapping",
-                        "This code uses Rust Diesel ORM to write to a relational database",
+                        "Database insert mapping is derived with macro",
+                        "Database is written via ORM",
                     ),
                 ),
                 (
@@ -303,8 +303,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Diesel table_name attribute mapping a struct to a database table",
-                        "This code uses Rust Diesel ORM to interact with a relational database table",
+                        "Database table is mapped with struct attribute",
+                        "Database table is accessed via ORM",
                     ),
                 ),
                 (
@@ -312,8 +312,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Diesel attribute macro configuring ORM database mapping",
-                        "This code uses Rust Diesel ORM to interact with a relational database",
+                        "ORM mapping is configured with attribute",
+                        "Database is accessed via ORM",
                     ),
                 ),
                 (
@@ -321,8 +321,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Diesel PgConnection type for PostgreSQL database connection",
-                        "This code uses Rust Diesel ORM to connect to a PostgreSQL database",
+                        "PostgreSQL connection is typed for database access",
+                        "PostgreSQL database is accessed via ORM",
                     ),
                 ),
                 (
@@ -330,8 +330,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Diesel SqliteConnection type for SQLite database connection",
-                        "This code uses Rust Diesel ORM to connect to a SQLite database",
+                        "SQLite connection is typed for database access",
+                        "SQLite database is accessed via ORM",
                     ),
                 ),
                 (
@@ -339,8 +339,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust Diesel MysqlConnection type for MySQL database connection",
-                        "This code uses Rust Diesel ORM to connect to a MySQL database",
+                        "MySQL connection is typed for database access",
+                        "MySQL database is accessed via ORM",
                     ),
                 ),
                 (
@@ -348,8 +348,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust sqlx::query macro executing a SQL query",
-                        "This code uses Rust sqlx to query a relational database",
+                        "SQL query is executed with macro",
+                        "Database is queried via sqlx interface",
                     ),
                 ),
                 (
@@ -357,8 +357,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust sqlx query_as! macro executing a typed SQL query",
-                        "This code uses Rust sqlx to query a relational database",
+                        "SQL query is executed with typed macro",
+                        "Database is queried via sqlx interface",
                     ),
                 ),
                 (
@@ -366,8 +366,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust sqlx query! macro executing a checked SQL query",
-                        "This code uses Rust sqlx to query a relational database",
+                        "SQL query is executed with checked macro",
+                        "Database is queried via sqlx interface",
                     ),
                 ),
                 (
@@ -375,8 +375,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust AWS SDK DynamoDB crate for NoSQL database access",
-                        "This code uses Rust AWS SDK to interact with a DynamoDB database",
+                        "DynamoDB client is imported for NoSQL access",
+                        "DynamoDB database is accessed via SDK",
                     ),
                 ),
                 (
@@ -384,8 +384,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust neo4rs library import for Neo4j graph database client",
-                        "This code uses Rust neo4rs to interact with a Neo4j graph database",
+                        "Neo4j client is imported for graph database",
+                        "Neo4j graph database is accessed via neo4rs",
                     ),
                 ),
                 (
@@ -393,8 +393,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust neo4rs Graph::new call creating a Neo4j database connection",
-                        "This code uses Rust neo4rs to connect to a Neo4j graph database",
+                        "Neo4j connection is created with Graph",
+                        "Neo4j database connection is opened via neo4rs",
                     ),
                 ),
             ],
@@ -406,8 +406,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust std::fs module for synchronous file system operations",
-                        "This code uses Rust std::fs to interact with the file system",
+                        "File system is accessed synchronously",
+                        "File system is accessed via std::fs",
                     ),
                 ),
                 (
@@ -415,8 +415,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust tokio::fs module for async file system operations",
-                        "This code uses Rust Tokio to interact with the file system asynchronously",
+                        "File system is accessed with async operations",
+                        "File system is accessed asynchronously",
                     ),
                 ),
                 (
@@ -424,8 +424,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust AWS SDK S3 crate for object storage access",
-                        "This code uses Rust AWS SDK to interact with S3 object storage",
+                        "S3 client is imported for object storage",
+                        "S3 object storage is accessed via SDK",
                     ),
                 ),
                 (
@@ -433,8 +433,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust azure_storage_blobs crate for Azure Blob Storage access",
-                        "This code uses Rust Azure SDK to interact with Azure Blob Storage",
+                        "Azure Blob Storage is accessed by client",
+                        "Azure Blob Storage is accessed via SDK",
                     ),
                 ),
             ],
@@ -446,8 +446,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust tonic library for gRPC client and server",
-                        "This code uses Rust tonic to interact with a gRPC endpoint",
+                        "gRPC client is created for RPC communication",
+                        "gRPC endpoint is accessed via tonic client",
                     ),
                 ),
                 (
@@ -455,8 +455,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rust tonic::async_trait attribute implementing a gRPC service",
-                        "This code uses Rust tonic to expose an inbound gRPC service",
+                        "gRPC service is implemented with async trait",
+                        "gRPC service is exposed via tonic",
                     ),
                 ),
             ],
@@ -468,8 +468,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust juniper library import for GraphQL server",
-                        "This code uses Rust juniper to interact with a GraphQL API",
+                        "GraphQL server is imported",
+                        "GraphQL API is accessed via juniper interface",
                     ),
                 ),
                 (
@@ -477,8 +477,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust async-graphql library import for async GraphQL server",
-                        "This code uses Rust async-graphql to interact with a GraphQL API",
+                        "GraphQL server is imported for async queries",
+                        "GraphQL API is accessed via client",
                     ),
                 ),
             ],
@@ -490,8 +490,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust lettre library import for email sending",
-                        "This code uses Rust lettre to send outbound email messages",
+                        "Email sending is imported",
+                        "Email message is sent via lettre client",
                     ),
                 ),
                 (
@@ -499,8 +499,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust lettre SmtpTransport type for sending email via SMTP",
-                        "This code uses Rust lettre to send outbound email via SMTP",
+                        "SMTP email is sent by transport",
+                        "Email is sent via SMTP using lettre",
                     ),
                 ),
             ],
@@ -512,8 +512,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust redis library import for Redis cache client",
-                        "This code uses Rust redis to connect to a Redis cache",
+                        "Redis cache is imported",
+                        "Redis cache connection is opened via redis",
                     ),
                 ),
                 (
@@ -521,8 +521,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust deadpool-redis library import for async Redis connection pool",
-                        "This code uses Rust deadpool-redis to connect to a Redis cache",
+                        "Redis connection pool is imported for async access",
+                        "Redis cache is accessed via connection pool",
                     ),
                 ),
             ],
@@ -534,8 +534,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust eventsource library import for server-sent events",
-                        "This code uses Rust eventsource to interact with SSE streaming",
+                        "Server-sent events are imported",
+                        "SSE stream is accessed for events",
                     ),
                 ),
                 (
@@ -543,8 +543,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rust Sse type exposing an inbound server-sent events stream",
-                        "This code uses Rust to expose an inbound SSE streaming endpoint",
+                        "Server-sent events are exposed by SSE stream",
+                        "SSE endpoint is exposed for streaming events",
                     ),
                 ),
             ],
@@ -556,8 +556,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust ssh2 library import for SSH and SFTP client",
-                        "This code uses Rust ssh2 to connect to an SSH/SFTP server",
+                        "SSH client is imported for SFTP",
+                        "SSH server connection is opened via ssh2",
                     ),
                 ),
                 (
@@ -565,8 +565,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust ssh2 Sftp type for SFTP file transfer operations",
-                        "This code uses Rust ssh2 to connect to an SFTP server",
+                        "SFTP operations are handled by type",
+                        "SFTP server connection is opened via ssh2",
                     ),
                 ),
                 (
@@ -574,8 +574,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust suppaftp library import for FTP/FTPS client",
-                        "This code uses Rust suppaftp to connect to an FTP server",
+                        "FTP client is imported",
+                        "FTP server connection is opened via suppaftp",
                     ),
                 ),
                 (
@@ -583,8 +583,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rust suppaftp FtpStream type for FTP connection and transfer",
-                        "This code uses Rust suppaftp to connect to an FTP server",
+                        "FTP connection is handled by stream",
+                        "FTP server connection is opened via suppaftp",
                     ),
                 ),
             ],
@@ -596,8 +596,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust tokio-cron-scheduler library import for cron task scheduling",
-                        "This code uses Rust tokio-cron-scheduler to interact with scheduled tasks",
+                        "Cron scheduling is imported for task execution",
+                        "Scheduled tasks are managed via tokio-cron-scheduler",
                     ),
                 ),
                 (
@@ -605,8 +605,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rust cron library import for cron expression parsing and scheduling",
-                        "This code uses Rust cron to interact with scheduled tasks",
+                        "Cron scheduling is imported for task execution",
+                        "Scheduled tasks are managed by cron",
                     ),
                 ),
             ],

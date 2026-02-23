@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rocket library import for HTTP server framework",
-                        "This code uses Rocket to interact with an HTTP server",
+                        "HTTP server framework is imported",
+                        "HTTP server is configured",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rocket #[get] macro defining an inbound GET HTTP route handler",
-                        "This code uses Rocket to handle inbound GET HTTP requests",
+                        "GET HTTP route is defined by macro",
+                        "GET route is registered for inbound HTTP requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rocket #[post] macro defining an inbound POST HTTP route handler",
-                        "This code uses Rocket to handle inbound POST HTTP requests",
+                        "POST HTTP route is defined by macro",
+                        "POST route is registered for inbound HTTP requests",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rocket #[put] macro defining an inbound PUT HTTP route handler",
-                        "This code uses Rocket to handle inbound PUT HTTP requests",
+                        "PUT HTTP route is defined by macro",
+                        "PUT route is registered for inbound HTTP requests",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rocket #[delete] macro defining an inbound DELETE HTTP route handler",
-                        "This code uses Rocket to handle inbound DELETE HTTP requests",
+                        "DELETE HTTP route is defined by macro",
+                        "DELETE route is registered for inbound HTTP requests",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rocket #[patch] macro defining an inbound PATCH HTTP route handler",
-                        "This code uses Rocket to handle inbound PATCH HTTP requests",
+                        "PATCH HTTP route is defined by macro",
+                        "PATCH route is registered for inbound HTTP requests",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rocket #[route] macro defining a generic inbound HTTP route handler",
-                        "This code uses Rocket to handle inbound HTTP requests",
+                        "HTTP route is defined by generic macro",
+                        "HTTP request is handled by route",
                     ),
                 ),
             ],

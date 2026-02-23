@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Boost Beast HTTP namespace for HTTP client/server operations",
-                        "This code uses Boost Beast to interact with an HTTP endpoint",
+                        "HTTP operations are enabled via Beast",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
             ],
@@ -31,8 +31,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Boost Asio TCP socket for async network communication",
-                        "This code uses Boost Asio to interact with a TCP socket",
+                        "TCP socket is created for async communication",
+                        "TCP socket is accessed",
                     ),
                 ),
                 (
@@ -40,8 +40,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Boost Asio UDP socket for async network communication",
-                        "This code uses Boost Asio to interact with a UDP socket",
+                        "UDP socket is created for async communication",
+                        "UDP socket is accessed",
                     ),
                 ),
             ],
@@ -53,8 +53,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Boost Filesystem library for file system operations",
-                        "This code uses Boost Filesystem to interact with the file system",
+                        "Filesystem is accessed via library",
+                        "File system is accessed",
                     ),
                 ),
             ],
@@ -66,8 +66,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Boost Asio deadline_timer for scheduling timed callbacks",
-                        "This code uses Boost Asio to interact with scheduled timer tasks",
+                        "Timer is scheduled for timed callbacks",
+                        "Timer task is scheduled",
                     ),
                 ),
                 (
@@ -75,8 +75,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Boost Asio steady_timer for scheduling steady-clock callbacks",
-                        "This code uses Boost Asio to interact with scheduled timer tasks",
+                        "Timer is scheduled with steady clock",
+                        "Timer task is scheduled",
                     ),
                 ),
             ],

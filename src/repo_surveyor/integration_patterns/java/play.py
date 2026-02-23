@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play import play.mvc for building Play Framework Java MVC controllers",
-                        "This code uses Play to expose an inbound HTTP endpoint",
+                        "MVC controllers are imported for Java framework",
+                        "HTTP endpoint is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play import play.api.mvc for building Play Framework Scala MVC controllers",
-                        "This code uses Play to expose an inbound HTTP endpoint",
+                        "MVC controllers are imported for Scala framework",
+                        "HTTP endpoint is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play Action block defining a synchronous HTTP request handler",
-                        "This code uses Play to handle inbound HTTP requests",
+                        "HTTP request is handled by synchronous action",
+                        "HTTP request is handled by controller",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play Action.async for defining an asynchronous HTTP request handler",
-                        "This code uses Play to handle inbound HTTP requests asynchronously",
+                        "HTTP request is handled by asynchronous action",
+                        "HTTP request is handled asynchronously",
                     ),
                 ),
             ],

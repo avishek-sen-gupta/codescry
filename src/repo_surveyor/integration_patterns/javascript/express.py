@@ -19,8 +19,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Express framework require for HTTP server",
-                        "This code uses Node.js Express for inbound HTTP server integration",
+                        "HTTP server is imported via Express",
+                        "HTTP server is exposed for inbound integration",
                     ),
                 ),
                 (
@@ -28,8 +28,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Express router .get handler for HTTP GET route",
-                        "This code uses Node.js Express to handle inbound HTTP GET requests",
+                        "GET route is handled by router",
+                        "HTTP GET request is handled for inbound",
                     ),
                 ),
                 (
@@ -37,8 +37,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Express router .post handler for HTTP POST route",
-                        "This code uses Node.js Express to handle inbound HTTP POST requests",
+                        "POST route is handled by router",
+                        "HTTP POST request is handled for inbound",
                     ),
                 ),
                 (
@@ -46,8 +46,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Express router .put handler for HTTP PUT route",
-                        "This code uses Node.js Express to handle inbound HTTP PUT requests",
+                        "PUT route is handled by router",
+                        "HTTP PUT request is handled for inbound",
                     ),
                 ),
                 (
@@ -55,8 +55,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Express router .delete handler for HTTP DELETE route",
-                        "This code uses Node.js Express to handle inbound HTTP DELETE requests",
+                        "DELETE route is handled by router",
+                        "HTTP DELETE request is handled for inbound",
                     ),
                 ),
             ],
@@ -68,8 +68,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Express express-graphql middleware for GraphQL server",
-                        "This code uses Node.js Express to expose inbound GraphQL APIs",
+                        "GraphQL server is enabled via middleware",
+                        "GraphQL API is exposed for inbound requests",
                     ),
                 ),
             ],

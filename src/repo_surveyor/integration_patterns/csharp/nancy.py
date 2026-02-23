@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Nancy NancyModule class defining HTTP route handlers for a Nancy application",
-                        "This code uses Nancy to expose inbound HTTP REST route handlers",
+                        "Route handlers are defined with NancyModule",
+                        "HTTP REST route handlers are exposed inbound",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Nancy Get[] route declaration handling incoming HTTP GET requests",
-                        "This code uses Nancy to handle incoming HTTP GET requests",
+                        "GET route is registered for HTTP requests",
+                        "HTTP GET request is handled",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Nancy Post[] route declaration handling incoming HTTP POST requests",
-                        "This code uses Nancy to handle incoming HTTP POST requests",
+                        "POST route is registered for HTTP requests",
+                        "HTTP POST request is handled",
                     ),
                 ),
             ],

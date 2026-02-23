@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Python requests library for making HTTP requests",
-                        "This code uses Python requests to make outbound HTTP API calls",
+                        "HTTP requests are made by requests library",
+                        "HTTP request is made with requests",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Python httpx library for async HTTP client requests",
-                        "This code uses Python httpx to make outbound HTTP API calls",
+                        "Async HTTP requests are made by httpx",
+                        "HTTP request is made with httpx client",
                     ),
                 ),
             ],
@@ -39,8 +39,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Zeep library for SOAP web service client",
-                        "This code uses Python Zeep to call outbound SOAP web services",
+                        "SOAP services are accessed by Zeep client",
+                        "SOAP service is called with Zeep client",
                     ),
                 ),
                 (
@@ -48,8 +48,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Zeep library import for SOAP web service integration",
-                        "This code uses Python Zeep to call outbound SOAP web services",
+                        "SOAP integration is imported via Zeep library",
+                        "SOAP service is called with Zeep client",
                     ),
                 ),
                 (
@@ -57,8 +57,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Suds library for SOAP web service client",
-                        "This code uses Python Suds to call outbound SOAP web services",
+                        "SOAP services are accessed by Suds client",
+                        "SOAP service is called with Suds client",
                     ),
                 ),
             ],
@@ -70,8 +70,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Python Celery task decorator receiving incoming task messages",
-                        "This code uses Python Celery to receive incoming messages from a message queue",
+                        "Task messages are received by Celery decorator",
+                        "Messages are consumed from queue via Celery",
                     ),
                 ),
                 (
@@ -79,8 +79,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Python Celery shared_task decorator for receiving reusable task messages",
-                        "This code uses Python Celery to receive incoming messages from a message queue",
+                        "Reusable tasks are decorated by shared_task decorator",
+                        "Messages are consumed from queue via Celery",
                     ),
                 ),
                 (
@@ -88,8 +88,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Celery library import for distributed task queue",
-                        "This code uses Python Celery to interact with a message queue",
+                        "Task queue is imported via Celery library",
+                        "Message queue is accessed via Celery worker",
                     ),
                 ),
                 (
@@ -97,8 +97,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Kombu library import for messaging and AMQP",
-                        "This code uses Python Kombu to interact with a message queue",
+                        "Messaging is imported via Kombu AMQP library",
+                        "Message queue is accessed via Kombu",
                     ),
                 ),
                 (
@@ -106,8 +106,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Pika library import for RabbitMQ messaging",
-                        "This code uses Python Pika to interact with a message queue",
+                        "RabbitMQ messaging is imported via Pika library",
+                        "Message queue is accessed via Pika",
                     ),
                 ),
                 (
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python kafka-python library import for Kafka messaging",
-                        "This code uses Python Kafka to interact with a Kafka topic",
+                        "Kafka messaging is imported via kafka-python library",
+                        "Kafka topic is accessed for messaging",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python aiokafka library import for async Kafka messaging",
-                        "This code uses Python aiokafka to interact with a Kafka topic",
+                        "Async Kafka messaging is imported via aiokafka",
+                        "Kafka topic is accessed via aiokafka",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Python KafkaConsumer for consuming messages from Kafka",
-                        "This code uses Python Kafka to consume incoming messages from a Kafka topic",
+                        "Kafka messages are consumed by KafkaConsumer",
+                        "Messages are consumed from Kafka topic",
                     ),
                 ),
                 (
@@ -142,8 +142,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python KafkaProducer for producing messages to Kafka",
-                        "This code uses Python Kafka to send outgoing messages to a Kafka topic",
+                        "Kafka messages are produced by KafkaProducer",
+                        "Messages are sent to Kafka topic",
                     ),
                 ),
                 (
@@ -151,8 +151,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Google Cloud Pub/Sub library for cloud messaging",
-                        "This code uses Python Google Cloud to interact with a message queue",
+                        "Cloud messaging is handled by Pub/Sub library",
+                        "Message queue is accessed via Google Cloud",
                     ),
                 ),
             ],
@@ -164,8 +164,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python websockets library import for WebSocket communication",
-                        "This code uses Python websockets to interact with a WebSocket connection",
+                        "WebSocket library is imported for bidirectional communication",
+                        "WebSocket connection is opened with websockets",
                     ),
                 ),
                 (
@@ -173,8 +173,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python websockets library for WebSocket communication",
-                        "This code uses Python websockets to interact with a WebSocket connection",
+                        "WebSocket library is imported for bidirectional communication",
+                        "WebSocket connection is opened with websockets",
                     ),
                 ),
                 (
@@ -182,8 +182,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Socket.IO library import for real-time event communication",
-                        "This code uses Python socketio to interact with a WebSocket connection",
+                        "Real-time communication is imported via Socket.IO library",
+                        "WebSocket connection is opened with socketio",
                     ),
                 ),
                 (
@@ -191,8 +191,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Socket.IO library for real-time event communication",
-                        "This code uses Python socketio to interact with a WebSocket connection",
+                        "Real-time events are communicated via Socket.IO library",
+                        "WebSocket connection is opened with socketio",
                     ),
                 ),
                 (
@@ -200,8 +200,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Python Socket.IO event handler decorator listening for incoming events",
-                        "This code uses Python socketio to listen for incoming WebSocket connection events",
+                        "Socket events are handled by event decorator",
+                        "WebSocket events are listened via socketio",
                     ),
                 ),
                 (
@@ -209,8 +209,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Python Socket.IO instance event handler decorator listening for incoming events",
-                        "This code uses Python socketio to listen for incoming WebSocket connection events",
+                        "Socket events are handled by instance decorator",
+                        "WebSocket events are listened via socketio",
                     ),
                 ),
                 (
@@ -218,8 +218,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python socket library import for low-level network socket communication",
-                        "This code uses Python socket to interact with a network socket",
+                        "Socket library is imported for network communication",
+                        "Network socket is opened for communication",
                     ),
                 ),
             ],
@@ -231,8 +231,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python SQLAlchemy ORM for database operations",
-                        "This code uses Python SQLAlchemy to interact with a relational database",
+                        "Database operations are handled by SQLAlchemy ORM",
+                        "Database is accessed via SQLAlchemy ORM",
                     ),
                 ),
                 (
@@ -240,8 +240,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python SQLAlchemy library import for database operations",
-                        "This code uses Python SQLAlchemy to interact with a relational database",
+                        "Database operations are imported via SQLAlchemy library",
+                        "Database is accessed via SQLAlchemy ORM",
                     ),
                 ),
                 (
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Peewee ORM for database operations",
-                        "This code uses Python Peewee to interact with a relational database",
+                        "Database operations are handled by Peewee ORM",
+                        "Database is accessed via Peewee ORM",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Tortoise ORM for async database operations",
-                        "This code uses Python Tortoise to interact with a relational database",
+                        "Async database operations are handled by Tortoise ORM",
+                        "Database is accessed via Tortoise ORM",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python psycopg driver for PostgreSQL database access",
-                        "This code uses Python psycopg to query a relational database",
+                        "PostgreSQL database is accessed by psycopg driver",
+                        "Database is queried with psycopg driver",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python PyMySQL driver for MySQL database access",
-                        "This code uses Python PyMySQL to query a relational database",
+                        "MySQL database is accessed by PyMySQL driver",
+                        "Database is queried with PyMySQL driver",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python asyncpg driver for async PostgreSQL database access",
-                        "This code uses Python asyncpg to query a relational database",
+                        "Async PostgreSQL is accessed by asyncpg driver",
+                        "Database is queried with asyncpg driver",
                     ),
                 ),
                 (
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python SQLAlchemy declarative base decorator for ORM model definition",
-                        "This code uses Python SQLAlchemy to define a database model for persistence",
+                        "ORM models are decorated by declarative base",
+                        "Database model is defined with SQLAlchemy",
                     ),
                 ),
                 (
@@ -303,8 +303,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Python ORM Column definition for database schema mapping",
-                        "This code uses Python ORM to define a database model for persistence",
+                        "Database schema is mapped by ORM Column",
+                        "Database model is defined for ORM persistence",
                     ),
                 ),
                 (
@@ -312,8 +312,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Python ORM relationship definition for database model associations",
-                        "This code uses Python ORM to interact with a relational database",
+                        "Database models are associated by ORM relationship",
+                        "Database is accessed via ORM interface",
                     ),
                 ),
                 (
@@ -321,8 +321,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Google Cloud Firestore client for NoSQL database access",
-                        "This code uses Python Google Cloud to write to a database",
+                        "NoSQL database is accessed via Firestore client",
+                        "Database is written via Google Cloud client",
                     ),
                 ),
                 (
@@ -330,8 +330,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Cassandra driver for distributed NoSQL database access",
-                        "This code uses Python Cassandra to query a database",
+                        "Distributed database is accessed by Cassandra driver",
+                        "Database is queried with Cassandra driver",
                     ),
                 ),
                 (
@@ -339,8 +339,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Neo4j driver for graph database access",
-                        "This code uses Python Neo4j to query a database",
+                        "Graph database is accessed by Neo4j driver",
+                        "Database is queried with Neo4j driver",
                     ),
                 ),
                 (
@@ -348,8 +348,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Neo4j library import for graph database access",
-                        "This code uses Python Neo4j to query a database",
+                        "Graph database is imported via Neo4j library",
+                        "Database is queried with Neo4j driver",
                     ),
                 ),
                 (
@@ -357,8 +357,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python py2neo library for Neo4j graph database access",
-                        "This code uses Python py2neo to query a database",
+                        "Graph database is accessed by py2neo library",
+                        "Database is queried with py2neo",
                     ),
                 ),
                 (
@@ -366,8 +366,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python neomodel ORM for Neo4j graph database access",
-                        "This code uses Python neomodel to interact with a database",
+                        "Graph database is accessed by neomodel ORM",
+                        "Database is accessed with neomodel",
                     ),
                 ),
             ],
@@ -379,8 +379,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python built-in open() for filesystem file access",
-                        "This code uses Python to interact with a file",
+                        "Filesystem files are accessed by built-in open",
+                        "File is accessed for operations",
                     ),
                 ),
                 (
@@ -388,8 +388,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python pathlib.Path for filesystem path manipulation",
-                        "This code uses Python pathlib to interact with a filesystem",
+                        "Filesystem paths are manipulated by pathlib Path",
+                        "Filesystem is accessed via pathlib",
                     ),
                 ),
                 (
@@ -397,8 +397,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python shutil library import for high-level filesystem operations",
-                        "This code uses Python shutil to interact with a filesystem",
+                        "Filesystem operations are imported via shutil library",
+                        "Filesystem is accessed via shutil",
                     ),
                 ),
                 (
@@ -406,8 +406,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python boto3 AWS SDK import for cloud storage access",
-                        "This code uses Python boto3 to write to cloud storage",
+                        "Cloud storage is imported via boto3 SDK",
+                        "Cloud storage is written via boto3",
                     ),
                 ),
                 (
@@ -415,8 +415,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Google Cloud Storage client for cloud file access",
-                        "This code uses Python Google Cloud to write to cloud storage",
+                        "Cloud storage is accessed via Google client",
+                        "Cloud storage is written via Google Cloud",
                     ),
                 ),
                 (
@@ -424,8 +424,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Azure Blob Storage client for cloud file access",
-                        "This code uses Python Azure to write to cloud storage",
+                        "Cloud blob storage is accessed via Azure client",
+                        "Cloud storage is written via Azure client",
                     ),
                 ),
             ],
@@ -437,8 +437,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python grpc library import for gRPC service communication",
-                        "This code uses Python grpc to integrate with a gRPC service",
+                        "gRPC communication is imported via grpc library",
+                        "gRPC service is accessed for integration",
                     ),
                 ),
                 (
@@ -446,8 +446,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Python grpc.server instantiation exposing a gRPC service endpoint",
-                        "This code uses Python grpc to expose an inbound gRPC service",
+                        "gRPC service is exposed by server instantiation",
+                        "gRPC service is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -455,8 +455,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Python gRPC servicer registration for handling inbound gRPC calls",
-                        "This code uses Python grpc to handle incoming requests from a gRPC service",
+                        "gRPC calls are handled by servicer registration",
+                        "gRPC requests are handled by service",
                     ),
                 ),
             ],
@@ -468,8 +468,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Graphene library import for GraphQL schema definition",
-                        "This code uses Python Graphene to interact with a GraphQL schema",
+                        "GraphQL schema is imported via Graphene library",
+                        "GraphQL schema is accessed with Graphene",
                     ),
                 ),
                 (
@@ -477,8 +477,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Ariadne library for schema-first GraphQL integration",
-                        "This code uses Python Ariadne to interact with a GraphQL schema",
+                        "GraphQL schema is defined with Ariadne library",
+                        "GraphQL schema is accessed for query operations",
                     ),
                 ),
                 (
@@ -486,8 +486,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Strawberry library for code-first GraphQL schema definition",
-                        "This code uses Python Strawberry to interact with a GraphQL schema",
+                        "GraphQL schema is defined by Strawberry library",
+                        "GraphQL schema is accessed with Strawberry",
                     ),
                 ),
             ],
@@ -499,8 +499,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python smtplib library import for sending email via SMTP",
-                        "This code uses Python smtplib to send an email message",
+                        "Email is sent via smtplib SMTP library",
+                        "Email is sent via smtplib",
                     ),
                 ),
                 (
@@ -508,8 +508,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python email.mime module for constructing outbound email messages",
-                        "This code uses Python email to send an email message",
+                        "Email messages are constructed by mime module",
+                        "Email is sent via Python email",
                     ),
                 ),
                 (
@@ -517,8 +517,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python SendGrid library import for transactional email delivery",
-                        "This code uses Python SendGrid to send an email message",
+                        "Transactional email is imported via SendGrid library",
+                        "Email is sent via SendGrid API",
                     ),
                 ),
             ],
@@ -530,8 +530,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python redis library import for Redis cache access",
-                        "This code uses Python redis to connect to a Redis cache",
+                        "Redis cache is imported via redis library",
+                        "Redis cache is connected for storage",
                     ),
                 ),
                 (
@@ -539,8 +539,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python pymemcache library for Memcached cache access",
-                        "This code uses Python pymemcache to connect to a cache store",
+                        "Memcached cache is accessed by pymemcache library",
+                        "Cache is connected via pymemcache",
                     ),
                 ),
                 (
@@ -548,8 +548,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python cachetools library for in-process caching utilities",
-                        "This code uses Python cachetools to interact with a cache store",
+                        "In-process caching is handled by cachetools library",
+                        "Cache is accessed with cachetools",
                     ),
                 ),
             ],
@@ -561,8 +561,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Python sse-starlette library for server-sent event streaming",
-                        "This code uses Python sse-starlette to expose an inbound server-sent event stream",
+                        "SSE library is imported for server-sent event streaming",
+                        "Event stream is exposed via sse-starlette",
                     ),
                 ),
                 (
@@ -570,8 +570,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python asyncio.Queue for async producer-consumer data streaming",
-                        "This code uses Python asyncio to interact with a server-sent event stream",
+                        "Async data is streamed by asyncio Queue",
+                        "Event stream is consumed via asyncio",
                     ),
                 ),
             ],
@@ -583,8 +583,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python ftplib library import for FTP server access",
-                        "This code uses Python ftplib to connect to a FTP/SFTP server",
+                        "FTP server is imported via ftplib library",
+                        "FTP connection is opened with ftplib",
                     ),
                 ),
                 (
@@ -592,8 +592,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python Paramiko library import for SSH and SFTP server access",
-                        "This code uses Python Paramiko to connect to a FTP/SFTP server",
+                        "SSH server is accessed via Paramiko library",
+                        "FTP connection is opened with Paramiko",
                     ),
                 ),
                 (
@@ -601,8 +601,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Python pysftp library import for SFTP server access",
-                        "This code uses Python pysftp to connect to a FTP/SFTP server",
+                        "SFTP server is imported via pysftp library",
+                        "SFTP connection is opened with pysftp",
                     ),
                 ),
             ],
@@ -614,8 +614,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python schedule library import for job scheduling",
-                        "This code uses Python schedule to interact with a scheduled task",
+                        "Jobs are scheduled by schedule library",
+                        "Scheduled task is registered with schedule",
                     ),
                 ),
                 (
@@ -623,8 +623,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python APScheduler library for advanced task scheduling",
-                        "This code uses Python APScheduler to interact with a scheduled task",
+                        "Tasks are scheduled by APScheduler library",
+                        "Task is scheduled with timer",
                     ),
                 ),
                 (
@@ -632,8 +632,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Python Celery schedules module for periodic task scheduling",
-                        "This code uses Python Celery to interact with a scheduled task",
+                        "Periodic tasks are scheduled by Celery schedules",
+                        "Scheduled task is registered with Celery",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Vert.x import for building Vert.x HTTP server or client components",
-                        "This code uses Vert.x to expose an inbound HTTP endpoint",
+                        "HTTP components are imported via Vert.x",
+                        "HTTP endpoint is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Vert.x vertx.createHttpServer call for starting an HTTP server",
-                        "This code uses Vert.x to expose an inbound REST API",
+                        "HTTP server is created with configuration",
+                        "REST API is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Vert.x Router.router call for creating an HTTP request router",
-                        "This code uses Vert.x to handle inbound HTTP requests",
+                        "HTTP router is created for requests",
+                        "HTTP request is handled by server",
                     ),
                 ),
             ],
@@ -49,8 +49,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Vert.x ServerWebSocket for handling server-side WebSocket connections",
-                        "This code uses Vert.x to expose an inbound WebSocket connection",
+                        "WebSocket connection is handled server-side",
+                        "WebSocket connection is exposed for inbound events",
                     ),
                 ),
                 (
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Vert.x SockJSHandler for handling SockJS WebSocket-like connections",
-                        "This code uses Vert.x to expose an inbound WebSocket connection",
+                        "SockJS connection is handled by handler",
+                        "WebSocket connection is exposed for inbound events",
                     ),
                 ),
             ],
@@ -71,8 +71,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Vert.x EventBus for publishing and consuming messages across verticles",
-                        "This code uses Vert.x EventBus to interact with a message queue",
+                        "Messages are published via EventBus",
+                        "Message queue is accessed via event bus",
                     ),
                 ),
                 (
@@ -80,8 +80,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Vert.x vertx.eventBus() accessor for obtaining the Vert.x EventBus",
-                        "This code uses Vert.x EventBus to interact with a message queue",
+                        "EventBus is accessed for messaging",
+                        "Message queue is accessed via event bus",
                     ),
                 ),
             ],

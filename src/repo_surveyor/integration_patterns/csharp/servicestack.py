@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ServiceStack namespace import enabling a ServiceStack web service",
-                        "This code uses ServiceStack to expose inbound HTTP REST services",
+                        "Web service is enabled via ServiceStack namespace",
+                        "HTTP REST services are exposed with ServiceStack",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ServiceStack IReturn<T> interface marking a request DTO with its response type",
-                        "This code uses ServiceStack to handle inbound HTTP service requests",
+                        "Request DTO is marked with response type",
+                        "HTTP service requests are handled with ServiceStack",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ServiceStack IGet interface marking a request DTO for HTTP GET handling",
-                        "This code uses ServiceStack to handle incoming HTTP GET requests",
+                        "HTTP GET request is marked by IGet interface",
+                        "HTTP GET requests are handled with ServiceStack",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ServiceStack IPost interface marking a request DTO for HTTP POST handling",
-                        "This code uses ServiceStack to handle incoming HTTP POST requests",
+                        "HTTP POST request is marked by IPost interface",
+                        "HTTP POST requests are handled with ServiceStack",
                     ),
                 ),
             ],
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack OrmLite namespace import for lightweight ORM database access",
-                        "This code uses ServiceStack OrmLite to query a database",
+                        "Lightweight ORM is imported via OrmLite namespace",
+                        "Database is queried with ServiceStack OrmLite",
                     ),
                 ),
                 (
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack OrmLiteConnectionFactory class creating database connections",
-                        "This code uses ServiceStack OrmLite to connect to an outbound database",
+                        "Database connections are created by OrmLiteConnectionFactory",
+                        "Database is connected with ServiceStack OrmLite",
                     ),
                 ),
                 (
@@ -76,8 +76,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack IDbConnectionFactory interface providing database connections",
-                        "This code uses ServiceStack OrmLite to connect to an outbound database",
+                        "Database connections are provided by IDbConnectionFactory interface",
+                        "Database is connected with ServiceStack OrmLite",
                     ),
                 ),
                 (
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack OrmLite Db.Select<T> method querying rows from a database table",
-                        "This code uses ServiceStack OrmLite to query an outbound database",
+                        "Database rows are queried by Db.Select method",
+                        "Database is queried with ServiceStack OrmLite",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack OrmLite Db.Insert method inserting a row into a database table",
-                        "This code uses ServiceStack OrmLite to write to an outbound database",
+                        "Database row is inserted by Db.Insert method",
+                        "Database is written with ServiceStack OrmLite",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack OrmLite Db.Update method updating rows in a database table",
-                        "This code uses ServiceStack OrmLite to write to an outbound database",
+                        "Database rows are updated by Db.Update method",
+                        "Database is written with ServiceStack OrmLite",
                     ),
                 ),
                 (
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack OrmLite Db.Delete method deleting rows from a database table",
-                        "This code uses ServiceStack OrmLite to write to an outbound database",
+                        "Database rows are deleted by Db.Delete method",
+                        "Database is written with ServiceStack OrmLite",
                     ),
                 ),
                 (
@@ -121,8 +121,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack OrmLite Db.SingleById method fetching a row by primary key",
-                        "This code uses ServiceStack OrmLite to query an outbound database by ID",
+                        "Database row is fetched by Db.SingleById method",
+                        "Database is queried by ID with ServiceStack OrmLite",
                     ),
                 ),
                 (
@@ -130,8 +130,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack OrmLite Db.LoadSelect method eagerly loading related rows from a database",
-                        "This code uses ServiceStack OrmLite to query an outbound database with related data",
+                        "Related database rows are loaded by Db.LoadSelect method",
+                        "Database is queried with related data",
                     ),
                 ),
                 (
@@ -139,8 +139,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ServiceStack.Data namespace import providing database connection abstractions",
-                        "This code uses ServiceStack to connect to an outbound database",
+                        "Database connections are abstracted via ServiceStack.Data namespace",
+                        "Database is connected with ServiceStack",
                     ),
                 ),
             ],

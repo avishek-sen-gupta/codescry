@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails ApplicationController subclass handling inbound HTTP requests",
-                        "This code uses Rails to handle inbound HTTP requests via a controller",
+                        "HTTP requests are handled by ApplicationController",
+                        "HTTP request is handled by controller",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails ActionController::Base subclass handling inbound HTTP requests",
-                        "This code uses Rails ActionController to handle inbound HTTP requests",
+                        "HTTP requests are handled by controller base",
+                        "HTTP requests are handled via Rails ActionController",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails ActionController::API subclass exposing an inbound API endpoint",
-                        "This code uses Rails ActionController::API to handle inbound API requests",
+                        "API endpoint is exposed via controller subclass",
+                        "API requests are handled via Rails ActionController",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails render json: sending a JSON response to inbound requests",
-                        "This code uses Rails to expose inbound HTTP endpoints returning JSON responses",
+                        "JSON response is sent to requests",
+                        "HTTP endpoint is exposed returning JSON responses",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails respond_to block handling inbound multi-format HTTP responses",
-                        "This code uses Rails to handle inbound HTTP requests with format-based responses",
+                        "Multi-format HTTP responses are handled by respond_to",
+                        "HTTP request is handled with format-based responses",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Rails before_action callback executing before inbound request handling",
-                        "This code uses Rails to intercept inbound HTTP requests with pre-action callbacks",
+                        "Request handling is executed before by callback",
+                        "HTTP request is intercepted with pre-action callbacks",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Rails after_action callback executing after inbound request handling",
-                        "This code uses Rails to process inbound HTTP requests with post-action callbacks",
+                        "Request handling is executed after by callback",
+                        "HTTP request is processed with post-action callbacks",
                     ),
                 ),
                 (
@@ -81,8 +81,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails resources route defining RESTful inbound resource endpoints",
-                        "This code uses Rails routing to expose inbound RESTful resource endpoints",
+                        "RESTful resource endpoints are defined by resources",
+                        "RESTful endpoints are exposed via Rails routing",
                     ),
                 ),
                 (
@@ -90,8 +90,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Rails get route defining an inbound HTTP GET endpoint",
-                        "This code uses Rails routing to handle inbound HTTP GET requests",
+                        "HTTP GET endpoint is defined by route",
+                        "HTTP GET requests are handled via Rails routing",
                     ),
                 ),
                 (
@@ -99,8 +99,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Rails post route defining an inbound HTTP POST endpoint",
-                        "This code uses Rails routing to handle inbound HTTP POST requests",
+                        "HTTP POST endpoint is defined by route",
+                        "POST route is registered for inbound HTTP requests",
                     ),
                 ),
                 (
@@ -108,8 +108,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Rails put route defining an inbound HTTP PUT endpoint",
-                        "This code uses Rails routing to handle inbound HTTP PUT requests",
+                        "HTTP PUT endpoint is defined by route",
+                        "PUT route is registered for inbound HTTP requests",
                     ),
                 ),
                 (
@@ -117,8 +117,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Rails delete route defining an inbound HTTP DELETE endpoint",
-                        "This code uses Rails routing to handle inbound HTTP DELETE requests",
+                        "HTTP DELETE endpoint is defined by route",
+                        "HTTP DELETE requests are handled via Rails routing",
                     ),
                 ),
                 (
@@ -126,8 +126,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Rails patch route defining an inbound HTTP PATCH endpoint",
-                        "This code uses Rails routing to handle inbound HTTP PATCH requests",
+                        "HTTP PATCH endpoint is defined by route",
+                        "PATCH route is registered for inbound HTTP requests",
                     ),
                 ),
             ],
@@ -139,8 +139,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord::Schema.define declaring the outbound database schema",
-                        "This code uses Rails ActiveRecord to write an outbound database schema definition",
+                        "Database schema is declared by Schema definition",
+                        "Database schema is written via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -148,8 +148,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord transaction wrapping outbound database operations",
-                        "This code uses Rails ActiveRecord to execute outbound database operations in a transaction",
+                        "Database operations are wrapped by transaction",
+                        "Database operations are executed in transaction via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -157,8 +157,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord pluck querying specific columns from the database",
-                        "This code uses Rails ActiveRecord to query specific column values from an outbound database",
+                        "Database columns are queried by pluck selection",
+                        "Column values are queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -166,8 +166,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord select specifying columns in a database query",
-                        "This code uses Rails ActiveRecord to query selected columns from an outbound database",
+                        "Database query columns are specified by select",
+                        "Selected columns are queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -175,8 +175,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord group aggregating database query results",
-                        "This code uses Rails ActiveRecord to query grouped results from an outbound database",
+                        "Database query results are aggregated",
+                        "Grouped results are queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -184,8 +184,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord order sorting database query results",
-                        "This code uses Rails ActiveRecord to query ordered results from an outbound database",
+                        "Database query results are sorted by order",
+                        "Ordered results are queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -193,8 +193,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord limit capping the number of database query results",
-                        "This code uses Rails ActiveRecord to query limited results from an outbound database",
+                        "Database query results are limited",
+                        "Limited results are queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -202,8 +202,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord offset paginating database query results",
-                        "This code uses Rails ActiveRecord to query paginated results from an outbound database",
+                        "Database query results are paginated",
+                        "Paginated results are queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -211,8 +211,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord having filtering aggregated database query results",
-                        "This code uses Rails ActiveRecord to query filtered aggregates from an outbound database",
+                        "Aggregated query results are filtered",
+                        "Filtered aggregates are queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -220,8 +220,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.LOW,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord count querying the number of matching database records",
-                        "This code uses Rails ActiveRecord to query a record count from an outbound database",
+                        "Database records are counted via query",
+                        "Record count is queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -229,8 +229,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord exists? checking for record presence in the database",
-                        "This code uses Rails ActiveRecord to query record existence in an outbound database",
+                        "Record presence is checked in database",
+                        "Record existence is queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -238,8 +238,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord find_or_create_by upsert-style database operation",
-                        "This code uses Rails ActiveRecord to write or query a record in an outbound database",
+                        "Database record is found or created",
+                        "Record is written or queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -247,8 +247,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord find_or_initialize_by lazy database record initialization",
-                        "This code uses Rails ActiveRecord to query or initialize a record against an outbound database",
+                        "Database record is found or initialized",
+                        "Record is queried or initialized via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -256,8 +256,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord update_all bulk-updating database records",
-                        "This code uses Rails ActiveRecord to write bulk updates to an outbound database",
+                        "Database records are bulk-updated by update_all",
+                        "Bulk updates are written via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -265,8 +265,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord delete_all bulk-deleting database records",
-                        "This code uses Rails ActiveRecord to delete records from an outbound database",
+                        "Database records are bulk-deleted",
+                        "Records are deleted from database via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -274,8 +274,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord destroy_all bulk-destroying database records with callbacks",
-                        "This code uses Rails ActiveRecord to destroy records in an outbound database",
+                        "Database records are bulk-destroyed with callbacks",
+                        "Records are destroyed via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -283,8 +283,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord accepts_nested_attributes_for enabling nested model writes",
-                        "This code uses Rails ActiveRecord to write nested model attributes to an outbound database",
+                        "Nested attributes are accepted for model writes",
+                        "Nested attributes are written via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -292,8 +292,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord dependent: :destroy cascading deletes to associated records",
-                        "This code uses Rails ActiveRecord to cascade deletion to associated outbound database records",
+                        "Associated records are cascade-deleted",
+                        "Records are cascade deleted via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -301,8 +301,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord foreign_key declaring a database foreign key constraint",
-                        "This code uses Rails ActiveRecord to define a foreign key in an outbound database",
+                        "Database foreign key is declared",
+                        "Foreign key is defined via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -310,8 +310,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord class_name specifying an association model class",
-                        "This code uses Rails ActiveRecord to associate models in an outbound database",
+                        "Association model class is specified",
+                        "Models are associated in database via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -319,8 +319,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord polymorphic: true declaring a polymorphic association",
-                        "This code uses Rails ActiveRecord to define polymorphic associations in an outbound database",
+                        "Polymorphic association is declared with polymorphic flag",
+                        "Polymorphic associations are defined via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -328,8 +328,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord through: declaring a join-table association",
-                        "This code uses Rails ActiveRecord to query through-associations in an outbound database",
+                        "Join-table association is declared through association",
+                        "Through-associations are queried via Rails ActiveRecord",
                     ),
                 ),
                 (
@@ -337,8 +337,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveRecord arel_table building low-level SQL queries",
-                        "This code uses Rails Arel to construct outbound database queries programmatically",
+                        "SQL queries are built via arel table",
+                        "Database queries are constructed via Rails Arel",
                     ),
                 ),
                 (
@@ -346,8 +346,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails Arel SQL AST builder for low-level database queries",
-                        "This code uses Rails Arel to build outbound database queries",
+                        "Database queries are built by Arel SQL AST",
+                        "Database queries are built via Rails Arel",
                     ),
                 ),
                 (
@@ -355,8 +355,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveGraph::Node declaring a graph database node model",
-                        "This code uses Rails ActiveGraph to interact with an outbound graph database node",
+                        "Graph node model is declared",
+                        "Graph database node is accessed via Rails ActiveGraph",
                     ),
                 ),
                 (
@@ -364,8 +364,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActiveGraph::Relationship declaring a graph database relationship model",
-                        "This code uses Rails ActiveGraph to interact with outbound graph database relationships",
+                        "Graph relationship model is declared",
+                        "Graph database relationships are accessed via Rails ActiveGraph",
                     ),
                 ),
             ],
@@ -377,8 +377,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails ActionCable framework handling inbound WebSocket connections",
-                        "This code uses Rails ActionCable to handle inbound WebSocket connections",
+                        "WebSocket connections are handled by ActionCable",
+                        "WebSocket connections are handled via Rails ActionCable",
                     ),
                 ),
                 (
@@ -386,8 +386,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails ApplicationCable::Channel subclass handling inbound WebSocket channel subscriptions",
-                        "This code uses Rails ActionCable to handle inbound WebSocket channel subscriptions",
+                        "WebSocket channel subscriptions are handled by ApplicationCable::Channel",
+                        "WebSocket subscriptions are handled via Rails ActionCable",
                     ),
                 ),
                 (
@@ -395,8 +395,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Rails ApplicationCable::Connection subclass managing inbound WebSocket connections",
-                        "This code uses Rails ActionCable to accept inbound WebSocket connections",
+                        "WebSocket connections are managed by ApplicationCable::Connection",
+                        "WebSocket connections are accepted via Rails ActionCable",
                     ),
                 ),
             ],
@@ -408,8 +408,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ApplicationMailer subclass composing outbound email messages",
-                        "This code uses Rails ActionMailer to send outbound email messages",
+                        "Email messages are composed by ApplicationMailer",
+                        "Email messages are sent via Rails ActionMailer",
                     ),
                 ),
                 (
@@ -417,8 +417,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActionMailer::Base subclass composing outbound email messages",
-                        "This code uses Rails ActionMailer to send outbound email messages",
+                        "Email message is composed via mailer base",
+                        "Email messages are sent via Rails ActionMailer",
                     ),
                 ),
                 (
@@ -426,8 +426,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActionMailer deliver_now sending an outbound email synchronously",
-                        "This code uses Rails ActionMailer to send an outbound email immediately",
+                        "Email is sent synchronously via mailer",
+                        "Email is sent immediately via Rails ActionMailer",
                     ),
                 ),
                 (
@@ -435,8 +435,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails ActionMailer deliver_later enqueuing an outbound email for async delivery",
-                        "This code uses Rails ActionMailer to send an outbound email asynchronously",
+                        "Email is queued for asynchronous delivery",
+                        "Email is sent asynchronously via Rails ActionMailer",
                     ),
                 ),
             ],
@@ -448,8 +448,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Rails Rails.cache accessor interacting with the configured cache store",
-                        "This code uses Rails to write to or read from an outbound cache store",
+                        "Cache store is accessed by Rails.cache",
+                        "Cache store is accessed for read-write operations",
                     ),
                 ),
                 (
@@ -457,8 +457,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rails caches_action enabling action-level response caching",
-                        "This code uses Rails to interact with action-level response caching",
+                        "Action-level response caching is enabled",
+                        "Response caching is applied at action level",
                     ),
                 ),
                 (
@@ -466,8 +466,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rails fragment_cache enabling view fragment caching",
-                        "This code uses Rails to interact with view fragment caching",
+                        "View fragment caching is enabled",
+                        "View fragment is cached",
                     ),
                 ),
                 (
@@ -475,8 +475,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rails config.cache_store configuring the application cache backend",
-                        "This code uses Rails to configure the outbound cache store integration",
+                        "Application cache backend is configured",
+                        "Cache store is configured for outbound integration",
                     ),
                 ),
             ],
@@ -488,8 +488,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rails ApplicationJob subclass defining a background job",
-                        "This code uses Rails ActiveJob to interact with a background job queue",
+                        "Background job is defined by ApplicationJob",
+                        "Background job queue is accessed via Rails ActiveJob",
                     ),
                 ),
                 (
@@ -497,8 +497,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rails ActiveJob::Base subclass defining a background job",
-                        "This code uses Rails ActiveJob to interact with a background job queue",
+                        "Background job is defined via base class",
+                        "Background job queue is accessed via Rails ActiveJob",
                     ),
                 ),
                 (
@@ -506,8 +506,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rails ActiveJob perform_later enqueuing a job for asynchronous execution",
-                        "This code uses Rails ActiveJob to interact with an asynchronous job queue",
+                        "Job is queued for asynchronous execution",
+                        "Asynchronous job queue is accessed via Rails ActiveJob",
                     ),
                 ),
                 (
@@ -515,8 +515,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Rails ActiveJob perform_now executing a job synchronously",
-                        "This code uses Rails ActiveJob to interact with a job by executing it immediately",
+                        "Job is executed synchronously",
+                        "Job is executed immediately via Rails ActiveJob",
                     ),
                 ),
             ],

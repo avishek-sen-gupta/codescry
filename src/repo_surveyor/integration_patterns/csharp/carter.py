@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Carter CarterModule class defining a group of HTTP route handlers",
-                        "This code uses Carter to expose inbound HTTP REST route handlers",
+                        "HTTP route handlers are grouped by CarterModule class",
+                        "HTTP REST routes are exposed for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Carter ICarterModule interface implemented to register HTTP routes",
-                        "This code uses Carter to expose inbound HTTP REST route handlers",
+                        "HTTP routes are registered via ICarterModule interface",
+                        "HTTP REST routes are exposed for inbound requests",
                     ),
                 ),
             ],

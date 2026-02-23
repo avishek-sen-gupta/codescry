@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Warp library import for composable HTTP server framework",
-                        "This code uses Warp to interact with an HTTP server",
+                        "HTTP server is imported via Warp",
+                        "HTTP server is accessed via Warp",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Axum library import for async HTTP server framework",
-                        "This code uses Axum to interact with an HTTP server",
+                        "Async HTTP framework is imported",
+                        "HTTP server is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Axum Router type defining inbound HTTP route configuration",
-                        "This code uses Axum to expose an inbound HTTP server",
+                        "HTTP router is configured for inbound routes",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Axum .route() method registering an inbound HTTP route handler",
-                        "This code uses Axum to handle inbound HTTP requests",
+                        "HTTP route is registered with handler method",
+                        "HTTP request is handled for inbound processing",
                     ),
                 ),
             ],
@@ -49,8 +49,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Axum response::sse module exposing an inbound SSE streaming endpoint",
-                        "This code uses Axum to expose an inbound server-sent events stream",
+                        "SSE endpoint is exposed for streaming",
+                        "SSE stream is exposed for inbound connections",
                     ),
                 ),
             ],

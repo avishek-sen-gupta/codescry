@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "FastAPI @app.get decorator defining an inbound GET REST endpoint",
-                        "This code uses FastAPI to expose an inbound REST API endpoint",
+                        "GET endpoint is decorated for inbound REST",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "FastAPI @app.post decorator defining an inbound POST REST endpoint",
-                        "This code uses FastAPI to expose an inbound REST API endpoint",
+                        "POST endpoint is decorated for inbound REST",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "FastAPI @app.put decorator defining an inbound PUT REST endpoint",
-                        "This code uses FastAPI to expose an inbound REST API endpoint",
+                        "PUT endpoint is decorated for inbound REST",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "FastAPI @app.delete decorator defining an inbound DELETE REST endpoint",
-                        "This code uses FastAPI to expose an inbound REST API endpoint",
+                        "DELETE endpoint is decorated for inbound REST",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "FastAPI framework import for building REST API applications",
-                        "This code uses FastAPI to interact with an HTTP endpoint",
+                        "REST API framework is imported",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
             ],
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "FastAPI SQLModel ORM import for database model and query operations",
-                        "This code uses FastAPI SQLModel to interact with a relational database",
+                        "Database model is imported for ORM operations",
+                        "Database is accessed via SQLModel",
                     ),
                 ),
                 (
@@ -76,8 +76,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "FastAPI SQLModel library import for database access",
-                        "This code uses FastAPI SQLModel to interact with a relational database",
+                        "Database access is imported via SQLModel",
+                        "Database is accessed via SQLModel",
                     ),
                 ),
                 (
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "FastAPI SQLModel class for combined Pydantic and ORM database model definition",
-                        "This code uses FastAPI SQLModel to define a database model for persistence",
+                        "Database model is defined with Pydantic validation",
+                        "Database model is defined for persistence",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "FastAPI databases library import for async database access",
-                        "This code uses FastAPI databases to query a relational database",
+                        "Async database access is imported",
+                        "Database is queried via FastAPI databases",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "FastAPI databases library for async database query execution",
-                        "This code uses FastAPI databases to query a relational database",
+                        "Database queries are executed asynchronously",
+                        "Database is queried via FastAPI databases",
                     ),
                 ),
             ],
@@ -116,8 +116,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "FastAPI Strawberry GraphQL integration for inbound GraphQL endpoint",
-                        "This code uses FastAPI Strawberry to expose an inbound GraphQL schema",
+                        "GraphQL endpoint is integrated for inbound requests",
+                        "GraphQL schema is exposed via Strawberry",
                     ),
                 ),
             ],
@@ -129,8 +129,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "FastAPI EventSourceResponse for server-sent event stream delivery",
-                        "This code uses FastAPI to expose an inbound server-sent event stream",
+                        "Event stream is delivered via EventSource response",
+                        "Server-sent events are streamed inbound",
                     ),
                 ),
                 (
@@ -138,8 +138,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "FastAPI StreamingResponse for chunked HTTP response streaming",
-                        "This code uses FastAPI to expose an inbound server-sent event stream",
+                        "HTTP response is streamed in chunks",
+                        "Server-sent events are streamed inbound",
                     ),
                 ),
             ],

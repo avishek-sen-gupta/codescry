@@ -19,8 +19,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Express import for HTTP server framework",
-                        "This code uses TypeScript Express to expose an inbound HTTP server",
+                        "HTTP server is imported via Express",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -28,8 +28,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Express .get() route handler accepting inbound GET requests",
-                        "This code uses TypeScript Express to handle inbound GET HTTP requests",
+                        "GET requests are handled by route",
+                        "GET request is handled by HTTP route",
                     ),
                 ),
                 (
@@ -37,8 +37,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Express .post() route handler accepting inbound POST requests",
-                        "This code uses TypeScript Express to handle inbound POST HTTP requests",
+                        "POST requests are handled by route",
+                        "POST request is handled by HTTP route",
                     ),
                 ),
                 (
@@ -46,8 +46,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Express .put() route handler accepting inbound PUT requests",
-                        "This code uses TypeScript Express to handle inbound PUT HTTP requests",
+                        "PUT requests are handled by route",
+                        "PUT request is handled by HTTP route",
                     ),
                 ),
                 (
@@ -55,8 +55,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Express .delete() route handler accepting inbound DELETE requests",
-                        "This code uses TypeScript Express to handle inbound DELETE HTTP requests",
+                        "DELETE requests are handled by route",
+                        "DELETE request is handled by HTTP route",
                     ),
                 ),
             ],

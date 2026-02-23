@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "POCO HTTPServer class creating an inbound HTTP server",
-                        "This code uses POCO to expose an inbound HTTP server",
+                        "HTTP server is created for inbound connections",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "POCO HTTPClientSession class making outbound HTTP requests",
-                        "This code uses POCO to send outbound HTTP requests",
+                        "HTTP request is sent to remote endpoint",
+                        "HTTP request is sent to outbound endpoint",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "POCO HTTPRequestHandler class handling inbound HTTP requests",
-                        "This code uses POCO to handle inbound HTTP requests",
+                        "HTTP request is handled by inbound handler",
+                        "HTTP request is handled by server",
                     ),
                 ),
             ],
@@ -49,8 +49,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "POCO ServerSocket class accepting inbound socket connections",
-                        "This code uses POCO to accept inbound socket connections",
+                        "Socket connections are accepted for inbound traffic",
+                        "Socket connection is accepted for inbound requests",
                     ),
                 ),
                 (
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "POCO StreamSocket class for TCP stream communication",
-                        "This code uses POCO to interact with a TCP stream socket",
+                        "TCP stream is communicated via socket",
+                        "TCP socket stream is accessed for communication",
                     ),
                 ),
             ],
@@ -71,8 +71,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "POCO Data::Session class opening a database session",
-                        "This code uses POCO Data to connect to a relational database",
+                        "Database session is opened by Session class",
+                        "Database connection is opened with credentials",
                     ),
                 ),
                 (
@@ -80,8 +80,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "POCO Data::Statement class executing a database statement",
-                        "This code uses POCO Data to query a relational database",
+                        "Database statement is executed by SQL command",
+                        "Database is queried with SQL",
                     ),
                 ),
                 (
@@ -89,8 +89,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "POCO Data::ODBC connector for ODBC database access",
-                        "This code uses POCO Data ODBC to connect to a relational database",
+                        "ODBC database is accessed by Data connector",
+                        "Database connection is opened via ODBC",
                     ),
                 ),
             ],
@@ -102,8 +102,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "POCO MailMessage class composing an outbound email message",
-                        "This code uses POCO to send outbound email messages",
+                        "Email message is composed for outbound delivery",
+                        "Email message is sent via outbound service",
                     ),
                 ),
                 (
@@ -111,8 +111,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "POCO SMTPClientSession class sending email via SMTP",
-                        "This code uses POCO to send outbound email via SMTP",
+                        "Email is sent via SMTP protocol",
+                        "Email is sent via SMTP protocol",
                     ),
                 ),
             ],
@@ -124,8 +124,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "POCO FTPClientSession class connecting to an FTP server",
-                        "This code uses POCO to connect to an outbound FTP server",
+                        "FTP connection is opened to remote server",
+                        "FTP connection is opened for outbound transfer",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "POCO SFTPClientSession class connecting to an SFTP server",
-                        "This code uses POCO to connect to an outbound SFTP server",
+                        "SFTP connection is opened to secure server",
+                        "SFTP connection is opened for outbound transfer",
                     ),
                 ),
             ],
@@ -146,8 +146,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "POCO File class for file system operations",
-                        "This code uses POCO to interact with the file system",
+                        "File operations are performed on filesystem",
+                        "File system is accessed for operations",
                     ),
                 ),
                 (
@@ -155,8 +155,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "POCO DirectoryIterator class iterating over directory entries",
-                        "This code uses POCO to interact with the file system",
+                        "Directory entries are iterated by file system traversal",
+                        "File system is accessed for operations",
                     ),
                 ),
             ],

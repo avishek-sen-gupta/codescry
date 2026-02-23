@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Ktor server routing import for HTTP route handling",
-                        "This code uses Ktor to handle inbound HTTP routing",
+                        "HTTP routing is imported",
+                        "HTTP routing is handled via Ktor",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Ktor routing block for HTTP route definition",
-                        "This code uses Ktor to handle inbound HTTP routes",
+                        "HTTP routes are defined with routing",
+                        "HTTP routes are handled via Ktor",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Ktor GET route handler for HTTP GET requests",
-                        "This code uses Ktor to handle inbound HTTP GET requests",
+                        "GET request is handled by route",
+                        "HTTP GET requests are handled via Ktor",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Ktor POST route handler for HTTP POST requests",
-                        "This code uses Ktor to handle inbound HTTP POST requests",
+                        "POST request is handled by route",
+                        "HTTP POST requests are handled via Ktor",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Ktor call.respond for HTTP response sending",
-                        "This code uses Ktor to handle inbound HTTP calls and respond",
+                        "HTTP response is sent",
+                        "HTTP calls are handled and responded",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Ktor call.receive for HTTP request body reading",
-                        "This code uses Ktor to receive inbound HTTP request payloads",
+                        "HTTP request body is received",
+                        "HTTP request payloads are received inbound",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Ktor embeddedServer for HTTP server instantiation",
-                        "This code uses Ktor to expose an inbound embedded HTTP server",
+                        "HTTP server is created with embeddedServer",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Ktor server WebSocket import for WebSocket support",
-                        "This code uses Ktor to handle inbound WebSocket connections",
+                        "WebSocket support is imported",
+                        "WebSocket connections are handled via Ktor",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Ktor webSocket route handler for WebSocket connections",
-                        "This code uses Ktor to accept inbound WebSocket connections",
+                        "WebSocket connection is handled by route",
+                        "WebSocket connections are accepted via Ktor",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Ktor WebSocket incoming.receive for frame reception",
-                        "This code uses Ktor to receive inbound WebSocket frames",
+                        "WebSocket frame is received from incoming",
+                        "WebSocket frames are received inbound",
                     ),
                 ),
             ],
@@ -116,8 +116,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Ktor server SSE import for server-sent events support",
-                        "This code uses Ktor to expose inbound server-sent event streams",
+                        "Server-sent events are imported",
+                        "Server-sent event streams are exposed inbound",
                     ),
                 ),
                 (
@@ -125,8 +125,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Ktor SSE route handler for server-sent event streaming",
-                        "This code uses Ktor to handle inbound SSE stream connections",
+                        "SSE streaming is handled by route",
+                        "SSE stream connections are handled inbound",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Echo labstack/echo package import for the Echo HTTP framework",
-                        "This code uses Echo to interact with an HTTP web framework",
+                        "Echo framework is imported for HTTP handling",
+                        "HTTP framework is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Echo echo.Context interface representing an inbound HTTP request context",
-                        "This code uses Echo to handle incoming HTTP requests",
+                        "HTTP request context is represented by Context",
+                        "HTTP requests are handled incoming",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Echo echo.New function creating a new Echo HTTP server instance",
-                        "This code uses Echo to expose an inbound HTTP server",
+                        "Echo server instance is created",
+                        "HTTP server is exposed inbound",
                     ),
                 ),
             ],

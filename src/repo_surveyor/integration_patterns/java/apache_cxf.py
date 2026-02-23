@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Apache CXF import for building CXF-based web service clients or servers",
-                        "This code uses Apache CXF to interact with an HTTP endpoint",
+                        "CXF framework is imported for web services",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Apache CXF JaxWsServerFactoryBean for publishing a JAX-WS SOAP service endpoint",
-                        "This code uses Apache CXF to expose an inbound REST API",
+                        "JAX-WS service is published with server factory",
+                        "REST API is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Apache CXF JaxRsServerFactoryBean for publishing a JAX-RS REST service endpoint",
-                        "This code uses Apache CXF to expose an inbound REST API",
+                        "JAX-RS service is published with server factory",
+                        "REST API is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -49,8 +49,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Apache CXF org.apache.cxf.jaxws import for JAX-WS SOAP service integration",
-                        "This code uses Apache CXF to interact with a SOAP web service",
+                        "JAX-WS integration is imported for SOAP services",
+                        "SOAP web service is accessed",
                     ),
                 ),
                 (
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Apache CXF CxfEndpoint for configuring a CXF web service endpoint",
-                        "This code uses Apache CXF to interact with a SOAP endpoint",
+                        "CXF endpoint is configured for web service",
+                        "SOAP endpoint is accessed",
                     ),
                 ),
             ],

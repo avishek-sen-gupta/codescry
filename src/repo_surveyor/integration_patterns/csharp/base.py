@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [ApiController] attribute marking a REST API controller",
-                        "This code uses C# ASP.NET to expose an inbound REST API controller",
+                        "REST controller is annotated with ApiController",
+                        "REST API controller is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [HttpGet] attribute defining an HTTP GET endpoint",
-                        "This code uses C# ASP.NET to handle incoming HTTP GET requests",
+                        "HTTP GET endpoint is defined with attribute",
+                        "HTTP GET request is handled for inbound processing",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [HttpPost] attribute defining an HTTP POST endpoint",
-                        "This code uses C# ASP.NET to handle incoming HTTP POST requests",
+                        "HTTP POST endpoint is defined with attribute",
+                        "HTTP POST request is handled for inbound processing",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [HttpPut] attribute defining an HTTP PUT endpoint",
-                        "This code uses C# ASP.NET to handle incoming HTTP PUT requests",
+                        "HTTP PUT endpoint is defined with attribute",
+                        "HTTP PUT request is handled for inbound processing",
                     ),
                 ),
                 (
@@ -53,8 +53,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [HttpDelete] attribute defining an HTTP DELETE endpoint",
-                        "This code uses C# ASP.NET to handle incoming HTTP DELETE requests",
+                        "HTTP DELETE endpoint is defined with attribute",
+                        "HTTP DELETE request is handled for inbound processing",
                     ),
                 ),
                 (
@@ -62,8 +62,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [Route] attribute declaring a URL route for a controller or action",
-                        "This code uses C# ASP.NET to expose a routed HTTP endpoint",
+                        "URL route is declared for controller action",
+                        "HTTP endpoint is exposed with routing",
                     ),
                 ),
                 (
@@ -71,8 +71,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [FromBody] attribute binding an action parameter from the request body",
-                        "This code uses C# ASP.NET to receive data from an inbound HTTP request body",
+                        "Request body is bound to action parameter",
+                        "Request body data is received from inbound request",
                     ),
                 ),
                 (
@@ -80,8 +80,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [FromQuery] attribute binding an action parameter from the query string",
-                        "This code uses C# ASP.NET to receive data from an inbound HTTP query string",
+                        "Query string is bound to action parameter",
+                        "Query string data is received from inbound request",
                     ),
                 ),
                 (
@@ -89,8 +89,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# ControllerBase class serving as the base for REST API controllers",
-                        "This code uses C# ASP.NET to expose an inbound REST API controller",
+                        "REST controller is extended from base",
+                        "REST API controller is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -98,8 +98,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "C# IActionResult interface representing an HTTP action response",
-                        "This code uses C# ASP.NET to handle and respond to inbound HTTP requests",
+                        "HTTP response is represented via interface",
+                        "HTTP request is handled and responded to",
                     ),
                 ),
                 (
@@ -107,8 +107,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "C# ActionResult<T> generic type wrapping a typed HTTP action response",
-                        "This code uses C# ASP.NET to handle and respond to inbound HTTP requests",
+                        "HTTP response is wrapped with type",
+                        "HTTP request is handled and responded to",
                     ),
                 ),
             ],
@@ -120,8 +120,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [ServiceContract] attribute declaring a WCF service interface",
-                        "This code uses C# WCF to expose an inbound SOAP service contract",
+                        "WCF service interface is declared with attribute",
+                        "SOAP service contract is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -129,8 +129,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [OperationContract] attribute declaring a WCF service operation",
-                        "This code uses C# WCF to expose an inbound SOAP service operation",
+                        "WCF service operation is declared with attribute",
+                        "SOAP service operation is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -138,8 +138,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# [DataContract] attribute marking a type for WCF serialization",
-                        "This code uses C# WCF to define a data type for inbound SOAP messages",
+                        "WCF serialization is marked with DataContract",
+                        "Data type is defined for inbound SOAP messages",
                     ),
                 ),
                 (
@@ -147,8 +147,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "C# [DataMember] attribute marking a field for WCF serialization",
-                        "This code uses C# WCF to define a member field for inbound SOAP messages",
+                        "WCF serialization is marked with DataMember",
+                        "Member field is defined for inbound SOAP messages",
                     ),
                 ),
             ],
@@ -160,8 +160,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# MassTransit namespace import for message bus integration",
-                        "This code uses C# MassTransit to interact with a message bus",
+                        "Message bus is integrated via namespace",
+                        "Message bus is accessed",
                     ),
                 ),
                 (
@@ -169,8 +169,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# NServiceBus namespace import for service bus integration",
-                        "This code uses C# NServiceBus to interact with a service bus",
+                        "Service bus is integrated via namespace",
+                        "Service bus is accessed",
                     ),
                 ),
                 (
@@ -178,8 +178,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# Rebus namespace import for message bus integration",
-                        "This code uses C# Rebus to interact with a message bus",
+                        "Message bus is integrated via Rebus",
+                        "Message bus is accessed",
                     ),
                 ),
                 (
@@ -187,8 +187,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# IConsumer<T> interface implementing a message consumer",
-                        "This code uses C# MassTransit to receive and consume inbound messages",
+                        "Messages are consumed via interface",
+                        "Message is received and consumed from bus",
                     ),
                 ),
                 (
@@ -196,8 +196,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# IMessageHandler interface handling inbound messages",
-                        "This code uses C# messaging to handle incoming messages",
+                        "Inbound messages are handled via interface",
+                        "Incoming messages are handled via messaging",
                     ),
                 ),
                 (
@@ -205,8 +205,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "C# IBus interface sending messages via a message bus",
-                        "This code uses C# messaging to send outbound messages to a bus",
+                        "Messages are sent via bus interface",
+                        "Outbound messages are sent to message bus",
                     ),
                 ),
                 (
@@ -214,8 +214,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# Amazon.SQS client interacting with AWS Simple Queue Service",
-                        "This code uses C# AWS SDK to interact with an SQS message queue",
+                        "SQS queue is accessed with client",
+                        "SQS message queue is accessed",
                     ),
                 ),
                 (
@@ -223,8 +223,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# Amazon.SimpleNotificationService client interacting with AWS SNS",
-                        "This code uses C# AWS SDK to interact with an SNS notification topic",
+                        "SNS notifications are sent with client",
+                        "SNS notification topic is accessed",
                     ),
                 ),
                 (
@@ -232,8 +232,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# Azure.Messaging.ServiceBus client interacting with Azure Service Bus",
-                        "This code uses C# Azure SDK to interact with an Azure Service Bus",
+                        "Service Bus is accessed with client",
+                        "Azure Service Bus is accessed",
                     ),
                 ),
             ],
@@ -245,8 +245,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# Microsoft.AspNetCore.SignalR namespace import for real-time communication",
-                        "This code uses C# SignalR to accept real-time WebSocket connections",
+                        "Real-time communication is enabled via SignalR",
+                        "WebSocket connections are accepted for real-time communication",
                     ),
                 ),
                 (
@@ -254,8 +254,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# Hub class defining a SignalR hub for real-time clients",
-                        "This code uses C# SignalR to expose an inbound real-time communication hub",
+                        "SignalR hub is defined for clients",
+                        "Real-time communication hub is exposed for inbound connections",
                     ),
                 ),
                 (
@@ -263,8 +263,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# HubConnection class connecting to a remote SignalR hub",
-                        "This code uses C# SignalR to connect to an outbound real-time hub",
+                        "SignalR hub is connected remotely",
+                        "Real-time hub is connected for outbound SignalR",
                     ),
                 ),
                 (
@@ -272,8 +272,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "C# TcpClient class opening an outbound TCP connection",
-                        "This code uses C# networking to connect to an outbound TCP endpoint",
+                        "TCP connection is opened for outbound communication",
+                        "Outbound TCP endpoint is connected via networking",
                     ),
                 ),
                 (
@@ -281,8 +281,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "C# TcpListener class listening for inbound TCP connections",
-                        "This code uses C# networking to accept inbound TCP connections",
+                        "TCP connections are listened for inbound traffic",
+                        "Inbound TCP connections are accepted via networking",
                     ),
                 ),
             ],
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Entity Framework namespace import for ORM database access",
-                        "This code uses C# Entity Framework to interact with a database",
+                        "Database is accessed via Entity Framework",
+                        "Database is accessed",
                     ),
                 ),
                 (
@@ -303,8 +303,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Entity Framework DbContext subclass managing database session",
-                        "This code uses C# Entity Framework to interact with a database",
+                        "Database session is managed with context",
+                        "Database is accessed",
                     ),
                 ),
                 (
@@ -312,8 +312,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Entity Framework DbSet<T> property representing a database table",
-                        "This code uses C# Entity Framework to query a database table",
+                        "Database table is represented as property",
+                        "Database table is queried",
                     ),
                 ),
                 (
@@ -321,8 +321,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# [Table] attribute mapping a class to a database table",
-                        "This code uses C# Entity Framework to write to a mapped database table",
+                        "Database table is mapped with class attribute",
+                        "Database table is written with mapping",
                     ),
                 ),
                 (
@@ -330,8 +330,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "C# [Key] attribute marking a property as a database primary key",
-                        "This code uses C# Entity Framework to define a database primary key",
+                        "Database primary key is marked with attribute",
+                        "Database primary key is defined",
                     ),
                 ),
                 (
@@ -339,8 +339,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "C# [Column] attribute mapping a property to a database column",
-                        "This code uses C# Entity Framework to write to a mapped database column",
+                        "Database column is mapped with property attribute",
+                        "Database column is written with mapping",
                     ),
                 ),
                 (
@@ -348,8 +348,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# SqlConnection class opening a connection to a SQL Server database",
-                        "This code uses C# ADO.NET to connect to an outbound SQL Server database",
+                        "SQL database connection is opened",
+                        "SQL Server database is connected with credentials",
                     ),
                 ),
                 (
@@ -357,8 +357,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Dapper namespace import for lightweight ORM database access",
-                        "This code uses C# Dapper to query a database",
+                        "Database is accessed via lightweight ORM",
+                        "Database is queried with mapper",
                     ),
                 ),
                 (
@@ -366,8 +366,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Amazon.DynamoDBv2 client interacting with AWS DynamoDB",
-                        "This code uses C# AWS SDK to write to a DynamoDB database",
+                        "DynamoDB is accessed with client",
+                        "DynamoDB database is written to",
                     ),
                 ),
                 (
@@ -375,8 +375,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Microsoft.Azure.Cosmos client interacting with Azure Cosmos DB",
-                        "This code uses C# Azure SDK to query an Azure Cosmos DB database",
+                        "Cosmos DB is accessed with client",
+                        "Azure Cosmos DB database is queried",
                     ),
                 ),
                 (
@@ -384,8 +384,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Neo4j.Driver namespace import for graph database access",
-                        "This code uses C# Neo4j driver to connect to a Neo4j graph database",
+                        "Graph database is accessed via driver",
+                        "Neo4j graph database is connected",
                     ),
                 ),
                 (
@@ -393,8 +393,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# IDriver interface for the Neo4j graph database driver",
-                        "This code uses C# Neo4j driver to connect to a Neo4j graph database",
+                        "Graph database is accessed via driver",
+                        "Neo4j graph database is connected",
                     ),
                 ),
                 (
@@ -402,8 +402,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# GraphDatabase.Driver factory creating a Neo4j driver instance",
-                        "This code uses C# Neo4j driver to connect to a Neo4j graph database",
+                        "Neo4j driver is created with factory",
+                        "Neo4j graph database is connected",
                     ),
                 ),
             ],
@@ -415,8 +415,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# File.Read method reading data from the filesystem",
-                        "This code uses C# System.IO to read from a file",
+                        "Filesystem is read with method",
+                        "File is read via System.IO",
                     ),
                 ),
                 (
@@ -424,8 +424,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# File.Write method writing data to the filesystem",
-                        "This code uses C# System.IO to write to a file",
+                        "Filesystem is written with method",
+                        "File is written via System.IO",
                     ),
                 ),
                 (
@@ -433,8 +433,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# StreamReader class reading character data from a stream",
-                        "This code uses C# System.IO to read from a stream or file",
+                        "Character data is read from stream",
+                        "Stream is read via System.IO",
                     ),
                 ),
                 (
@@ -442,8 +442,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# StreamWriter class writing character data to a stream",
-                        "This code uses C# System.IO to write to a stream or file",
+                        "Character data is written to stream",
+                        "Stream is written via System.IO",
                     ),
                 ),
                 (
@@ -451,8 +451,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# AWSSDK.S3 client interacting with AWS S3 object storage",
-                        "This code uses C# AWS SDK to write to an S3 storage bucket",
+                        "S3 storage is accessed with client",
+                        "S3 storage bucket is written to",
                     ),
                 ),
                 (
@@ -460,8 +460,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Azure.Storage.Blobs client interacting with Azure Blob Storage",
-                        "This code uses C# Azure SDK to write to Azure Blob Storage",
+                        "Blob storage is accessed with client",
+                        "Azure Blob Storage is written to",
                     ),
                 ),
                 (
@@ -469,8 +469,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Google.Cloud.Storage client interacting with Google Cloud Storage",
-                        "This code uses C# Google Cloud SDK to write to Google Cloud Storage",
+                        "Cloud Storage is accessed with client",
+                        "Google Cloud Storage is written to",
                     ),
                 ),
             ],
@@ -482,8 +482,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# Grpc.Core library providing core gRPC primitives",
-                        "This code uses C# gRPC to interact with a gRPC service",
+                        "gRPC primitives are provided via library",
+                        "gRPC service is accessed via client",
                     ),
                 ),
                 (
@@ -491,8 +491,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# Grpc.Net.Client library creating a managed gRPC client",
-                        "This code uses C# gRPC to call an outbound gRPC service",
+                        "gRPC client is created with library",
+                        "gRPC service is called for outbound requests",
                     ),
                 ),
                 (
@@ -500,8 +500,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# ServerServiceDefinition class registering a gRPC service implementation",
-                        "This code uses C# gRPC to expose an inbound gRPC service",
+                        "gRPC service is registered with definition",
+                        "gRPC service is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -513,8 +513,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# HotChocolate library exposing a GraphQL server",
-                        "This code uses C# HotChocolate to expose an inbound GraphQL API",
+                        "GraphQL server is exposed with library",
+                        "GraphQL API is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -522,8 +522,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C# GraphQL.Server library hosting a GraphQL endpoint",
-                        "This code uses C# GraphQL.Server to expose an inbound GraphQL API",
+                        "GraphQL endpoint is hosted with library",
+                        "GraphQL API is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -535,8 +535,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# System.Net.Mail namespace providing SMTP email sending",
-                        "This code uses C# System.Net.Mail to send outbound email messages",
+                        "SMTP email is sent via namespace",
+                        "Email messages are sent via outbound SMTP",
                     ),
                 ),
                 (
@@ -544,8 +544,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# SmtpClient class sending email via an SMTP server",
-                        "This code uses C# SMTP to send outbound email messages",
+                        "Email is sent via SMTP",
+                        "Email message is sent via SMTP",
                     ),
                 ),
                 (
@@ -553,8 +553,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# MailKit library sending and receiving email messages",
-                        "This code uses C# MailKit to send outbound email messages",
+                        "Email is sent and received",
+                        "Email message is sent via SMTP",
                     ),
                 ),
                 (
@@ -562,8 +562,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# MimeKit library constructing MIME email messages",
-                        "This code uses C# MimeKit to produce outbound MIME email messages",
+                        "Email messages are constructed with MIME",
+                        "MIME email message is produced for outbound delivery",
                     ),
                 ),
             ],
@@ -575,8 +575,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# IDistributedCache interface accessing a distributed cache",
-                        "This code uses C# distributed caching to write to a remote cache store",
+                        "Distributed cache is accessed via interface",
+                        "Remote cache store is written via distributed caching",
                     ),
                 ),
                 (
@@ -584,8 +584,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# IMemoryCache interface accessing an in-process memory cache",
-                        "This code uses C# memory caching to write to an in-process cache",
+                        "Memory cache is accessed via interface",
+                        "In-process cache is written via memory caching",
                     ),
                 ),
                 (
@@ -593,8 +593,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# StackExchange.Redis client connecting to a Redis cache",
-                        "This code uses C# StackExchange.Redis to write to a Redis cache",
+                        "Redis cache is connected with client",
+                        "Redis cache is written with key-value data",
                     ),
                 ),
             ],
@@ -606,8 +606,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "C# IAsyncEnumerable<T> interface streaming data asynchronously",
-                        "This code uses C# async streaming to expose an inbound data stream",
+                        "Data is streamed asynchronously",
+                        "Data stream is exposed for inbound async streaming",
                     ),
                 ),
                 (
@@ -615,8 +615,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# text/event-stream content type enabling Server-Sent Events",
-                        "This code uses C# HTTP to interact with a Server-Sent Events stream",
+                        "Server-Sent Events are enabled with content type",
+                        "SSE stream is accessed",
                     ),
                 ),
             ],
@@ -628,8 +628,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# FtpWebRequest class making outbound FTP requests",
-                        "This code uses C# networking to connect to an outbound FTP server",
+                        "FTP request is made outbound",
+                        "Outbound FTP server is connected via networking",
                     ),
                 ),
                 (
@@ -637,8 +637,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# SftpClient class connecting to an outbound SFTP server",
-                        "This code uses C# SSH.NET to connect to an outbound SFTP server",
+                        "SFTP server is connected outbound",
+                        "SFTP server is connected for outbound access",
                     ),
                 ),
                 (
@@ -646,8 +646,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C# FluentFTP library connecting to an outbound FTP server",
-                        "This code uses C# FluentFTP to connect to an outbound FTP server",
+                        "FTP server is connected via library",
+                        "FTP server is connected for outbound access",
                     ),
                 ),
             ],
@@ -659,8 +659,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# Hangfire library scheduling background jobs",
-                        "This code uses C# Hangfire to integrate with a background job scheduler",
+                        "Background jobs are scheduled with library",
+                        "Background job scheduler is integrated",
                     ),
                 ),
                 (
@@ -668,8 +668,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# Quartz.NET library scheduling recurring jobs",
-                        "This code uses C# Quartz.NET to integrate with a job scheduling system",
+                        "Jobs are scheduled with Quartz",
+                        "Job scheduling system is integrated",
                     ),
                 ),
                 (
@@ -677,8 +677,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C# IHostedService interface running a background hosted service",
-                        "This code uses C# hosting to integrate with a background service lifecycle",
+                        "Background service is hosted via interface",
+                        "Background service lifecycle is integrated with hosting",
                     ),
                 ),
             ],

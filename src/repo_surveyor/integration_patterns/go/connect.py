@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Connect connectrpc.com/connect package import for Connect RPC integration",
-                        "This code uses Connect to interact with a Connect RPC service",
+                        "Connect RPC integration is imported via connectrpc package",
+                        "Connect RPC service is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Connect connect.NewHandler function registering an inbound Connect RPC handler",
-                        "This code uses Connect to expose an inbound Connect RPC service handler",
+                        "Connect RPC handler is registered by NewHandler function",
+                        "Connect RPC service handler is exposed for inbound calls",
                     ),
                 ),
             ],
@@ -40,8 +40,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Connect connect.NewClient function creating an outbound Connect RPC client",
-                        "This code uses Connect to call an outbound Connect RPC service",
+                        "Connect RPC client is created by NewClient function",
+                        "Connect RPC service is called",
                     ),
                 ),
             ],

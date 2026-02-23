@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core IApplicationBuilder interface configuring the HTTP request pipeline",
-                        "This code uses ASP.NET Core to expose an inbound HTTP middleware pipeline",
+                        "HTTP pipeline is configured with middleware",
+                        "HTTP middleware pipeline is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core app.MapGet method registering a minimal API GET endpoint",
-                        "This code uses ASP.NET Core to handle incoming HTTP GET requests",
+                        "GET endpoint is registered with minimal API",
+                        "HTTP GET requests are handled for incoming traffic",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core app.MapPost method registering a minimal API POST endpoint",
-                        "This code uses ASP.NET Core to handle incoming HTTP POST requests",
+                        "POST endpoint is registered with minimal API",
+                        "HTTP POST requests are handled for incoming traffic",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core WebApplication.CreateBuilder factory initializing a web host",
-                        "This code uses ASP.NET Core to expose an inbound web application host",
+                        "Web host is initialized with builder factory",
+                        "Web application host is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core Minimal API pattern defining lightweight HTTP endpoints",
-                        "This code uses ASP.NET Core to expose inbound minimal API endpoints",
+                        "HTTP endpoints are defined with minimal pattern",
+                        "Minimal API endpoints are exposed for inbound requests",
                     ),
                 ),
             ],
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core AddDbContext method registering an Entity Framework DbContext",
-                        "This code uses ASP.NET Core to connect to an outbound database via Entity Framework",
+                        "DbContext is registered with Entity Framework",
+                        "Database connection is opened via Entity Framework",
                     ),
                 ),
                 (
@@ -76,8 +76,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core DbContextOptions class configuring an Entity Framework database context",
-                        "This code uses ASP.NET Core Entity Framework to configure a database connection",
+                        "Database context is configured with Entity Framework",
+                        "Database connection is configured with Entity Framework",
                     ),
                 ),
                 (
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core UseNpgsql method configuring a PostgreSQL database provider",
-                        "This code uses ASP.NET Core Entity Framework to connect to a PostgreSQL database",
+                        "Database provider is configured with PostgreSQL",
+                        "PostgreSQL database is connected via Entity Framework",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core UseSqlServer method configuring a SQL Server database provider",
-                        "This code uses ASP.NET Core Entity Framework to connect to a SQL Server database",
+                        "Database provider is configured with SQL Server",
+                        "SQL Server database is connected via Entity Framework",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core UseSqlite method configuring a SQLite database provider",
-                        "This code uses ASP.NET Core Entity Framework to connect to a SQLite database",
+                        "Database provider is configured with SQLite",
+                        "SQLite database is connected via Entity Framework",
                     ),
                 ),
                 (
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core UseMySql method configuring a MySQL database provider",
-                        "This code uses ASP.NET Core Entity Framework to connect to a MySQL database",
+                        "Database provider is configured with MySQL",
+                        "MySQL database is connected via Entity Framework",
                     ),
                 ),
                 (
@@ -121,8 +121,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core UseInMemoryDatabase method configuring an in-memory database provider",
-                        "This code uses ASP.NET Core Entity Framework to connect to an in-memory database",
+                        "Database provider is configured with memory storage",
+                        "In-memory database is connected via Entity Framework",
                     ),
                 ),
                 (
@@ -130,8 +130,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core AddEntityFrameworkStores method registering EF-backed identity stores",
-                        "This code uses ASP.NET Core Identity to write to an Entity Framework database store",
+                        "Identity stores are registered with Entity Framework",
+                        "Entity Framework database is written by Identity",
                     ),
                 ),
                 (
@@ -139,8 +139,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core AddNeo4j method registering a Neo4j graph database driver",
-                        "This code uses ASP.NET Core to connect to an outbound Neo4j graph database",
+                        "Neo4j driver is registered for graph database",
+                        "Neo4j graph database is connected for outbound access",
                     ),
                 ),
                 (
@@ -148,8 +148,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core services.AddSingleton<IDriver> registering a Neo4j driver singleton",
-                        "This code uses ASP.NET Core to connect to an outbound Neo4j graph database",
+                        "Neo4j driver is registered as singleton",
+                        "Neo4j graph database is connected for outbound access",
                     ),
                 ),
             ],
@@ -161,8 +161,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core MapGrpcService method registering a gRPC service endpoint",
-                        "This code uses ASP.NET Core to expose an inbound gRPC service",
+                        "gRPC service is registered with endpoint",
+                        "gRPC service is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -170,8 +170,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core Grpc.AspNetCore package hosting a gRPC server",
-                        "This code uses ASP.NET Core to expose an inbound gRPC server",
+                        "gRPC server is hosted with AspNetCore",
+                        "gRPC server is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -183,8 +183,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core app.MapGraphQL method registering a GraphQL endpoint",
-                        "This code uses ASP.NET Core to expose an inbound GraphQL API",
+                        "GraphQL endpoint is registered with mapping",
+                        "GraphQL API is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -192,8 +192,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "ASP.NET Core AddGraphQLServer method registering a HotChocolate GraphQL server",
-                        "This code uses ASP.NET Core to expose an inbound GraphQL server",
+                        "GraphQL server is registered with HotChocolate",
+                        "GraphQL server is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -205,8 +205,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core AddStackExchangeRedisCache method registering a Redis distributed cache",
-                        "This code uses ASP.NET Core to write to an outbound Redis cache",
+                        "Redis cache is registered for distributed storage",
+                        "Redis cache is written for outbound storage",
                     ),
                 ),
                 (
@@ -214,8 +214,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "ASP.NET Core AddDistributedMemoryCache method registering an in-memory distributed cache",
-                        "This code uses ASP.NET Core to write to an in-memory distributed cache",
+                        "Memory cache is registered for distributed storage",
+                        "In-memory distributed cache is written for storage",
                     ),
                 ),
             ],
@@ -227,8 +227,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "ASP.NET Core AddHangfire method registering Hangfire background job services",
-                        "This code uses ASP.NET Core Hangfire to integrate with a background job scheduler",
+                        "Background job services are registered with Hangfire",
+                        "Background job scheduler is integrated with Hangfire",
                     ),
                 ),
                 (
@@ -236,8 +236,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "ASP.NET Core UseHangfireDashboard method enabling the Hangfire monitoring dashboard",
-                        "This code uses ASP.NET Core Hangfire to interact with a job scheduling dashboard",
+                        "Hangfire dashboard is enabled for monitoring",
+                        "Job scheduling dashboard is integrated with Hangfire",
                     ),
                 ),
                 (
@@ -245,8 +245,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "ASP.NET Core Hangfire RecurringJob class scheduling periodic background jobs",
-                        "This code uses ASP.NET Core Hangfire to integrate with a recurring job scheduler",
+                        "Background jobs are scheduled with recurring pattern",
+                        "Recurring job scheduler is integrated with Hangfire",
                     ),
                 ),
             ],

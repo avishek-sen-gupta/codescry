@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Pyramid framework import for building web applications and REST APIs",
-                        "This code uses Pyramid to interact with an HTTP endpoint",
+                        "Web application is imported for REST API building",
+                        "HTTP endpoint is accessed for communication",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Pyramid view module import for request handling and view registration",
-                        "This code uses Pyramid to interact with an HTTP endpoint",
+                        "Request handling is imported for view registration",
+                        "HTTP endpoint is accessed for communication",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Pyramid @view_config decorator defining an inbound HTTP view endpoint",
-                        "This code uses Pyramid to expose an inbound REST API endpoint",
+                        "HTTP view is registered with route configuration",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Pyramid config module import for application configuration and routing",
-                        "This code uses Pyramid to interact with an HTTP endpoint",
+                        "Application configuration is imported for routing setup",
+                        "HTTP endpoint is accessed for communication",
                     ),
                 ),
             ],

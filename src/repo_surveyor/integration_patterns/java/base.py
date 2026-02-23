@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java HttpServletRequest for handling incoming HTTP requests",
-                        "This code uses Java Servlet API to process inbound HTTP requests",
+                        "HTTP requests are handled by servlet request",
+                        "HTTP requests are processed by servlet",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java HttpServletResponse for sending HTTP responses",
-                        "This code uses Java Servlet API to send HTTP responses",
+                        "HTTP responses are sent by servlet response",
+                        "HTTP responses are sent by servlet",
                     ),
                 ),
             ],
@@ -39,8 +39,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @WebService annotation defining a SOAP web service endpoint",
-                        "This code uses Java JAX-WS to expose an inbound SOAP web service",
+                        "SOAP web service endpoint is annotated",
+                        "SOAP service is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -48,8 +48,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @WebMethod annotation exposing a method as a SOAP operation",
-                        "This code uses Java JAX-WS to expose an inbound SOAP web service operation",
+                        "SOAP operation is exposed by method annotation",
+                        "SOAP operation is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -57,8 +57,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @WebParam annotation mapping a SOAP operation parameter",
-                        "This code uses Java JAX-WS to accept inbound SOAP web service parameters",
+                        "SOAP parameter is mapped by annotation",
+                        "SOAP parameters are accepted by inbound service",
                     ),
                 ),
                 (
@@ -66,8 +66,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @SOAPBinding annotation configuring SOAP message binding style",
-                        "This code uses Java JAX-WS to expose an inbound SOAP endpoint binding",
+                        "SOAP message binding is configured by annotation",
+                        "SOAP endpoint is bound for inbound requests",
                     ),
                 ),
                 (
@@ -75,8 +75,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java SOAPMessage class for constructing or parsing SOAP messages",
-                        "This code uses Java SAAJ to interact with a SOAP web service",
+                        "SOAP messages are constructed or parsed",
+                        "SOAP service is accessed via SAAJ",
                     ),
                 ),
                 (
@@ -84,8 +84,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java SOAPEnvelope class for accessing the SOAP message envelope",
-                        "This code uses Java SAAJ to interact with a SOAP endpoint",
+                        "SOAP message envelope is accessed",
+                        "SOAP endpoint is accessed via SAAJ",
                     ),
                 ),
                 (
@@ -93,8 +93,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java JAXBContext for XML marshalling and unmarshalling",
-                        "This code uses Java JAXB to interact with XML-based SOAP messages",
+                        "XML marshalling is handled by JAXB context",
+                        "XML messages are processed via JAXB",
                     ),
                 ),
             ],
@@ -106,8 +106,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Java JMS MessageListener interface for receiving messages",
-                        "This code uses Java JMS to receive incoming messages from a message queue",
+                        "Messages are received via MessageListener interface",
+                        "Messages are received from inbound queue",
                     ),
                 ),
                 (
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JMS MessageProducer for sending messages to a destination",
-                        "This code uses Java JMS to send outgoing messages to a message queue",
+                        "Messages are sent to JMS destination",
+                        "Messages are sent to outbound queue",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Java JMS MessageConsumer for receiving messages from a destination",
-                        "This code uses Java JMS to consume incoming messages from a message queue",
+                        "Messages are received from JMS destination",
+                        "Messages are consumed from inbound queue",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java AWS SqsClient for interacting with Amazon SQS queues",
-                        "This code uses Java AWS SDK to send outgoing messages to an SQS queue",
+                        "SQS queues are accessed by client",
+                        "SQS message is sent outbound",
                     ),
                 ),
                 (
@@ -142,8 +142,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java AWS SnsClient for publishing messages to Amazon SNS topics",
-                        "This code uses Java AWS SDK to send outgoing messages to an SNS topic",
+                        "SNS messages are published to topics",
+                        "SNS message is sent outbound",
                     ),
                 ),
             ],
@@ -155,8 +155,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @ServerEndpoint annotation defining a WebSocket server endpoint",
-                        "This code uses Java WebSocket API to expose an inbound WebSocket connection",
+                        "WebSocket server endpoint is annotated",
+                        "WebSocket connection is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -164,8 +164,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @OnOpen annotation handling WebSocket connection open events",
-                        "This code uses Java WebSocket API to accept an inbound WebSocket connection",
+                        "WebSocket open events are handled by annotation",
+                        "WebSocket connection is accepted for inbound requests",
                     ),
                 ),
                 (
@@ -173,8 +173,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @OnClose annotation handling WebSocket connection close events",
-                        "This code uses Java WebSocket API to handle inbound WebSocket connection closure",
+                        "WebSocket close events are handled by annotation",
+                        "WebSocket connection closure is handled",
                     ),
                 ),
                 (
@@ -182,8 +182,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @OnMessage annotation receiving WebSocket messages",
-                        "This code uses Java WebSocket API to receive inbound WebSocket messages",
+                        "WebSocket messages are received by annotation",
+                        "WebSocket messages are received from inbound connection",
                     ),
                 ),
                 (
@@ -191,8 +191,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @OnError annotation handling WebSocket error events",
-                        "This code uses Java WebSocket API to handle inbound WebSocket error events",
+                        "WebSocket error events are handled by annotation",
+                        "WebSocket error events are handled",
                     ),
                 ),
                 (
@@ -200,8 +200,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java ServerSocket class for accepting incoming TCP connections",
-                        "This code uses Java networking to accept inbound TCP socket connections",
+                        "TCP connections are accepted by ServerSocket",
+                        "TCP connections are accepted for inbound sockets",
                     ),
                 ),
                 (
@@ -209,8 +209,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java DatagramSocket class for sending and receiving UDP packets",
-                        "This code uses Java networking to interact with a network socket via UDP",
+                        "UDP packets are sent via datagram socket",
+                        "Network socket is accessed via UDP",
                     ),
                 ),
                 (
@@ -218,8 +218,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java NIO SocketChannel for non-blocking TCP socket I/O",
-                        "This code uses Java NIO to interact with a network socket",
+                        "TCP socket is opened for non-blocking IO",
+                        "Network socket is accessed via NIO",
                     ),
                 ),
             ],
@@ -231,8 +231,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JPA @Entity annotation mapping a class to a database table",
-                        "This code uses Java JPA to define a database entity for persistence",
+                        "Database table is mapped with class annotation",
+                        "Database entity is defined for persistence",
                     ),
                 ),
                 (
@@ -240,8 +240,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JPA @Table annotation specifying the database table name",
-                        "This code uses Java JPA to map a class to a specific database table",
+                        "Database table name is specified with annotation",
+                        "Class is mapped to database table",
                     ),
                 ),
                 (
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JPA @Column annotation mapping a field to a database column",
-                        "This code uses Java JPA to map a field to a specific database column",
+                        "Database column is mapped with field annotation",
+                        "Field is mapped to database column",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JPA @JoinColumn annotation defining a foreign key column",
-                        "This code uses Java JPA to write a foreign key relationship to a database table",
+                        "Foreign key column is defined with annotation",
+                        "Foreign key relationship is written to database",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JPA @OneToMany annotation mapping a one-to-many relationship",
-                        "This code uses Java JPA to write a one-to-many relationship to a database",
+                        "One-to-many relationship is mapped with annotation",
+                        "One-to-many relationship is written to database",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JPA @ManyToOne annotation mapping a many-to-one relationship",
-                        "This code uses Java JPA to write a many-to-one relationship to a database",
+                        "Many-to-one relationship is mapped with annotation",
+                        "Many-to-one relationship is written to database",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JPA @ManyToMany annotation mapping a many-to-many relationship",
-                        "This code uses Java JPA to write a many-to-many relationship to a database",
+                        "Many-to-many relationship is mapped with annotation",
+                        "Many-to-many relationship is written to database",
                     ),
                 ),
                 (
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java @Transactional annotation managing database transaction boundaries",
-                        "This code uses Java JPA to execute database queries within a transaction",
+                        "Database transactions are managed by annotation",
+                        "Database queries are executed within transaction",
                     ),
                 ),
                 (
@@ -303,8 +303,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java @PersistenceContext annotation injecting a JPA EntityManager",
-                        "This code uses Java JPA to query a database via an injected EntityManager",
+                        "JPA EntityManager is injected for persistence",
+                        "Database is queried via injected EntityManager",
                     ),
                 ),
                 (
@@ -312,8 +312,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JPA EntityManager for database operations",
-                        "This code uses Java JPA EntityManager to execute database queries",
+                        "Database operations are managed by EntityManager",
+                        "Database queries are executed via EntityManager",
                     ),
                 ),
                 (
@@ -321,8 +321,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JDBC PreparedStatement for executing SQL queries",
-                        "This code uses Java JDBC to execute parameterized database queries",
+                        "SQL queries are executed by prepared statement",
+                        "Database queries are executed with parameters",
                     ),
                 ),
                 (
@@ -330,8 +330,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JDBC ResultSet for reading SQL query results",
-                        "This code uses Java JDBC to query and read results from a database",
+                        "SQL query results are read from ResultSet",
+                        "Database results are queried and read",
                     ),
                 ),
                 (
@@ -339,8 +339,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java AWS DynamoDbClient for accessing Amazon DynamoDB",
-                        "This code uses Java AWS SDK to query an Amazon DynamoDB database",
+                        "DynamoDB is accessed by client",
+                        "DynamoDB database is queried via AWS SDK",
                     ),
                 ),
                 (
@@ -348,8 +348,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java Neo4j driver import for connecting to a Neo4j graph database",
-                        "This code uses Java Neo4j driver to query a Neo4j graph database",
+                        "Neo4j graph database is connected via driver",
+                        "Neo4j database is queried via driver",
                     ),
                 ),
                 (
@@ -357,8 +357,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java Neo4j GraphDatabase.driver call for opening a database connection",
-                        "This code uses Java Neo4j driver to connect to a graph database",
+                        "Database connection is opened to Neo4j",
+                        "Graph database connection is opened via Neo4j",
                     ),
                 ),
                 (
@@ -366,8 +366,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JDBC DriverManager.getConnection call for opening a database connection",
-                        "This code uses Java JDBC to connect to a relational database",
+                        "Database connection is opened by driver manager",
+                        "Database connection is opened via JDBC",
                     ),
                 ),
             ],
@@ -379,8 +379,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java FileInputStream for reading bytes from a file",
-                        "This code uses Java I/O to read from a file",
+                        "File bytes are read by input stream",
+                        "File is read via I/O stream",
                     ),
                 ),
                 (
@@ -388,8 +388,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java FileOutputStream for writing bytes to a file",
-                        "This code uses Java I/O to write to a file",
+                        "File bytes are written by output stream",
+                        "File is written via I/O stream",
                     ),
                 ),
                 (
@@ -397,8 +397,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java BufferedReader for reading text from a character input stream",
-                        "This code uses Java I/O to interact with a file or input stream",
+                        "Text input stream is read by buffer",
+                        "File stream is accessed for I/O operations",
                     ),
                 ),
                 (
@@ -406,8 +406,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java NIO Files.read method for reading file contents",
-                        "This code uses Java NIO to read from a file",
+                        "File contents are read from path",
+                        "File is read via NIO",
                     ),
                 ),
                 (
@@ -415,8 +415,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java NIO Files.write method for writing content to a file",
-                        "This code uses Java NIO to write to a file",
+                        "Content is written to file path",
+                        "File is written via NIO",
                     ),
                 ),
                 (
@@ -424,8 +424,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java NIO Files.copy method for copying file content",
-                        "This code uses Java NIO to interact with a filesystem",
+                        "File content is copied between paths",
+                        "Filesystem is accessed via NIO",
                     ),
                 ),
                 (
@@ -433,8 +433,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java AWS AmazonS3Client for accessing Amazon S3 object storage",
-                        "This code uses Java AWS SDK to write to Amazon S3 cloud storage",
+                        "S3 object storage is accessed by client",
+                        "S3 storage is written via AWS SDK",
                     ),
                 ),
                 (
@@ -442,8 +442,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java Azure Blob Storage import for accessing Azure cloud storage",
-                        "This code uses Java Azure SDK to write to Azure Blob cloud storage",
+                        "Azure cloud storage is imported for access",
+                        "Azure Blob storage is written",
                     ),
                 ),
                 (
@@ -451,8 +451,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java Google Cloud Storage import for accessing GCS buckets",
-                        "This code uses Java Google Cloud SDK to write to Google Cloud Storage",
+                        "GCS buckets are imported for access",
+                        "Cloud Storage is written via Google SDK",
                     ),
                 ),
             ],
@@ -464,8 +464,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java gRPC import for building gRPC clients or servers",
-                        "This code uses Java gRPC to interact with a gRPC service",
+                        "gRPC clients are built with import",
+                        "gRPC service is accessed for communication",
                     ),
                 ),
                 (
@@ -473,8 +473,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java @GrpcService annotation defining a gRPC server implementation",
-                        "This code uses Java gRPC to expose an inbound gRPC service",
+                        "gRPC server implementation is annotated",
+                        "gRPC service is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -482,8 +482,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java gRPC StreamObserver for handling streaming RPC calls",
-                        "This code uses Java gRPC to interact with a gRPC streaming endpoint",
+                        "Streaming RPC calls are handled",
+                        "gRPC streaming endpoint is accessed",
                     ),
                 ),
                 (
@@ -491,8 +491,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java gRPC ManagedChannel for connecting to a remote gRPC server",
-                        "This code uses Java gRPC to connect to an outbound gRPC service",
+                        "gRPC server is connected via channel",
+                        "gRPC service is connected for outbound requests",
                     ),
                 ),
             ],
@@ -504,8 +504,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java GraphQL import for building or querying a GraphQL API",
-                        "This code uses Java GraphQL to interact with a GraphQL schema",
+                        "GraphQL API is imported for building",
+                        "GraphQL schema is accessed via client",
                     ),
                 ),
                 (
@@ -513,8 +513,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java GraphQLSchema class for defining a GraphQL schema",
-                        "This code uses Java GraphQL to interact with a GraphQL schema",
+                        "GraphQL schema is defined by class",
+                        "GraphQL schema is accessed via client",
                     ),
                 ),
             ],
@@ -526,8 +526,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java javax.mail API for sending email messages",
-                        "This code uses Java Mail API to send outgoing email messages",
+                        "Email messages are sent via mail API",
+                        "Email messages are sent via Mail API",
                     ),
                 ),
                 (
@@ -535,8 +535,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java jakarta.mail API for sending email messages",
-                        "This code uses Java Jakarta Mail to send outgoing email messages",
+                        "Email messages are sent via mail API",
+                        "Email messages are sent via Jakarta Mail",
                     ),
                 ),
             ],
@@ -548,8 +548,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java Jedis import for connecting to a Redis cache",
-                        "This code uses Java Jedis to connect to a Redis cache store",
+                        "Redis cache is connected via Jedis",
+                        "Redis connection is opened via Jedis",
                     ),
                 ),
                 (
@@ -557,8 +557,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java Lettuce import for connecting to a Redis cache",
-                        "This code uses Java Lettuce to connect to a Redis cache store",
+                        "Redis cache is connected via Lettuce",
+                        "Redis connection is opened via Lettuce",
                     ),
                 ),
                 (
@@ -566,8 +566,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JCache (JSR-107) import for interacting with a cache store",
-                        "This code uses Java JCache API to interact with a cache store",
+                        "Cache store is imported via JCache",
+                        "Cache store is accessed via JCache API",
                     ),
                 ),
             ],
@@ -579,8 +579,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Java SseEmitter class for pushing server-sent events to clients",
-                        "This code uses Java SSE to expose an inbound server-sent event stream",
+                        "Server-sent events are pushed to clients",
+                        "Event stream is exposed for inbound SSE",
                     ),
                 ),
                 (
@@ -588,8 +588,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java text/event-stream content type for SSE responses",
-                        "This code uses Java HTTP to interact with a server-sent event stream",
+                        "SSE responses are streamed with content type",
+                        "Server-sent event stream is accessed via HTTP",
                     ),
                 ),
                 (
@@ -597,8 +597,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java Reactor Flux type for reactive streaming data sequences",
-                        "This code uses Java Reactor to interact with a server-sent event stream",
+                        "Data sequences are streamed via Flux",
+                        "Event stream is processed via Reactor",
                     ),
                 ),
             ],
@@ -610,8 +610,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java Apache Commons FTPClient for connecting to an FTP server",
-                        "This code uses Java FTP client to connect to an FTP server",
+                        "FTP server connection is established by client",
+                        "FTP server connection is opened",
                     ),
                 ),
                 (
@@ -619,8 +619,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JSch library for establishing SSH/SFTP connections",
-                        "This code uses Java JSch to connect to an SFTP connection",
+                        "SSH connection is established for SFTP",
+                        "SFTP connection is opened via JSch",
                     ),
                 ),
                 (
@@ -628,8 +628,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java JSch ChannelSftp for transferring files over SFTP",
-                        "This code uses Java JSch to connect to an SFTP connection",
+                        "Files are transferred over SFTP channel",
+                        "SFTP connection is opened via JSch",
                     ),
                 ),
                 (
@@ -637,8 +637,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Java SFTPClient for connecting to and transferring files via SFTP",
-                        "This code uses Java SFTP client to connect to an SFTP connection",
+                        "Files are transferred via SFTP client",
+                        "SFTP connection is opened via client",
                     ),
                 ),
             ],
@@ -650,8 +650,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java Quartz Scheduler import for defining scheduled tasks",
-                        "This code uses Java Quartz to interact with a scheduled task",
+                        "Scheduled tasks are defined with Quartz",
+                        "Scheduled task is managed via Quartz",
                     ),
                 ),
                 (
@@ -659,8 +659,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java @Schedule annotation for defining a scheduled task",
-                        "This code uses Java EJB to work with a scheduled task",
+                        "Scheduled task is defined by annotation",
+                        "Scheduled task is integrated with EJB",
                     ),
                 ),
                 (
@@ -668,8 +668,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Java ScheduledExecutorService for executing tasks on a schedule",
-                        "This code uses Java concurrency utilities to work with a scheduled task",
+                        "Tasks are executed on schedule",
+                        "Scheduled task is managed via concurrency utilities",
                     ),
                 ),
             ],

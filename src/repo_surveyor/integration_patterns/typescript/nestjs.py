@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Controller decorator defining an inbound HTTP controller",
-                        "This code uses NestJS to handle inbound HTTP requests",
+                        "HTTP controller is annotated for inbound requests",
+                        "HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Get decorator handling inbound GET HTTP requests",
-                        "This code uses NestJS to handle inbound GET HTTP requests",
+                        "GET request is handled by inbound route",
+                        "GET HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Post decorator handling inbound POST HTTP requests",
-                        "This code uses NestJS to handle inbound POST HTTP requests",
+                        "POST request is handled by inbound route",
+                        "POST HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Put decorator handling inbound PUT HTTP requests",
-                        "This code uses NestJS to handle inbound PUT HTTP requests",
+                        "PUT request is handled by inbound route",
+                        "PUT HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Delete decorator handling inbound DELETE HTTP requests",
-                        "This code uses NestJS to handle inbound DELETE HTTP requests",
+                        "DELETE request is handled by inbound route",
+                        "DELETE HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Patch decorator handling inbound PATCH HTTP requests",
-                        "This code uses NestJS to handle inbound PATCH HTTP requests",
+                        "PATCH request is handled by inbound route",
+                        "PATCH HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Body decorator extracting inbound request body",
-                        "This code uses NestJS to receive inbound HTTP request body data",
+                        "Request body is extracted from inbound request",
+                        "HTTP request body is received inbound",
                     ),
                 ),
                 (
@@ -81,8 +81,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Param decorator extracting inbound route parameters",
-                        "This code uses NestJS to receive inbound HTTP route parameters",
+                        "Route parameters are extracted from inbound request",
+                        "HTTP route parameters are received inbound",
                     ),
                 ),
                 (
@@ -90,8 +90,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Query decorator extracting inbound query parameters",
-                        "This code uses NestJS to receive inbound HTTP query parameters",
+                        "Query parameters are extracted from inbound request",
+                        "HTTP query parameters are received inbound",
                     ),
                 ),
                 (
@@ -99,8 +99,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "NestJS @nestjs/common import for core framework components",
-                        "This code uses NestJS to integrate with the NestJS framework",
+                        "Core framework components are imported",
+                        "Framework integration is implemented",
                     ),
                 ),
             ],
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS TypeORM module import for relational database integration",
-                        "This code uses NestJS TypeORM to interact with a relational database",
+                        "Relational database integration is imported via TypeORM",
+                        "Database is accessed with TypeORM",
                     ),
                 ),
                 (
@@ -121,8 +121,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS Mongoose module import for MongoDB integration",
-                        "This code uses NestJS Mongoose to interact with a MongoDB database",
+                        "MongoDB integration is imported via Mongoose",
+                        "MongoDB database is accessed",
                     ),
                 ),
                 (
@@ -130,8 +130,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS Sequelize module import for relational database integration",
-                        "This code uses NestJS Sequelize to interact with a relational database",
+                        "Relational database integration is imported via Sequelize",
+                        "Database is accessed with Sequelize",
                     ),
                 ),
                 (
@@ -139,8 +139,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS TypeOrmModule class configuring TypeORM database integration",
-                        "This code uses NestJS TypeORM to interact with a relational database",
+                        "TypeORM database integration is configured",
+                        "Database is accessed with TypeORM",
                     ),
                 ),
                 (
@@ -148,8 +148,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS MongooseModule class configuring Mongoose MongoDB integration",
-                        "This code uses NestJS Mongoose to interact with a MongoDB database",
+                        "Mongoose MongoDB integration is configured",
+                        "MongoDB database is accessed",
                     ),
                 ),
                 (
@@ -157,8 +157,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS SequelizeModule class configuring Sequelize database integration",
-                        "This code uses NestJS Sequelize to interact with a relational database",
+                        "Sequelize database integration is configured",
+                        "Database is accessed with Sequelize",
                     ),
                 ),
                 (
@@ -166,8 +166,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS PrismaService class providing Prisma ORM database access",
-                        "This code uses NestJS Prisma to query a relational database",
+                        "Prisma database is accessed by service",
+                        "Database is queried with Prisma",
                     ),
                 ),
                 (
@@ -175,8 +175,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS PrismaClient class for direct Prisma ORM database access",
-                        "This code uses NestJS Prisma to query a relational database",
+                        "Prisma database is accessed directly",
+                        "Database is queried with Prisma",
                     ),
                 ),
                 (
@@ -184,8 +184,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS InjectRepository decorator injecting a TypeORM repository",
-                        "This code uses NestJS TypeORM to interact with a relational database repository",
+                        "TypeORM repository is injected with decorator",
+                        "Database repository is accessed with TypeORM",
                     ),
                 ),
                 (
@@ -193,8 +193,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS InjectModel decorator injecting a Mongoose model",
-                        "This code uses NestJS Mongoose to interact with a MongoDB model",
+                        "Mongoose model is injected with decorator",
+                        "MongoDB model is accessed",
                     ),
                 ),
                 (
@@ -202,8 +202,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS Prisma module import for Prisma ORM integration",
-                        "This code uses NestJS Prisma to interact with a relational database",
+                        "Prisma ORM integration is imported",
+                        "Database is accessed with Prisma",
                     ),
                 ),
                 (
@@ -211,8 +211,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS nest-neo4j import for Neo4j graph database integration",
-                        "This code uses NestJS Neo4j to interact with a graph database",
+                        "Neo4j database integration is imported",
+                        "Graph database is accessed",
                     ),
                 ),
                 (
@@ -220,8 +220,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS Neo4jService class providing Neo4j graph database access",
-                        "This code uses NestJS Neo4j to interact with a graph database",
+                        "Neo4j database is accessed by service",
+                        "Graph database is accessed",
                     ),
                 ),
             ],
@@ -233,8 +233,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @MessagePattern decorator handling inbound microservice messages",
-                        "This code uses NestJS microservices to receive inbound messages",
+                        "Microservice messages are handled by inbound pattern",
+                        "Messages are received inbound",
                     ),
                 ),
                 (
@@ -242,8 +242,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @EventPattern decorator handling inbound microservice events",
-                        "This code uses NestJS microservices to receive inbound events",
+                        "Microservice events are handled by inbound pattern",
+                        "Events are received inbound",
                     ),
                 ),
             ],
@@ -255,8 +255,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @WebSocketGateway decorator defining an inbound WebSocket gateway",
-                        "This code uses NestJS to accept inbound WebSocket connections",
+                        "WebSocket gateway is defined for inbound connections",
+                        "WebSocket connections are accepted inbound",
                     ),
                 ),
                 (
@@ -264,8 +264,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @SubscribeMessage decorator handling inbound WebSocket messages",
-                        "This code uses NestJS to receive inbound WebSocket messages",
+                        "WebSocket messages are handled by inbound subscription",
+                        "WebSocket messages are received inbound",
                     ),
                 ),
             ],
@@ -277,8 +277,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS GraphQL module import for GraphQL API integration",
-                        "This code uses NestJS GraphQL to expose an inbound GraphQL API",
+                        "GraphQL API integration is imported",
+                        "GraphQL API is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -286,8 +286,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Query decorator handling inbound GraphQL query operations",
-                        "This code uses NestJS GraphQL to handle inbound GraphQL queries",
+                        "GraphQL query is handled by inbound operation",
+                        "GraphQL queries are handled inbound",
                     ),
                 ),
                 (
@@ -295,8 +295,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Mutation decorator handling inbound GraphQL mutation operations",
-                        "This code uses NestJS GraphQL to handle inbound GraphQL mutations",
+                        "GraphQL mutation is handled by inbound operation",
+                        "GraphQL mutations are handled inbound",
                     ),
                 ),
                 (
@@ -304,8 +304,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Resolver decorator defining a GraphQL resolver class",
-                        "This code uses NestJS GraphQL to expose an inbound GraphQL API",
+                        "GraphQL resolver is defined with decorator",
+                        "GraphQL API is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -317,8 +317,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS mailer module import for email sending",
-                        "This code uses NestJS mailer to send outbound email messages",
+                        "Email sending is imported via mailer",
+                        "Email messages are sent outbound",
                     ),
                 ),
                 (
@@ -326,8 +326,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS MailerService class for sending outbound emails",
-                        "This code uses NestJS mailer to send outbound email messages",
+                        "Outbound emails are sent by MailerService",
+                        "Email messages are sent outbound",
                     ),
                 ),
             ],
@@ -339,8 +339,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS cache-manager module import for cache integration",
-                        "This code uses NestJS cache-manager to interact with a cache",
+                        "Cache integration is imported via cache-manager",
+                        "Cache is accessed",
                     ),
                 ),
                 (
@@ -348,8 +348,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "NestJS CacheModule class configuring cache integration",
-                        "This code uses NestJS to interact with a cache",
+                        "Cache integration is configured with CacheModule",
+                        "Cache is accessed",
                     ),
                 ),
             ],
@@ -361,8 +361,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS @Sse decorator exposing an inbound server-sent events endpoint",
-                        "This code uses NestJS to expose an inbound SSE streaming endpoint",
+                        "Server-sent events endpoint is exposed for inbound",
+                        "SSE streaming endpoint is exposed inbound",
                     ),
                 ),
                 (
@@ -370,8 +370,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "NestJS Observable<MessageEvent> stream for server-sent events",
-                        "This code uses NestJS to expose an inbound SSE streaming endpoint",
+                        "Server-sent events are streamed via Observable",
+                        "SSE streaming endpoint is exposed inbound",
                     ),
                 ),
             ],
@@ -383,8 +383,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "NestJS @Cron decorator scheduling a cron-based task",
-                        "This code uses NestJS to interact with scheduled cron tasks",
+                        "Cron task is scheduled with decorator",
+                        "Cron tasks are scheduled",
                     ),
                 ),
                 (
@@ -392,8 +392,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "NestJS schedule module import for task scheduling",
-                        "This code uses NestJS to interact with scheduled tasks",
+                        "Task scheduling is imported",
+                        "Tasks are scheduled",
                     ),
                 ),
                 (
@@ -401,8 +401,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "NestJS ScheduleModule class configuring task scheduling",
-                        "This code uses NestJS to interact with scheduled tasks",
+                        "Task scheduling is configured with ScheduleModule",
+                        "Tasks are scheduled",
                     ),
                 ),
             ],

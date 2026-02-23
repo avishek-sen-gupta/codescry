@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "aiohttp framework import for async HTTP client and server operations",
-                        "This code uses aiohttp to interact with an HTTP endpoint",
+                        "HTTP operations are imported via aiohttp",
+                        "HTTP endpoint is accessed via aiohttp",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Angular HttpClientModule import for outbound HTTP requests",
-                        "This code uses Angular HttpClient to send outbound HTTP requests",
+                        "HTTP module is imported for outbound requests",
+                        "HTTP request is sent via client",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Angular HttpClient class sending outbound HTTP requests",
-                        "This code uses Angular HttpClient to send outbound HTTP requests",
+                        "HTTP requests are sent with client",
+                        "HTTP request is sent via client",
                     ),
                 ),
             ],
@@ -40,8 +40,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Angular WebSocket module import for outbound WebSocket connections",
-                        "This code uses Angular to connect to an outbound WebSocket endpoint",
+                        "WebSocket connections are imported for outbound",
+                        "WebSocket endpoint is connected for outbound communication",
                     ),
                 ),
             ],

@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go net/http package import providing HTTP client and server primitives",
-                        "This code uses Go net/http to interact with HTTP services",
+                        "HTTP primitives are imported",
+                        "HTTP service is accessed via client",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go http.HandleFunc registering an HTTP request handler function",
-                        "This code uses Go net/http to handle incoming HTTP requests",
+                        "HTTP handler function is registered",
+                        "HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go http.Handle registering an HTTP handler for a URL pattern",
-                        "This code uses Go net/http to handle incoming HTTP requests",
+                        "HTTP handler is registered for URL pattern",
+                        "HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go router .GET method registering an HTTP GET route handler",
-                        "This code uses Go net/http to handle incoming HTTP GET requests",
+                        "GET route is registered",
+                        "HTTP GET request is handled inbound",
                     ),
                 ),
                 (
@@ -53,8 +53,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go router .POST method registering an HTTP POST route handler",
-                        "This code uses Go net/http to handle incoming HTTP POST requests",
+                        "POST route is registered",
+                        "HTTP POST request is handled inbound",
                     ),
                 ),
                 (
@@ -62,8 +62,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go router .PUT method registering an HTTP PUT route handler",
-                        "This code uses Go net/http to handle incoming HTTP PUT requests",
+                        "PUT route is registered",
+                        "HTTP PUT request is handled inbound",
                     ),
                 ),
                 (
@@ -71,8 +71,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go router .DELETE method registering an HTTP DELETE route handler",
-                        "This code uses Go net/http to handle incoming HTTP DELETE requests",
+                        "DELETE route is registered",
+                        "HTTP DELETE request is handled inbound",
                     ),
                 ),
             ],
@@ -84,8 +84,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go gowsdl package import generating a SOAP client from a WSDL",
-                        "This code uses Go gowsdl to call an outbound SOAP service",
+                        "SOAP client is generated from WSDL",
+                        "SOAP service is called outbound",
                     ),
                 ),
                 (
@@ -93,8 +93,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go encoding/xml package import for XML serialization and deserialization",
-                        "This code uses Go encoding/xml to interact with XML-based services",
+                        "XML serialization is imported",
+                        "XML service is accessed via encoding",
                     ),
                 ),
             ],
@@ -106,8 +106,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go sarama package import for Apache Kafka producer and consumer integration",
-                        "This code uses Go sarama to interact with a Kafka message broker",
+                        "Kafka integration is imported via sarama package",
+                        "Kafka broker is accessed via client",
                     ),
                 ),
                 (
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go amqp package import for AMQP message broker integration",
-                        "This code uses Go amqp to interact with an AMQP message broker",
+                        "AMQP broker is imported for messaging",
+                        "AMQP broker is accessed",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go nats.go package import for NATS messaging system integration",
-                        "This code uses Go NATS to interact with a NATS message broker",
+                        "NATS messaging is imported",
+                        "NATS broker is accessed",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go sarama.NewConsumer function creating a Kafka consumer",
-                        "This code uses Go sarama to receive messages from a Kafka topic",
+                        "Kafka consumer is created for message consumption",
+                        "Kafka message is consumed from topic",
                     ),
                 ),
                 (
@@ -142,8 +142,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go sarama.NewProducer function creating a Kafka producer",
-                        "This code uses Go sarama to produce messages to a Kafka topic",
+                        "Kafka producer is created for message publishing",
+                        "Kafka message is produced to topic",
                     ),
                 ),
                 (
@@ -151,8 +151,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go amqp.Dial function opening a connection to an AMQP broker",
-                        "This code uses Go amqp to interact with an AMQP message broker",
+                        "AMQP connection is opened to broker",
+                        "AMQP broker is accessed",
                     ),
                 ),
                 (
@@ -160,8 +160,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go pubsub package import for Google Cloud Pub/Sub integration",
-                        "This code uses Go Cloud Pub/Sub to interact with a Google Cloud message topic",
+                        "Cloud Pub/Sub is imported",
+                        "Pub/Sub topic is accessed",
                     ),
                 ),
             ],
@@ -173,8 +173,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go gorilla/websocket package import for WebSocket client and server integration",
-                        "This code uses Go Gorilla WebSocket to interact with a WebSocket connection",
+                        "WebSocket integration is imported",
+                        "WebSocket connection is accessed",
                     ),
                 ),
                 (
@@ -182,8 +182,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go websocket.Upgrader struct upgrading an HTTP connection to a WebSocket",
-                        "This code uses Go Gorilla WebSocket to accept inbound WebSocket connections",
+                        "WebSocket connection is upgraded from HTTP connection",
+                        "WebSocket connections are accepted inbound",
                     ),
                 ),
                 (
@@ -191,8 +191,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Go net.Listen function opening a TCP or Unix socket listener",
-                        "This code uses Go net to listen for inbound network connections",
+                        "Socket listener is opened",
+                        "Network listener is created for inbound connections",
                     ),
                 ),
                 (
@@ -200,8 +200,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Go net.Dial function opening an outbound network connection",
-                        "This code uses Go net to connect to an outbound network endpoint",
+                        "Network connection is opened outbound",
+                        "Network endpoint connection is opened outbound",
                     ),
                 ),
             ],
@@ -213,8 +213,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go GORM package import for ORM-based database access",
-                        "This code uses Go GORM to query a database",
+                        "ORM package is imported for database access",
+                        "Database is queried via GORM",
                     ),
                 ),
                 (
@@ -222,8 +222,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go sqlx package import providing extensions to the standard database/sql library",
-                        "This code uses Go sqlx to query a database",
+                        "Database extensions are imported via sqlx package",
+                        "Database is queried via SQL",
                     ),
                 ),
                 (
@@ -231,8 +231,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go pgx package import for PostgreSQL database driver access",
-                        "This code uses Go pgx to connect to a PostgreSQL database",
+                        "PostgreSQL driver is imported",
+                        "PostgreSQL database connection is opened",
                     ),
                 ),
                 (
@@ -240,8 +240,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Go database/sql package import providing a generic SQL database interface",
-                        "This code uses Go database/sql to interact with a relational database",
+                        "SQL database interface is imported",
+                        "Database is accessed via SQL connection",
                     ),
                 ),
                 (
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go GORM model struct for ORM database mapping",
-                        "This code uses Go GORM to define a database model for persistence",
+                        "ORM model is structured for database mapping",
+                        "Database model is defined via GORM",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go GORM db.Create method inserting a new record into a database",
-                        "This code uses Go GORM to write a new record to a database",
+                        "Database record is created",
+                        "Database record is written via GORM",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go GORM db.Find method querying records from a database",
-                        "This code uses Go GORM to query records from a database",
+                        "Database records are queried",
+                        "Database records are queried",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go GORM db.Where method adding filter conditions to a database query",
-                        "This code uses Go GORM to query filtered records from a database",
+                        "Database query is filtered with conditions",
+                        "Database records are queried filtered",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go sql.Open function opening a connection to a SQL database driver",
-                        "This code uses Go database/sql to connect to an outbound SQL database",
+                        "Database connection is opened with SQL driver",
+                        "Database connection is opened for outbound SQL",
                     ),
                 ),
                 (
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go gocql package import for Apache Cassandra database access",
-                        "This code uses Go gocql to connect to a Cassandra database",
+                        "Cassandra database is imported",
+                        "Cassandra database connection is opened",
                     ),
                 ),
                 (
@@ -303,8 +303,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go Firestore package import for Google Cloud Firestore database access",
-                        "This code uses Go Cloud Firestore to write to a Firestore database",
+                        "Firestore database is imported",
+                        "Firestore database is written",
                     ),
                 ),
                 (
@@ -312,8 +312,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go neo4j-go-driver package import for Neo4j graph database access",
-                        "This code uses Go Neo4j driver to connect to a Neo4j graph database",
+                        "Neo4j driver is imported for graph database",
+                        "Neo4j database connection is opened",
                     ),
                 ),
                 (
@@ -321,8 +321,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go neo4j.NewDriverWithContext function creating a Neo4j driver instance",
-                        "This code uses Go Neo4j driver to connect to a Neo4j graph database",
+                        "Neo4j driver is created",
+                        "Neo4j database connection is opened",
                     ),
                 ),
             ],
@@ -334,8 +334,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go os.Open function opening a file for reading",
-                        "This code uses Go os to read from a file",
+                        "File is opened for reading",
+                        "File is read from filesystem",
                     ),
                 ),
                 (
@@ -343,8 +343,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go os.Create function creating or truncating a file for writing",
-                        "This code uses Go os to write to a file",
+                        "File is created for writing",
+                        "File is written to filesystem",
                     ),
                 ),
                 (
@@ -352,8 +352,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go io.Copy function copying data between an io.Reader and io.Writer",
-                        "This code uses Go io to interact with a data stream",
+                        "Data is copied between reader and writer",
+                        "Data stream is accessed via IO",
                     ),
                 ),
                 (
@@ -361,8 +361,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go s3manager utility managing multipart uploads and downloads to AWS S3",
-                        "This code uses Go AWS SDK to write to an S3 storage bucket",
+                        "S3 multipart uploads are managed by upload utility",
+                        "S3 bucket is written via AWS SDK",
                     ),
                 ),
                 (
@@ -370,8 +370,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go Cloud Storage package import for Google Cloud Storage bucket access",
-                        "This code uses Go Cloud Storage to write to a Google Cloud Storage bucket",
+                        "Cloud storage is imported for bucket access",
+                        "Cloud Storage bucket is written",
                     ),
                 ),
             ],
@@ -383,8 +383,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go grpc package import providing core gRPC client and server primitives",
-                        "This code uses Go gRPC to interact with a gRPC service",
+                        "gRPC primitives are imported",
+                        "gRPC service is accessed via client",
                     ),
                 ),
                 (
@@ -392,8 +392,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go pb.Register*Server function registering a gRPC service implementation",
-                        "This code uses Go gRPC to expose an inbound gRPC service",
+                        "gRPC service is registered",
+                        "gRPC service is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -405,8 +405,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go gqlgen package import for code-generated GraphQL server integration",
-                        "This code uses Go gqlgen to interact with a GraphQL API",
+                        "GraphQL server is imported with code generation",
+                        "GraphQL API is accessed via client",
                     ),
                 ),
                 (
@@ -414,8 +414,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go graphql-go package import for building a GraphQL schema and server",
-                        "This code uses Go graphql-go to interact with a GraphQL API",
+                        "GraphQL schema is imported for server",
+                        "GraphQL API is accessed via client",
                     ),
                 ),
             ],
@@ -427,8 +427,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go net/smtp package import for sending email via an SMTP server",
-                        "This code uses Go net/smtp to send outbound email messages",
+                        "SMTP email is imported",
+                        "Email message is sent via SMTP",
                     ),
                 ),
                 (
@@ -436,8 +436,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go gomail package import for composing and sending email messages",
-                        "This code uses Go gomail to send outbound email messages",
+                        "Email composer is imported for messaging",
+                        "Email message is sent outbound",
                     ),
                 ),
             ],
@@ -449,8 +449,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go go-redis package import for Redis cache client integration",
-                        "This code uses Go go-redis to write to a Redis cache",
+                        "Redis client is imported for cache integration",
+                        "Redis cache is written with data",
                     ),
                 ),
                 (
@@ -458,8 +458,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go gomemcache package import for Memcached cache client integration",
-                        "This code uses Go gomemcache to write to a Memcached cache",
+                        "Memcached client is imported for cache integration",
+                        "Memcached cache is written with data",
                     ),
                 ),
             ],
@@ -471,8 +471,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Go text/event-stream content type enabling Server-Sent Events responses",
-                        "This code uses Go net/http to expose an inbound Server-Sent Events stream",
+                        "Server-Sent Events are enabled by content type",
+                        "Server-Sent Events stream is exposed inbound",
                     ),
                 ),
                 (
@@ -480,8 +480,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Go http.Flusher interface flushing buffered data to a streaming HTTP client",
-                        "This code uses Go net/http to expose an inbound streaming HTTP response",
+                        "HTTP data is flushed to streaming client",
+                        "Streaming HTTP response is exposed inbound",
                     ),
                 ),
             ],
@@ -493,8 +493,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go pkg/sftp package import for SFTP client file transfer",
-                        "This code uses Go pkg/sftp to connect to an outbound SFTP server",
+                        "SFTP client is imported for file transfer",
+                        "SFTP server connection is opened outbound",
                     ),
                 ),
                 (
@@ -502,8 +502,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Go jlaffaye/ftp package import for FTP client file transfer",
-                        "This code uses Go jlaffaye/ftp to connect to an outbound FTP server",
+                        "FTP client is imported for file transfer",
+                        "FTP server connection is opened outbound",
                     ),
                 ),
             ],
@@ -515,8 +515,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go robfig/cron package import for cron-based job scheduling",
-                        "This code uses Go cron to integrate with a scheduled job runner",
+                        "Cron scheduler is imported",
+                        "Scheduled job is integrated with cron runner",
                     ),
                 ),
                 (
@@ -524,8 +524,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Go time.NewTicker function creating a channel-based periodic timer",
-                        "This code uses Go time to integrate with a periodic tick-based scheduler",
+                        "Periodic timer is created with channel-based ticker",
+                        "Periodic scheduler is integrated with timer",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @RestController annotation defining a REST API controller",
-                        "This code uses Spring MVC to expose an inbound REST API controller",
+                        "REST controller is annotated by @RestController",
+                        "REST controller is exposed for inbound API",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @Controller annotation defining an MVC web controller",
-                        "This code uses Spring MVC to expose an inbound HTTP endpoint",
+                        "MVC controller is annotated by @Controller",
+                        "HTTP endpoint is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @RequestMapping annotation mapping HTTP requests to handler methods",
-                        "This code uses Spring MVC to handle incoming HTTP requests",
+                        "HTTP requests are mapped by @RequestMapping annotation",
+                        "HTTP requests are handled",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @GetMapping annotation defining an HTTP GET endpoint handler",
-                        "This code uses Spring MVC to handle incoming HTTP GET requests",
+                        "HTTP GET endpoint is annotated for handling",
+                        "HTTP GET requests are handled",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @PostMapping annotation defining an HTTP POST endpoint handler",
-                        "This code uses Spring MVC to handle incoming HTTP POST requests",
+                        "HTTP POST endpoint is annotated for handling",
+                        "HTTP POST requests are handled",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @PutMapping annotation defining an HTTP PUT endpoint handler",
-                        "This code uses Spring MVC to handle incoming HTTP PUT requests",
+                        "HTTP PUT endpoint is annotated for handling",
+                        "HTTP PUT requests are handled",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @DeleteMapping annotation defining an HTTP DELETE endpoint handler",
-                        "This code uses Spring MVC to handle incoming HTTP DELETE requests",
+                        "HTTP DELETE endpoint is annotated for handling",
+                        "HTTP DELETE requests are handled",
                     ),
                 ),
                 (
@@ -81,8 +81,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @PatchMapping annotation defining an HTTP PATCH endpoint handler",
-                        "This code uses Spring MVC to handle incoming HTTP PATCH requests",
+                        "HTTP PATCH endpoint is annotated for handling",
+                        "HTTP PATCH requests are handled",
                     ),
                 ),
                 (
@@ -90,8 +90,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @RequestBody annotation binding an HTTP request body to a method parameter",
-                        "This code uses Spring MVC to receive inbound HTTP request body data",
+                        "HTTP request body is bound by @RequestBody annotation",
+                        "HTTP request body is received",
                     ),
                 ),
                 (
@@ -99,8 +99,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @ResponseBody annotation serializing return values to the HTTP response body",
-                        "This code uses Spring MVC to handle inbound HTTP requests with response serialization",
+                        "Response body is serialized by @ResponseBody annotation",
+                        "HTTP requests are handled with response serialization",
                     ),
                 ),
                 (
@@ -108,8 +108,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @PathVariable annotation extracting values from URI path segments",
-                        "This code uses Spring MVC to handle inbound HTTP requests with path variables",
+                        "URI path values are extracted by @PathVariable annotation",
+                        "HTTP requests are handled with path variables",
                     ),
                 ),
                 (
@@ -117,8 +117,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @RequestParam annotation binding HTTP query parameters to method parameters",
-                        "This code uses Spring MVC to handle inbound HTTP requests with query parameters",
+                        "Query parameters are bound by @RequestParam annotation",
+                        "HTTP requests are handled with query parameters",
                     ),
                 ),
             ],
@@ -130,8 +130,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @KafkaListener annotation consuming Kafka messages",
-                        "This code uses Spring Kafka to consume incoming messages from a Kafka topic",
+                        "Kafka messages are consumed by @KafkaListener annotation",
+                        "Kafka messages are consumed from topic",
                     ),
                 ),
                 (
@@ -139,8 +139,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @JmsListener annotation consuming JMS messages from a queue or topic",
-                        "This code uses Spring JMS to listen for incoming messages from a JMS queue",
+                        "JMS messages are consumed by @JmsListener annotation",
+                        "JMS messages are consumed from queue",
                     ),
                 ),
                 (
@@ -148,8 +148,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @RabbitListener annotation consuming AMQP messages from a RabbitMQ queue",
-                        "This code uses Spring AMQP to listen for incoming messages from a RabbitMQ queue",
+                        "AMQP messages are consumed by @RabbitListener annotation",
+                        "Messages are listened from RabbitMQ with Spring AMQP",
                     ),
                 ),
                 (
@@ -157,8 +157,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @StreamListener annotation consuming messages from a Spring Cloud Stream binding",
-                        "This code uses Spring Cloud Stream to listen for incoming messages from a message queue",
+                        "Stream messages are consumed by @StreamListener annotation",
+                        "Messages are listened from message queue",
                     ),
                 ),
                 (
@@ -166,8 +166,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring @SendTo annotation forwarding method return values to a messaging destination",
-                        "This code uses Spring Messaging to send outgoing messages to a message queue",
+                        "Return values are forwarded by @SendTo annotation",
+                        "Messages are sent to message queue",
                     ),
                 ),
                 (
@@ -175,8 +175,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring KafkaTemplate for producing Kafka messages",
-                        "This code uses Spring Kafka to send outgoing messages to a Kafka topic",
+                        "Kafka messages are produced via template",
+                        "Kafka messages are sent to topic",
                     ),
                 ),
                 (
@@ -184,8 +184,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring JmsTemplate for sending JMS messages to a queue or topic",
-                        "This code uses Spring JMS to send outgoing messages to a JMS queue",
+                        "JMS messages are sent to queue via template",
+                        "JMS messages are sent to queue",
                     ),
                 ),
                 (
@@ -193,8 +193,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring RabbitTemplate for publishing AMQP messages to a RabbitMQ exchange",
-                        "This code uses Spring AMQP to send outgoing messages to a RabbitMQ queue",
+                        "AMQP messages are published to RabbitMQ exchange",
+                        "Messages are sent to RabbitMQ with Spring AMQP",
                     ),
                 ),
             ],
@@ -206,8 +206,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring @Repository annotation marking a class as a data access component",
-                        "This code uses Spring Data to query a database",
+                        "Data access component is marked by @Repository annotation",
+                        "Database is queried with Spring Data",
                     ),
                 ),
                 (
@@ -215,8 +215,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring @Query annotation declaring a custom database query on a repository method",
-                        "This code uses Spring Data to execute a custom query against a database",
+                        "Database query is declared by @Query annotation",
+                        "Database is queried with custom Spring Data query",
                     ),
                 ),
                 (
@@ -224,8 +224,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring JdbcTemplate for executing SQL queries against a relational database",
-                        "This code uses Spring JDBC to query a relational database",
+                        "SQL queries are executed against database via JdbcTemplate",
+                        "Database is queried with JDBC",
                     ),
                 ),
                 (
@@ -233,8 +233,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Hibernate SessionFactory for managing database sessions",
-                        "This code uses Spring Hibernate to query a relational database",
+                        "Database sessions are managed by Hibernate SessionFactory",
+                        "Database is queried with Hibernate ORM",
                     ),
                 ),
                 (
@@ -242,8 +242,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Data Neo4j @Node annotation mapping a class to a graph node",
-                        "This code uses Spring Data Neo4j to write a graph node to a database",
+                        "Graph node is mapped by @Node annotation",
+                        "Graph node is written to database",
                     ),
                 ),
                 (
@@ -251,8 +251,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Data Neo4j @Relationship annotation mapping a class to a graph relationship",
-                        "This code uses Spring Data Neo4j to write a graph relationship to a database",
+                        "Graph relationship is mapped by @Relationship annotation",
+                        "Graph relationship is written to database",
                     ),
                 ),
                 (
@@ -260,8 +260,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Data Neo4j Neo4jRepository interface for graph database access",
-                        "This code uses Spring Data Neo4j to query a Neo4j graph database",
+                        "Graph database repository is accessed with Neo4j interface",
+                        "Neo4j graph database is queried with Spring Data",
                     ),
                 ),
                 (
@@ -269,8 +269,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Data Neo4j ReactiveNeo4jRepository for reactive graph database access",
-                        "This code uses Spring Data Neo4j to reactively query a Neo4j graph database",
+                        "Reactive graph database is accessed with Neo4j repository",
+                        "Neo4j graph database is reactively queried",
                     ),
                 ),
                 (
@@ -278,8 +278,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Data Neo4j Neo4jTemplate for executing graph database operations",
-                        "This code uses Spring Data Neo4j to query a Neo4j graph database",
+                        "Graph database operations are executed via Neo4j template",
+                        "Neo4j graph database is queried with Spring Data",
                     ),
                 ),
                 (
@@ -287,8 +287,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Data Neo4j @EnableNeo4jRepositories annotation activating Neo4j repository support",
-                        "This code uses Spring Data Neo4j to enable querying a Neo4j graph database",
+                        "Neo4j repositories are activated by @EnableNeo4jRepositories annotation",
+                        "Neo4j graph database is queried with Spring Data",
                     ),
                 ),
             ],
@@ -300,8 +300,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring WebSocketHandler interface for handling WebSocket connections",
-                        "This code uses Spring WebSocket to handle inbound WebSocket connections",
+                        "WebSocket connections are handled by interface",
+                        "WebSocket connections are handled inbound",
                     ),
                 ),
             ],
@@ -313,8 +313,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @QueryMapping annotation handling GraphQL query operations",
-                        "This code uses Spring GraphQL to handle inbound GraphQL query requests",
+                        "GraphQL queries are handled by @QueryMapping annotation",
+                        "GraphQL query requests are handled with Spring",
                     ),
                 ),
                 (
@@ -322,8 +322,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @MutationMapping annotation handling GraphQL mutation operations",
-                        "This code uses Spring GraphQL to handle inbound GraphQL mutation requests",
+                        "GraphQL mutations are handled by @MutationMapping annotation",
+                        "GraphQL mutation requests are handled with Spring",
                     ),
                 ),
                 (
@@ -331,8 +331,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring @SchemaMapping annotation mapping a handler method to a GraphQL schema field",
-                        "This code uses Spring GraphQL to handle inbound GraphQL schema field requests",
+                        "GraphQL schema field is mapped by @SchemaMapping annotation",
+                        "GraphQL schema field is handled for inbound requests",
                     ),
                 ),
             ],
@@ -344,8 +344,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring SimpleMailMessage class for composing and sending plain text emails",
-                        "This code uses Spring Mail to send outgoing email messages",
+                        "Plain text emails are composed and sent",
+                        "Email messages are sent via SMTP",
                     ),
                 ),
                 (
@@ -353,8 +353,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring MimeMessageHelper for composing and sending MIME email messages",
-                        "This code uses Spring Mail to send outgoing email messages via SMTP server",
+                        "MIME email messages are composed and sent",
+                        "Email messages are sent via SMTP server",
                     ),
                 ),
             ],
@@ -366,8 +366,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring @Cacheable annotation caching the result of a method",
-                        "This code uses Spring Cache to interact with a cache store",
+                        "Method result is cached by @Cacheable annotation",
+                        "Cache store is interacted with Spring Cache",
                     ),
                 ),
                 (
@@ -375,8 +375,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring @CacheEvict annotation evicting entries from a cache",
-                        "This code uses Spring Cache to interact with a cache store",
+                        "Cache entries are evicted by @CacheEvict annotation",
+                        "Cache store is interacted with Spring Cache",
                     ),
                 ),
                 (
@@ -384,8 +384,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring @CachePut annotation updating a cache entry with a method result",
-                        "This code uses Spring Cache to interact with a cache store",
+                        "Cache entry is updated by @CachePut annotation",
+                        "Cache store is interacted with Spring Cache",
                     ),
                 ),
                 (
@@ -393,8 +393,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring RedisTemplate for executing Redis commands against a Redis cache",
-                        "This code uses Spring Data Redis to connect to a Redis cache store",
+                        "Redis commands are executed against cache via template",
+                        "Redis cache store is connected with Spring Data",
                     ),
                 ),
                 (
@@ -402,8 +402,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring @EnableCaching annotation activating Spring's annotation-driven cache management",
-                        "This code uses Spring Cache to work with a cache store",
+                        "Cache management is activated by @EnableCaching annotation",
+                        "Cache store is worked with Spring Cache",
                     ),
                 ),
             ],
@@ -415,8 +415,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring Flux<ServerSentEvent> return type for streaming server-sent events to clients",
-                        "This code uses Spring WebFlux to expose an inbound server-sent event stream",
+                        "Server-sent events are streamed to clients via Flux",
+                        "Server-sent events are streamed inbound",
                     ),
                 ),
                 (
@@ -424,8 +424,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring @Tailable annotation enabling tailable cursor queries on capped MongoDB collections",
-                        "This code uses Spring Data to interact with a server-sent event stream",
+                        "Tailable cursor queries are enabled by @Tailable annotation",
+                        "Server-sent event stream is interacted with",
                     ),
                 ),
             ],
@@ -437,8 +437,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Integration FtpInboundFileSynchronizer for downloading files from an FTP server",
-                        "This code uses Spring Integration FTP to connect to an FTP server",
+                        "FTP files are downloaded by inbound synchronizer",
+                        "FTP server is connected via Integration",
                     ),
                 ),
                 (
@@ -446,8 +446,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Integration SftpInboundFileSynchronizer for downloading files from an SFTP server",
-                        "This code uses Spring Integration SFTP to connect to an SFTP connection",
+                        "SFTP files are downloaded by inbound synchronizer",
+                        "SFTP connection is established via Integration",
                     ),
                 ),
                 (
@@ -455,8 +455,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring Integration @ServiceActivator wired to an FTP channel adapter",
-                        "This code uses Spring Integration to connect to an FTP server",
+                        "FTP channel adapter is wired with ServiceActivator",
+                        "FTP server is connected via Integration",
                     ),
                 ),
             ],
@@ -468,8 +468,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring @Scheduled annotation triggering a method on a fixed schedule",
-                        "This code uses Spring Scheduling to work with a scheduled task",
+                        "Method is scheduled by @Scheduled annotation",
+                        "Scheduled task is executed",
                     ),
                 ),
                 (
@@ -477,8 +477,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring @EnableScheduling annotation activating Spring's scheduled task execution",
-                        "This code uses Spring Scheduling to work with scheduled tasks",
+                        "Scheduled tasks are activated by @EnableScheduling annotation",
+                        "Scheduled tasks are executed",
                     ),
                 ),
                 (
@@ -486,8 +486,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring TaskScheduler interface for programmatically scheduling tasks",
-                        "This code uses Spring Scheduling to work with a scheduled task",
+                        "Tasks are scheduled programmatically via interface",
+                        "Scheduled task is executed",
                     ),
                 ),
             ],

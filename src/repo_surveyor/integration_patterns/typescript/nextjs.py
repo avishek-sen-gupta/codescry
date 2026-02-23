@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Next.js NextApiRequest type for inbound API route handler",
-                        "This code uses TypeScript Next.js to handle inbound HTTP API requests",
+                        "API requests are typed for handlers",
+                        "HTTP API request is handled by route",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Next.js NextApiResponse type for API route response",
-                        "This code uses TypeScript Next.js to handle inbound HTTP API requests",
+                        "API responses are typed for handlers",
+                        "HTTP API request is handled by route",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Next.js getServerSideProps function for server-side rendering",
-                        "This code uses TypeScript Next.js to handle inbound server-side page requests",
+                        "Server rendering is performed via props",
+                        "Server-side page is rendered for request",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Next.js getStaticProps function for static site generation",
-                        "This code uses TypeScript Next.js to handle inbound static page requests",
+                        "Static generation is performed via props",
+                        "Static page is served for request",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Next.js server import for edge middleware and API routes",
-                        "This code uses TypeScript Next.js to handle inbound server-side requests",
+                        "Next.js server is imported for middleware routing",
+                        "Server-side request is handled by framework",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Actix actix-web library import for HTTP server framework",
-                        "This code uses Actix to interact with an HTTP server",
+                        "HTTP server framework is imported",
+                        "HTTP server is integrated with Actix",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix #[get] macro defining an inbound GET HTTP route handler",
-                        "This code uses Actix to handle inbound GET HTTP requests",
+                        "GET route is defined for inbound requests",
+                        "GET HTTP requests are handled by Actix",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix #[post] macro defining an inbound POST HTTP route handler",
-                        "This code uses Actix to handle inbound POST HTTP requests",
+                        "POST route is defined for inbound requests",
+                        "POST HTTP requests are handled by Actix",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix #[put] macro defining an inbound PUT HTTP route handler",
-                        "This code uses Actix to handle inbound PUT HTTP requests",
+                        "PUT route is defined for inbound requests",
+                        "PUT HTTP requests are handled by Actix",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix #[delete] macro defining an inbound DELETE HTTP route handler",
-                        "This code uses Actix to handle inbound DELETE HTTP requests",
+                        "DELETE route is defined for inbound requests",
+                        "DELETE HTTP requests are handled by Actix",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix #[patch] macro defining an inbound PATCH HTTP route handler",
-                        "This code uses Actix to handle inbound PATCH HTTP requests",
+                        "PATCH route is defined for inbound requests",
+                        "PATCH HTTP requests are handled by Actix",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix HttpResponse type constructing an inbound HTTP response",
-                        "This code uses Actix to handle inbound HTTP requests",
+                        "HTTP response is constructed for inbound handling",
+                        "HTTP requests are handled by Actix server",
                     ),
                 ),
                 (
@@ -81,8 +81,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix HttpRequest type representing an inbound HTTP request",
-                        "This code uses Actix to handle inbound HTTP requests",
+                        "HTTP request is represented for inbound handling",
+                        "HTTP requests are handled by Actix server",
                     ),
                 ),
                 (
@@ -90,8 +90,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix web::Json extractor deserializing inbound JSON request body",
-                        "This code uses Actix to receive inbound HTTP JSON data",
+                        "JSON request body is deserialized with extractor",
+                        "HTTP JSON data is received by Actix",
                     ),
                 ),
                 (
@@ -99,8 +99,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix web::Path extractor extracting inbound route path parameters",
-                        "This code uses Actix to receive inbound HTTP route parameters",
+                        "Route parameters are extracted with path extractor",
+                        "HTTP route parameters are received by Actix",
                     ),
                 ),
                 (
@@ -108,8 +108,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Actix web::Query extractor extracting inbound query string parameters",
-                        "This code uses Actix to receive inbound HTTP query parameters",
+                        "Query parameters are extracted with string extractor",
+                        "HTTP query parameters are received by Actix",
                     ),
                 ),
                 (
@@ -117,8 +117,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Actix web::Data extractor sharing application state in HTTP handlers",
-                        "This code uses Actix to interact with shared HTTP application state",
+                        "Application state is shared with data extractor",
+                        "HTTP application state is shared with Actix",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Next.js NextApiRequest type for API route request handling",
-                        "This code uses Next.js to handle inbound API route requests",
+                        "API request is handled by NextApiRequest",
+                        "API route is handled for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Next.js NextApiResponse type for API route response handling",
-                        "This code uses Next.js to handle inbound API route responses",
+                        "API response is typed for route handling",
+                        "API route is handled for inbound responses",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Next.js getServerSideProps function for server-side data fetching",
-                        "This code uses Next.js to handle inbound server-side page requests",
+                        "Server-side data is fetched for page rendering",
+                        "Server-side page is handled for inbound requests",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Next.js getStaticProps function for static page data fetching",
-                        "This code uses Next.js to handle inbound static page generation requests",
+                        "Static page data is fetched at build time",
+                        "Static page is generated for inbound requests",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Next.js next/server require for edge/middleware request handling",
-                        "This code uses Next.js to handle inbound edge runtime requests",
+                        "Edge request is handled by middleware server",
+                        "Edge runtime is handled for inbound requests",
                     ),
                 ),
             ],

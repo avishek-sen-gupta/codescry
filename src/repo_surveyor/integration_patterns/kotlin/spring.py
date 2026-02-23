@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @RestController annotation for REST API endpoint",
-                        "This code uses Kotlin Spring to expose inbound REST API endpoints",
+                        "REST endpoint is annotated for controller",
+                        "REST API endpoints are exposed for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @GetMapping annotation for HTTP GET handler",
-                        "This code uses Kotlin Spring to handle inbound HTTP GET requests",
+                        "HTTP GET is handled by mapping",
+                        "HTTP GET requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @PostMapping annotation for HTTP POST handler",
-                        "This code uses Kotlin Spring to handle inbound HTTP POST requests",
+                        "HTTP POST is handled by mapping",
+                        "HTTP POST requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @PutMapping annotation for HTTP PUT handler",
-                        "This code uses Kotlin Spring to handle inbound HTTP PUT requests",
+                        "HTTP PUT is handled by mapping",
+                        "HTTP PUT requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @DeleteMapping annotation for HTTP DELETE handler",
-                        "This code uses Kotlin Spring to handle inbound HTTP DELETE requests",
+                        "HTTP DELETE is handled by mapping",
+                        "HTTP DELETE requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @RequestMapping annotation for HTTP route mapping",
-                        "This code uses Kotlin Spring to handle inbound HTTP requests",
+                        "HTTP route is mapped by annotation",
+                        "HTTP requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring coRouter block for coroutine-based routing",
-                        "This code uses Kotlin Spring to handle inbound HTTP routes with coroutines",
+                        "Coroutine routing is defined with coRouter block",
+                        "HTTP routes are handled with coroutines for inbound requests",
                     ),
                 ),
                 (
@@ -81,8 +81,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring router block for functional HTTP routing",
-                        "This code uses Kotlin Spring to handle inbound HTTP routes functionally",
+                        "HTTP routing is defined with router block",
+                        "HTTP routes are handled functionally for inbound requests",
                     ),
                 ),
             ],
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @KafkaListener annotation for Kafka message consumption",
-                        "This code uses Kotlin Spring to receive inbound Kafka messages",
+                        "Kafka message is consumed by listener",
+                        "Kafka messages are consumed from inbound topic",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @JmsListener annotation for JMS message consumption",
-                        "This code uses Kotlin Spring to receive inbound JMS messages",
+                        "JMS message is consumed by listener",
+                        "JMS messages are received from inbound queue",
                     ),
                 ),
                 (
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring @RabbitListener annotation for RabbitMQ message consumption",
-                        "This code uses Kotlin Spring to receive inbound RabbitMQ messages",
+                        "RabbitMQ message is consumed by listener",
+                        "RabbitMQ messages are received from inbound queue",
                     ),
                 ),
                 (
@@ -121,8 +121,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Spring KafkaTemplate for Kafka message publishing",
-                        "This code uses Kotlin Spring to produce outgoing Kafka messages",
+                        "Kafka message is published via template",
+                        "Kafka messages are produced for outbound delivery",
                     ),
                 ),
             ],
@@ -134,8 +134,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Spring @Repository annotation for database repository",
-                        "This code uses Kotlin Spring to query a database via a repository",
+                        "Database repository is annotated for access",
+                        "Database is queried via repository pattern",
                     ),
                 ),
                 (
@@ -143,8 +143,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Spring @Query annotation for custom database query",
-                        "This code uses Kotlin Spring to query a database with a custom statement",
+                        "Database query is annotated as custom",
+                        "Database is queried with custom statement",
                     ),
                 ),
                 (
@@ -152,8 +152,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Spring JdbcTemplate for JDBC database operations",
-                        "This code uses Kotlin Spring to query a relational database via JDBC",
+                        "Database operations are handled by JDBC template",
+                        "Database is queried via JDBC connection",
                     ),
                 ),
                 (
@@ -161,8 +161,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Spring R2dbcRepository for reactive database access",
-                        "This code uses Kotlin Spring to query a database reactively via R2DBC",
+                        "Reactive database is accessed by repository",
+                        "Database is queried reactively via R2DBC",
                     ),
                 ),
             ],
@@ -174,8 +174,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Spring @Cacheable annotation for cache-aside pattern",
-                        "This code uses Kotlin Spring to interact with a cache layer",
+                        "Cache pattern is annotated as cacheable",
+                        "Cache layer is accessed",
                     ),
                 ),
                 (
@@ -183,8 +183,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Spring @CacheEvict annotation for cache invalidation",
-                        "This code uses Kotlin Spring to interact with cache eviction",
+                        "Cache invalidation is annotated for eviction",
+                        "Cache is evicted using Spring framework",
                     ),
                 ),
                 (
@@ -192,8 +192,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Spring @EnableCaching annotation for cache configuration",
-                        "This code uses Kotlin Spring to integrate with a caching layer",
+                        "Cache configuration is enabled by annotation",
+                        "Cache layer is integrated",
                     ),
                 ),
             ],
@@ -205,8 +205,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Spring @Scheduled annotation for scheduled task execution",
-                        "This code uses Kotlin Spring to interact with scheduled tasks",
+                        "Task execution is scheduled by annotation",
+                        "Scheduled tasks are executed using Spring framework",
                     ),
                 ),
                 (
@@ -214,8 +214,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Spring @EnableScheduling annotation for scheduling configuration",
-                        "This code uses Kotlin Spring to interact with the task scheduling system",
+                        "Scheduling configuration is enabled by annotation",
+                        "Task scheduling is managed using Spring framework",
                     ),
                 ),
             ],

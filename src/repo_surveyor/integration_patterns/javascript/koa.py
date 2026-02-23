@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Koa framework require for HTTP server",
-                        "This code uses Node.js Koa to handle inbound HTTP server requests",
+                        "HTTP server is imported via Koa",
+                        "HTTP server is handled for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Koa new Koa() instantiation for HTTP application",
-                        "This code uses Node.js Koa to expose an inbound HTTP server application",
+                        "HTTP application is instantiated with Koa",
+                        "HTTP server is exposed for inbound application",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Koa router require for HTTP route handling",
-                        "This code uses Node.js Koa to handle inbound HTTP routes",
+                        "HTTP routes are handled by Koa router",
+                        "HTTP route is handled for inbound requests",
                     ),
                 ),
             ],

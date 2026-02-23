@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ sqlite3.h header import for SQLite database access",
-                        "This code uses C++ SQLite3 to connect to a local SQLite database",
+                        "SQLite header is imported for database access",
+                        "Local SQLite database is connected via SQLite3",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ sqlite3_open call opening a SQLite database connection",
-                        "This code uses C++ SQLite3 to connect to a SQLite database",
+                        "SQLite connection is opened to database",
+                        "SQLite database is connected via SQLite3",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ sqlite3_exec call executing a SQL statement",
-                        "This code uses C++ SQLite3 to query a SQLite database",
+                        "SQL statement is executed on database",
+                        "SQLite database is queried via SQLite3",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ sqlite3_prepare call preparing a SQL statement",
-                        "This code uses C++ SQLite3 to execute outbound database queries",
+                        "SQL statement is prepared for execution",
+                        "Database queries are executed via outbound SQLite3",
                     ),
                 ),
                 (
@@ -53,8 +53,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ libpq-fe.h header import for PostgreSQL client access",
-                        "This code uses C++ libpq to connect to a PostgreSQL database",
+                        "PostgreSQL client is imported via header",
+                        "PostgreSQL connection is opened with database",
                     ),
                 ),
                 (
@@ -62,8 +62,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ PQconnectdb call opening a PostgreSQL database connection",
-                        "This code uses C++ libpq to connect to a PostgreSQL database",
+                        "PostgreSQL connection is opened with credentials",
+                        "PostgreSQL connection is opened with database",
                     ),
                 ),
                 (
@@ -71,8 +71,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ PQexec call executing a PostgreSQL query",
-                        "This code uses C++ libpq to query a PostgreSQL database",
+                        "PostgreSQL query is executed with statement",
+                        "PostgreSQL database is queried with SQL",
                     ),
                 ),
                 (
@@ -80,8 +80,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mysql.h header import for MySQL client access",
-                        "This code uses C++ MySQL C API to connect to a MySQL database",
+                        "MySQL header is imported for client access",
+                        "MySQL database is connected via C API",
                     ),
                 ),
                 (
@@ -89,8 +89,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mysql_real_connect call opening a MySQL database connection",
-                        "This code uses C++ MySQL C API to connect to a MySQL database",
+                        "MySQL connection is opened to database",
+                        "MySQL database is connected via C API",
                     ),
                 ),
                 (
@@ -98,8 +98,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mysql_query call executing a MySQL query",
-                        "This code uses C++ MySQL C API to query a MySQL database",
+                        "MySQL query is executed with statement",
+                        "MySQL database is queried via C API",
                     ),
                 ),
                 (
@@ -107,8 +107,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mongoc.h header import for MongoDB C driver access",
-                        "This code uses C++ MongoDB C driver to connect to a MongoDB database",
+                        "MongoDB header is imported for C driver access",
+                        "MongoDB database is connected via C driver",
                     ),
                 ),
                 (
@@ -116,8 +116,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ sql.h ODBC header import for database access",
-                        "This code uses C++ ODBC to connect to a relational database",
+                        "ODBC header is imported for database access",
+                        "Relational database is connected via ODBC",
                     ),
                 ),
                 (
@@ -125,8 +125,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ sqlext.h ODBC extension header import for database access",
-                        "This code uses C++ ODBC extensions to query a relational database",
+                        "ODBC extension header is imported for database",
+                        "Relational database is queried via ODBC extensions",
                     ),
                 ),
                 (
@@ -134,8 +134,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ LevelDB header import for key-value store access",
-                        "This code uses C++ LevelDB to write to a key-value store",
+                        "Key-value store is imported via LevelDB",
+                        "Key-value store is written via LevelDB",
                     ),
                 ),
                 (
@@ -143,8 +143,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ RocksDB header import for key-value store access",
-                        "This code uses C++ RocksDB to write to a key-value store",
+                        "Key-value store is imported via RocksDB",
+                        "Key-value store is written via RocksDB",
                     ),
                 ),
                 (
@@ -152,8 +152,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ lmdb.h header import for LMDB embedded database access",
-                        "This code uses C++ LMDB to write to an embedded key-value store",
+                        "LMDB database is imported for access",
+                        "Embedded key-value store is written via LMDB",
                     ),
                 ),
             ],
@@ -165,8 +165,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ curl/curl.h header import for libcurl HTTP client",
-                        "This code uses C++ libcurl to send outbound HTTP requests",
+                        "HTTP client is imported via libcurl",
+                        "HTTP requests are sent via outbound libcurl",
                     ),
                 ),
                 (
@@ -174,8 +174,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ curl_easy_init call initializing a libcurl easy handle",
-                        "This code uses C++ libcurl to send outbound HTTP requests",
+                        "HTTP handle is initialized for transfer",
+                        "HTTP requests are sent via outbound libcurl",
                     ),
                 ),
                 (
@@ -183,8 +183,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ curl_easy_perform call executing an HTTP transfer",
-                        "This code uses C++ libcurl to send outbound HTTP requests",
+                        "HTTP transfer is executed with request",
+                        "HTTP requests are sent via outbound libcurl",
                     ),
                 ),
                 (
@@ -192,8 +192,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ curl_easy_setopt call configuring a libcurl transfer",
-                        "This code uses C++ libcurl to configure outbound HTTP requests",
+                        "HTTP transfer is configured with options",
+                        "HTTP requests are configured for outbound libcurl",
                     ),
                 ),
                 (
@@ -201,8 +201,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ cpprestsdk header import for REST client/server",
-                        "This code uses C++ cpprestsdk to interact with an HTTP endpoint",
+                        "REST client is imported via cpprestsdk",
+                        "HTTP endpoint is accessed via cpprestsdk",
                     ),
                 ),
                 (
@@ -210,8 +210,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C++ microhttpd.h header import for embedded HTTP server",
-                        "This code uses C++ libmicrohttpd to expose an inbound HTTP server",
+                        "HTTP server is imported via microhttpd",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -223,8 +223,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ librdkafka header import for Kafka client",
-                        "This code uses C++ librdkafka to interact with a Kafka broker",
+                        "Kafka client is imported via library",
+                        "Kafka broker is connected for messaging",
                     ),
                 ),
                 (
@@ -232,8 +232,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ rd_kafka_new call creating a Kafka client instance",
-                        "This code uses C++ librdkafka to interact with a Kafka broker",
+                        "Kafka client is created for messaging",
+                        "Kafka broker is connected for messaging",
                     ),
                 ),
                 (
@@ -241,8 +241,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ amqp.h header import for AMQP messaging client",
-                        "This code uses C++ rabbitmq-c to interact with an AMQP broker",
+                        "AMQP messaging is imported via header",
+                        "AMQP broker is connected for messaging",
                     ),
                 ),
                 (
@@ -250,8 +250,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ amqp_new_connection call establishing an AMQP connection",
-                        "This code uses C++ rabbitmq-c to interact with an AMQP broker",
+                        "AMQP connection is established with broker",
+                        "AMQP broker is connected for messaging",
                     ),
                 ),
                 (
@@ -259,8 +259,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ zmq.h header import for ZeroMQ messaging",
-                        "This code uses C++ ZeroMQ to interact with a messaging socket",
+                        "ZeroMQ header is imported for messaging",
+                        "Messaging socket is accessed via ZeroMQ",
                     ),
                 ),
                 (
@@ -268,8 +268,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ zmq_socket call creating a ZeroMQ socket",
-                        "This code uses C++ ZeroMQ to interact with a messaging socket",
+                        "ZeroMQ socket is created for messaging",
+                        "Messaging socket is accessed via ZeroMQ",
                     ),
                 ),
                 (
@@ -277,8 +277,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ nng header import for nanomsg next generation messaging",
-                        "This code uses C++ nng to interact with a messaging socket",
+                        "Nanomsg header is imported for messaging",
+                        "Messaging socket is created for communication",
                     ),
                 ),
             ],
@@ -290,8 +290,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ sys/socket.h header import for POSIX socket API",
-                        "This code uses C++ POSIX sockets to interact with a network socket",
+                        "Socket header is imported for POSIX API",
+                        "Network socket is accessed via POSIX sockets",
                     ),
                 ),
                 (
@@ -299,8 +299,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ netinet/in.h header import for internet address structures",
-                        "This code uses C++ POSIX sockets to interact with a network socket",
+                        "Internet address header is imported for networking",
+                        "Network socket is accessed via POSIX sockets",
                     ),
                 ),
                 (
@@ -308,8 +308,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ uv.h header import for libuv async I/O",
-                        "This code uses C++ libuv to interact with asynchronous network I/O",
+                        "Async I/O header is imported for libuv",
+                        "Network I/O is handled asynchronously",
                     ),
                 ),
                 (
@@ -317,8 +317,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ uv_tcp_init call initializing a libuv TCP handle",
-                        "This code uses C++ libuv to interact with a TCP socket",
+                        "TCP handle is initialized for networking",
+                        "TCP socket is created for network communication",
                     ),
                 ),
                 (
@@ -326,8 +326,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ libevent2 header import for event-driven networking",
-                        "This code uses C++ libevent to interact with event-driven network I/O",
+                        "Event networking is imported via libevent",
+                        "Event-driven network I/O is handled via libevent",
                     ),
                 ),
                 (
@@ -335,8 +335,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C++ evconnlistener_new_bind call binding a libevent connection listener",
-                        "This code uses C++ libevent to accept inbound network connections",
+                        "Connection listener is bound with libevent",
+                        "Network connections are accepted via inbound libevent",
                     ),
                 ),
             ],
@@ -348,8 +348,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ grpcpp header import for gRPC C++ library",
-                        "This code uses C++ gRPC to interact with a gRPC endpoint",
+                        "gRPC library is imported for C++",
+                        "gRPC endpoint is accessed via client",
                     ),
                 ),
                 (
@@ -357,8 +357,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C++ grpc::Server class instantiation for gRPC server",
-                        "This code uses C++ gRPC to expose an inbound gRPC server",
+                        "gRPC server is instantiated for service",
+                        "gRPC server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -366,8 +366,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C++ grpc::ServerBuilder class building a gRPC server",
-                        "This code uses C++ gRPC to expose an inbound gRPC server",
+                        "gRPC server is built with configuration",
+                        "gRPC server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -375,8 +375,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ grpc::ClientContext class for outbound gRPC calls",
-                        "This code uses C++ gRPC to call an outbound gRPC service",
+                        "gRPC calls are made with ClientContext",
+                        "gRPC service is called for outbound requests",
                     ),
                 ),
             ],
@@ -388,8 +388,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ fstream header import for file stream I/O",
-                        "This code uses C++ fstream to interact with file I/O",
+                        "File stream is imported for I/O",
+                        "File I/O is accessed via fstream",
                     ),
                 ),
                 (
@@ -397,8 +397,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "C++ std::ifstream class reading from a file",
-                        "This code uses C++ std::ifstream to receive data from a file",
+                        "File input stream is created for reading",
+                        "File data is received from input stream",
                     ),
                 ),
                 (
@@ -406,8 +406,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ std::ofstream class writing to a file",
-                        "This code uses C++ std::ofstream to write to a file",
+                        "File output stream is created for writing",
+                        "File is written with output stream",
                     ),
                 ),
                 (
@@ -415,8 +415,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ std::fstream class for bidirectional file I/O",
-                        "This code uses C++ std::fstream to interact with a file",
+                        "File stream is created for bidirectional I/O",
+                        "File is opened for I/O operations",
                     ),
                 ),
                 (
@@ -424,8 +424,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ fopen call opening a file for reading or writing",
-                        "This code uses C++ fopen to interact with a file",
+                        "File is opened for reading writing",
+                        "File is accessed via fopen",
                     ),
                 ),
                 (
@@ -433,8 +433,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "C++ fread call reading data from a file stream",
-                        "This code uses C++ fread to receive data from a file",
+                        "Data is read from file stream",
+                        "Data is received from file via fread",
                     ),
                 ),
                 (
@@ -442,8 +442,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ fwrite call writing data to a file stream",
-                        "This code uses C++ fwrite to write to a file",
+                        "Data is written to file stream",
+                        "File is written via fwrite",
                     ),
                 ),
                 (
@@ -451,8 +451,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ filesystem header import for std::filesystem operations",
-                        "This code uses C++ std::filesystem to interact with the file system",
+                        "Filesystem operations are imported via header",
+                        "File system is accessed for operations",
                     ),
                 ),
                 (
@@ -460,8 +460,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ std::filesystem namespace usage for file system operations",
-                        "This code uses C++ std::filesystem to interact with the file system",
+                        "Filesystem operations are accessed via namespace",
+                        "File system is accessed for operations",
                     ),
                 ),
             ],
@@ -473,8 +473,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ hiredis header import for Redis client",
-                        "This code uses C++ hiredis to connect to a Redis cache",
+                        "Redis client is imported via hiredis",
+                        "Redis cache is connected via hiredis",
                     ),
                 ),
                 (
@@ -482,8 +482,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ redisConnect call connecting to a Redis server",
-                        "This code uses C++ hiredis to connect to a Redis cache",
+                        "Redis connection is opened to server",
+                        "Redis cache is connected via hiredis",
                     ),
                 ),
                 (
@@ -491,8 +491,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ redisCommand call sending a command to Redis",
-                        "This code uses C++ hiredis to query a Redis cache",
+                        "Redis command is sent to server",
+                        "Redis cache is queried via hiredis",
                     ),
                 ),
                 (
@@ -500,8 +500,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ libmemcached header import for Memcached client",
-                        "This code uses C++ libmemcached to connect to a Memcached cache",
+                        "Memcached client is imported via library",
+                        "Cache connection is opened with Memcached server",
                     ),
                 ),
                 (
@@ -509,8 +509,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ memcached_create call creating a Memcached client instance",
-                        "This code uses C++ libmemcached to connect to a Memcached cache",
+                        "Memcached client is created with instance",
+                        "Cache connection is opened with Memcached server",
                     ),
                 ),
             ],
@@ -522,8 +522,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ soapH.h gSOAP header import for SOAP web services",
-                        "This code uses C++ gSOAP to interact with a SOAP web service",
+                        "SOAP header is imported for web services",
+                        "SOAP web service is accessed via gSOAP",
                     ),
                 ),
                 (
@@ -531,8 +531,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ soap_init call initializing a gSOAP context",
-                        "This code uses C++ gSOAP to interact with a SOAP web service",
+                        "SOAP context is initialized for web services",
+                        "SOAP web service is accessed via gSOAP",
                     ),
                 ),
                 (
@@ -540,8 +540,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ soap_call_* stub invoking an outbound SOAP operation",
-                        "This code uses C++ gSOAP to call an outbound SOAP web service",
+                        "SOAP operation is invoked for outbound call",
+                        "SOAP web service is called for outbound requests",
                     ),
                 ),
             ],
@@ -553,8 +553,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ libssh2_sftp.h header import for SFTP client",
-                        "This code uses C++ libssh2 to connect to an SFTP server",
+                        "SFTP client is imported via header",
+                        "SFTP connection is opened with server",
                     ),
                 ),
                 (
@@ -562,8 +562,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ libssh2_sftp_* call performing an SFTP operation",
-                        "This code uses C++ libssh2 to connect to an SFTP server",
+                        "SFTP operation is performed with call",
+                        "SFTP connection is opened with server",
                     ),
                 ),
                 (
@@ -571,8 +571,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ curl_easy_setopt with CURLPROTO_FTP configuring an FTP transfer",
-                        "This code uses C++ libcurl to connect to an FTP server",
+                        "FTP transfer is configured with protocol",
+                        "FTP server is connected via libcurl",
                     ),
                 ),
             ],
@@ -584,8 +584,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ timer_create call creating a POSIX interval timer",
-                        "This code uses C++ POSIX timers to interact with scheduled tasks",
+                        "POSIX timer is created with interval",
+                        "Scheduled tasks are managed via POSIX timers",
                     ),
                 ),
                 (
@@ -593,8 +593,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "C++ setitimer call setting an interval timer",
-                        "This code uses C++ setitimer to interact with scheduled tasks",
+                        "Interval timer is set with parameters",
+                        "Scheduled tasks are created with timer",
                     ),
                 ),
             ],
@@ -606,8 +606,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mailio header import for email library",
-                        "This code uses C++ mailio to send outbound email messages",
+                        "Email library is imported via mailio",
+                        "Email message is sent outbound",
                     ),
                 ),
                 (
@@ -615,8 +615,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mailio::message class composing an email message",
-                        "This code uses C++ mailio to send outbound email messages",
+                        "Email message is composed with class",
+                        "Email message is sent outbound",
                     ),
                 ),
                 (
@@ -624,8 +624,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mailio::smtp class sending email via SMTP",
-                        "This code uses C++ mailio to send outbound email via SMTP",
+                        "Email is sent via SMTP client",
+                        "Email is sent outbound via SMTP",
                     ),
                 ),
                 (
@@ -633,8 +633,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mailio::smtps class sending email via SMTPS",
-                        "This code uses C++ mailio to send outbound email via SMTPS",
+                        "Email is sent via SMTPS client",
+                        "Email is sent outbound via SMTPS",
                     ),
                 ),
                 (
@@ -642,8 +642,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mailio::imap class accessing email via IMAP",
-                        "This code uses C++ mailio to connect to an IMAP mail server",
+                        "Email is accessed via IMAP client",
+                        "IMAP connection is opened with mail server",
                     ),
                 ),
                 (
@@ -651,8 +651,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mailio::imaps class accessing email via IMAPS",
-                        "This code uses C++ mailio to connect to an IMAPS mail server",
+                        "Email is accessed via IMAPS client",
+                        "IMAPS connection is opened with mail server",
                     ),
                 ),
                 (
@@ -660,8 +660,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ mailio::pop3 class retrieving email via POP3",
-                        "This code uses C++ mailio to connect to a POP3 mail server",
+                        "Email is retrieved via POP3 client",
+                        "POP3 connection is opened with mail server",
                     ),
                 ),
                 (
@@ -669,8 +669,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ vmime header import for email library",
-                        "This code uses C++ VMime to send outbound email messages",
+                        "Email header is imported for messaging",
+                        "Email messages are sent via outbound VMime",
                     ),
                 ),
                 (
@@ -678,8 +678,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ vmime::net::smtp namespace sending email via SMTP",
-                        "This code uses C++ VMime to send outbound email via SMTP",
+                        "Email is sent via SMTP protocol",
+                        "Email is sent via outbound SMTP VMime",
                     ),
                 ),
                 (
@@ -687,8 +687,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ vmime::net::imap namespace accessing email via IMAP",
-                        "This code uses C++ VMime to connect to an IMAP mail server",
+                        "Email is accessed via IMAP protocol",
+                        "IMAP mail server is connected via VMime",
                     ),
                 ),
                 (
@@ -696,8 +696,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "C++ vmime::messageBuilder class composing an email message",
-                        "This code uses C++ VMime to send outbound email messages",
+                        "Email message is composed with builder",
+                        "Email messages are sent via outbound VMime",
                     ),
                 ),
             ],

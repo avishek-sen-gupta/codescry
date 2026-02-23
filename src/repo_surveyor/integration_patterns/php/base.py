@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP cURL initializing an outbound HTTP client request",
-                        "This code uses PHP cURL to make outbound HTTP requests",
+                        "HTTP client is initialized via cURL",
+                        "HTTP request is made with client",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP cURL configuring an outbound HTTP request option",
-                        "This code uses PHP cURL to configure outbound HTTP requests",
+                        "HTTP request option is configured via cURL",
+                        "HTTP request is configured with options",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP cURL executing an outbound HTTP request",
-                        "This code uses PHP cURL to send an outbound HTTP request",
+                        "HTTP request is executed via cURL",
+                        "HTTP request is sent with parameters",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP file_get_contents fetching a remote HTTP URL",
-                        "This code uses PHP file_get_contents to send an outbound HTTP request",
+                        "HTTP URL is fetched remotely",
+                        "HTTP request is sent with file functions",
                     ),
                 ),
                 (
@@ -53,8 +53,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP GuzzleHttp\\Client HTTP client being instantiated",
-                        "This code uses PHP Guzzle to send outbound HTTP requests",
+                        "HTTP client is created for outbound requests",
+                        "HTTP request is sent with client",
                     ),
                 ),
                 (
@@ -62,8 +62,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Http::get making an outbound HTTP GET request",
-                        "This code uses PHP Http to send an outbound HTTP GET request",
+                        "HTTP GET request is made outbound",
+                        "HTTP GET request is sent to endpoint",
                     ),
                 ),
                 (
@@ -71,8 +71,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Http::post making an outbound HTTP POST request",
-                        "This code uses PHP Http to send an outbound HTTP POST request",
+                        "HTTP POST request is made outbound",
+                        "HTTP POST request is sent to endpoint",
                     ),
                 ),
             ],
@@ -84,8 +84,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP SoapClient being instantiated for outbound SOAP calls",
-                        "This code uses PHP SoapClient to call an outbound SOAP web service",
+                        "SOAP client is created for outbound calls",
+                        "SOAP service is called with client request",
                     ),
                 ),
                 (
@@ -93,8 +93,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PHP SoapServer being instantiated to handle inbound SOAP requests",
-                        "This code uses PHP SoapServer to expose an inbound SOAP web service",
+                        "SOAP server is created for inbound requests",
+                        "SOAP service is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -102,8 +102,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP SoapFault handling a SOAP error condition",
-                        "This code uses PHP SoapFault to interact with SOAP error handling",
+                        "SOAP error is handled via fault",
+                        "SOAP errors are handled with fault processing",
                     ),
                 ),
             ],
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP PhpAmqpLib AMQP client library usage",
-                        "This code uses PHP PhpAmqpLib to interact with an AMQP message broker",
+                        "AMQP client is accessed for messaging",
+                        "AMQP broker is accessed for message exchange",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP AMQPConnection establishing an AMQP broker connection",
-                        "This code uses PHP AMQP to interact with an AMQP message broker",
+                        "AMQP connection is established with broker",
+                        "AMQP broker is accessed for message exchange",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP AMQPChannel operating on an AMQP messaging channel",
-                        "This code uses PHP AMQP to interact with an AMQP messaging channel",
+                        "AMQP channel is operated for messaging",
+                        "AMQP channel is accessed for messaging",
                     ),
                 ),
                 (
@@ -142,8 +142,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP Enqueue message queue abstraction library usage",
-                        "This code uses PHP Enqueue to interact with a message queue",
+                        "Message queue is accessed via abstraction library",
+                        "Message queue is accessed for processing",
                     ),
                 ),
                 (
@@ -151,8 +151,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP RdKafka Kafka client library usage",
-                        "This code uses PHP RdKafka to interact with a Kafka cluster",
+                        "Kafka client is accessed for messaging",
+                        "Kafka cluster is accessed for message streaming",
                     ),
                 ),
             ],
@@ -164,8 +164,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP socket_create creating a raw socket",
-                        "This code uses PHP sockets to interact with a network socket",
+                        "Raw socket is created",
+                        "Network socket is accessed for communication",
                     ),
                 ),
                 (
@@ -173,8 +173,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP socket_connect connecting to a remote socket endpoint",
-                        "This code uses PHP sockets to connect to a remote socket endpoint",
+                        "Socket endpoint is connected remotely",
+                        "Socket endpoint is connected to remotely",
                     ),
                 ),
                 (
@@ -182,8 +182,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PHP socket_listen binding a socket to accept inbound connections",
-                        "This code uses PHP sockets to listen for inbound socket connections",
+                        "Socket is bound for inbound connections",
+                        "Socket connections are listened for inbound traffic",
                     ),
                 ),
                 (
@@ -191,8 +191,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PHP stream_socket_server creating an inbound socket server",
-                        "This code uses PHP stream sockets to accept inbound socket connections",
+                        "Socket server is created for inbound connections",
+                        "Socket connections are accepted for inbound traffic",
                     ),
                 ),
                 (
@@ -200,8 +200,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP stream_socket_client creating an outbound stream socket connection",
-                        "This code uses PHP stream sockets to connect to a remote socket endpoint",
+                        "Stream socket is connected outbound",
+                        "Socket endpoint is connected to remotely",
                     ),
                 ),
                 (
@@ -209,8 +209,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PHP Ratchet WebSocket server library usage",
-                        "This code uses PHP Ratchet to accept inbound WebSocket connections",
+                        "WebSocket server is created with library",
+                        "WebSocket connections are accepted for inbound communication",
                     ),
                 ),
             ],
@@ -222,8 +222,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP PDO database abstraction being instantiated",
-                        "This code uses PHP PDO to connect to an outbound database",
+                        "Database abstraction is created via PDO",
+                        "Database is connected to with credentials",
                     ),
                 ),
                 (
@@ -231,8 +231,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP PDO preparing a parameterized SQL statement",
-                        "This code uses PHP PDO to execute outbound database queries",
+                        "SQL statement is prepared with parameters",
+                        "Database queries are executed with prepared statements",
                     ),
                 ),
                 (
@@ -240,8 +240,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP mysqli_connect establishing a MySQL database connection",
-                        "This code uses PHP mysqli to connect to an outbound MySQL database",
+                        "MySQL database is connected via mysqli",
+                        "MySQL database is connected to with driver",
                     ),
                 ),
                 (
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP mysqli object being instantiated for MySQL connection",
-                        "This code uses PHP mysqli to connect to an outbound MySQL database",
+                        "MySQL connection is created via mysqli",
+                        "MySQL database is connected to with driver",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP pg_connect establishing a PostgreSQL database connection",
-                        "This code uses PHP pg to connect to an outbound PostgreSQL database",
+                        "PostgreSQL database is connected via pg_connect",
+                        "PostgreSQL database is connected to with driver",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP MongoDB\\Client connecting to a MongoDB database",
-                        "This code uses PHP MongoDB to connect to an outbound MongoDB database",
+                        "MongoDB database is connected via client",
+                        "MongoDB database is connected to with driver",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Redis client being instantiated",
-                        "This code uses PHP Redis to connect to an outbound Redis database",
+                        "Redis client is created for cache",
+                        "Redis database is connected to with driver",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Doctrine ORM being used for object-relational mapping",
-                        "This code uses PHP Doctrine ORM to query an outbound relational database",
+                        "Object-relational mapping is handled by ORM",
+                        "Database is queried with ORM mapping",
                     ),
                 ),
                 (
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Doctrine DBAL database abstraction layer usage",
-                        "This code uses PHP Doctrine DBAL to execute outbound database queries",
+                        "Database abstraction is accessed via DBAL",
+                        "Database queries are executed with connection",
                     ),
                 ),
             ],
@@ -307,8 +307,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP fopen opening a file or stream for I/O",
-                        "This code uses PHP fopen to interact with a local file or stream",
+                        "File stream is opened for I/O",
+                        "File stream is opened for operations",
                     ),
                 ),
                 (
@@ -316,8 +316,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP fwrite writing data to a file handle",
-                        "This code uses PHP fwrite to write to a local file",
+                        "File data is written to handle",
+                        "Local file is written with handle",
                     ),
                 ),
                 (
@@ -325,8 +325,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP file_put_contents writing data to a file",
-                        "This code uses PHP file_put_contents to write to a local file",
+                        "File data is written to path",
+                        "Local file is written with content",
                     ),
                 ),
                 (
@@ -334,8 +334,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "PHP file_get_contents reading data from a local file path",
-                        "This code uses PHP file_get_contents to receive data from a local file",
+                        "File data is read from local path",
+                        "Local file is read with stream",
                     ),
                 ),
                 (
@@ -343,8 +343,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP League\\Flysystem filesystem abstraction library usage",
-                        "This code uses PHP Flysystem to interact with a local or cloud filesystem",
+                        "Filesystem is accessed via abstraction library",
+                        "Filesystem is accessed for file operations",
                     ),
                 ),
                 (
@@ -352,8 +352,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Aws\\S3 client interacting with AWS S3 storage",
-                        "This code uses PHP AWS SDK to write to or read from outbound S3 object storage",
+                        "S3 client is created for AWS storage interaction",
+                        "S3 storage is accessed for object operations",
                     ),
                 ),
                 (
@@ -361,8 +361,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP Storage::disk accessing a configured filesystem disk",
-                        "This code uses PHP Storage to interact with a configured file storage backend",
+                        "Filesystem disk is accessed via storage",
+                        "File storage is accessed with backend configuration",
                     ),
                 ),
             ],
@@ -374,8 +374,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP Grpc\\ namespace usage for gRPC communication",
-                        "This code uses PHP gRPC to interact with a gRPC service",
+                        "gRPC communication is accessed via namespace",
+                        "gRPC service is accessed with client",
                     ),
                 ),
                 (
@@ -383,8 +383,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP GPBMetadata\\ Protobuf message metadata usage",
-                        "This code uses PHP Protobuf to interact with gRPC message definitions",
+                        "Protobuf metadata is accessed for message handling",
+                        "gRPC messages are processed with protobuf definitions",
                     ),
                 ),
             ],
@@ -396,8 +396,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP GraphQL\\ library usage for GraphQL API handling",
-                        "This code uses PHP GraphQL to interact with a GraphQL API",
+                        "GraphQL API is handled by library",
+                        "GraphQL API is accessed with queries",
                     ),
                 ),
                 (
@@ -405,8 +405,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP webonyx/graphql-php library for GraphQL API implementation",
-                        "This code uses PHP webonyx/graphql-php to interact with a GraphQL API",
+                        "GraphQL API is implemented via library",
+                        "GraphQL API is accessed via webonyx client",
                     ),
                 ),
                 (
@@ -414,8 +414,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP Lighthouse\\ GraphQL server framework usage",
-                        "This code uses PHP Lighthouse to interact with a Laravel GraphQL API",
+                        "GraphQL server is created with framework",
+                        "GraphQL API is accessed with Laravel schema",
                     ),
                 ),
             ],
@@ -427,8 +427,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP mail() function sending an outbound email",
-                        "This code uses PHP mail() to send an outbound email message",
+                        "Email is sent outbound via mail function",
+                        "Email message is sent with mail function",
                     ),
                 ),
                 (
@@ -436,8 +436,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP PHPMailer\\PHPMailer library sending outbound email",
-                        "This code uses PHP PHPMailer to send outbound email messages",
+                        "Email is sent outbound via PHPMailer",
+                        "Email message is sent via SMTP",
                     ),
                 ),
                 (
@@ -445,8 +445,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Swift_Mailer library sending outbound email",
-                        "This code uses PHP SwiftMailer to send outbound email messages",
+                        "Email is sent outbound via Swift Mailer",
+                        "Email message is sent via transport",
                     ),
                 ),
                 (
@@ -454,8 +454,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Symfony Mailer component sending outbound email",
-                        "This code uses PHP Symfony Mailer to send outbound email messages",
+                        "Email is sent outbound via Symfony Mailer",
+                        "Email message is sent via mailer",
                     ),
                 ),
             ],
@@ -467,8 +467,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Memcached client connecting to an outbound Memcached cache",
-                        "This code uses PHP Memcached to write to or read from an outbound cache",
+                        "Memcached cache is connected for outbound access",
+                        "Cache is accessed for read write operations",
                     ),
                 ),
                 (
@@ -476,8 +476,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP Redis client being instantiated for cache operations",
-                        "This code uses PHP Redis to write to or read from an outbound Redis cache",
+                        "Redis client is created for cache operations",
+                        "Redis cache is accessed for data operations",
                     ),
                 ),
                 (
@@ -485,8 +485,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP apcu_store writing a value to the APCu in-process cache",
-                        "This code uses PHP APCu to write to an outbound in-process cache",
+                        "Cache value is written to APCu",
+                        "Cache is written to in-process storage",
                     ),
                 ),
                 (
@@ -494,8 +494,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP apcu_fetch reading a value from the APCu in-process cache",
-                        "This code uses PHP APCu to read from an outbound in-process cache",
+                        "Cache value is read from APCu",
+                        "Cache is read from in-process storage",
                     ),
                 ),
                 (
@@ -503,8 +503,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP Psr\\Cache\\ PSR-6 cache interface usage",
-                        "This code uses PHP PSR-6 to interact with a cache backend",
+                        "Cache is accessed via PSR-6 interface",
+                        "Cache backend is accessed with pool interface",
                     ),
                 ),
                 (
@@ -512,8 +512,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP Psr\\SimpleCache\\ PSR-16 simple cache interface usage",
-                        "This code uses PHP PSR-16 to interact with a simple cache backend",
+                        "Cache is accessed via PSR-16 interface",
+                        "Cache backend is accessed with simple interface",
                     ),
                 ),
             ],
@@ -525,8 +525,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP text/event-stream content type for SSE communication",
-                        "This code uses PHP to interact with a Server-Sent Events stream",
+                        "SSE communication is indicated via content type",
+                        "Server-Sent Events stream is accessed",
                     ),
                 ),
                 (
@@ -534,8 +534,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PHP header() setting Content-Type for SSE to stream events to clients",
-                        "This code uses PHP to handle inbound Server-Sent Events connections",
+                        "SSE events are streamed via Content-Type header",
+                        "Server-Sent Events connection is handled for inbound streams",
                     ),
                 ),
             ],
@@ -547,8 +547,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP ftp_connect establishing an outbound FTP connection",
-                        "This code uses PHP FTP to connect to an outbound FTP server",
+                        "FTP connection is established outbound",
+                        "FTP server is connected to with credentials",
                     ),
                 ),
                 (
@@ -556,8 +556,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP ftp_login authenticating against an outbound FTP server",
-                        "This code uses PHP FTP to connect to an outbound FTP server",
+                        "FTP server is authenticated outbound",
+                        "FTP server is connected to with credentials",
                     ),
                 ),
                 (
@@ -565,8 +565,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP ssh2_sftp initializing an outbound SFTP subsystem",
-                        "This code uses PHP SSH2 to connect to an outbound SFTP server",
+                        "SFTP subsystem is initialized outbound",
+                        "SFTP server is connected to with credentials",
                     ),
                 ),
                 (
@@ -574,8 +574,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PHP phpseclib Net\\SFTP client connecting to an SFTP server",
-                        "This code uses PHP phpseclib to connect to an outbound SFTP server",
+                        "SFTP server is connected via phpseclib",
+                        "SFTP server is connected to with credentials",
                     ),
                 ),
             ],
@@ -587,8 +587,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP cron_schedule registering a cron-based scheduled task",
-                        "This code uses PHP to interact with scheduled cron tasks",
+                        "Cron task is registered with schedule",
+                        "Cron tasks are scheduled",
                     ),
                 ),
                 (
@@ -596,8 +596,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP scheduler cron expression defining a recurring task schedule",
-                        "This code uses PHP to interact with a cron-expression scheduled task",
+                        "Task schedule is defined with cron expression",
+                        "Cron expression task is scheduled",
                     ),
                 ),
                 (
@@ -605,8 +605,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP scheduler everyMinute scheduling a task to run every minute",
-                        "This code uses PHP to interact with a minutely scheduled task",
+                        "Minute task is scheduled via scheduler",
+                        "Minutely task is scheduled",
                     ),
                 ),
                 (
@@ -614,8 +614,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PHP scheduler daily scheduling a task to run once per day",
-                        "This code uses PHP to interact with a daily scheduled task",
+                        "Daily task is scheduled via scheduler",
+                        "Daily task is scheduled",
                     ),
                 ),
             ],

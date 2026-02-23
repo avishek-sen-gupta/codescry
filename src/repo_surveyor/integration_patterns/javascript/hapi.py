@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Node.js Hapi framework require for HTTP server",
-                        "This code uses Node.js Hapi to handle inbound HTTP server requests",
+                        "HTTP server is imported via Hapi",
+                        "HTTP server is handled for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Hapi Hapi.server call for HTTP server instantiation",
-                        "This code uses Node.js Hapi to expose an inbound HTTP server",
+                        "HTTP server is instantiated for request handling",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Hapi server.route call for HTTP route registration",
-                        "This code uses Node.js Hapi to handle inbound HTTP routes",
+                        "HTTP route is registered for request handling",
+                        "HTTP route is handled for inbound requests",
                     ),
                 ),
             ],

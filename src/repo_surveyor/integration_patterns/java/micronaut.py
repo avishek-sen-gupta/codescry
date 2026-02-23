@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Micronaut import for building Micronaut HTTP server or client components",
-                        "This code uses Micronaut to interact with an HTTP endpoint",
+                        "HTTP components are imported for server client",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut @Client annotation defining a declarative HTTP client",
-                        "This code uses Micronaut to call an outbound HTTP REST API",
+                        "HTTP client is annotated with declarative interface",
+                        "HTTP REST API is called outbound",
                     ),
                 ),
             ],
@@ -40,8 +40,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data import for accessing Micronaut's data persistence layer",
-                        "This code uses Micronaut Data to query a database",
+                        "Data persistence layer is imported",
+                        "Database is queried",
                     ),
                 ),
                 (
@@ -49,8 +49,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data @MappedEntity annotation mapping a class to a database table",
-                        "This code uses Micronaut Data to define a database entity for persistence",
+                        "Entity class is mapped to database table",
+                        "Database entity is defined for persistence",
                     ),
                 ),
                 (
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data @MappedProperty annotation mapping a field to a database column",
-                        "This code uses Micronaut Data to map a field to a database column",
+                        "Field is mapped to database column",
+                        "Field is mapped to database column",
                     ),
                 ),
                 (
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data CrudRepository interface for basic database CRUD operations",
-                        "This code uses Micronaut Data to execute CRUD queries against a database",
+                        "CRUD repository is created for database operations",
+                        "Database is accessed with CRUD queries",
                     ),
                 ),
                 (
@@ -76,8 +76,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data PageableRepository interface for paginated database queries",
-                        "This code uses Micronaut Data to execute paginated queries against a database",
+                        "Pageable repository is created for database queries",
+                        "Database is queried with pagination",
                     ),
                 ),
                 (
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data JpaRepository interface for JPA-based database access",
-                        "This code uses Micronaut Data JPA to query a relational database",
+                        "JPA repository is created for database access",
+                        "Database is queried with JPA",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut transaction management import for controlling database transactions",
-                        "This code uses Micronaut to execute database queries within a transaction",
+                        "Transaction management is imported for database control",
+                        "Database queries are executed within transaction",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data @R2dbcRepository annotation for reactive R2DBC database access",
-                        "This code uses Micronaut Data R2DBC to reactively query a relational database",
+                        "R2DBC repository is annotated for reactive database",
+                        "Database is queried reactively with R2DBC",
                     ),
                 ),
                 (
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data @JdbcRepository annotation for JDBC-based database access",
-                        "This code uses Micronaut Data JDBC to query a relational database",
+                        "JDBC repository is annotated for database access",
+                        "Database is queried with JDBC",
                     ),
                 ),
                 (
@@ -121,8 +121,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Micronaut Data @MongoRepository annotation for MongoDB database access",
-                        "This code uses Micronaut Data to query a MongoDB database",
+                        "MongoDB repository is annotated for database access",
+                        "MongoDB database is queried",
                     ),
                 ),
             ],

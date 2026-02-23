@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "JAX-RS @GET annotation defining an HTTP GET resource method",
-                        "This code uses JAX-RS to handle incoming HTTP GET requests",
+                        "GET resource method is annotated for HTTP",
+                        "HTTP GET request is handled inbound",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "JAX-RS @POST annotation defining an HTTP POST resource method",
-                        "This code uses JAX-RS to handle incoming HTTP POST requests",
+                        "POST resource method is annotated for HTTP",
+                        "HTTP POST request is handled inbound",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "JAX-RS @PUT annotation defining an HTTP PUT resource method",
-                        "This code uses JAX-RS to handle incoming HTTP PUT requests",
+                        "PUT resource method is annotated for HTTP",
+                        "HTTP PUT request is handled inbound",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "JAX-RS @DELETE annotation defining an HTTP DELETE resource method",
-                        "This code uses JAX-RS to handle incoming HTTP DELETE requests",
+                        "DELETE resource method is annotated for HTTP",
+                        "HTTP DELETE request is handled inbound",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "JAX-RS @Path annotation defining the URI path for a REST resource",
-                        "This code uses JAX-RS to expose an inbound REST API endpoint",
+                        "URI path is defined for REST resource",
+                        "REST API endpoint is exposed inbound",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "JAX-RS @Produces annotation specifying the media types a resource method can return",
-                        "This code uses JAX-RS to handle inbound HTTP requests returning specific media types",
+                        "Media types are specified for resource production",
+                        "HTTP response is returned with media types",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "JAX-RS @Consumes annotation specifying the media types a resource method accepts",
-                        "This code uses JAX-RS to accept inbound HTTP requests with specific media types",
+                        "Media types are specified for resource consumption",
+                        "HTTP request is accepted with media types",
                     ),
                 ),
             ],

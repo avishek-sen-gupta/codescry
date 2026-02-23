@@ -19,8 +19,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Sanic framework import for building async REST API applications",
-                        "This code uses Sanic to interact with an HTTP endpoint",
+                        "Async REST API is built with framework import",
+                        "HTTP endpoint is accessed via Sanic",
                     ),
                 ),
                 (
@@ -28,8 +28,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Sanic application instantiation for configuring the async API server",
-                        "This code uses Sanic to interact with an HTTP endpoint",
+                        "Async API server is created for configuration",
+                        "HTTP endpoint is accessed via Sanic",
                     ),
                 ),
                 (
@@ -37,8 +37,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Sanic @app.get decorator defining an inbound GET REST endpoint",
-                        "This code uses Sanic to expose an inbound REST API endpoint",
+                        "GET route is registered for inbound requests",
+                        "REST endpoint is exposed via Sanic",
                     ),
                 ),
                 (
@@ -46,8 +46,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Sanic @app.post decorator defining an inbound POST REST endpoint",
-                        "This code uses Sanic to expose an inbound REST API endpoint",
+                        "POST route is registered for inbound requests",
+                        "REST endpoint is exposed via Sanic",
                     ),
                 ),
                 (
@@ -55,8 +55,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Sanic @app.put decorator defining an inbound PUT REST endpoint",
-                        "This code uses Sanic to expose an inbound REST API endpoint",
+                        "PUT route is registered for inbound requests",
+                        "REST endpoint is exposed via Sanic",
                     ),
                 ),
                 (
@@ -64,8 +64,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Sanic @app.delete decorator defining an inbound DELETE REST endpoint",
-                        "This code uses Sanic to expose an inbound REST API endpoint",
+                        "DELETE route is registered for inbound requests",
+                        "REST endpoint is exposed via Sanic",
                     ),
                 ),
             ],
@@ -77,8 +77,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Sanic @app.websocket decorator defining an inbound WebSocket handler",
-                        "This code uses Sanic to handle incoming WebSocket connection requests",
+                        "WebSocket handler is registered for inbound connections",
+                        "WebSocket connection is handled via Sanic",
                     ),
                 ),
             ],

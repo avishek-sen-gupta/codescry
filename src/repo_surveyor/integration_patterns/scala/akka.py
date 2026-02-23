@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP scaladsl import for HTTP server/client",
-                        "This code uses Akka HTTP to handle inbound HTTP requests",
+                        "HTTP server is imported with scaladsl",
+                        "HTTP requests are handled by Akka HTTP",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP Pekko scaladsl import for HTTP server/client",
-                        "This code uses Akka HTTP Pekko to handle inbound HTTP requests",
+                        "HTTP server is imported with Pekko scaladsl",
+                        "HTTP requests are handled by Akka Pekko",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP pathPrefix directive for URL path matching",
-                        "This code uses Akka HTTP to handle inbound HTTP route path prefixes",
+                        "URL path is matched with prefix directive",
+                        "HTTP route path prefix is handled for inbound requests",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP complete directive for HTTP response completion",
-                        "This code uses Akka HTTP to handle inbound HTTP requests and respond",
+                        "HTTP response is completed with directive",
+                        "HTTP requests are handled with responses by Akka",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP Http().newServerAt for HTTP server binding",
-                        "This code uses Akka HTTP to expose an inbound HTTP server",
+                        "HTTP server is bound with address",
+                        "HTTP server is exposed by Akka HTTP",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP path directive for exact URL path matching",
-                        "This code uses Akka HTTP to handle inbound HTTP requests at a path",
+                        "URL path is matched with exact directive",
+                        "HTTP requests are handled at path by Akka",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP get directive for HTTP GET request handling",
-                        "This code uses Akka HTTP to handle inbound HTTP GET requests",
+                        "GET request is handled with directive",
+                        "HTTP GET requests are handled by Akka",
                     ),
                 ),
                 (
@@ -81,8 +81,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP post directive for HTTP POST request handling",
-                        "This code uses Akka HTTP to handle inbound HTTP POST requests",
+                        "POST request is handled with directive",
+                        "HTTP POST requests are handled by Akka",
                     ),
                 ),
             ],
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Akka HTTP ActorSystem instantiation for actor-based messaging",
-                        "This code uses Akka HTTP to interact with an actor messaging system",
+                        "Actor system is instantiated for messaging",
+                        "Actor messaging system is accessed",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Akka HTTP actor import for actor-based messaging",
-                        "This code uses Akka HTTP to interact with the actor messaging system",
+                        "Actor messaging is imported",
+                        "Actor messaging system is accessed",
                     ),
                 ),
                 (
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Akka HTTP Pekko actor import for actor-based messaging",
-                        "This code uses Akka HTTP Pekko to interact with the actor messaging system",
+                        "Actor messaging is imported with Pekko",
+                        "Actor messaging system is integrated with Akka",
                     ),
                 ),
             ],
@@ -125,8 +125,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP handleWebSocketMessages for WebSocket connection handling",
-                        "This code uses Akka HTTP to handle inbound WebSocket connections",
+                        "WebSocket connection is handled with messages",
+                        "WebSocket connection is handled for inbound communication",
                     ),
                 ),
                 (
@@ -134,8 +134,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP WebSocket model import for WebSocket support",
-                        "This code uses Akka HTTP to handle inbound WebSocket messages",
+                        "WebSocket support is imported with model",
+                        "WebSocket message is handled for inbound communication",
                     ),
                 ),
             ],
@@ -147,8 +147,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP SSE model import for server-sent events support",
-                        "This code uses Akka HTTP to expose inbound server-sent event streams",
+                        "Server-sent events are imported with SSE",
+                        "Server-sent event streams are exposed by Akka",
                     ),
                 ),
                 (
@@ -156,8 +156,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Akka HTTP completeWithSource for streaming response",
-                        "This code uses Akka HTTP to handle inbound streaming SSE connections",
+                        "Streaming response is completed with source",
+                        "SSE stream is handled for inbound connections",
                     ),
                 ),
             ],

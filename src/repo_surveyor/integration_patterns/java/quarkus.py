@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Quarkus import for building Quarkus application components",
-                        "This code uses Quarkus to interact with an HTTP endpoint",
+                        "Quarkus components are imported for application building",
+                        "HTTP endpoint is accessed via Quarkus",
                     ),
                 ),
             ],
@@ -31,8 +31,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Panache PanacheEntity base class for active record pattern ORM",
-                        "This code uses Quarkus Panache to query a database entity",
+                        "Active record ORM is enabled via base entity",
+                        "Database entity is queried via Quarkus Panache",
                     ),
                 ),
                 (
@@ -40,8 +40,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Panache PanacheRepository interface for repository pattern database access",
-                        "This code uses Quarkus Panache to query a database",
+                        "Database repository is created with interface pattern",
+                        "Database is queried via Quarkus Panache",
                     ),
                 ),
                 (
@@ -49,8 +49,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Panache PanacheEntityBase for customized active record ORM entities",
-                        "This code uses Quarkus Panache to query a database entity",
+                        "Active record ORM is customized via base entity",
+                        "Database entity is queried via Quarkus Panache",
                     ),
                 ),
                 (
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Panache PanacheMongoEntity for active record MongoDB documents",
-                        "This code uses Quarkus Panache to query a MongoDB database",
+                        "MongoDB document is modeled with active record",
+                        "MongoDB database is queried via Quarkus Panache",
                     ),
                 ),
                 (
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Panache PanacheMongoRepository for repository pattern MongoDB access",
-                        "This code uses Quarkus Panache to query a MongoDB database",
+                        "MongoDB repository is created for data access",
+                        "MongoDB database is queried via Quarkus Panache",
                     ),
                 ),
                 (
@@ -76,8 +76,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Hibernate ORM import for JPA-based relational database access",
-                        "This code uses Quarkus Hibernate to query a relational database",
+                        "Hibernate ORM is imported for database access",
+                        "Database is queried via Quarkus Hibernate",
                     ),
                 ),
                 (
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Panache import for simplified ORM-based database access",
-                        "This code uses Quarkus Panache to query a database",
+                        "ORM database access is imported via Panache",
+                        "Database is queried via Quarkus Panache",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus @NamedQuery annotation defining a named JPA query on an entity",
-                        "This code uses Quarkus JPA to execute a named query against a database",
+                        "Named JPA query is annotated on entity",
+                        "Named query is executed against database via Quarkus JPA",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Neo4j import for connecting to a Neo4j graph database",
-                        "This code uses Quarkus Neo4j to query a Neo4j graph database",
+                        "Neo4j database is imported for graph access",
+                        "Neo4j database is queried via Quarkus",
                     ),
                 ),
             ],
@@ -116,8 +116,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Quarkus Reactive Messaging @Incoming annotation consuming messages from a channel",
-                        "This code uses Quarkus Reactive Messaging to receive incoming messages from a message queue",
+                        "Message is consumed from channel via annotation",
+                        "Messages are received from queue via Quarkus Reactive Messaging",
                     ),
                 ),
                 (
@@ -125,8 +125,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Quarkus Reactive Messaging @Outgoing annotation producing messages to a channel",
-                        "This code uses Quarkus Reactive Messaging to send outgoing messages to a message queue",
+                        "Message is produced to channel via annotation",
+                        "Messages are sent to queue via Quarkus Reactive Messaging",
                     ),
                 ),
             ],

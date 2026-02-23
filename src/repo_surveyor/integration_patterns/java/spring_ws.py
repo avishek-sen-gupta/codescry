@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring WS @Endpoint annotation defining a SOAP web service endpoint class",
-                        "This code uses Spring WS to expose an inbound SOAP web service",
+                        "SOAP endpoint is annotated for web service",
+                        "SOAP service is exposed inbound",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Spring WS @PayloadRoot annotation mapping a SOAP request by its root element",
-                        "This code uses Spring WS to handle inbound SOAP web service requests",
+                        "SOAP request is mapped by payload root",
+                        "SOAP requests are handled inbound",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Spring WS WebServiceTemplate for sending SOAP requests to a remote web service",
-                        "This code uses Spring WS to call an outbound SOAP web service",
+                        "SOAP requests are sent to remote service",
+                        "SOAP service is called outbound",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Spring WS org.springframework.ws import for SOAP web service integration",
-                        "This code uses Spring WS to interact with a SOAP web service",
+                        "SOAP web service integration is imported",
+                        "SOAP service is accessed",
                     ),
                 ),
             ],

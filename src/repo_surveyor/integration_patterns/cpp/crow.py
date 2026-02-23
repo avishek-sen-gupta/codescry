@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Crow CROW_ROUTE macro defining an inbound HTTP route handler",
-                        "This code uses Crow to handle inbound HTTP requests",
+                        "HTTP route handler is defined by CROW_ROUTE macro",
+                        "HTTP requests are handled for inbound traffic",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Crow SimpleApp class creating an HTTP server application",
-                        "This code uses Crow to expose an inbound HTTP server",
+                        "HTTP server application is created by SimpleApp class",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Crow json::wvalue class building a JSON HTTP response",
-                        "This code uses Crow to handle inbound HTTP requests with JSON responses",
+                        "JSON HTTP response is built by json::wvalue class",
+                        "HTTP requests are handled with JSON responses",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Crow response class constructing an HTTP response",
-                        "This code uses Crow to handle inbound HTTP requests",
+                        "HTTP response is constructed by response class",
+                        "HTTP requests are handled for inbound traffic",
                     ),
                 ),
             ],

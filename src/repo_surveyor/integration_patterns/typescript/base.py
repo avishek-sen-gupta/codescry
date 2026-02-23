@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Fastify import for HTTP server framework",
-                        "This code uses TypeScript Fastify to expose an inbound HTTP server",
+                        "HTTP server is imported via Fastify",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Koa import for HTTP server framework",
-                        "This code uses TypeScript Koa to expose an inbound HTTP server",
+                        "HTTP server is imported via Koa",
+                        "HTTP server is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript axios import for HTTP client",
-                        "This code uses TypeScript axios to send outbound HTTP requests",
+                        "HTTP client is imported via axios",
+                        "HTTP request is sent for outbound communication",
                     ),
                 ),
             ],
@@ -48,8 +48,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript soap import for SOAP web service integration",
-                        "This code uses TypeScript soap to interact with a SOAP web service",
+                        "SOAP client is imported for web services",
+                        "SOAP service is accessed for communication",
                     ),
                 ),
                 (
@@ -57,8 +57,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript soap library import for SOAP web service integration",
-                        "This code uses TypeScript soap to interact with a SOAP web service",
+                        "SOAP integration is imported via library",
+                        "SOAP service is accessed for communication",
                     ),
                 ),
             ],
@@ -70,8 +70,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript KafkaJS import for Kafka messaging client",
-                        "This code uses TypeScript KafkaJS to interact with a Kafka broker",
+                        "Kafka messaging is imported via client",
+                        "Kafka broker is accessed for messaging",
                     ),
                 ),
                 (
@@ -79,8 +79,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript amqplib import for AMQP messaging client",
-                        "This code uses TypeScript amqplib to interact with an AMQP broker",
+                        "AMQP client is imported for messaging",
+                        "AMQP broker is accessed for messaging",
                     ),
                 ),
                 (
@@ -88,8 +88,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript Bull import for Redis-backed job queue",
-                        "This code uses TypeScript Bull to interact with a job queue",
+                        "Job queue is imported with Redis",
+                        "Job queue is managed for task processing",
                     ),
                 ),
                 (
@@ -97,8 +97,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript AWS SDK SQS client import for queue messaging",
-                        "This code uses TypeScript AWS SDK to interact with an SQS queue",
+                        "SQS client is imported for messaging",
+                        "SQS queue is accessed via SDK",
                     ),
                 ),
                 (
@@ -106,8 +106,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript AWS SDK SNS client import for pub/sub notifications",
-                        "This code uses TypeScript AWS SDK to interact with an SNS topic",
+                        "SNS client is imported for notifications",
+                        "SNS topic is accessed via SDK",
                     ),
                 ),
                 (
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript Google Cloud Pub/Sub client import for messaging",
-                        "This code uses TypeScript Google Cloud to interact with a Pub/Sub topic",
+                        "Pub/Sub messaging is imported via client",
+                        "Pub/Sub topic is managed for messaging",
                     ),
                 ),
             ],
@@ -128,8 +128,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Socket.IO import for real-time WebSocket server",
-                        "This code uses TypeScript Socket.IO to accept inbound WebSocket connections",
+                        "WebSocket server is imported via Socket.IO",
+                        "WebSocket connection is accepted for inbound events",
                     ),
                 ),
                 (
@@ -137,8 +137,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript ws import for WebSocket client and server",
-                        "This code uses TypeScript ws to interact with a WebSocket connection",
+                        "WebSocket client is imported via ws",
+                        "WebSocket connection is managed for communication",
                     ),
                 ),
                 (
@@ -146,8 +146,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Socket.IO io.on() listener accepting inbound events",
-                        "This code uses TypeScript Socket.IO to listen for inbound socket events",
+                        "Socket events are listened for inbound handling",
+                        "Socket event is listened for inbound messages",
                     ),
                 ),
                 (
@@ -155,8 +155,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript socket.on() listener handling inbound socket messages",
-                        "This code uses TypeScript to listen for inbound socket messages",
+                        "Socket messages are handled by listener",
+                        "Socket message is listened for inbound communication",
                     ),
                 ),
             ],
@@ -168,8 +168,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript TypeORM @Entity decorator mapping a database entity",
-                        "This code uses TypeScript TypeORM to interact with a relational database",
+                        "Database entity is annotated with mapping",
+                        "Database is accessed with ORM client",
                     ),
                 ),
                 (
@@ -177,8 +177,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript TypeORM @Column decorator mapping a database column",
-                        "This code uses TypeScript TypeORM to interact with a relational database",
+                        "Database column is annotated with mapping",
+                        "Database is accessed with ORM client",
                     ),
                 ),
                 (
@@ -186,8 +186,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript TypeORM @PrimaryGeneratedColumn decorator for auto-increment primary key",
-                        "This code uses TypeScript TypeORM to interact with a relational database",
+                        "Primary key is annotated for auto-increment",
+                        "Database is accessed with ORM client",
                     ),
                 ),
                 (
@@ -195,8 +195,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript TypeORM @ManyToOne decorator for relational database association",
-                        "This code uses TypeScript TypeORM to interact with a relational database",
+                        "Database association is annotated with ManyToOne",
+                        "Database is accessed with ORM client",
                     ),
                 ),
                 (
@@ -204,8 +204,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript TypeORM @OneToMany decorator for relational database association",
-                        "This code uses TypeScript TypeORM to interact with a relational database",
+                        "Database association is annotated with OneToMany",
+                        "Database is accessed with ORM client",
                     ),
                 ),
                 (
@@ -213,8 +213,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript TypeORM @Repository decorator for database repository",
-                        "This code uses TypeScript TypeORM to interact with a relational database",
+                        "Database repository is annotated with decorator",
+                        "Database is accessed with ORM client",
                     ),
                 ),
                 (
@@ -222,8 +222,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript TypeORM import for ORM database integration",
-                        "This code uses TypeScript TypeORM to interact with a relational database",
+                        "Database ORM is imported via TypeORM",
+                        "Database is accessed with ORM client",
                     ),
                 ),
                 (
@@ -231,8 +231,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript Prisma Client import for database ORM",
-                        "This code uses TypeScript Prisma to query a relational database",
+                        "Database ORM is imported via Prisma Client",
+                        "Database is queried with ORM client",
                     ),
                 ),
                 (
@@ -240,8 +240,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript Sequelize import for ORM database integration",
-                        "This code uses TypeScript Sequelize to interact with a relational database",
+                        "Database ORM is imported via Sequelize",
+                        "Database is accessed with ORM client",
                     ),
                 ),
                 (
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript Mongoose import for MongoDB ODM integration",
-                        "This code uses TypeScript Mongoose to interact with a MongoDB database",
+                        "MongoDB ODM is imported via Mongoose",
+                        "MongoDB database is accessed with ODM",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript Prisma client call querying a database",
-                        "This code uses TypeScript Prisma to query a relational database",
+                        "Database is queried by Prisma client",
+                        "Database is queried with ORM client",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript AWS SDK DynamoDB client import for NoSQL database",
-                        "This code uses TypeScript AWS SDK to interact with a DynamoDB database",
+                        "DynamoDB client is imported for NoSQL",
+                        "DynamoDB database is accessed via SDK",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript Firebase Admin import for Firestore/RTDB access",
-                        "This code uses TypeScript Firebase to interact with a Firebase database",
+                        "Firebase services are imported for access",
+                        "Firebase database is accessed with client",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript neo4j-driver import for Neo4j graph database client",
-                        "This code uses TypeScript Neo4j driver to interact with a graph database",
+                        "Neo4j client is imported for graph database",
+                        "Graph database is accessed with driver",
                     ),
                 ),
                 (
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript neo4j.driver() call creating a Neo4j database connection",
-                        "This code uses TypeScript Neo4j driver to connect to a graph database",
+                        "Neo4j connection is created with driver",
+                        "Graph database connection is opened with driver",
                     ),
                 ),
             ],
@@ -307,8 +307,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript fs.readFile call reading data from a file",
-                        "This code uses TypeScript Node.js fs to read from a file",
+                        "File data is read from filesystem",
+                        "File is read from filesystem",
                     ),
                 ),
                 (
@@ -316,8 +316,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript fs.writeFile call writing data to a file",
-                        "This code uses TypeScript Node.js fs to write to a file",
+                        "File data is written to filesystem",
+                        "File is written to filesystem",
                     ),
                 ),
                 (
@@ -325,8 +325,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript AWS SDK S3 client import for object storage",
-                        "This code uses TypeScript AWS SDK to interact with S3 object storage",
+                        "S3 client is imported for object storage",
+                        "S3 storage is accessed via SDK",
                     ),
                 ),
                 (
@@ -334,8 +334,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Multer import for inbound multipart file upload handling",
-                        "This code uses TypeScript Multer to accept inbound file uploads",
+                        "File uploads are handled via Multer",
+                        "File upload is accepted for inbound processing",
                     ),
                 ),
                 (
@@ -343,8 +343,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript Azure Storage Blob client import for object storage",
-                        "This code uses TypeScript Azure SDK to interact with Blob storage",
+                        "Blob storage is imported for objects",
+                        "Blob storage is accessed via cloud SDK",
                     ),
                 ),
                 (
@@ -352,8 +352,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript Google Cloud Storage client import for object storage",
-                        "This code uses TypeScript Google Cloud to interact with Cloud Storage",
+                        "Cloud storage is imported via client",
+                        "Cloud storage is accessed via SDK",
                     ),
                 ),
             ],
@@ -365,8 +365,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript gRPC-js import for gRPC client and server",
-                        "This code uses TypeScript gRPC to interact with a gRPC endpoint",
+                        "gRPC client is imported for communication",
+                        "gRPC endpoint is accessed for communication",
                     ),
                 ),
                 (
@@ -374,8 +374,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript gRPC proto-loader import for loading protobuf definitions",
-                        "This code uses TypeScript gRPC to interact with a gRPC endpoint",
+                        "Protobuf definitions are imported via proto-loader",
+                        "gRPC endpoint is accessed for communication",
                     ),
                 ),
             ],
@@ -387,8 +387,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript Apollo Server import for GraphQL server",
-                        "This code uses TypeScript Apollo Server to expose an inbound GraphQL API",
+                        "GraphQL server is imported via Apollo",
+                        "GraphQL API is exposed for inbound queries",
                     ),
                 ),
                 (
@@ -396,8 +396,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "TypeScript type-graphql import for decorator-based GraphQL schema",
-                        "This code uses TypeScript type-graphql to expose an inbound GraphQL API",
+                        "GraphQL schema is imported via decorators",
+                        "GraphQL API is exposed for inbound queries",
                     ),
                 ),
                 (
@@ -405,8 +405,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript graphql-tools import for GraphQL schema utilities",
-                        "This code uses TypeScript graphql-tools to interact with a GraphQL schema",
+                        "GraphQL schema is imported via tools",
+                        "GraphQL schema is managed with tools",
                     ),
                 ),
             ],
@@ -418,8 +418,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript Nodemailer import for email sending",
-                        "This code uses TypeScript Nodemailer to send outbound email messages",
+                        "Email client is imported via Nodemailer",
+                        "Email message is sent via SMTP",
                     ),
                 ),
                 (
@@ -427,8 +427,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript SendGrid mail client import for email sending",
-                        "This code uses TypeScript SendGrid to send outbound email messages",
+                        "Email client is imported via SendGrid",
+                        "Email message is sent via API",
                     ),
                 ),
             ],
@@ -440,8 +440,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript ioredis import for Redis cache client",
-                        "This code uses TypeScript ioredis to connect to a Redis cache",
+                        "Redis client is imported via ioredis",
+                        "Redis cache connection is opened with client",
                     ),
                 ),
                 (
@@ -449,8 +449,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript redis import for Redis cache client",
-                        "This code uses TypeScript redis to connect to a Redis cache",
+                        "Redis client is imported for caching",
+                        "Redis cache connection is opened with client",
                     ),
                 ),
                 (
@@ -458,8 +458,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript memcached import for Memcached client",
-                        "This code uses TypeScript memcached to connect to a Memcached cache",
+                        "Memcached client is imported for caching",
+                        "Memcached cache connection is opened with client",
                     ),
                 ),
             ],
@@ -471,8 +471,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript EventSource API consuming server-sent events",
-                        "This code uses TypeScript EventSource to send outbound SSE subscription requests",
+                        "Server events are consumed via EventSource",
+                        "SSE subscription is sent for outbound streaming",
                     ),
                 ),
                 (
@@ -480,8 +480,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript text/event-stream content type for SSE streaming",
-                        "This code uses TypeScript to interact with server-sent event streaming",
+                        "SSE stream is indicated by content type",
+                        "Server-sent events are streamed for communication",
                     ),
                 ),
             ],
@@ -493,8 +493,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript ssh2-sftp-client import for SFTP file transfer client",
-                        "This code uses TypeScript ssh2-sftp-client to connect to an SFTP server",
+                        "SFTP client is imported for file transfer",
+                        "SFTP server connection is opened with client",
                     ),
                 ),
                 (
@@ -502,8 +502,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript basic-ftp import for FTP client",
-                        "This code uses TypeScript basic-ftp to connect to an FTP server",
+                        "FTP client is imported via basic-ftp",
+                        "FTP server connection is opened with client",
                     ),
                 ),
                 (
@@ -511,8 +511,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript ftp import for FTP client",
-                        "This code uses TypeScript ftp to connect to an FTP server",
+                        "FTP client is imported for transfer",
+                        "FTP server connection is opened with client",
                     ),
                 ),
                 (
@@ -520,8 +520,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript SFTPWrapper class for SFTP session operations",
-                        "This code uses TypeScript ssh2 SFTPWrapper to connect to an SFTP server",
+                        "SFTP session is wrapped for operations",
+                        "SFTP server connection is opened with client",
                     ),
                 ),
                 (
@@ -529,8 +529,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "TypeScript SFTP Client instantiation for file transfer",
-                        "This code uses TypeScript to connect to an SFTP server",
+                        "SFTP client is created for file transfer",
+                        "SFTP server connection is opened with client",
                     ),
                 ),
             ],
@@ -542,8 +542,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript node-cron import for cron-based task scheduling",
-                        "This code uses TypeScript node-cron to interact with scheduled tasks",
+                        "Cron scheduler is imported for tasks",
+                        "Scheduled task is managed with cron",
                     ),
                 ),
                 (
@@ -551,8 +551,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript cron import for cron-based task scheduling",
-                        "This code uses TypeScript cron to interact with scheduled tasks",
+                        "Task scheduler is imported for cron jobs",
+                        "Scheduled task is managed with cron",
                     ),
                 ),
                 (
@@ -560,8 +560,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TypeScript Agenda import for MongoDB-backed job scheduling",
-                        "This code uses TypeScript Agenda to interact with scheduled jobs",
+                        "Job scheduler is imported with MongoDB",
+                        "Scheduled jobs are managed with task scheduler",
                     ),
                 ),
             ],

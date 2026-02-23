@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PL/I CICS WEB command for HTTP communication",
-                        "This code uses PL/I CICS to handle inbound HTTP web requests",
+                        "HTTP communication is handled by WEB command",
+                        "HTTP requests are handled via CICS inbound",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS INVOKE WEBSERVICE command for web service calls",
-                        "This code uses PL/I CICS to call outbound web services",
+                        "Web service is invoked by INVOKE command",
+                        "Web services are called via CICS outbound",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I CICS DFHWS include for web service definitions",
-                        "This code uses PL/I CICS to interact with web service structures",
+                        "Web service definitions are included via DFHWS",
+                        "Web service structures are accessed via CICS",
                     ),
                 ),
             ],
@@ -48,8 +48,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I PLISAXA built-in for SAX XML parsing",
-                        "This code uses PL/I to interact with XML via SAX parsing",
+                        "SAX XML parsing is performed by PLISAXA",
+                        "XML is parsed via SAX",
                     ),
                 ),
                 (
@@ -57,8 +57,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I PLISAXB built-in for SAX XML parsing with buffer",
-                        "This code uses PL/I to interact with XML via buffered SAX parsing",
+                        "SAX XML parsing is performed by PLISAXB",
+                        "XML is parsed via buffered SAX",
                     ),
                 ),
                 (
@@ -66,8 +66,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I PLISAXC built-in for SAX XML parsing with callback",
-                        "This code uses PL/I to interact with XML via callback-based SAX parsing",
+                        "SAX XML parsing is performed by PLISAXC",
+                        "XML is parsed via callback SAX",
                     ),
                 ),
                 (
@@ -75,8 +75,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I XMLCHAR built-in for XML character data handling",
-                        "This code uses PL/I to interact with XML character data",
+                        "XML character data is handled by XMLCHAR",
+                        "XML character data is processed",
                     ),
                 ),
                 (
@@ -84,8 +84,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I DOMTREE built-in for DOM XML tree manipulation",
-                        "This code uses PL/I to interact with XML via DOM tree structures",
+                        "XML DOM tree is manipulated by DOMTREE",
+                        "XML is processed via DOM tree",
                     ),
                 ),
             ],
@@ -97,8 +97,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I MQSeries MQOPEN call for queue handle opening",
-                        "This code uses PL/I MQSeries to interact with a message queue",
+                        "Queue handle is opened by MQOPEN call",
+                        "Message queue is accessed via MQSeries",
                     ),
                 ),
                 (
@@ -106,8 +106,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I MQSeries MQPUT call sending a message to a queue",
-                        "This code uses PL/I MQSeries to send outgoing messages to a message queue",
+                        "Message is sent to queue by MQPUT",
+                        "Messages are sent to queue via MQSeries",
                     ),
                 ),
                 (
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PL/I MQSeries MQGET call receiving a message from a queue",
-                        "This code uses PL/I MQSeries to receive inbound messages from a message queue",
+                        "Message is received from queue by MQGET",
+                        "Messages are received from queue via MQSeries",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I MQSeries MQCLOSE call for queue handle closing",
-                        "This code uses PL/I MQSeries to interact with message queue handles",
+                        "Queue handle is closed by MQCLOSE call",
+                        "Message queue handles are accessed via MQSeries",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I MQSeries MQCONN call for queue manager connection",
-                        "This code uses PL/I MQSeries to interact with a queue manager",
+                        "Queue manager connection is opened by MQCONN",
+                        "Queue manager is accessed via MQSeries",
                     ),
                 ),
                 (
@@ -142,8 +142,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I MQSeries MQDISC call for queue manager disconnection",
-                        "This code uses PL/I MQSeries to interact with queue manager connections",
+                        "Queue manager is disconnected by MQDISC call",
+                        "Queue manager connections are accessed via MQSeries",
                     ),
                 ),
                 (
@@ -151,8 +151,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I MQSeries CMQP include for MQ constant definitions",
-                        "This code uses PL/I MQSeries to interact with message queue structures",
+                        "MQ constants are included via CMQP",
+                        "Message queue structures are accessed via MQSeries",
                     ),
                 ),
                 (
@@ -160,8 +160,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I MQSeries CMQEPP include for MQ extended constant definitions",
-                        "This code uses PL/I MQSeries to interact with extended message queue structures",
+                        "MQ extended constants are included via CMQEPP",
+                        "Extended message structures are accessed via MQSeries",
                     ),
                 ),
                 (
@@ -169,8 +169,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS WRITEQ TD command for transient data queue writing",
-                        "This code uses PL/I CICS to send outgoing data to a transient data queue",
+                        "Transient data queue is written by WRITEQ TD",
+                        "Data is sent to transient data queue",
                     ),
                 ),
                 (
@@ -178,8 +178,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PL/I CICS READQ TD command for transient data queue reading",
-                        "This code uses PL/I CICS to receive inbound data from a transient data queue",
+                        "Transient data queue is read by READQ TD",
+                        "Data is received from transient data queue",
                     ),
                 ),
                 (
@@ -187,8 +187,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS WRITEQ TS command for temporary storage queue writing",
-                        "This code uses PL/I CICS to send outgoing data to a temporary storage queue",
+                        "Temporary storage queue is written by WRITEQ TS",
+                        "Data is sent to temporary storage queue",
                     ),
                 ),
                 (
@@ -196,8 +196,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PL/I CICS READQ TS command for temporary storage queue reading",
-                        "This code uses PL/I CICS to receive inbound data from a temporary storage queue",
+                        "Temporary storage queue is read by READQ TS",
+                        "Data is received from temporary storage queue",
                     ),
                 ),
             ],
@@ -209,8 +209,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I EZASOKET call for TCP/IP socket operations",
-                        "This code uses PL/I to interact with TCP/IP sockets",
+                        "TCP/IP socket operations are performed by EZASOKET",
+                        "TCP sockets are accessed",
                     ),
                 ),
                 (
@@ -218,8 +218,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I SOCKET call for socket creation",
-                        "This code uses PL/I to interact with network sockets",
+                        "Socket is created by SOCKET call",
+                        "Network socket is accessed for communication",
                     ),
                 ),
                 (
@@ -227,8 +227,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "PL/I CICS EXTRACT TCPIP command for TCP/IP attribute extraction",
-                        "This code uses PL/I CICS to handle inbound TCP/IP connection details",
+                        "TCP/IP attributes are extracted by EXTRACT command",
+                        "TCP connection is handled via CICS inbound",
                     ),
                 ),
                 (
@@ -236,8 +236,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I CICS SOCKET command for socket operations",
-                        "This code uses PL/I CICS to interact with network sockets",
+                        "Socket operations are performed by SOCKET command",
+                        "Network sockets are accessed via CICS",
                     ),
                 ),
             ],
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I embedded SQL statement for database operations",
-                        "This code uses PL/I embedded SQL to execute outbound database queries",
+                        "Database operations are performed via embedded SQL",
+                        "Database queries are executed via embedded SQL",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I SQLCA structure for SQL communication area",
-                        "This code uses PL/I embedded SQL to query a relational database",
+                        "SQL communication area is structured by SQLCA",
+                        "Relational database is queried via embedded SQL",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I SQLCODE variable for SQL return code handling",
-                        "This code uses PL/I embedded SQL to query a relational database",
+                        "SQL return code is handled by SQLCODE",
+                        "Relational database is queried via embedded SQL",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I SQLCA include for SQL communication area definition",
-                        "This code uses PL/I embedded SQL to query a relational database",
+                        "SQL communication area is included via SQLCA",
+                        "Relational database is queried via embedded SQL",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I SQLDA include for SQL descriptor area definition",
-                        "This code uses PL/I embedded SQL to query a relational database dynamically",
+                        "SQL descriptor area is included via SQLDA",
+                        "Database is queried dynamically via embedded SQL",
                     ),
                 ),
                 (
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I embedded SQL CURSOR declaration for result set iteration",
-                        "This code uses PL/I embedded SQL to query a database cursor",
+                        "Result set cursor is declared for iteration",
+                        "Database cursor is queried via embedded SQL",
                     ),
                 ),
                 (
@@ -303,8 +303,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I embedded SQL FETCH INTO for cursor row retrieval",
-                        "This code uses PL/I embedded SQL to query rows from a database cursor",
+                        "Cursor row is retrieved by FETCH INTO",
+                        "Cursor rows are queried via embedded SQL",
                     ),
                 ),
                 (
@@ -312,8 +312,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I embedded SQL SELECT INTO for single row retrieval",
-                        "This code uses PL/I embedded SQL to query a single database row",
+                        "Single row is retrieved by SELECT INTO",
+                        "Single database row is queried via SQL",
                     ),
                 ),
                 (
@@ -321,8 +321,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I embedded SQL INSERT INTO for database row insertion",
-                        "This code uses PL/I embedded SQL to write rows to a database",
+                        "Database row is inserted by INSERT INTO",
+                        "Database rows are written via embedded SQL",
                     ),
                 ),
                 (
@@ -330,8 +330,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I embedded SQL UPDATE SET for database row modification",
-                        "This code uses PL/I embedded SQL to write updates to a database",
+                        "Database row is modified by UPDATE SET",
+                        "Database records are updated via embedded SQL",
                     ),
                 ),
                 (
@@ -339,8 +339,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I embedded SQL DELETE FROM for database row deletion",
-                        "This code uses PL/I embedded SQL to write deletions to a database",
+                        "Database row is deleted by DELETE FROM",
+                        "Database records are deleted via embedded SQL",
                     ),
                 ),
                 (
@@ -348,8 +348,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS READ command for VSAM file/database record retrieval",
-                        "This code uses PL/I CICS to query a VSAM database record",
+                        "VSAM record is retrieved by READ command",
+                        "VSAM record is queried via CICS",
                     ),
                 ),
                 (
@@ -357,8 +357,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS WRITE command for VSAM file/database record writing",
-                        "This code uses PL/I CICS to write to a VSAM database record",
+                        "VSAM record is written by WRITE command",
+                        "VSAM record is written via CICS",
                     ),
                 ),
                 (
@@ -366,8 +366,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS REWRITE command for VSAM file/database record update",
-                        "This code uses PL/I CICS to write updates to a VSAM database record",
+                        "VSAM record is updated by REWRITE command",
+                        "VSAM record is updated via CICS",
                     ),
                 ),
                 (
@@ -375,8 +375,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS DELETE command for VSAM file/database record deletion",
-                        "This code uses PL/I CICS to write deletions to a VSAM database",
+                        "VSAM record is deleted by DELETE command",
+                        "VSAM record is deleted via CICS",
                     ),
                 ),
                 (
@@ -384,8 +384,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS STARTBR command for VSAM browse operation start",
-                        "This code uses PL/I CICS to query VSAM records via browse",
+                        "VSAM browse is started by STARTBR command",
+                        "VSAM records are browsed via CICS",
                     ),
                 ),
                 (
@@ -393,8 +393,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS READNEXT command for VSAM forward browse",
-                        "This code uses PL/I CICS to query the next VSAM database record",
+                        "VSAM records are browsed forward by READNEXT",
+                        "Next VSAM record is queried via CICS",
                     ),
                 ),
                 (
@@ -402,8 +402,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I CICS READPREV command for VSAM backward browse",
-                        "This code uses PL/I CICS to query the previous VSAM database record",
+                        "VSAM records are browsed backward by READPREV",
+                        "Previous VSAM record is queried via CICS",
                     ),
                 ),
                 (
@@ -411,8 +411,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IMS PLITDLI call for DL/I database operations",
-                        "This code uses PL/I IMS to query an IMS DL/I database",
+                        "Database operations are performed by PLITDLI call",
+                        "IMS database is queried via DL/I",
                     ),
                 ),
                 (
@@ -420,8 +420,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IMS AIBTDLI call for AIB-based DL/I database operations",
-                        "This code uses PL/I IMS to query an IMS DL/I database via AIB",
+                        "Database operations are performed by AIBTDLI call",
+                        "IMS database is queried via AIB",
                     ),
                 ),
                 (
@@ -429,8 +429,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IMS PCB POINTER for program communication block reference",
-                        "This code uses PL/I IMS to query an IMS database via PCB",
+                        "Program communication block is referenced by PCB POINTER",
+                        "IMS database is queried via PCB",
                     ),
                 ),
                 (
@@ -438,8 +438,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IDMS embedded statement for CA IDMS database operations",
-                        "This code uses PL/I IDMS to query a CA IDMS network database",
+                        "Database operations are performed via embedded statement",
+                        "IDMS network database is queried",
                     ),
                 ),
                 (
@@ -447,8 +447,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IDMS BIND RUN-UNIT for database session initialisation",
-                        "This code uses PL/I IDMS to connect to a CA IDMS database run unit",
+                        "Database session is initialized by BIND RUN-UNIT",
+                        "IDMS database run unit is connected",
                     ),
                 ),
                 (
@@ -456,8 +456,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IDMS READY USAGE-MODE for area readiness declaration",
-                        "This code uses PL/I IDMS to query a CA IDMS database area",
+                        "Area readiness is declared by READY USAGE-MODE",
+                        "IDMS database area is queried",
                     ),
                 ),
                 (
@@ -465,8 +465,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IDMS OBTAIN command for database record retrieval",
-                        "This code uses PL/I IDMS to query records from a CA IDMS database",
+                        "Database record is retrieved by OBTAIN command",
+                        "IDMS database records are queried",
                     ),
                 ),
                 (
@@ -474,8 +474,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IDMS FIND CALC command for database record location",
-                        "This code uses PL/I IDMS to query records by CALC key in CA IDMS",
+                        "Database record is located by FIND CALC",
+                        "IDMS records are queried by CALC key",
                     ),
                 ),
                 (
@@ -483,8 +483,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IDMS COMMIT TASK for database transaction commit",
-                        "This code uses PL/I IDMS to write committed transactions to CA IDMS",
+                        "Database transaction is committed by COMMIT TASK",
+                        "IDMS transactions are committed",
                     ),
                 ),
                 (
@@ -492,8 +492,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IDMS ROLLBACK TASK for database transaction rollback",
-                        "This code uses PL/I IDMS to write transaction rollbacks to CA IDMS",
+                        "Database transaction is rolled back by ROLLBACK TASK",
+                        "IDMS transactions are rolled back",
                     ),
                 ),
                 (
@@ -501,8 +501,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "PL/I IDMS FINISH TASK for database run-unit termination",
-                        "This code uses PL/I IDMS to write the final commit to a CA IDMS run unit",
+                        "Database run-unit is terminated by FINISH TASK",
+                        "IDMS run unit is committed",
                     ),
                 ),
             ],
@@ -514,8 +514,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I OPEN FILE statement for file opening",
-                        "This code uses PL/I to interact with file handles for I/O",
+                        "File is opened by OPEN statement",
+                        "File handle is accessed for I/O operations",
                     ),
                 ),
                 (
@@ -523,8 +523,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I READ FILE statement for file record reading",
-                        "This code uses PL/I to interact with file data by reading records",
+                        "File record is read by READ statement",
+                        "File records are read",
                     ),
                 ),
                 (
@@ -532,8 +532,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I WRITE FILE statement for file record writing",
-                        "This code uses PL/I to interact with file data by writing records",
+                        "File record is written by WRITE statement",
+                        "File records are written",
                     ),
                 ),
                 (
@@ -541,8 +541,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I CLOSE FILE statement for file closing",
-                        "This code uses PL/I to interact with file handles on close",
+                        "File is closed by CLOSE statement",
+                        "File handle is closed for I/O operations",
                     ),
                 ),
                 (
@@ -550,8 +550,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "PL/I DECLARE FILE statement for file variable declaration",
-                        "This code uses PL/I to interact with declared file variables",
+                        "File variable is declared by DECLARE statement",
+                        "File variables are declared",
                     ),
                 ),
             ],

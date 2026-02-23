@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "CoreWCF namespace import enabling a CoreWCF SOAP service",
-                        "This code uses CoreWCF to expose an inbound SOAP service",
+                        "CoreWCF SOAP service is enabled by namespace import",
+                        "SOAP service is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "CoreWCF.Http namespace configuring HTTP transport for a CoreWCF service",
-                        "This code uses CoreWCF to expose an inbound SOAP service over HTTP",
+                        "HTTP transport is configured for CoreWCF service",
+                        "SOAP service is exposed over HTTP for inbound requests",
                     ),
                 ),
             ],

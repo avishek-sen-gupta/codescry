@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Drogon HttpController class defining an inbound HTTP controller",
-                        "This code uses Drogon to handle inbound HTTP requests",
+                        "HTTP controller is defined for inbound requests",
+                        "HTTP requests are handled inbound",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Drogon HttpSimpleController class for simple inbound HTTP handlers",
-                        "This code uses Drogon to handle inbound HTTP requests",
+                        "Simple HTTP handler is defined for inbound requests",
+                        "HTTP requests are handled inbound",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Drogon HttpApiController class for inbound REST API handlers",
-                        "This code uses Drogon to expose an inbound REST API",
+                        "REST API handler is defined by HttpApiController",
+                        "REST API is exposed inbound",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Drogon HttpResponse class constructing an HTTP response",
-                        "This code uses Drogon to handle inbound HTTP requests",
+                        "HTTP response is constructed by HttpResponse",
+                        "HTTP requests are handled inbound",
                     ),
                 ),
             ],
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Drogon WebSocketController class for inbound WebSocket connections",
-                        "This code uses Drogon to accept inbound WebSocket connections",
+                        "WebSocket connection is handled for inbound requests",
+                        "WebSocket connections are accepted inbound",
                     ),
                 ),
             ],

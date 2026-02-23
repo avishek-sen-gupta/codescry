@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "COBOL CICS WEB command handling inbound web requests",
-                        "This code uses COBOL CICS to handle inbound HTTP web requests",
+                        "Web request is handled for inbound",
+                        "HTTP request is handled inbound",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS INVOKE WEBSERVICE command calling an outbound web service",
-                        "This code uses COBOL CICS to call an outbound web service",
+                        "Web service is invoked for outbound call",
+                        "Web service is called outbound",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL DFHWS- prefix referencing CICS web service data areas",
-                        "This code uses COBOL CICS to interact with a web service",
+                        "Web service data areas are referenced by prefix",
+                        "Web service is accessed",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS WEB SEND command transmitting an HTTP response",
-                        "This code uses COBOL CICS to send outbound web data",
+                        "HTTP response is sent to client",
+                        "Web data is sent outbound",
                     ),
                 ),
                 (
@@ -53,8 +53,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "COBOL CICS WEB RECEIVE command receiving inbound HTTP data",
-                        "This code uses COBOL CICS to receive inbound web data",
+                        "HTTP data is received from inbound request",
+                        "Web data is received inbound",
                     ),
                 ),
                 (
@@ -62,8 +62,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL CICS URIMAP resource defining a URI mapping",
-                        "This code uses COBOL CICS to interact with a URI-mapped web endpoint",
+                        "URI mapping is defined for resource",
+                        "Web endpoint is accessed with URI mapping",
                     ),
                 ),
                 (
@@ -71,8 +71,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL WEBSERVICE keyword referencing a web service definition",
-                        "This code uses COBOL to interact with a web service",
+                        "Web service is referenced by WEBSERVICE keyword",
+                        "Web service is called",
                     ),
                 ),
             ],
@@ -84,8 +84,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL CICS TRANSFORM command converting XML/SOAP data",
-                        "This code uses COBOL CICS to interact with a SOAP message transform",
+                        "XML data is converted with transform",
+                        "SOAP message is transformed",
                     ),
                 ),
                 (
@@ -93,8 +93,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL XML PARSE statement parsing an XML document",
-                        "This code uses COBOL XML parsing to interact with XML/SOAP data",
+                        "XML document is parsed by XML PARSE statement",
+                        "XML data is parsed for SOAP interaction",
                     ),
                 ),
                 (
@@ -102,8 +102,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL XML GENERATE statement producing an XML document",
-                        "This code uses COBOL XML generation to interact with XML/SOAP data",
+                        "XML document is generated by XML GENERATE statement",
+                        "XML data is generated for SOAP interaction",
                     ),
                 ),
                 (
@@ -111,8 +111,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL DFHWS2LS CICS web service to language structure transform",
-                        "This code uses COBOL CICS to interact with a SOAP web service",
+                        "Web service is transformed to language structure",
+                        "SOAP web service is accessed",
                     ),
                 ),
                 (
@@ -120,8 +120,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL DFHLS2WS CICS language structure to web service transform",
-                        "This code uses COBOL CICS to interact with a SOAP web service",
+                        "Language structure is transformed to web service",
+                        "SOAP web service is accessed",
                     ),
                 ),
                 (
@@ -129,8 +129,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL SOAPACTION header referencing a SOAP action",
-                        "This code uses COBOL to interact with a SOAP web service",
+                        "SOAP action is referenced by header",
+                        "SOAP web service is called",
                     ),
                 ),
                 (
@@ -138,8 +138,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL WSDL reference describing a SOAP web service interface",
-                        "This code uses COBOL to interact with a WSDL-described web service",
+                        "SOAP service interface is described by WSDL reference",
+                        "Web service is called with WSDL",
                     ),
                 ),
             ],
@@ -151,8 +151,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL MQ MQOPEN call opening an IBM MQ queue",
-                        "This code uses COBOL IBM MQ to interact with a message queue",
+                        "MQ queue is opened by MQOPEN",
+                        "Message queue is accessed",
                     ),
                 ),
                 (
@@ -160,8 +160,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL MQ MQPUT call producing a message to an IBM MQ queue",
-                        "This code uses COBOL IBM MQ to produce outbound messages",
+                        "Message is produced to MQ queue",
+                        "Messages are produced outbound",
                     ),
                 ),
                 (
@@ -169,8 +169,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "COBOL MQ MQGET call consuming a message from an IBM MQ queue",
-                        "This code uses COBOL IBM MQ to receive inbound messages",
+                        "Message is consumed from MQ queue",
+                        "Messages are received inbound",
                     ),
                 ),
                 (
@@ -178,8 +178,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL MQ MQCLOSE call closing an IBM MQ queue handle",
-                        "This code uses COBOL IBM MQ to interact with a message queue",
+                        "MQ queue handle is closed by MQCLOSE",
+                        "Message queue is accessed",
                     ),
                 ),
                 (
@@ -187,8 +187,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL MQ MQCONN call connecting to an IBM MQ queue manager",
-                        "This code uses COBOL IBM MQ to connect to a message broker",
+                        "MQ queue manager connection is opened",
+                        "Message broker connection is opened",
                     ),
                 ),
                 (
@@ -196,8 +196,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL MQ MQDISC call disconnecting from an IBM MQ queue manager",
-                        "This code uses COBOL IBM MQ to interact with a message broker",
+                        "MQ queue manager connection is closed",
+                        "Message broker is accessed",
                     ),
                 ),
                 (
@@ -205,8 +205,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL MQ MQOD object descriptor structure for IBM MQ",
-                        "This code uses COBOL IBM MQ to interact with a message queue object",
+                        "Object descriptor is structured for MQ",
+                        "Message queue object is accessed",
                     ),
                 ),
                 (
@@ -214,8 +214,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL MQ MQMD message descriptor structure for IBM MQ",
-                        "This code uses COBOL IBM MQ to interact with message metadata",
+                        "Message descriptor is structured for MQ",
+                        "Message metadata is accessed",
                     ),
                 ),
                 (
@@ -223,8 +223,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL CMQC copybook defining IBM MQ constants",
-                        "This code uses COBOL IBM MQ to interact with a message queue",
+                        "MQ constants are imported for messaging",
+                        "Message queue is accessed",
                     ),
                 ),
                 (
@@ -232,8 +232,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS WRITEQ TD command writing to a transient data queue",
-                        "This code uses COBOL CICS to produce outbound transient data",
+                        "Transient data is written to queue",
+                        "Transient data is produced outbound",
                     ),
                 ),
                 (
@@ -241,8 +241,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "COBOL CICS READQ TD command reading from a transient data queue",
-                        "This code uses COBOL CICS to receive inbound transient data",
+                        "Transient data is read from queue",
+                        "Transient data is received inbound",
                     ),
                 ),
                 (
@@ -250,8 +250,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS WRITEQ TS command writing to a temporary storage queue",
-                        "This code uses COBOL CICS to produce outbound temporary storage data",
+                        "Temporary storage is written to queue",
+                        "Temporary storage data is produced outbound",
                     ),
                 ),
                 (
@@ -259,8 +259,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "COBOL CICS READQ TS command reading from a temporary storage queue",
-                        "This code uses COBOL CICS to receive inbound temporary storage data",
+                        "Temporary storage is read from queue",
+                        "Temporary storage data is received inbound",
                     ),
                 ),
                 (
@@ -268,8 +268,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL CICS DEQ command releasing an enqueue resource",
-                        "This code uses COBOL CICS to interact with resource locking",
+                        "Resource lock is released with DEQ",
+                        "Resource locking is managed",
                     ),
                 ),
                 (
@@ -277,8 +277,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL CICS ENQ command acquiring an enqueue resource lock",
-                        "This code uses COBOL CICS to interact with resource locking",
+                        "Resource lock is acquired with ENQ",
+                        "Resource locking is managed",
                     ),
                 ),
             ],
@@ -290,8 +290,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL EZASOKET program name for TCP/IP socket API",
-                        "This code uses COBOL TCP/IP sockets to interact with a network socket",
+                        "TCP socket API is accessed by program",
+                        "Network socket is accessed via TCP/IP",
                     ),
                 ),
                 (
@@ -299,8 +299,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL CALL EZASOKET statement invoking the TCP/IP socket API",
-                        "This code uses COBOL TCP/IP sockets to interact with a network socket",
+                        "TCP socket API is invoked for networking",
+                        "Network socket is accessed via TCP/IP",
                     ),
                 ),
                 (
@@ -308,8 +308,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL SOCKET- data area prefix for socket operation data",
-                        "This code uses COBOL to interact with a network socket",
+                        "Socket operation data is prefixed by area",
+                        "Network socket is accessed",
                     ),
                 ),
                 (
@@ -317,8 +317,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL TCPIP reference for TCP/IP network communication",
-                        "This code uses COBOL to interact with TCP/IP networking",
+                        "TCP/IP communication is referenced for network operations",
+                        "TCP/IP network is accessed",
                     ),
                 ),
                 (
@@ -326,8 +326,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "COBOL CICS EXTRACT TCPIP command retrieving inbound TCP/IP client info",
-                        "This code uses COBOL CICS to receive inbound TCP/IP connection data",
+                        "TCP client info is extracted from inbound",
+                        "TCP/IP connection data is received inbound",
                     ),
                 ),
                 (
@@ -335,8 +335,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL CICS SOCKET command performing socket operations",
-                        "This code uses COBOL CICS to interact with a network socket",
+                        "Socket operations are performed with command",
+                        "Network socket is opened for communication",
                     ),
                 ),
             ],
@@ -348,8 +348,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL embedded SQL statement for database operations",
-                        "This code uses COBOL embedded SQL to execute outbound database queries",
+                        "Database is accessed by embedded SQL statement",
+                        "Database is queried with embedded SQL",
                     ),
                 ),
                 (
@@ -357,8 +357,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL SQLCA communications area for SQL status codes",
-                        "This code uses COBOL embedded SQL to interact with a database",
+                        "SQL status is communicated by SQLCA area",
+                        "Database is accessed with embedded SQL",
                     ),
                 ),
                 (
@@ -366,8 +366,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL SQLCODE field checking SQL return status",
-                        "This code uses COBOL embedded SQL to interact with a database",
+                        "SQL status is checked by SQLCODE field",
+                        "Database is accessed with embedded SQL",
                     ),
                 ),
                 (
@@ -375,8 +375,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL DCLGEN generated table declaration for embedded SQL",
-                        "This code uses COBOL embedded SQL to interact with a database table",
+                        "Table declaration is generated for embedded SQL",
+                        "Database table is accessed with embedded SQL",
                     ),
                 ),
                 (
@@ -384,8 +384,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL INCLUDE SQLCA copybook importing the SQL communications area",
-                        "This code uses COBOL embedded SQL to interact with a database",
+                        "SQL communications area is imported by INCLUDE",
+                        "Database is accessed with embedded SQL",
                     ),
                 ),
                 (
@@ -393,8 +393,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL DECLARE CURSOR statement defining a database cursor",
-                        "This code uses COBOL embedded SQL to query database rows",
+                        "Database cursor is declared for query processing",
+                        "Database rows are queried with embedded SQL",
                     ),
                 ),
                 (
@@ -402,8 +402,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL FETCH INTO statement retrieving rows from a database cursor",
-                        "This code uses COBOL embedded SQL to query database rows",
+                        "Database rows are fetched from cursor",
+                        "Database rows are queried with embedded SQL",
                     ),
                 ),
                 (
@@ -411,8 +411,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL SELECT INTO statement fetching a single database row",
-                        "This code uses COBOL embedded SQL to query a database",
+                        "Single database row is fetched by SELECT",
+                        "Database is queried with embedded SQL",
                     ),
                 ),
                 (
@@ -420,8 +420,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL INSERT INTO statement writing a row to a database table",
-                        "This code uses COBOL embedded SQL to write to a database",
+                        "Database row is written by INSERT INTO",
+                        "Database is written with embedded SQL",
                     ),
                 ),
                 (
@@ -429,8 +429,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL UPDATE SET statement modifying rows in a database table",
-                        "This code uses COBOL embedded SQL to write to a database",
+                        "Database rows are modified by UPDATE SET statement",
+                        "Database is written with embedded SQL",
                     ),
                 ),
                 (
@@ -438,8 +438,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL DELETE FROM statement removing rows from a database table",
-                        "This code uses COBOL embedded SQL to write to a database",
+                        "Database rows are removed by DELETE FROM",
+                        "Database is written with embedded SQL",
                     ),
                 ),
                 (
@@ -447,8 +447,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL READ FILE statement reading from a VSAM or sequential file",
-                        "This code uses COBOL to interact with a file-based data store",
+                        "VSAM file is read by READ statement",
+                        "File-based data store is accessed",
                     ),
                 ),
                 (
@@ -456,8 +456,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL WRITE FILE statement writing to a VSAM or sequential file",
-                        "This code uses COBOL to interact with a file-based data store",
+                        "VSAM file is written by WRITE FILE statement",
+                        "File-based data store is accessed",
                     ),
                 ),
                 (
@@ -465,8 +465,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL REWRITE FILE statement updating a record in a file",
-                        "This code uses COBOL to interact with a file-based data store",
+                        "File record is updated by REWRITE",
+                        "File-based data store is accessed",
                     ),
                 ),
                 (
@@ -474,8 +474,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL DELETE FILE statement removing a record from a file",
-                        "This code uses COBOL to interact with a file-based data store",
+                        "File record is deleted by DELETE statement",
+                        "File-based data store is accessed",
                     ),
                 ),
                 (
@@ -483,8 +483,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL START FILE statement positioning a file cursor",
-                        "This code uses COBOL to interact with a file-based data store",
+                        "File cursor is positioned by START",
+                        "File-based data store is accessed",
                     ),
                 ),
                 (
@@ -492,8 +492,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS READ command reading a VSAM file record",
-                        "This code uses COBOL CICS to query a VSAM data store",
+                        "VSAM record is read from file",
+                        "VSAM data store is queried",
                     ),
                 ),
                 (
@@ -501,8 +501,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS WRITE command writing a VSAM file record",
-                        "This code uses COBOL CICS to write to a VSAM data store",
+                        "VSAM record is written to file",
+                        "VSAM data store is written",
                     ),
                 ),
                 (
@@ -510,8 +510,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS REWRITE command updating a VSAM file record",
-                        "This code uses COBOL CICS to write to a VSAM data store",
+                        "VSAM record is updated in file",
+                        "VSAM data store is written",
                     ),
                 ),
                 (
@@ -519,8 +519,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS DELETE command removing a VSAM file record",
-                        "This code uses COBOL CICS to write to a VSAM data store",
+                        "VSAM record is deleted from file",
+                        "VSAM data store is written",
                     ),
                 ),
                 (
@@ -528,8 +528,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS STARTBR command starting a VSAM browse operation",
-                        "This code uses COBOL CICS to query a VSAM data store",
+                        "VSAM browse is started for records",
+                        "VSAM data store is queried",
                     ),
                 ),
                 (
@@ -537,8 +537,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS READNEXT command reading the next VSAM record in a browse",
-                        "This code uses COBOL CICS to query a VSAM data store",
+                        "Next VSAM record is read in browse",
+                        "VSAM data store is queried",
                     ),
                 ),
                 (
@@ -546,8 +546,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CICS READPREV command reading the previous VSAM record in a browse",
-                        "This code uses COBOL CICS to query a VSAM data store",
+                        "Previous VSAM record is read in browse",
+                        "VSAM data store is queried",
                     ),
                 ),
                 (
@@ -555,8 +555,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CALL CBLTDLI statement invoking IMS DL/I database calls",
-                        "This code uses COBOL IMS DL/I to query an IMS database",
+                        "IMS database is invoked via DL/I calls",
+                        "IMS database is queried with DL/I calls",
                     ),
                 ),
                 (
@@ -564,8 +564,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CALL PLITDLI statement invoking IMS DL/I via PL/I interface",
-                        "This code uses COBOL IMS DL/I to query an IMS database",
+                        "IMS database is invoked via PL/I interface",
+                        "IMS database is queried with DL/I calls",
                     ),
                 ),
                 (
@@ -573,8 +573,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL CALL AIBTDLI statement invoking IMS DL/I via AIB interface",
-                        "This code uses COBOL IMS DL/I to query an IMS database",
+                        "IMS database is invoked via AIB interface",
+                        "IMS database is queried with DL/I calls",
                     ),
                 ),
                 (
@@ -582,8 +582,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL PCB MASK data area defining an IMS program communication block",
-                        "This code uses COBOL IMS DL/I to interact with an IMS database",
+                        "Communication block is defined by PCB MASK",
+                        "IMS database is accessed",
                     ),
                 ),
                 (
@@ -591,8 +591,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL SSA AREA data area defining an IMS segment search argument",
-                        "This code uses COBOL IMS DL/I to query an IMS database segment",
+                        "Segment search argument is defined by SSA",
+                        "IMS database segment is queried with DL/I calls",
                     ),
                 ),
                 (
@@ -600,8 +600,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IO-PCB I/O program communication block for IMS",
-                        "This code uses COBOL IMS DL/I to interact with an IMS database",
+                        "I/O communication block is defined for IMS",
+                        "IMS database is accessed",
                     ),
                 ),
                 (
@@ -609,8 +609,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL DB-PCB database program communication block for IMS",
-                        "This code uses COBOL IMS DL/I to interact with an IMS database",
+                        "Database communication block is defined for IMS",
+                        "IMS database is accessed",
                     ),
                 ),
                 (
@@ -618,8 +618,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL EXEC IDMS statement invoking a CA IDMS database operation",
-                        "This code uses COBOL IDMS to query a network database",
+                        "IDMS database operation is invoked by EXEC",
+                        "Network database is queried",
                     ),
                 ),
                 (
@@ -627,8 +627,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS BIND RUN-UNIT statement initializing an IDMS run unit",
-                        "This code uses COBOL IDMS to connect to a network database",
+                        "IDMS run unit is initialized by BIND",
+                        "Network database connection is opened",
                     ),
                 ),
                 (
@@ -636,8 +636,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS READY USAGE-MODE statement opening a database area",
-                        "This code uses COBOL IDMS to interact with a network database area",
+                        "Database area is opened with usage mode",
+                        "Database area is accessed",
                     ),
                 ),
                 (
@@ -645,8 +645,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS FINISH TASK statement terminating an IDMS run unit",
-                        "This code uses COBOL IDMS to interact with a network database",
+                        "IDMS run unit is terminated by FINISH",
+                        "Network database is accessed",
                     ),
                 ),
                 (
@@ -654,8 +654,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS OBTAIN statement retrieving a record from a network database",
-                        "This code uses COBOL IDMS to query a network database",
+                        "Record is retrieved from network database",
+                        "Network database is queried",
                     ),
                 ),
                 (
@@ -663,8 +663,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS FIND CALC statement locating a record by calculated key",
-                        "This code uses COBOL IDMS to query a network database",
+                        "Record is located by calculated key",
+                        "Network database is queried",
                     ),
                 ),
                 (
@@ -672,8 +672,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS FIND FIRST WITHIN statement locating the first set member",
-                        "This code uses COBOL IDMS to query a network database set",
+                        "First set member is located by FIND",
+                        "Database set is queried",
                     ),
                 ),
                 (
@@ -681,8 +681,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS FIND NEXT WITHIN statement locating the next set member",
-                        "This code uses COBOL IDMS to query a network database set",
+                        "Next set member is located by FIND",
+                        "Database set is queried",
                     ),
                 ),
                 (
@@ -690,8 +690,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS FIND PRIOR statement locating the previous set member",
-                        "This code uses COBOL IDMS to query a network database set",
+                        "Previous set member is located by FIND",
+                        "Database set is queried",
                     ),
                 ),
                 (
@@ -699,8 +699,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS FIND LAST statement locating the last set member",
-                        "This code uses COBOL IDMS to query a network database set",
+                        "Last set member is located by FIND",
+                        "Database set is queried",
                     ),
                 ),
                 (
@@ -708,8 +708,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS FIND OWNER statement locating the owner of a set",
-                        "This code uses COBOL IDMS to query a network database set",
+                        "Set owner is located by FIND",
+                        "Database set is queried",
                     ),
                 ),
                 (
@@ -717,8 +717,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS FIND WITHIN statement locating a record within a set",
-                        "This code uses COBOL IDMS to query a network database set",
+                        "Record is located within set by FIND",
+                        "Database set is queried",
                     ),
                 ),
                 (
@@ -726,8 +726,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS CONNECT TO statement inserting a record into a set",
-                        "This code uses COBOL IDMS to write to a network database set",
+                        "Record is inserted into set by CONNECT",
+                        "Database set is written",
                     ),
                 ),
                 (
@@ -735,8 +735,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS DISCONNECT FROM statement removing a record from a set",
-                        "This code uses COBOL IDMS to write to a network database set",
+                        "Record is removed from set by DISCONNECT",
+                        "Database set is written",
                     ),
                 ),
                 (
@@ -744,8 +744,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS COMMIT TASK statement committing a database transaction",
-                        "This code uses COBOL IDMS to write to a network database",
+                        "Database transaction is committed by IDMS",
+                        "Network database is written",
                     ),
                 ),
                 (
@@ -753,8 +753,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS ROLLBACK TASK statement rolling back a database transaction",
-                        "This code uses COBOL IDMS to interact with a network database transaction",
+                        "Database transaction is rolled back by IDMS",
+                        "Database transaction is managed",
                     ),
                 ),
                 (
@@ -762,8 +762,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS-STATUS field checking IDMS operation return status",
-                        "This code uses COBOL IDMS to interact with a network database",
+                        "Operation status is checked by IDMS field",
+                        "Network database is accessed",
                     ),
                 ),
                 (
@@ -771,8 +771,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL SUBSCHEMA-CTRL area defining IDMS subschema control",
-                        "This code uses COBOL IDMS to interact with a network database subschema",
+                        "IDMS subschema control is defined by SUBSCHEMA-CTRL area",
+                        "Database subschema is accessed",
                     ),
                 ),
                 (
@@ -780,8 +780,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL COPY IDMS statement importing IDMS data definitions",
-                        "This code uses COBOL IDMS to interact with a network database",
+                        "IDMS data definitions are imported by COPY statement",
+                        "Network database is accessed",
                     ),
                 ),
                 (
@@ -789,8 +789,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL SCHEMA SECTION defining IDMS database schema references",
-                        "This code uses COBOL IDMS to interact with a network database schema",
+                        "Database schema references are defined by SCHEMA",
+                        "Database schema is accessed",
                     ),
                 ),
                 (
@@ -798,8 +798,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS DC RETURN statement returning control to IDMS DC",
-                        "This code uses COBOL IDMS to interact with an online database task",
+                        "Control is returned to IDMS DC",
+                        "Online database task is accessed",
                     ),
                 ),
                 (
@@ -807,8 +807,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS GET SCRATCH statement retrieving scratch pad data",
-                        "This code uses COBOL IDMS to query scratch pad storage",
+                        "Scratch pad data is retrieved by GET",
+                        "Scratch pad storage is queried",
                     ),
                 ),
                 (
@@ -816,8 +816,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS PUT SCRATCH statement storing scratch pad data",
-                        "This code uses COBOL IDMS to write to scratch pad storage",
+                        "Scratch pad data is stored by PUT",
+                        "Scratch pad storage is written",
                     ),
                 ),
                 (
@@ -825,8 +825,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS TRANSFER CONTROL TO statement transferring to another program",
-                        "This code uses COBOL IDMS to call an outbound program",
+                        "Control is transferred to another program",
+                        "Program is called outbound",
                     ),
                 ),
                 (
@@ -834,8 +834,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "COBOL IDMS-DC data area for IDMS online DC environment",
-                        "This code uses COBOL IDMS to interact with an online database task",
+                        "Data area is defined for IDMS DC",
+                        "Online database task is accessed",
                     ),
                 ),
             ],
@@ -847,8 +847,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL OPEN INPUT statement opening a file for reading",
-                        "This code uses COBOL to interact with a file for input",
+                        "File is opened for reading",
+                        "File is read for input",
                     ),
                 ),
                 (
@@ -856,8 +856,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL OPEN OUTPUT statement opening a file for writing",
-                        "This code uses COBOL to interact with a file for output",
+                        "File is opened for writing",
+                        "File is written for output",
                     ),
                 ),
                 (
@@ -865,8 +865,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL OPEN I-O statement opening a file for bidirectional access",
-                        "This code uses COBOL to interact with a file for input and output",
+                        "File is opened for bidirectional access",
+                        "File is accessed for input/output",
                     ),
                 ),
                 (
@@ -874,8 +874,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL READ statement reading a record from a file",
-                        "This code uses COBOL to interact with a file",
+                        "File record is read by READ statement",
+                        "File is accessed",
                     ),
                 ),
                 (
@@ -883,8 +883,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL WRITE statement writing a record to a file",
-                        "This code uses COBOL to interact with a file",
+                        "File record is written by WRITE statement",
+                        "File is accessed",
                     ),
                 ),
                 (
@@ -892,8 +892,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL CLOSE statement closing an open file",
-                        "This code uses COBOL to interact with a file",
+                        "File is closed after operations",
+                        "File is accessed",
                     ),
                 ),
                 (
@@ -901,8 +901,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "COBOL FD file description entry declaring a file",
-                        "This code uses COBOL to interact with a file",
+                        "File is declared by description entry",
+                        "File is accessed",
                     ),
                 ),
             ],

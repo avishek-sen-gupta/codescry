@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Flask @app.route decorator defining an inbound HTTP REST endpoint",
-                        "This code uses Flask to expose an inbound REST API endpoint",
+                        "HTTP route is registered with path handler",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Flask framework import for building web applications and REST APIs",
-                        "This code uses Flask to interact with an HTTP endpoint",
+                        "Web framework is imported for REST APIs",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
             ],
@@ -40,8 +40,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy extension import for ORM database integration",
-                        "This code uses Flask SQLAlchemy to interact with a relational database",
+                        "ORM extension is imported for database integration",
+                        "Database is accessed via SQLAlchemy",
                     ),
                 ),
                 (
@@ -49,8 +49,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy library import for database ORM access",
-                        "This code uses Flask SQLAlchemy to interact with a relational database",
+                        "ORM library is imported for database access",
+                        "Database is accessed via SQLAlchemy",
                     ),
                 ),
                 (
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy instantiation binding ORM to Flask application",
-                        "This code uses Flask SQLAlchemy to connect to a relational database",
+                        "ORM instance is bound to Flask application",
+                        "Database connection is opened via SQLAlchemy",
                     ),
                 ),
                 (
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy instantiation for deferred application binding",
-                        "This code uses Flask SQLAlchemy to connect to a relational database",
+                        "ORM instance is created for deferred binding",
+                        "Database connection is opened via SQLAlchemy",
                     ),
                 ),
                 (
@@ -76,8 +76,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy db.Model base class for ORM database model definition",
-                        "This code uses Flask SQLAlchemy to define a database model for persistence",
+                        "Database model is defined via ORM base class",
+                        "Database model is defined for persistence",
                     ),
                 ),
                 (
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy db.Column field definition for database schema mapping",
-                        "This code uses Flask SQLAlchemy to define a database model for persistence",
+                        "Database column is defined for schema mapping",
+                        "Database model is defined for persistence",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy db.relationship definition for ORM model associations",
-                        "This code uses Flask SQLAlchemy to interact with a relational database",
+                        "Model associations are defined via relationship",
+                        "Database is accessed via SQLAlchemy",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy db.ForeignKey definition for relational database linking",
-                        "This code uses Flask SQLAlchemy to interact with a relational database",
+                        "Foreign key is defined for database linking",
+                        "Database is accessed via SQLAlchemy",
                     ),
                 ),
                 (
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy db.session for transactional database operations",
-                        "This code uses Flask SQLAlchemy to write to a database",
+                        "Database operations are handled transactionally",
+                        "Database is written via SQLAlchemy",
                     ),
                 ),
                 (
@@ -121,8 +121,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-SQLAlchemy db.create_all for database schema initialisation",
-                        "This code uses Flask SQLAlchemy to write to a database",
+                        "Database schema is initialized",
+                        "Database is written via SQLAlchemy",
                     ),
                 ),
                 (
@@ -130,8 +130,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-Migrate extension for database schema migration management",
-                        "This code uses Flask to interact with a relational database",
+                        "Database migrations are managed via extension",
+                        "Database is accessed",
                     ),
                 ),
                 (
@@ -139,8 +139,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-Migrate import for applying database schema migrations",
-                        "This code uses Flask to interact with a relational database",
+                        "Database schema migrations are imported",
+                        "Database is accessed",
                     ),
                 ),
             ],
@@ -152,8 +152,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Flask-Caching extension for response and data cache store integration",
-                        "This code uses Flask to connect to a cache store",
+                        "Cache store is integrated via extension",
+                        "Cache store is connected",
                     ),
                 ),
             ],
@@ -165,8 +165,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Flask-APScheduler extension for background task scheduling",
-                        "This code uses Flask APScheduler to interact with a scheduled task",
+                        "Background tasks are scheduled via extension",
+                        "Scheduled task is handled by APScheduler",
                     ),
                 ),
             ],

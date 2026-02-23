@@ -17,8 +17,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic HTTP keyword indicating web communication",
-                        "This code references HTTP suggesting web-based integration",
+                        "HTTP communication is indicated",
+                        "HTTP web-based integration is referenced",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic REST or RESTful keyword indicating API-style integration",
-                        "This code references REST suggesting HTTP API-based communication",
+                        "REST API integration is indicated",
+                        "REST HTTP API communication is referenced",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic API keyword indicating programmatic integration",
-                        "This code references an API suggesting external service communication",
+                        "API integration is indicated",
+                        "API communication is referenced for external services",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic endpoint keyword indicating a network-accessible interface",
-                        "This code references an endpoint suggesting exposed or consumed service URLs",
+                        "Network endpoint is indicated",
+                        "Service endpoint is referenced for URL exposure",
                     ),
                 ),
             ],
@@ -66,8 +66,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic SOAP keyword indicating XML web service communication",
-                        "This code references SOAP suggesting XML-based web service integration",
+                        "SOAP web service communication is indicated",
+                        "SOAP XML web service is referenced",
                     ),
                 ),
                 (
@@ -75,8 +75,8 @@ COMMON = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "WSDL descriptor indicating SOAP web service definition",
-                        "This code references a WSDL descriptor for SOAP service interface definition",
+                        "SOAP service is described by WSDL",
+                        "WSDL descriptor is referenced for SOAP service interface",
                     ),
                 ),
                 (
@@ -84,8 +84,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "SOAP envelope keyword indicating XML message wrapping",
-                        "This code references an envelope suggesting SOAP XML message structure",
+                        "XML message is wrapped in SOAP envelope",
+                        "SOAP envelope is referenced for XML message structure",
                     ),
                 ),
             ],
@@ -102,8 +102,8 @@ COMMON = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Apache Kafka keyword indicating distributed event streaming",
-                        "This code references Kafka suggesting message broker integration",
+                        "Event streaming is indicated via Kafka",
+                        "Kafka message broker is referenced",
                     ),
                 ),
                 (
@@ -111,8 +111,8 @@ COMMON = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "RabbitMQ keyword indicating AMQP message broker usage",
-                        "This code references RabbitMQ suggesting asynchronous message queue integration",
+                        "AMQP message broker is indicated",
+                        "RabbitMQ message queue is referenced",
                     ),
                 ),
                 (
@@ -120,8 +120,8 @@ COMMON = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "AMQP protocol keyword indicating message broker communication",
-                        "This code references AMQP suggesting message queue protocol usage",
+                        "AMQP communication is indicated",
+                        "AMQP message queue protocol is referenced",
                     ),
                 ),
                 (
@@ -129,8 +129,8 @@ COMMON = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Apache Pulsar keyword indicating distributed messaging",
-                        "This code references Pulsar suggesting distributed pub-sub messaging integration",
+                        "Distributed messaging is indicated via Pulsar",
+                        "Pulsar distributed messaging is referenced",
                     ),
                 ),
                 (
@@ -138,8 +138,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "NATS keyword indicating lightweight messaging system",
-                        "This code references NATS suggesting lightweight pub-sub messaging integration",
+                        "Lightweight messaging is indicated by NATS",
+                        "NATS pub-sub messaging is referenced",
                     ),
                 ),
             ],
@@ -158,8 +158,8 @@ COMMON = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "WebSocket keyword indicating bidirectional real-time communication",
-                        "This code references WebSocket suggesting real-time bidirectional connection",
+                        "WebSocket communication is indicated",
+                        "WebSocket connection is referenced for bidirectional communication",
                     ),
                 ),
                 (
@@ -167,8 +167,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "TCP keyword indicating transport-layer network communication",
-                        "This code references TCP suggesting low-level network socket communication",
+                        "TCP network communication is indicated",
+                        "TCP socket communication is referenced",
                     ),
                 ),
                 (
@@ -176,8 +176,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "UDP keyword indicating datagram-based network communication",
-                        "This code references UDP suggesting connectionless datagram communication",
+                        "UDP communication is indicated",
+                        "UDP communication is referenced for connectionless datagrams",
                     ),
                 ),
             ],
@@ -193,8 +193,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic database keyword indicating data persistence",
-                        "This code references a database suggesting data storage integration",
+                        "Database persistence is indicated",
+                        "Database integration is referenced for data storage",
                     ),
                 ),
                 (
@@ -202,8 +202,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Datasource keyword indicating database connection configuration",
-                        "This code references a datasource suggesting configured database connection",
+                        "Database connection configuration is indicated by Datasource keyword",
+                        "Datasource connection is referenced for database access",
                     ),
                 ),
             ],
@@ -223,8 +223,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic file keyword indicating filesystem interaction",
-                        "This code references file operations suggesting filesystem I/O integration",
+                        "Filesystem interaction is indicated",
+                        "File operations are referenced for filesystem integration",
                     ),
                 ),
                 (
@@ -232,8 +232,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Upload keyword indicating file transfer to a server",
-                        "This code references upload suggesting inbound file transfer",
+                        "File upload is indicated",
+                        "File upload is referenced for inbound transfer",
                     ),
                 ),
                 (
@@ -241,8 +241,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Download keyword indicating file retrieval from a server",
-                        "This code references download suggesting outbound file retrieval",
+                        "File is retrieved from server",
+                        "File download is referenced for outbound retrieval",
                     ),
                 ),
             ],
@@ -260,8 +260,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "gRPC keyword indicating remote procedure call framework",
-                        "This code references gRPC suggesting protobuf-based remote procedure call integration",
+                        "gRPC communication is indicated",
+                        "gRPC integration is referenced for protobuf communication",
                     ),
                 ),
                 (
@@ -269,8 +269,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Protocol Buffers keyword indicating binary serialization",
-                        "This code references protobuf suggesting gRPC or binary serialization integration",
+                        "Binary serialization is indicated by Protocol Buffers",
+                        "Protobuf serialization is referenced for binary communication",
                     ),
                 ),
             ],
@@ -287,8 +287,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "GraphQL keyword indicating query-based API",
-                        "This code references GraphQL suggesting schema-driven API integration",
+                        "GraphQL API is indicated",
+                        "GraphQL schema-driven API is referenced",
                     ),
                 ),
             ],
@@ -303,8 +303,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "SMTP keyword indicating email sending protocol",
-                        "This code references SMTP suggesting outbound email integration",
+                        "Email sending protocol is indicated",
+                        "SMTP outbound email is referenced",
                     ),
                 ),
                 (
@@ -312,8 +312,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic email keyword indicating mail communication",
-                        "This code references email suggesting mail-based integration",
+                        "Email communication is indicated",
+                        "Email integration is referenced for mail communication",
                     ),
                 ),
             ],
@@ -330,8 +330,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Generic cache keyword indicating data caching",
-                        "This code references caching suggesting temporary data storage integration",
+                        "Cache integration is indicated",
+                        "Cache integration is referenced for temporary data storage",
                     ),
                 ),
                 (
@@ -339,8 +339,8 @@ COMMON = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Redis keyword indicating in-memory data store",
-                        "This code references Redis suggesting in-memory cache or data store integration",
+                        "In-memory data store is indicated",
+                        "Redis cache data store is referenced",
                     ),
                 ),
                 (
@@ -348,8 +348,8 @@ COMMON = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Memcached keyword indicating distributed memory cache",
-                        "This code references Memcached suggesting distributed caching integration",
+                        "Distributed memory cache is indicated by Memcached",
+                        "Memcached distributed caching is referenced",
                     ),
                 ),
             ],
@@ -365,8 +365,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Server-Sent Events keyword indicating server push streaming",
-                        "This code references Server-Sent Events suggesting unidirectional server push streaming",
+                        "Server push streaming is indicated via Server-Sent Events",
+                        "Server-sent events streaming is referenced",
                     ),
                 ),
                 (
@@ -374,8 +374,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "SSE keyword indicating server-sent event streaming",
-                        "This code references SSE suggesting server push event streaming",
+                        "Server-sent events are streamed to clients",
+                        "SSE server push streaming is referenced",
                     ),
                 ),
             ],
@@ -391,8 +391,8 @@ COMMON = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Cron keyword indicating scheduled task execution",
-                        "This code references cron suggesting time-based job scheduling",
+                        "Scheduled task execution is indicated by Cron keyword",
+                        "Cron scheduling is referenced for time-based jobs",
                     ),
                 ),
                 (
@@ -400,8 +400,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scheduler keyword indicating timed task management",
-                        "This code references a scheduler suggesting automated task scheduling",
+                        "Scheduled tasks are indicated",
+                        "Scheduler integration is referenced for automated tasks",
                     ),
                 ),
             ],
@@ -419,8 +419,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "FTP keyword indicating file transfer protocol",
-                        "This code references FTP suggesting file transfer protocol integration",
+                        "File transfer is indicated via FTP",
+                        "FTP file transfer protocol is referenced",
                     ),
                 ),
                 (
@@ -428,8 +428,8 @@ COMMON = BasePatternSpec(
                     Confidence.LOW,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "SFTP keyword indicating secure file transfer",
-                        "This code references SFTP suggesting secure file transfer integration",
+                        "Secure file transfer is indicated",
+                        "SFTP secure file transfer is referenced",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Chi go-chi/chi package import for lightweight HTTP router integration",
-                        "This code uses Chi to interact with an HTTP routing layer",
+                        "HTTP router integration is imported via go-chi/chi",
+                        "HTTP routing layer is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Chi chi.NewRouter function creating a new Chi HTTP router",
-                        "This code uses Chi to expose inbound HTTP REST routes",
+                        "Chi HTTP router is created by NewRouter function",
+                        "HTTP REST routes are exposed for inbound requests",
                     ),
                 ),
             ],

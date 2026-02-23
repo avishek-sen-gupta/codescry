@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play framework mvc import for HTTP controller support",
-                        "This code uses Play to handle inbound HTTP MVC requests",
+                        "MVC controller is imported for HTTP handling",
+                        "HTTP request is handled by MVC controller",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play framework Action block for HTTP request handling",
-                        "This code uses Play to handle inbound HTTP action requests",
+                        "HTTP request is handled by action block",
+                        "HTTP action is handled for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play framework Action.async block for async HTTP request handling",
-                        "This code uses Play to handle inbound HTTP requests asynchronously",
+                        "HTTP request is handled by async action",
+                        "HTTP request is handled asynchronously",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Play framework Ok response for HTTP 200 reply",
-                        "This code uses Play to handle inbound HTTP requests and respond",
+                        "HTTP response is returned with OK status",
+                        "HTTP request is handled with response",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play framework Json.toJson for JSON response serialization",
-                        "This code uses Play to handle inbound HTTP requests with JSON responses",
+                        "JSON response is serialized for output",
+                        "HTTP request is handled with JSON response",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play framework Action method definition for HTTP endpoint",
-                        "This code uses Play to expose inbound HTTP endpoint actions",
+                        "HTTP endpoint is defined by action method",
+                        "HTTP action is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -76,8 +76,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Play framework db import for database access",
-                        "This code uses Play to query a relational database",
+                        "Database access is imported for persistence",
+                        "Database is queried with SQL",
                     ),
                 ),
                 (
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Play framework Anorm import for SQL database access",
-                        "This code uses Play Anorm to query a relational database",
+                        "Database access is imported for SQL operations",
+                        "Database is queried with SQL",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Play framework Anorm SQL call for database query execution",
-                        "This code uses Play Anorm to query a relational database with SQL",
+                        "Database query is executed via SQL call",
+                        "Database is queried with SQL",
                     ),
                 ),
             ],
@@ -107,8 +107,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play framework streams import for WebSocket and streaming support",
-                        "This code uses Play to handle inbound WebSocket connections",
+                        "Streaming support is imported for WebSocket communication",
+                        "WebSocket connection is handled for inbound requests",
                     ),
                 ),
                 (
@@ -116,8 +116,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Play framework WebSocket.accept for WebSocket connection acceptance",
-                        "This code uses Play to accept inbound WebSocket connections",
+                        "WebSocket connection is accepted for bidirectional communication",
+                        "WebSocket connection is accepted for inbound requests",
                     ),
                 ),
             ],
@@ -129,8 +129,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Play framework cache import for cache integration",
-                        "This code uses Play to interact with a cache layer",
+                        "Cache integration is imported for performance",
+                        "Cache layer is accessed for storage",
                     ),
                 ),
                 (
@@ -138,8 +138,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Play framework @Cached annotation for action caching",
-                        "This code uses Play to interact with cached HTTP action responses",
+                        "Action is annotated for caching behavior",
+                        "HTTP response is cached by action",
                     ),
                 ),
             ],

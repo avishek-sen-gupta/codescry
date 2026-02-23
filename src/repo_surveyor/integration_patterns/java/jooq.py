@@ -19,8 +19,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ import for building type-safe SQL queries",
-                        "This code uses jOOQ to query a relational database",
+                        "SQL query library is imported for type-safe operations",
+                        "Database is queried via jOOQ",
                     ),
                 ),
                 (
@@ -28,8 +28,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ DSLContext for constructing and executing SQL queries",
-                        "This code uses jOOQ DSLContext to execute SQL queries against a database",
+                        "SQL queries are constructed with type-safe DSL",
+                        "SQL queries are executed against database",
                     ),
                 ),
                 (
@@ -37,8 +37,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ .insertInto() for constructing a SQL INSERT statement",
-                        "This code uses jOOQ to write rows to a database table",
+                        "SQL INSERT statement is constructed with table target",
+                        "Database rows are written to table",
                     ),
                 ),
                 (
@@ -46,8 +46,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ .select() for constructing a SQL SELECT query",
-                        "This code uses jOOQ to query rows from a database table",
+                        "SQL SELECT query is constructed with field selection",
+                        "Database rows are queried from table",
                     ),
                 ),
                 (
@@ -55,8 +55,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ .selectFrom() for constructing a SQL SELECT FROM query on a table",
-                        "This code uses jOOQ to query rows from a database table",
+                        "SQL SELECT query is constructed from table source",
+                        "Database rows are queried from table",
                     ),
                 ),
                 (
@@ -64,8 +64,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ .update() for constructing a SQL UPDATE statement",
-                        "This code uses jOOQ to update rows in a database table",
+                        "SQL UPDATE statement is constructed with table target",
+                        "Database rows are updated in table",
                     ),
                 ),
                 (
@@ -73,8 +73,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ .deleteFrom() for constructing a SQL DELETE statement",
-                        "This code uses jOOQ to delete rows from a database table",
+                        "SQL DELETE statement is constructed with table target",
+                        "Database rows are deleted from table",
                     ),
                 ),
                 (
@@ -82,8 +82,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ .fetch() for executing a SQL query and retrieving all results",
-                        "This code uses jOOQ to query and fetch results from a database",
+                        "SQL query is executed with all results fetched",
+                        "Database results are queried and fetched",
                     ),
                 ),
                 (
@@ -91,8 +91,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ .fetchOne() for executing a SQL query and retrieving a single result",
-                        "This code uses jOOQ to query a single row from a database",
+                        "SQL query is executed with single result fetched",
+                        "Database row is queried and fetched",
                     ),
                 ),
                 (
@@ -100,8 +100,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "jOOQ .execute() for executing a SQL DML statement",
-                        "This code uses jOOQ to execute a SQL statement against a database",
+                        "SQL statement is executed against database",
+                        "SQL statement is executed against database",
                     ),
                 ),
             ],

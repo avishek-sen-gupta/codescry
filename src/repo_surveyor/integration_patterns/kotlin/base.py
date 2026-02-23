@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Ktor client import for outbound HTTP requests",
-                        "This code uses Kotlin Ktor to send outbound HTTP requests",
+                        "HTTP client is imported for outbound requests",
+                        "HTTP requests are sent outbound",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin OkHttp library import for HTTP client",
-                        "This code uses Kotlin OkHttp to send outbound HTTP requests",
+                        "HTTP client is imported via OkHttp",
+                        "HTTP requests are sent outbound",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin OkHttpClient instantiation for HTTP client",
-                        "This code uses Kotlin OkHttp to send outbound HTTP requests",
+                        "HTTP client is created for requests",
+                        "HTTP requests are sent outbound",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Retrofit2 library import for REST client",
-                        "This code uses Kotlin Retrofit2 to call outbound REST APIs",
+                        "REST client is imported via Retrofit",
+                        "REST APIs are called outbound",
                     ),
                 ),
                 (
@@ -53,8 +53,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin HttpURLConnection usage for HTTP client",
-                        "This code uses Kotlin to send outbound HTTP requests",
+                        "HTTP connection is opened for outbound request",
+                        "HTTP requests are sent outbound",
                     ),
                 ),
                 (
@@ -62,8 +62,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Java HttpClient import for HTTP client",
-                        "This code uses Kotlin Java HTTP client to send outbound HTTP requests",
+                        "HTTP client is imported for requests",
+                        "HTTP requests are sent outbound",
                     ),
                 ),
             ],
@@ -75,8 +75,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin JAX-WS @WebService annotation for SOAP service",
-                        "This code uses Kotlin JAX-WS to expose an inbound SOAP web service",
+                        "SOAP service is annotated for web service",
+                        "SOAP web service is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -84,8 +84,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin JAX-WS @WebMethod annotation for SOAP endpoint",
-                        "This code uses Kotlin JAX-WS to handle inbound SOAP method calls",
+                        "SOAP endpoint is annotated with web method",
+                        "SOAP method calls are handled for inbound requests",
                     ),
                 ),
                 (
@@ -93,8 +93,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin SAAJ SOAPMessage for SOAP messaging",
-                        "This code uses Kotlin SAAJ to interact with SOAP messages",
+                        "SOAP message is created for messaging",
+                        "SOAP messages are processed",
                     ),
                 ),
                 (
@@ -102,8 +102,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin JAXB JAXBContext for XML serialization",
-                        "This code uses Kotlin JAXB to interact with XML data binding",
+                        "XML serialization is handled by JAXB context",
+                        "XML data is bound via JAXB",
                     ),
                 ),
             ],
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Apache Kafka import for messaging",
-                        "This code uses Kotlin Apache Kafka to interact with a message broker",
+                        "Messaging is handled via Kafka import",
+                        "Message broker is accessed via Kafka",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin KafkaProducer instantiation for message publishing",
-                        "This code uses Kotlin Kafka to produce outgoing messages to a topic",
+                        "Message producer is created for Kafka",
+                        "Messages are produced to Kafka topic",
                     ),
                 ),
                 (
@@ -133,8 +133,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin KafkaConsumer instantiation for message consumption",
-                        "This code uses Kotlin Kafka to receive inbound messages from a topic",
+                        "Message consumer is created for Kafka",
+                        "Messages are received from Kafka topic",
                     ),
                 ),
                 (
@@ -142,8 +142,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin RabbitMQ import for messaging",
-                        "This code uses Kotlin RabbitMQ to interact with a message queue",
+                        "Messaging is imported via RabbitMQ",
+                        "Message queue is accessed",
                     ),
                 ),
                 (
@@ -151,8 +151,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin AWS SqsClient for SQS queue operations",
-                        "This code uses Kotlin AWS SDK to send messages to an SQS queue",
+                        "SQS queue operations are performed via client",
+                        "Messages are sent to SQS queue",
                     ),
                 ),
                 (
@@ -160,8 +160,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin AWS SnsClient for SNS notification publishing",
-                        "This code uses Kotlin AWS SDK to produce outgoing SNS notifications",
+                        "SNS notifications are published via client",
+                        "SNS notifications are produced for outgoing messages",
                     ),
                 ),
             ],
@@ -173,8 +173,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin ServerSocket instantiation for TCP server",
-                        "This code uses Kotlin to accept inbound TCP socket connections",
+                        "TCP server is created via socket",
+                        "TCP socket connections are accepted inbound",
                     ),
                 ),
                 (
@@ -182,8 +182,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin DatagramSocket instantiation for UDP communication",
-                        "This code uses Kotlin to interact with UDP datagrams",
+                        "UDP communication is established via DatagramSocket",
+                        "UDP datagrams are processed",
                     ),
                 ),
                 (
@@ -191,8 +191,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Java NIO channels import for non-blocking I/O",
-                        "This code uses Kotlin Java NIO to interact with network channels",
+                        "Non-blocking I/O is imported via channels",
+                        "Network channels are accessed via NIO",
                     ),
                 ),
                 (
@@ -200,8 +200,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin JAX-WS @ServerEndpoint annotation for WebSocket server",
-                        "This code uses Kotlin WebSocket to handle inbound WebSocket connections",
+                        "WebSocket server is annotated with endpoint",
+                        "WebSocket connections are handled for inbound clients",
                     ),
                 ),
             ],
@@ -213,8 +213,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Exposed ORM import for database access",
-                        "This code uses Kotlin Exposed to query a relational database",
+                        "Database is accessed via Exposed ORM",
+                        "Database is queried via relational interface",
                     ),
                 ),
                 (
@@ -222,8 +222,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Exposed Database.connect call for database connectivity",
-                        "This code uses Kotlin Exposed to connect to a database",
+                        "Database is connected via Exposed",
+                        "Database connection is opened",
                     ),
                 ),
                 (
@@ -231,8 +231,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Exposed transaction block for database operations",
-                        "This code uses Kotlin Exposed to write to a database within a transaction",
+                        "Database operations are executed in transaction",
+                        "Database is written within transaction",
                     ),
                 ),
                 (
@@ -240,8 +240,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin JPA @Entity annotation for database entity mapping",
-                        "This code uses Kotlin JPA to query a relational database entity",
+                        "Database entity is annotated for mapping",
+                        "Database entity is queried via JPA",
                     ),
                 ),
                 (
@@ -249,8 +249,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin JPA @Table annotation for database table mapping",
-                        "This code uses Kotlin JPA to query a database table",
+                        "Database table is annotated for mapping",
+                        "Database table is queried via JPA",
                     ),
                 ),
                 (
@@ -258,8 +258,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Spring @Transactional annotation for transaction management",
-                        "This code uses Kotlin Spring to write to a database transactionally",
+                        "Transaction management is annotated for handling",
+                        "Database is written transactionally",
                     ),
                 ),
                 (
@@ -267,8 +267,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin JPA EntityManager for database entity operations",
-                        "This code uses Kotlin JPA to query and write to a database",
+                        "Database entities are managed by entity manager",
+                        "Database is queried and written via JPA",
                     ),
                 ),
                 (
@@ -276,8 +276,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin JDBC PreparedStatement for parameterised SQL execution",
-                        "This code uses Kotlin JDBC to query a relational database",
+                        "SQL statement is prepared with parameters",
+                        "Database is queried via JDBC interface",
                     ),
                 ),
                 (
@@ -285,8 +285,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Neo4j driver import for graph database access",
-                        "This code uses Kotlin Neo4j to query a graph database",
+                        "Graph database is imported via driver",
+                        "Graph database is queried",
                     ),
                 ),
                 (
@@ -294,8 +294,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Neo4j GraphDatabase.driver for graph database connectivity",
-                        "This code uses Kotlin Neo4j to connect to a graph database",
+                        "Graph database is connected via driver",
+                        "Graph database connection is opened",
                     ),
                 ),
             ],
@@ -307,8 +307,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin File.readText call for file reading",
-                        "This code uses Kotlin to receive data from a local file",
+                        "File content is read from path",
+                        "Data is read from local file",
                     ),
                 ),
                 (
@@ -316,8 +316,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin File.writeText call for file writing",
-                        "This code uses Kotlin to write to a local file",
+                        "File content is written to filesystem",
+                        "Data is written to local file",
                     ),
                 ),
                 (
@@ -325,8 +325,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Java NIO Files import for file system access",
-                        "This code uses Kotlin Java NIO to interact with the file system",
+                        "File system is accessed via NIO Files",
+                        "File system is accessed via NIO",
                     ),
                 ),
                 (
@@ -334,8 +334,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin AWS AmazonS3Client for S3 object storage",
-                        "This code uses Kotlin AWS SDK to write to S3 object storage",
+                        "S3 object storage is accessed via client",
+                        "Objects are written to S3 storage",
                     ),
                 ),
             ],
@@ -347,8 +347,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin gRPC import for RPC communication",
-                        "This code uses Kotlin gRPC to interact with a remote procedure call service",
+                        "gRPC communication is imported",
+                        "RPC service is accessed remotely",
                     ),
                 ),
                 (
@@ -356,8 +356,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin gRPC @GrpcService annotation for server-side RPC",
-                        "This code uses Kotlin gRPC to handle inbound RPC calls",
+                        "gRPC service is annotated for RPC handling",
+                        "RPC calls are handled for inbound requests",
                     ),
                 ),
                 (
@@ -365,8 +365,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin gRPC StreamObserver for streaming RPC",
-                        "This code uses Kotlin gRPC to interact with streaming RPC calls",
+                        "RPC streaming is handled with StreamObserver",
+                        "Streaming RPC calls are managed",
                     ),
                 ),
                 (
@@ -374,8 +374,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin gRPC ManagedChannel for client-side RPC channel",
-                        "This code uses Kotlin gRPC to call outbound RPC services",
+                        "gRPC channel is created for client RPC",
+                        "RPC services are called for outbound requests",
                     ),
                 ),
             ],
@@ -387,8 +387,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin GraphQL library import for GraphQL integration",
-                        "This code uses Kotlin GraphQL to interact with a GraphQL API",
+                        "GraphQL library is imported for integration",
+                        "GraphQL API is accessed",
                     ),
                 ),
                 (
@@ -396,8 +396,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin GraphQL GraphQLSchema for schema definition",
-                        "This code uses Kotlin GraphQL to interact with a GraphQL schema",
+                        "GraphQL schema is defined for API structure",
+                        "GraphQL schema is accessed",
                     ),
                 ),
                 (
@@ -405,8 +405,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin GraphQL Kotlin library import for GraphQL server/client",
-                        "This code uses Kotlin GraphQL Kotlin to interact with a GraphQL API",
+                        "GraphQL library is imported for server client",
+                        "GraphQL API is accessed",
                     ),
                 ),
             ],
@@ -418,8 +418,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin JavaMail import for email sending",
-                        "This code uses Kotlin JavaMail to send outbound email messages",
+                        "Email sending is imported via JavaMail",
+                        "Email messages are sent outbound",
                     ),
                 ),
                 (
@@ -427,8 +427,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Jakarta Mail import for email sending",
-                        "This code uses Kotlin Jakarta Mail to send outbound email messages",
+                        "Email sending is imported via Jakarta Mail",
+                        "Email messages are sent outbound",
                     ),
                 ),
                 (
@@ -436,8 +436,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin MimeMessage instantiation for email composition",
-                        "This code uses Kotlin JavaMail to send outbound MIME email messages",
+                        "Email message is created for composition",
+                        "MIME email messages are sent outbound",
                     ),
                 ),
             ],
@@ -449,8 +449,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Jedis import for Redis cache access",
-                        "This code uses Kotlin Jedis to write to a Redis cache",
+                        "Redis cache is accessed via Jedis",
+                        "Redis cache is written to",
                     ),
                 ),
                 (
@@ -458,8 +458,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Lettuce import for Redis cache access",
-                        "This code uses Kotlin Lettuce to write to a Redis cache",
+                        "Redis cache is accessed via Lettuce",
+                        "Redis cache is written to",
                     ),
                 ),
                 (
@@ -467,8 +467,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin JCache import for cache abstraction",
-                        "This code uses Kotlin JCache to interact with a caching layer",
+                        "Cache abstraction is imported via JCache",
+                        "Cache is accessed via JCache interface",
                     ),
                 ),
             ],
@@ -480,8 +480,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Kotlin Spring SseEmitter for server-sent events",
-                        "This code uses Kotlin Spring to expose inbound server-sent event streams",
+                        "Server-sent events are emitted via SseEmitter",
+                        "Server-sent event streams are exposed for inbound requests",
                     ),
                 ),
                 (
@@ -489,8 +489,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin SSE content type for event streaming",
-                        "This code uses Kotlin to interact with server-sent event streams",
+                        "Event streaming is indicated by SSE",
+                        "Server-sent event streams are handled",
                     ),
                 ),
                 (
@@ -498,8 +498,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Reactor Flux for reactive streaming",
-                        "This code uses Kotlin Reactor to interact with reactive data streams",
+                        "Reactive stream is handled by Flux",
+                        "Reactive data streams are processed",
                     ),
                 ),
             ],
@@ -511,8 +511,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin Apache Commons FTPClient for FTP file transfer",
-                        "This code uses Kotlin Apache Commons to connect to an FTP server",
+                        "FTP file transfer is performed via client",
+                        "FTP server connection is opened",
                     ),
                 ),
                 (
@@ -520,8 +520,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin JSch instantiation for SSH/SFTP connectivity",
-                        "This code uses Kotlin JSch to connect to an SFTP server",
+                        "SSH connectivity is established via JSch",
+                        "SFTP server connection is opened",
                     ),
                 ),
                 (
@@ -529,8 +529,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Kotlin JSch ChannelSftp for SFTP file operations",
-                        "This code uses Kotlin JSch to write to an SFTP server",
+                        "SFTP operations are handled by channel",
+                        "SFTP server is written to",
                     ),
                 ),
             ],
@@ -542,8 +542,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Quartz scheduler import for job scheduling",
-                        "This code uses Kotlin Quartz to interact with scheduled jobs",
+                        "Job scheduler is imported via Quartz",
+                        "Scheduled jobs are managed",
                     ),
                 ),
                 (
@@ -551,8 +551,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin Spring @Scheduled annotation for task scheduling",
-                        "This code uses Kotlin Spring to interact with scheduled tasks",
+                        "Task scheduling is annotated for execution",
+                        "Scheduled tasks are executed using Spring framework",
                     ),
                 ),
                 (
@@ -560,8 +560,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin ScheduledExecutorService for thread-based scheduling",
-                        "This code uses Kotlin to interact with scheduled executor tasks",
+                        "Thread scheduling is handled by executor service",
+                        "Scheduled executor tasks are managed",
                     ),
                 ),
                 (
@@ -569,8 +569,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Kotlin coroutines delay import for coroutine-based scheduling",
-                        "This code uses Kotlin coroutines to interact with delayed execution",
+                        "Coroutine scheduling is imported with delay",
+                        "Delayed execution is managed with coroutines",
                     ),
                 ),
             ],

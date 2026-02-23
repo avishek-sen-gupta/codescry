@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Gorilla gorilla/mux package import for the Gorilla HTTP router",
-                        "This code uses Gorilla to interact with an HTTP routing layer",
+                        "HTTP router is imported via mux package",
+                        "HTTP routing layer is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Gorilla mux.NewRouter function creating a new Gorilla Mux HTTP router",
-                        "This code uses Gorilla to expose inbound HTTP REST routes",
+                        "HTTP router is created for request routing",
+                        "HTTP REST routes are exposed inbound",
                     ),
                 ),
             ],

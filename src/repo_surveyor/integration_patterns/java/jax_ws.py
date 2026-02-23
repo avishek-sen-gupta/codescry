@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "JAX-WS javax.xml.ws import for building SOAP web service clients or endpoints",
-                        "This code uses JAX-WS to interact with a SOAP web service",
+                        "SOAP web services are imported for endpoint building",
+                        "SOAP web service is accessed via client",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "JAX-WS jakarta.xml.ws import for building SOAP web service clients or endpoints",
-                        "This code uses JAX-WS to interact with a SOAP web service",
+                        "SOAP web services are imported for client building",
+                        "SOAP web service is accessed via client",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "JAX-WS @WebServiceClient annotation generated for a SOAP service client stub",
-                        "This code uses JAX-WS to call an outbound SOAP web service",
+                        "SOAP client stub is annotated for generation",
+                        "SOAP web service is called outbound",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "JAX-WS Service.create call for instantiating a SOAP service client",
-                        "This code uses JAX-WS to connect to an outbound SOAP web service",
+                        "SOAP service client is instantiated",
+                        "SOAP web service connection is opened outbound",
                     ),
                 ),
             ],

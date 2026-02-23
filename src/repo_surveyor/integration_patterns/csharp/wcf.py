@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "WCF System.ServiceModel namespace providing core WCF service model types",
-                        "This code uses WCF to interact with a SOAP service model",
+                        "WCF service model is imported",
+                        "SOAP service is accessed via WCF model",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "WCF ChannelFactory<T> class creating a proxy channel to a remote SOAP service",
-                        "This code uses WCF to call an outbound SOAP service via a channel factory",
+                        "SOAP proxy is created via ChannelFactory",
+                        "SOAP service is called via WCF channel factory",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "WCF BasicHttpBinding class configuring a basic HTTP SOAP binding",
-                        "This code uses WCF to interact with a SOAP service over HTTP",
+                        "HTTP binding is configured for SOAP",
+                        "SOAP service is accessed over HTTP",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "WCF ServiceHost class hosting and exposing a WCF service endpoint",
-                        "This code uses WCF to expose an inbound SOAP service host",
+                        "WCF service is hosted by ServiceHost",
+                        "SOAP service is hosted for inbound requests",
                     ),
                 ),
             ],

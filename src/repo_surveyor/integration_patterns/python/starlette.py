@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Starlette framework import for building lightweight ASGI web applications",
-                        "This code uses Starlette to interact with an HTTP endpoint",
+                        "ASGI web applications are built with framework",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
             ],

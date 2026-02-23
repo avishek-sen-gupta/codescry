@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Route::get defining an inbound HTTP GET route",
-                        "This code uses Laravel routing to handle incoming HTTP GET requests",
+                        "GET route is defined for inbound requests",
+                        "HTTP GET request is handled by route",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Route::post defining an inbound HTTP POST route",
-                        "This code uses Laravel routing to handle incoming HTTP POST requests",
+                        "POST route is defined for inbound requests",
+                        "HTTP POST request is handled by route",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Route::put defining an inbound HTTP PUT route",
-                        "This code uses Laravel routing to handle incoming HTTP PUT requests",
+                        "PUT route is defined for inbound requests",
+                        "HTTP PUT request is handled by route",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Route::delete defining an inbound HTTP DELETE route",
-                        "This code uses Laravel routing to handle incoming HTTP DELETE requests",
+                        "DELETE route is defined for inbound requests",
+                        "HTTP DELETE request is handled by route",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Route::patch defining an inbound HTTP PATCH route",
-                        "This code uses Laravel routing to handle incoming HTTP PATCH requests",
+                        "PATCH route is defined for inbound requests",
+                        "HTTP PATCH request is handled by route",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Route::resource defining inbound RESTful resource routes",
-                        "This code uses Laravel routing to expose inbound RESTful resource endpoints",
+                        "RESTful routes are defined for resources",
+                        "RESTful resource endpoints are exposed for inbound requests",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Route::apiResource defining inbound API resource routes",
-                        "This code uses Laravel routing to expose inbound API resource endpoints",
+                        "API resource routes are defined",
+                        "API resource endpoints are exposed for inbound requests",
                     ),
                 ),
             ],
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Eloquent ORM for database model operations",
-                        "This code uses Laravel Eloquent to query an outbound relational database",
+                        "Database operations are handled by Eloquent",
+                        "Database is queried via Eloquent ORM",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Eloquent Model subclass defining a database-backed model",
-                        "This code uses Laravel Eloquent to interact with an outbound database model",
+                        "Database model is defined with Eloquent",
+                        "Database model is accessed via Eloquent",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel DB::table query builder targeting a database table",
-                        "This code uses Laravel DB to query an outbound database table",
+                        "Database table is targeted by query",
+                        "Database table is queried outbound",
                     ),
                 ),
                 (
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel DB::select executing a raw SQL SELECT query",
-                        "This code uses Laravel DB to execute an outbound raw SQL SELECT query",
+                        "SQL SELECT query is executed",
+                        "SQL SELECT query is executed outbound",
                     ),
                 ),
                 (
@@ -121,8 +121,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Schema::create defining a new database table migration",
-                        "This code uses Laravel Schema to write a new table to an outbound database",
+                        "Database table is created with migration",
+                        "Database table is written with schema definition",
                     ),
                 ),
                 (
@@ -130,8 +130,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Eloquent hasMany declaring a one-to-many relationship",
-                        "This code uses Laravel Eloquent to query outbound has-many database relationships",
+                        "One-to-many relationship is declared",
+                        "Has-many relationships are queried outbound",
                     ),
                 ),
                 (
@@ -139,8 +139,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Eloquent belongsTo declaring an inverse relationship",
-                        "This code uses Laravel Eloquent to query outbound belongs-to database relationships",
+                        "Inverse relationship is declared with belongsTo",
+                        "Belongs-to relationships are queried outbound",
                     ),
                 ),
                 (
@@ -148,8 +148,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Eloquent belongsToMany declaring a many-to-many relationship",
-                        "This code uses Laravel Eloquent to query outbound many-to-many database relationships",
+                        "Many-to-many relationship is declared",
+                        "Many-to-many relationships are queried outbound",
                     ),
                 ),
             ],
@@ -161,8 +161,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Queue::push dispatching a job to the outbound queue",
-                        "This code uses Laravel Queue to send a job to an outbound message queue",
+                        "Job is pushed to queue",
+                        "Job is sent to outbound queue",
                     ),
                 ),
                 (
@@ -170,8 +170,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel dispatch() helper dispatching a job or event",
-                        "This code uses Laravel to send a job or event to an outbound queue",
+                        "Job or event is dispatched",
+                        "Job is sent to outbound queue",
                     ),
                 ),
                 (
@@ -179,8 +179,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel ShouldQueue interface marking a job for outbound queue dispatch",
-                        "This code uses Laravel Queue to send a job to an outbound message queue",
+                        "Job is marked for queue dispatch",
+                        "Job is sent to outbound queue",
                     ),
                 ),
                 (
@@ -188,8 +188,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Bus::dispatch dispatching a command via the command bus",
-                        "This code uses Laravel Bus to send a command to an outbound queue or handler",
+                        "Command is dispatched via Bus",
+                        "Command is sent to outbound queue",
                     ),
                 ),
             ],
@@ -201,8 +201,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Mail::send sending an outbound email message",
-                        "This code uses Laravel Mail to send an outbound email message",
+                        "Email message is sent outbound",
+                        "Email message is sent outbound",
                     ),
                 ),
                 (
@@ -210,8 +210,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Mail::to addressing an outbound email to a recipient",
-                        "This code uses Laravel Mail to send an outbound email to a recipient",
+                        "Email recipient is addressed",
+                        "Email is sent to recipient",
                     ),
                 ),
                 (
@@ -219,8 +219,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Mailable subclass composing an outbound email message",
-                        "This code uses Laravel Mail to compose and send an outbound email message",
+                        "Email message is composed with Mailable",
+                        "Email message is composed and sent",
                     ),
                 ),
                 (
@@ -228,8 +228,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Notification::send dispatching an outbound notification",
-                        "This code uses Laravel Notifications to send an outbound notification",
+                        "Notification is sent outbound",
+                        "Notification is sent outbound",
                     ),
                 ),
             ],
@@ -241,8 +241,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Cache::get reading a value from the outbound cache store",
-                        "This code uses Laravel Cache to read from an outbound cache store",
+                        "Cache value is read with get",
+                        "Cache store is read for data",
                     ),
                 ),
                 (
@@ -250,8 +250,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Cache::put writing a value to the outbound cache store",
-                        "This code uses Laravel Cache to write to an outbound cache store",
+                        "Cache value is written with put",
+                        "Cache store is written with data",
                     ),
                 ),
                 (
@@ -259,8 +259,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Cache::remember reading or caching a computed value",
-                        "This code uses Laravel Cache to read or write to an outbound cache store",
+                        "Cache value is computed or retrieved",
+                        "Cache store is accessed for read/write",
                     ),
                 ),
                 (
@@ -268,8 +268,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Cache::forget evicting a value from the outbound cache store",
-                        "This code uses Laravel Cache to remove a value from an outbound cache store",
+                        "Cache value is evicted with forget",
+                        "Cache value is removed from store",
                     ),
                 ),
             ],
@@ -281,8 +281,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Laravel scheduler $schedule->command scheduling an Artisan command",
-                        "This code uses Laravel Scheduler to interact with a scheduled Artisan command",
+                        "Artisan command is scheduled",
+                        "Artisan command is scheduled for execution",
                     ),
                 ),
                 (
@@ -290,8 +290,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Laravel scheduler $schedule->call scheduling a callable task",
-                        "This code uses Laravel Scheduler to interact with a scheduled callable task",
+                        "Callable task is scheduled",
+                        "Callable task is scheduled for execution",
                     ),
                 ),
                 (
@@ -299,8 +299,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Laravel scheduler $schedule->job scheduling a queued job",
-                        "This code uses Laravel Scheduler to interact with a scheduled queued job",
+                        "Queued job is scheduled",
+                        "Queued job is scheduled for execution",
                     ),
                 ),
             ],
@@ -312,8 +312,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Storage::put writing a file to the configured storage disk",
-                        "This code uses Laravel Storage to write a file to outbound storage",
+                        "File is written to storage",
+                        "File is written to outbound storage",
                     ),
                 ),
                 (
@@ -321,8 +321,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Storage::get reading a file from the configured storage disk",
-                        "This code uses Laravel Storage to receive a file from inbound storage",
+                        "File is read from storage",
+                        "File is received from inbound storage",
                     ),
                 ),
                 (
@@ -330,8 +330,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel Storage::delete removing a file from the configured storage disk",
-                        "This code uses Laravel Storage to delete a file from outbound storage",
+                        "File is deleted from storage",
+                        "File is deleted from outbound storage",
                     ),
                 ),
             ],
@@ -343,8 +343,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Laravel broadcast() helper dispatching a broadcast event",
-                        "This code uses Laravel Broadcasting to send an outbound broadcast event",
+                        "Broadcast event is dispatched",
+                        "Broadcast event is sent outbound",
                     ),
                 ),
                 (
@@ -352,8 +352,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Laravel Broadcast::channel defining an inbound broadcast channel",
-                        "This code uses Laravel Broadcasting to handle inbound channel subscriptions",
+                        "Broadcast channel is defined for inbound events",
+                        "Channel subscriptions are handled for inbound broadcasts",
                     ),
                 ),
                 (
@@ -361,8 +361,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Laravel Echo JavaScript client interacting with broadcast channels",
-                        "This code uses Laravel Echo to interact with outbound broadcast events",
+                        "Broadcast channels are accessed by Echo client",
+                        "Broadcast events are accessed outbound",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Symfony #[Route] attribute defining an inbound HTTP route",
-                        "This code uses Symfony routing to handle incoming HTTP requests",
+                        "HTTP route is defined with Route attribute",
+                        "HTTP requests are handled by routing",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Symfony AbstractController subclass handling inbound HTTP requests",
-                        "This code uses Symfony to handle inbound HTTP requests via a controller",
+                        "HTTP requests are handled by controller subclass",
+                        "HTTP requests are handled by controller",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Symfony @Route annotation defining an inbound HTTP route",
-                        "This code uses Symfony routing to handle incoming HTTP requests",
+                        "HTTP route is defined with Route annotation",
+                        "HTTP requests are handled by routing",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Symfony JsonResponse sending a JSON response to an inbound HTTP request",
-                        "This code uses Symfony to expose inbound HTTP endpoints returning JSON responses",
+                        "JSON response is sent to HTTP request",
+                        "JSON responses are returned from endpoints",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Symfony Request::create constructing an HTTP request object",
-                        "This code uses Symfony Request to interact with HTTP request construction",
+                        "HTTP request object is constructed",
+                        "HTTP request is constructed",
                     ),
                 ),
             ],
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony Doctrine #[ORM\\Entity] attribute marking a class as a database entity",
-                        "This code uses Symfony Doctrine ORM to interact with an outbound database entity",
+                        "Database entity is marked with ORM attribute",
+                        "Database entity is accessed via ORM",
                     ),
                 ),
                 (
@@ -76,8 +76,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony Doctrine #[ORM\\Table] attribute mapping a class to a database table",
-                        "This code uses Symfony Doctrine ORM to write to an outbound database table",
+                        "Database table is mapped with ORM attribute",
+                        "Database table is written via ORM",
                     ),
                 ),
                 (
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony Doctrine @ORM\\Entity annotation marking a class as a database entity",
-                        "This code uses Symfony Doctrine ORM to interact with an outbound database entity",
+                        "Database entity is marked with ORM annotation",
+                        "Database entity is accessed via ORM",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony Doctrine EntityManagerInterface managing outbound database persistence",
-                        "This code uses Symfony Doctrine to write to or query an outbound database",
+                        "Database persistence is managed by EntityManager interface",
+                        "Database is accessed via Doctrine",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony Doctrine EntityRepository querying the outbound database for entities",
-                        "This code uses Symfony Doctrine to query an outbound database entity repository",
+                        "Database entities are queried by repository",
+                        "Database entity repository is queried",
                     ),
                 ),
             ],
@@ -116,8 +116,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Symfony Messenger MessageBusInterface dispatching or handling messages",
-                        "This code uses Symfony Messenger to interact with a message bus",
+                        "Messages are dispatched via bus interface",
+                        "Message bus is accessed",
                     ),
                 ),
                 (
@@ -125,8 +125,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Symfony Messenger #[AsMessageHandler] attribute receiving inbound messages",
-                        "This code uses Symfony Messenger to handle inbound messages from a message bus",
+                        "Messages are received by handler attribute",
+                        "Messages are handled from message bus",
                     ),
                 ),
                 (
@@ -134,8 +134,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Symfony Messenger\\Stamp decorating a message envelope",
-                        "This code uses Symfony Messenger to interact with message envelope stamps",
+                        "Message envelope is decorated with stamp",
+                        "Message envelope stamps are processed",
                     ),
                 ),
             ],
@@ -147,8 +147,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony MailerInterface sending outbound email messages",
-                        "This code uses Symfony Mailer to send outbound email messages",
+                        "Email messages are sent via mailer interface",
+                        "Email messages are sent outbound",
                     ),
                 ),
                 (
@@ -156,8 +156,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony Email object composing an outbound email message",
-                        "This code uses Symfony Mailer to compose an outbound email message",
+                        "Email message is composed for outbound delivery",
+                        "Email message is composed for sending",
                     ),
                 ),
                 (
@@ -165,8 +165,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony TemplatedEmail composing a template-based outbound email",
-                        "This code uses Symfony Mailer to send a templated outbound email message",
+                        "Template email is composed for outbound delivery",
+                        "Templated email is sent outbound",
                     ),
                 ),
             ],
@@ -178,8 +178,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony CacheInterface accessing the configured outbound cache pool",
-                        "This code uses Symfony Cache to write to or read from an outbound cache pool",
+                        "Cache pool is accessed via interface",
+                        "Cache pool is accessed for read/write",
                     ),
                 ),
                 (
@@ -187,8 +187,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Symfony TagAwareCacheInterface accessing a tag-aware outbound cache pool",
-                        "This code uses Symfony Cache to write to or read from an outbound tag-aware cache pool",
+                        "Tag-aware cache pool is accessed via interface",
+                        "Tag-aware cache pool is accessed",
                     ),
                 ),
             ],
@@ -200,8 +200,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Symfony Scheduler #[AsCronTask] attribute defining a cron-scheduled task",
-                        "This code uses Symfony Scheduler to interact with a cron-expression scheduled task",
+                        "Cron task is defined with scheduler attribute",
+                        "Cron-scheduled task is executed",
                     ),
                 ),
                 (
@@ -209,8 +209,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Symfony Scheduler #[AsPeriodicTask] attribute defining a periodic scheduled task",
-                        "This code uses Symfony Scheduler to interact with a periodic scheduled task",
+                        "Periodic task is defined with scheduler attribute",
+                        "Periodic task is scheduled",
                     ),
                 ),
             ],

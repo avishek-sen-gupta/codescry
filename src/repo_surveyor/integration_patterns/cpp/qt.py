@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Qt QSqlDatabase class opening a database connection",
-                        "This code uses Qt to connect to a relational database",
+                        "Database connection is opened via SQL database",
+                        "Database is connected via Qt driver",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Qt QSqlQuery class executing a SQL query",
-                        "This code uses Qt to query a relational database",
+                        "SQL query is executed on database",
+                        "Database is queried via Qt",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Qt QSqlTableModel class providing a table-based database model",
-                        "This code uses Qt to interact with a relational database table",
+                        "Database table is modeled with SQL interface",
+                        "Database table is accessed via Qt",
                     ),
                 ),
             ],
@@ -49,8 +49,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Qt QNetworkAccessManager class sending outbound HTTP requests",
-                        "This code uses Qt to send outbound HTTP requests",
+                        "HTTP request is sent via network manager",
+                        "HTTP requests are sent via Qt",
                     ),
                 ),
                 (
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Qt QNetworkReply class handling HTTP response data",
-                        "This code uses Qt to send outbound HTTP requests",
+                        "HTTP response is handled by reply class",
+                        "HTTP requests are sent via Qt",
                     ),
                 ),
                 (
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Qt QNetworkRequest class constructing an outbound HTTP request",
-                        "This code uses Qt to send outbound HTTP requests",
+                        "HTTP request is constructed for outbound call",
+                        "HTTP requests are sent via Qt",
                     ),
                 ),
             ],
@@ -80,8 +80,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QTcpSocket class for TCP socket communication",
-                        "This code uses Qt to interact with a TCP socket",
+                        "TCP socket is created for network communication",
+                        "TCP socket is opened for communication",
                     ),
                 ),
                 (
@@ -89,8 +89,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QUdpSocket class for UDP socket communication",
-                        "This code uses Qt to interact with a UDP socket",
+                        "UDP socket is created for datagram communication",
+                        "UDP socket is accessed via Qt",
                     ),
                 ),
                 (
@@ -98,8 +98,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Qt QTcpServer class accepting inbound TCP connections",
-                        "This code uses Qt to accept inbound TCP connections",
+                        "TCP connections are accepted by server",
+                        "TCP connections are accepted via Qt",
                     ),
                 ),
                 (
@@ -107,8 +107,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QWebSocket class for WebSocket communication",
-                        "This code uses Qt to interact with a WebSocket connection",
+                        "WebSocket is created for bidirectional communication",
+                        "WebSocket connection is accessed via Qt",
                     ),
                 ),
                 (
@@ -116,8 +116,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Qt QWebSocketServer class accepting inbound WebSocket connections",
-                        "This code uses Qt to accept inbound WebSocket connections",
+                        "WebSocket connections are accepted by server",
+                        "WebSocket connections are accepted via Qt",
                     ),
                 ),
             ],
@@ -129,8 +129,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QFile class for reading and writing files",
-                        "This code uses Qt to interact with a file",
+                        "File is accessed for read-write operations",
+                        "File is accessed via Qt",
                     ),
                 ),
                 (
@@ -138,8 +138,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QDir class for directory navigation and file listing",
-                        "This code uses Qt to interact with the file system",
+                        "Directory is navigated with file listing",
+                        "File system is accessed via Qt",
                     ),
                 ),
                 (
@@ -147,8 +147,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QFileInfo class for querying file metadata",
-                        "This code uses Qt to interact with file system metadata",
+                        "File metadata is queried via info class",
+                        "File system metadata is accessed via Qt",
                     ),
                 ),
                 (
@@ -156,8 +156,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QTextStream class for reading and writing text files",
-                        "This code uses Qt to interact with a text file stream",
+                        "Text file is accessed via stream interface",
+                        "Text file stream is accessed via Qt",
                     ),
                 ),
             ],
@@ -169,8 +169,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QTimer class for scheduling periodic or one-shot callbacks",
-                        "This code uses Qt to interact with scheduled timer tasks",
+                        "Timer is scheduled for periodic callbacks",
+                        "Timer tasks are scheduled via Qt",
                     ),
                 ),
             ],
@@ -182,8 +182,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Qt QWebSocket class for streaming data over WebSocket",
-                        "This code uses Qt to interact with a WebSocket streaming connection",
+                        "Data is streamed over WebSocket connection",
+                        "WebSocket streaming connection is accessed via Qt",
                     ),
                 ),
             ],

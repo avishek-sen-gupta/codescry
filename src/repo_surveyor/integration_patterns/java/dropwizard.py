@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Dropwizard import for building a Dropwizard REST application",
-                        "This code uses Dropwizard to expose an inbound REST API",
+                        "Dropwizard application is imported for REST construction",
+                        "REST API is exposed inbound",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Dropwizard @Path annotation defining the URI path for a REST resource",
-                        "This code uses Dropwizard to expose an inbound REST API endpoint",
+                        "URI path is defined for REST resource",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Dropwizard @Produces annotation specifying the response media types for a resource",
-                        "This code uses Dropwizard to handle inbound HTTP requests returning specific media types",
+                        "Response media types are specified for resource",
+                        "HTTP requests are handled returning media types",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Dropwizard @Consumes annotation specifying the accepted request media types",
-                        "This code uses Dropwizard to accept inbound HTTP requests with specific media types",
+                        "Request media types are specified by annotation",
+                        "HTTP requests are accepted with media types",
                     ),
                 ),
             ],

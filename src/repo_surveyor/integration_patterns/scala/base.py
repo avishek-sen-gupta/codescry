@@ -17,8 +17,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala sttp client import for HTTP client requests",
-                        "This code uses Scala sttp to send outbound HTTP requests",
+                        "HTTP client is imported via sttp",
+                        "HTTP request is sent with sttp client",
                     ),
                 ),
                 (
@@ -26,8 +26,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala scalaj-http import for HTTP client requests",
-                        "This code uses Scala scalaj to send outbound HTTP requests",
+                        "HTTP client is imported via scalaj-http",
+                        "HTTP request is sent with scalaj client",
                     ),
                 ),
                 (
@@ -35,8 +35,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Dispatch library import for async HTTP client requests",
-                        "This code uses Scala Dispatch to send outbound HTTP requests",
+                        "HTTP requests are sent with async client",
+                        "HTTP request is sent via Dispatch",
                     ),
                 ),
                 (
@@ -44,8 +44,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala HttpURLConnection usage for HTTP client",
-                        "This code uses Scala to send outbound HTTP requests",
+                        "HTTP connection is opened for client requests",
+                        "HTTP request is sent outbound",
                     ),
                 ),
                 (
@@ -53,8 +53,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala requests-scala import for HTTP client requests",
-                        "This code uses Scala requests to send outbound HTTP requests",
+                        "HTTP client is imported via requests-scala",
+                        "HTTP request is sent with requests client",
                     ),
                 ),
             ],
@@ -66,8 +66,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala scalaxb import for SOAP/XML web services",
-                        "This code uses Scala scalaxb to interact with SOAP web services",
+                        "SOAP client is imported via scalaxb",
+                        "SOAP web services are interacted with scalaxb",
                     ),
                 ),
                 (
@@ -75,8 +75,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala JAX-WS import for SOAP web service integration",
-                        "This code uses Scala JAX-WS to interact with SOAP web services",
+                        "SOAP web service is integrated with import",
+                        "SOAP service is accessed via JAX-WS",
                     ),
                 ),
             ],
@@ -88,8 +88,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Apache Kafka import for messaging",
-                        "This code uses Scala Apache Kafka to interact with a message broker",
+                        "Messaging is enabled by Kafka import",
+                        "Message broker is accessed via Kafka",
                     ),
                 ),
                 (
@@ -97,8 +97,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala KafkaProducer for message publishing",
-                        "This code uses Scala Kafka to produce outgoing messages to a topic",
+                        "Messages are published to Kafka topics",
+                        "Kafka message is produced to topic",
                     ),
                 ),
                 (
@@ -106,8 +106,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Scala KafkaConsumer for message consumption",
-                        "This code uses Scala Kafka to receive inbound messages from a topic",
+                        "Messages are consumed from Kafka topics",
+                        "Kafka message is consumed from topic",
                     ),
                 ),
                 (
@@ -115,8 +115,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala RabbitMQ import for messaging",
-                        "This code uses Scala RabbitMQ to interact with a message queue",
+                        "Messaging is enabled by RabbitMQ import",
+                        "Message queue is interacted with RabbitMQ",
                     ),
                 ),
                 (
@@ -124,8 +124,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala fs2-kafka import for functional Kafka streaming",
-                        "This code uses Scala fs2-kafka to interact with Kafka streams",
+                        "Kafka streaming is handled with functional library",
+                        "Kafka streams are interacted with fs2-kafka",
                     ),
                 ),
             ],
@@ -137,8 +137,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Scala ServerSocket instantiation for TCP server",
-                        "This code uses Scala to accept inbound TCP socket connections",
+                        "TCP server is created with socket",
+                        "TCP socket connections are accepted",
                     ),
                 ),
                 (
@@ -146,8 +146,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala DatagramSocket instantiation for UDP communication",
-                        "This code uses Scala to interact with UDP datagrams",
+                        "UDP communication is enabled by socket creation",
+                        "UDP datagrams are interacted with",
                     ),
                 ),
                 (
@@ -155,8 +155,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Java NIO channels import for non-blocking I/O",
-                        "This code uses Scala Java NIO to interact with network channels",
+                        "Non-blocking I/O is enabled by channels import",
+                        "Network channel is accessed via NIO",
                     ),
                 ),
             ],
@@ -168,8 +168,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Slick library import for database access",
-                        "This code uses Scala Slick to interact with a relational database",
+                        "Database is accessed with functional library",
+                        "Relational database is interacted with Slick",
                     ),
                 ),
                 (
@@ -177,8 +177,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Doobie library import for functional database access",
-                        "This code uses Scala Doobie to query a relational database",
+                        "Database is accessed with functional library",
+                        "Database is queried via Doobie",
                     ),
                 ),
                 (
@@ -186,8 +186,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Quill library import for compile-time database queries",
-                        "This code uses Scala Quill to query a database",
+                        "Database queries are compiled with library import",
+                        "Database is queried with Quill",
                     ),
                 ),
                 (
@@ -195,8 +195,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala ScalikeJDBC library import for JDBC database access",
-                        "This code uses Scala ScalikeJDBC to query a relational database",
+                        "JDBC database is accessed with library import",
+                        "Relational database is queried with ScalikeJDBC",
                     ),
                 ),
                 (
@@ -204,8 +204,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala ReactiveMongo library import for MongoDB access",
-                        "This code uses Scala ReactiveMongo to query a MongoDB database",
+                        "MongoDB is accessed with reactive library",
+                        "MongoDB database is queried with ReactiveMongo",
                     ),
                 ),
                 (
@@ -213,8 +213,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Neotypes library import for Neo4j graph database access",
-                        "This code uses Scala Neotypes to query a Neo4j graph database",
+                        "Neo4j database is accessed with library import",
+                        "Neo4j graph database is queried with Neotypes",
                     ),
                 ),
                 (
@@ -222,8 +222,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala JDBC DriverManager.getConnection for database connectivity",
-                        "This code uses Scala JDBC to connect to a relational database",
+                        "Database connection is opened with credentials",
+                        "Database connection is opened via JDBC",
                     ),
                 ),
                 (
@@ -231,8 +231,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Anorm library import for SQL database access",
-                        "This code uses Scala Anorm to query a relational database",
+                        "SQL database is accessed with library import",
+                        "Database is queried via Anorm",
                     ),
                 ),
             ],
@@ -244,8 +244,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Scala io.Source import for file reading",
-                        "This code uses Scala to receive data from a file source",
+                        "Files are read with source import",
+                        "File source data is received",
                     ),
                 ),
                 (
@@ -253,8 +253,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Java NIO file import for file system access",
-                        "This code uses Scala Java NIO to interact with the file system",
+                        "File system is accessed with NIO import",
+                        "File system is accessed via NIO",
                     ),
                 ),
                 (
@@ -262,8 +262,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala better-files library import for file system access",
-                        "This code uses Scala better-files to interact with the file system",
+                        "File system is accessed with library import",
+                        "File system is interacted with better-files",
                     ),
                 ),
                 (
@@ -271,8 +271,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala os-lib import for operating system file operations",
-                        "This code uses Scala os-lib to interact with the file system",
+                        "File operations are imported via os-lib",
+                        "File system is interacted with os-lib",
                     ),
                 ),
             ],
@@ -284,8 +284,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala gRPC import for RPC communication",
-                        "This code uses Scala gRPC to interact with a remote procedure call service",
+                        "RPC communication is enabled by import",
+                        "RPC service is interacted with gRPC",
                     ),
                 ),
                 (
@@ -293,8 +293,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala ScalaPB import for Protocol Buffer and gRPC support",
-                        "This code uses Scala ScalaPB to interact with gRPC services",
+                        "Protocol Buffers are supported for gRPC",
+                        "gRPC services are interacted with ScalaPB",
                     ),
                 ),
                 (
@@ -302,8 +302,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala gRPC StreamObserver for streaming RPC",
-                        "This code uses Scala gRPC to interact with streaming RPC calls",
+                        "RPC streaming is handled by observer",
+                        "Streaming RPC calls are interacted with gRPC",
                     ),
                 ),
             ],
@@ -315,8 +315,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Sangria library import for GraphQL server",
-                        "This code uses Scala Sangria to interact with a GraphQL API",
+                        "GraphQL server is built with library import",
+                        "GraphQL API is interacted with Sangria",
                     ),
                 ),
                 (
@@ -324,8 +324,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Caliban library import for GraphQL server/client",
-                        "This code uses Scala Caliban to interact with a GraphQL API",
+                        "GraphQL server is built with library import",
+                        "GraphQL API is accessed via Caliban",
                     ),
                 ),
                 (
@@ -333,8 +333,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala GraphQL GraphQLSchema for schema definition",
-                        "This code uses Scala GraphQL to interact with a GraphQL schema",
+                        "GraphQL schema is defined for server",
+                        "GraphQL schema is accessed",
                     ),
                 ),
             ],
@@ -346,8 +346,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala JavaMail import for email sending",
-                        "This code uses Scala JavaMail to send outbound email messages",
+                        "Email is sent with JavaMail import",
+                        "Email message is sent via JavaMail",
                     ),
                 ),
                 (
@@ -355,8 +355,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Jakarta Mail import for email sending",
-                        "This code uses Scala Jakarta Mail to send outbound email messages",
+                        "Email is sent with Jakarta Mail import",
+                        "Email message is sent via Jakarta Mail",
                     ),
                 ),
                 (
@@ -364,8 +364,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Courier library import for email sending",
-                        "This code uses Scala Courier to send outbound email messages",
+                        "Email is sent with library import",
+                        "Email message is sent via Courier",
                     ),
                 ),
             ],
@@ -377,8 +377,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala ScalaCache library import for cache access",
-                        "This code uses Scala ScalaCache to write to a cache layer",
+                        "Cache is accessed with library import",
+                        "Cache layer is written with ScalaCache",
                     ),
                 ),
                 (
@@ -386,8 +386,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Jedis import for Redis cache access",
-                        "This code uses Scala Jedis to write to a Redis cache",
+                        "Redis cache is accessed with client import",
+                        "Redis cache is written via Jedis",
                     ),
                 ),
                 (
@@ -395,8 +395,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Lettuce import for Redis cache access",
-                        "This code uses Scala Lettuce to write to a Redis cache",
+                        "Redis cache is accessed with async client",
+                        "Redis cache is written with Lettuce client",
                     ),
                 ),
                 (
@@ -404,8 +404,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Caffeine library import for in-process cache",
-                        "This code uses Scala Caffeine to write to an in-process cache",
+                        "In-process cache is accessed with library import",
+                        "Cache is written via Caffeine",
                     ),
                 ),
             ],
@@ -417,8 +417,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala SSE content type for event streaming",
-                        "This code uses Scala to interact with server-sent event streams",
+                        "Event streaming is indicated by content type",
+                        "Server-sent event streams are interacted with",
                     ),
                 ),
                 (
@@ -426,8 +426,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Akka Source.tick for periodic streaming",
-                        "This code uses Scala Akka Streams to interact with periodic event streams",
+                        "Periodic streaming is created with tick source",
+                        "Event stream is processed via Akka Streams",
                     ),
                 ),
                 (
@@ -435,8 +435,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Scala ServerSentEvent for server-sent event handling",
-                        "This code uses Scala to expose inbound server-sent event streams",
+                        "Server-sent events are handled for streaming",
+                        "Server-sent event streams are exposed for inbound",
                     ),
                 ),
             ],
@@ -448,8 +448,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala Apache Commons FTPClient for FTP file transfer",
-                        "This code uses Scala Apache Commons to connect to an FTP server",
+                        "FTP file transfer is handled by client",
+                        "FTP server connection is opened via Commons",
                     ),
                 ),
                 (
@@ -457,8 +457,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala JSch instantiation for SSH/SFTP connectivity",
-                        "This code uses Scala JSch to connect to an SFTP server",
+                        "SSH connectivity is established for file transfer",
+                        "SFTP server connection is opened via JSch",
                     ),
                 ),
                 (
@@ -466,8 +466,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Scala JSch ChannelSftp for SFTP file operations",
-                        "This code uses Scala JSch to write to an SFTP server",
+                        "SFTP operations are performed on files",
+                        "SFTP server is written via JSch",
                     ),
                 ),
             ],
@@ -479,8 +479,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Quartz scheduler import for job scheduling",
-                        "This code uses Scala Quartz to interact with scheduled jobs",
+                        "Jobs are scheduled with Quartz import",
+                        "Scheduled jobs are interacted with Quartz",
                     ),
                 ),
                 (
@@ -488,8 +488,8 @@ BASE = BasePatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Akka scheduler import for actor-based scheduling",
-                        "This code uses Scala Akka to interact with scheduled actor messages",
+                        "Actor scheduling is enabled by import",
+                        "Actor message is scheduled via Akka",
                     ),
                 ),
                 (
@@ -497,8 +497,8 @@ BASE = BasePatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Scala Akka system.scheduler for scheduled task execution",
-                        "This code uses Scala Akka to interact with the actor system scheduler",
+                        "Scheduled tasks are executed by system scheduler",
+                        "Actor scheduler is accessed via Akka",
                     ),
                 ),
             ],

@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Tornado framework import for async web server and HTTP applications",
-                        "This code uses Tornado to interact with an HTTP endpoint",
+                        "Web server is imported for HTTP applications",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Tornado web module import for request handler and application routing",
-                        "This code uses Tornado to interact with an HTTP endpoint",
+                        "Request handlers are imported for routing",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Tornado httpclient module import for making outbound HTTP requests",
-                        "This code uses Tornado to send outbound HTTP API calls",
+                        "HTTP requests are made via httpclient",
+                        "HTTP API calls are sent outbound",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Tornado RequestHandler class for handling inbound HTTP requests",
-                        "This code uses Tornado to handle incoming HTTP requests",
+                        "HTTP requests are handled by RequestHandler",
+                        "HTTP requests are handled",
                     ),
                 ),
             ],
@@ -58,8 +58,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Tornado websocket module import for WebSocket server handler",
-                        "This code uses Tornado to handle incoming WebSocket connection requests",
+                        "WebSocket handlers are imported for server",
+                        "WebSocket connections are handled",
                     ),
                 ),
                 (
@@ -67,8 +67,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Tornado WebSocketHandler class for managing inbound WebSocket connections",
-                        "This code uses Tornado to handle incoming WebSocket connection requests",
+                        "WebSocket connections are managed by handler",
+                        "WebSocket connections are handled",
                     ),
                 ),
             ],

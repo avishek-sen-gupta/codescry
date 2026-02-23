@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "http4s library import for HTTP server/client",
-                        "This code uses http4s to handle inbound HTTP requests",
+                        "HTTP library is imported for server client operations",
+                        "HTTP requests are handled for inbound processing",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "http4s HttpRoutes.of for HTTP route definition",
-                        "This code uses http4s to handle inbound HTTP routes",
+                        "HTTP routes are defined with route handlers",
+                        "HTTP routes are handled for inbound requests",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "http4s BlazeServerBuilder for HTTP server construction",
-                        "This code uses http4s to expose an inbound Blaze HTTP server",
+                        "HTTP server is built via BlazeServerBuilder",
+                        "HTTP server is exposed using Blaze",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "http4s EmberServerBuilder for HTTP server construction",
-                        "This code uses http4s to expose an inbound Ember HTTP server",
+                        "HTTP server is built via EmberServerBuilder",
+                        "HTTP server is exposed using Ember",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "http4s Ok response for HTTP 200 reply",
-                        "This code uses http4s to handle inbound HTTP requests and respond",
+                        "HTTP response is created with OK status",
+                        "HTTP requests are handled with responses",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "http4s GET route pattern match for HTTP GET handling",
-                        "This code uses http4s to handle inbound HTTP GET requests",
+                        "GET route is matched for HTTP request handling",
+                        "HTTP GET requests are handled for inbound processing",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "http4s POST route pattern match for HTTP POST handling",
-                        "This code uses http4s to handle inbound HTTP POST requests",
+                        "POST route is matched for HTTP request handling",
+                        "HTTP POST requests are handled for inbound processing",
                     ),
                 ),
             ],
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "http4s server WebSocket import for WebSocket support",
-                        "This code uses http4s to handle inbound WebSocket connections",
+                        "WebSocket support is imported for server implementation",
+                        "WebSocket connections are handled for inbound requests",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "http4s WebSocketBuilder for WebSocket connection handling",
-                        "This code uses http4s to accept inbound WebSocket connections",
+                        "WebSocket connection is built for bidirectional communication",
+                        "WebSocket connections are accepted for inbound requests",
                     ),
                 ),
             ],

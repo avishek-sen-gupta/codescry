@@ -19,8 +19,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin import for setting up a Javalin HTTP server",
-                        "This code uses Javalin to expose an inbound HTTP endpoint",
+                        "HTTP server is imported via Javalin",
+                        "HTTP endpoint is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -28,8 +28,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin Javalin.create call for instantiating a Javalin HTTP server",
-                        "This code uses Javalin to expose an inbound REST API",
+                        "HTTP server is instantiated with Javalin",
+                        "REST API is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -37,8 +37,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin .get() route registration for handling HTTP GET requests",
-                        "This code uses Javalin to handle incoming HTTP GET requests",
+                        "GET route is registered for HTTP requests",
+                        "HTTP GET requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -46,8 +46,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin .post() route registration for handling HTTP POST requests",
-                        "This code uses Javalin to handle incoming HTTP POST requests",
+                        "POST route is registered for HTTP requests",
+                        "HTTP POST requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -55,8 +55,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin .put() route registration for handling HTTP PUT requests",
-                        "This code uses Javalin to handle incoming HTTP PUT requests",
+                        "PUT route is registered for HTTP requests",
+                        "HTTP PUT requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -64,8 +64,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin .delete() route registration for handling HTTP DELETE requests",
-                        "This code uses Javalin to handle incoming HTTP DELETE requests",
+                        "DELETE route is registered for HTTP requests",
+                        "HTTP DELETE requests are handled for inbound requests",
                     ),
                 ),
                 (
@@ -73,8 +73,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin .patch() route registration for handling HTTP PATCH requests",
-                        "This code uses Javalin to handle incoming HTTP PATCH requests",
+                        "PATCH route is registered for HTTP requests",
+                        "HTTP PATCH requests are handled for inbound requests",
                     ),
                 ),
             ],
@@ -86,8 +86,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin .ws() route registration for handling WebSocket connections",
-                        "This code uses Javalin to expose an inbound WebSocket connection",
+                        "WebSocket route is registered for connections",
+                        "WebSocket connection is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -95,8 +95,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Javalin WsConfig for configuring WebSocket handler callbacks",
-                        "This code uses Javalin to handle inbound WebSocket connections",
+                        "WebSocket handlers are configured with callbacks",
+                        "WebSocket connections are handled for inbound requests",
                     ),
                 ),
             ],

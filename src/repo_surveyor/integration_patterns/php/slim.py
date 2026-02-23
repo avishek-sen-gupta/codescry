@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Slim $app->get defining an inbound HTTP GET route",
-                        "This code uses Slim routing to handle incoming HTTP GET requests",
+                        "HTTP GET route is defined for inbound requests",
+                        "HTTP GET requests are handled with Slim",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Slim $app->post defining an inbound HTTP POST route",
-                        "This code uses Slim routing to handle incoming HTTP POST requests",
+                        "HTTP POST route is defined for inbound requests",
+                        "HTTP POST requests are handled with Slim",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Slim $app->put defining an inbound HTTP PUT route",
-                        "This code uses Slim routing to handle incoming HTTP PUT requests",
+                        "HTTP PUT route is defined for inbound requests",
+                        "HTTP PUT requests are handled with Slim",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Slim $app->delete defining an inbound HTTP DELETE route",
-                        "This code uses Slim routing to handle incoming HTTP DELETE requests",
+                        "HTTP DELETE route is defined for inbound requests",
+                        "HTTP DELETE requests are handled with Slim",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Slim $app->patch defining an inbound HTTP PATCH route",
-                        "This code uses Slim routing to handle incoming HTTP PATCH requests",
+                        "HTTP PATCH route is defined for inbound requests",
+                        "HTTP PATCH requests are handled with Slim",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Slim $response->withJson sending a JSON response to an inbound request",
-                        "This code uses Slim to expose inbound HTTP endpoints returning JSON responses",
+                        "JSON response is sent to inbound request",
+                        "HTTP endpoints are exposed returning JSON responses",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Slim AppFactory::create bootstrapping the Slim application to handle inbound requests",
-                        "This code uses Slim AppFactory to expose an inbound HTTP application",
+                        "Slim application is bootstrapped for inbound requests",
+                        "HTTP application is exposed with Slim AppFactory",
                     ),
                 ),
             ],

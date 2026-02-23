@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Django REST Framework @api_view decorator defining an API endpoint",
-                        "This code uses Django REST Framework to expose an inbound REST API endpoint",
+                        "API endpoint is decorated for inbound REST handling",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.INWARD,
                     (
-                        "Django REST Framework @action decorator defining a custom ViewSet action",
-                        "This code uses Django REST Framework to expose an inbound REST API endpoint",
+                        "ViewSet action is defined by @action decorator",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Django HTTP module import for request and response handling",
-                        "This code uses Django to interact with an HTTP endpoint",
+                        "HTTP requests are handled by module import",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Django REST Framework import for REST API construction",
-                        "This code uses Django REST Framework to interact with a REST API",
+                        "REST framework is imported for API construction",
+                        "REST API is accessed via framework",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Django REST Framework APIView class defining an inbound REST API view",
-                        "This code uses Django REST Framework to expose an inbound REST API endpoint",
+                        "REST API view is defined for inbound requests",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Django REST Framework ViewSet class defining a resource API endpoint",
-                        "This code uses Django REST Framework to expose an inbound REST API endpoint",
+                        "Resource API endpoint is defined by ViewSet",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
                 (
@@ -72,8 +72,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Django REST Framework GenericAPIView class for reusable API endpoint logic",
-                        "This code uses Django REST Framework to expose an inbound REST API endpoint",
+                        "Generic API view is defined for reusable endpoint logic",
+                        "REST endpoint is exposed for inbound API",
                     ),
                 ),
             ],
@@ -85,8 +85,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Django database module import for ORM and database access",
-                        "This code uses Django ORM to interact with a relational database",
+                        "Database is accessed via ORM module import",
+                        "Database is accessed via ORM",
                     ),
                 ),
                 (
@@ -94,8 +94,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Django models.Model defining a database model",
-                        "This code uses Django ORM to define a database model for persistence",
+                        "Database model is defined by Model class",
+                        "Database model is defined for persistence",
                     ),
                 ),
                 (
@@ -103,8 +103,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.MEDIUM,
                     SignalDirection.OUTWARD,
                     (
-                        "Django ForeignKey field defining a relational database association",
-                        "This code uses Django ORM to interact with a relational database",
+                        "Database association is defined by ForeignKey field",
+                        "Database is accessed via ORM",
                     ),
                 ),
                 (
@@ -112,8 +112,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Django neomodel StructuredNode for Neo4j graph database model definition",
-                        "This code uses Django neomodel to define a database model for persistence",
+                        "Graph database model is defined for Neo4j",
+                        "Database model is defined for persistence",
                     ),
                 ),
                 (
@@ -121,8 +121,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Django neomodel Cypher query execution against Neo4j graph database",
-                        "This code uses Django neomodel to query a database",
+                        "Cypher query is executed against Neo4j database",
+                        "Database is queried via neomodel",
                     ),
                 ),
             ],
@@ -134,8 +134,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Django Graphene-Django integration for GraphQL schema exposure",
-                        "This code uses Django to expose an inbound GraphQL schema",
+                        "GraphQL schema is exposed via Graphene-Django integration",
+                        "GraphQL schema is exposed for inbound requests",
                     ),
                 ),
             ],
@@ -147,8 +147,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Django core mail module for sending email messages",
-                        "This code uses Django to send an email message",
+                        "Email messages are sent via mail module",
+                        "Email message is sent",
                     ),
                 ),
                 (
@@ -156,8 +156,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Django send_mail utility for dispatching outbound email",
-                        "This code uses Django to send an email message",
+                        "Email is dispatched via send_mail utility",
+                        "Email message is sent",
                     ),
                 ),
             ],
@@ -169,8 +169,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.OUTWARD,
                     (
-                        "Django core cache module for cache store access",
-                        "This code uses Django to connect to a cache store",
+                        "Cache store is accessed via core module",
+                        "Cache store is connected",
                     ),
                 ),
             ],
@@ -182,8 +182,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Django StreamingHttpResponse for streaming inbound HTTP responses",
-                        "This code uses Django to expose an inbound server-sent event stream",
+                        "HTTP response is streamed for inbound connections",
+                        "Server-sent events are streamed inbound",
                     ),
                 ),
             ],
@@ -195,8 +195,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Django Celery Beat integration for periodic task scheduling",
-                        "This code uses Django Celery to interact with a scheduled task",
+                        "Periodic tasks are scheduled by Celery Beat integration",
+                        "Scheduled task is handled by Celery",
                     ),
                 ),
             ],

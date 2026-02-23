@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Gin gin-gonic/gin package import for the Gin HTTP framework",
-                        "This code uses Gin to interact with an HTTP web framework",
+                        "HTTP framework is imported",
+                        "HTTP framework is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Gin gin.Context struct representing an inbound HTTP request context",
-                        "This code uses Gin to handle incoming HTTP requests",
+                        "HTTP request context is represented",
+                        "HTTP requests are handled incoming",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Gin gin.Default function creating a Gin engine with default middleware",
-                        "This code uses Gin to expose an inbound HTTP server with default middleware",
+                        "HTTP engine is created with middleware",
+                        "HTTP server is exposed with middleware",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Gin gin.New function creating a bare Gin HTTP engine instance",
-                        "This code uses Gin to expose an inbound HTTP server",
+                        "HTTP engine is created",
+                        "HTTP server is exposed inbound",
                     ),
                 ),
             ],

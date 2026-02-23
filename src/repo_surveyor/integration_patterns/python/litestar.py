@@ -18,8 +18,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Litestar framework import for building REST API applications",
-                        "This code uses Litestar to interact with an HTTP endpoint",
+                        "Litestar framework is imported for REST API",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
                 (
@@ -27,8 +27,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.AMBIGUOUS,
                     (
-                        "Litestar application instantiation for configuring the API server",
-                        "This code uses Litestar to interact with an HTTP endpoint",
+                        "API server is created with Litestar configuration",
+                        "HTTP endpoint is accessed",
                     ),
                 ),
                 (
@@ -36,8 +36,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Litestar @get decorator defining an inbound GET REST endpoint",
-                        "This code uses Litestar to expose an inbound REST API endpoint",
+                        "GET endpoint is defined with decorator",
+                        "REST API endpoint is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -45,8 +45,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Litestar @post decorator defining an inbound POST REST endpoint",
-                        "This code uses Litestar to expose an inbound REST API endpoint",
+                        "POST endpoint is defined with decorator",
+                        "REST API endpoint is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -54,8 +54,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Litestar @put decorator defining an inbound PUT REST endpoint",
-                        "This code uses Litestar to expose an inbound REST API endpoint",
+                        "PUT endpoint is defined with decorator",
+                        "REST API endpoint is exposed for inbound requests",
                     ),
                 ),
                 (
@@ -63,8 +63,8 @@ FRAMEWORK = FrameworkPatternSpec(
                     Confidence.HIGH,
                     SignalDirection.INWARD,
                     (
-                        "Litestar @delete decorator defining an inbound DELETE REST endpoint",
-                        "This code uses Litestar to expose an inbound REST API endpoint",
+                        "DELETE endpoint is defined with decorator",
+                        "REST API endpoint is exposed for inbound requests",
                     ),
                 ),
             ],
