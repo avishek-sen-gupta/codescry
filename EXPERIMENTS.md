@@ -217,3 +217,88 @@ The rewrite produced a qualitative shift in classification behaviour:
 ### Verdict
 
 The bulk description rewrite validates the findings from the hand-crafted experiments: passive-voice, domain-concept descriptions consistently produce better embedding matches than verbose, API-name-heavy descriptions. The improvement is most visible in the dramatic reduction of ambiguous classifications, confirming that the template forces descriptions into a semantic space that aligns better with code semantics. The CodeT5 backend remains significantly less capable than Gemini (4.4% vs ~91% classification rate), but the rewrite narrows the quality gap for signals that *are* classified.
+
+---
+
+## Warp Pattern Expansion & Rust AST Walker Fix
+
+### Background
+
+Running the pattern-embedding pipeline on `restful-rust` (a Warp-based REST API) initially detected only 2 signals, with 1 classified. Investigation revealed two compounding issues:
+
+1. **Sparse Warp patterns**: The Warp framework module had only 1 pattern (`warp::path!`), missing all HTTP method filters, filter composition, JSON body handling, SSE, and WebSocket patterns.
+2. **Broken Rust AST walk-up**: Rust's tree-sitter grammar uses `*_item` suffix for top-level definitions (`function_item`, `struct_item`, `impl_item`, etc.) instead of the `*_definition`/`*_declaration` convention used by most other languages. The AST walker's suffix heuristics missed these entirely, so signals inside Warp method chains (`.and(warp::get())`) resolved to the raw `arguments` node with text `()` — a meaningless context that produced near-random embedding matches.
+
+### Fix 1: Warp Pattern Expansion
+
+Expanded from 1 to 25 patterns (50 descriptions) across three integration types:
+
+| Integration Type | Patterns Added |
+|------------------|---------------|
+| `http_rest` | `warp::serve`, `warp::path!`, `warp::path(`, `warp::get()` through `warp::head()`, `.and(`, `.or(`, `.and_then(`, `warp::body::json()`, `warp::body::content_length_limit(`, `warp::query::`, `warp::reply::json`, `warp::reply::with_status`, `warp::log(`, `warp::any()`, `warp::Filter`, `warp::test::request()` |
+| `sse_streaming` | `warp::sse` |
+| `socket` | `warp::ws()`, `warp::ws::Ws` |
+
+Signal detection jumped from 2 to 44.
+
+### Fix 2: Rust `*_item` Definition Nodes
+
+Added 8 Rust-specific node types to `_DefinitionNodes.EXACT` in the AST walker:
+
+```
+function_item, struct_item, enum_item, impl_item,
+trait_item, mod_item, const_item, static_item
+```
+
+This lets the walk-up algorithm correctly resolve Warp chain lines to their enclosing `function_item` or `let_declaration`, providing meaningful AST context for embeddings.
+
+#### Failed intermediate approach: `block` as statement node
+
+We first tried adding `block` to Rust's `_LanguageStatementNodes` to capture function bodies without signatures. This broke the test `test_if_expression_detected_as_statement`: on a line like `if req.is_valid() {`, the if body's `block` node starts on the same line as the `{`, and since tree-sitter's depth-first traversal visits the block *after* the condition nodes, the `block` becomes the deepest named node — which the walker immediately returned instead of the more meaningful `if_expression`. Removing `block` and relying solely on `*_item` definition nodes resolved the issue: `let_declaration` (via suffix) and `expression_statement` (via suffix) already catch all Rust statement-level constructs, so `block` is unnecessary.
+
+### Results: restful-rust (44 signals, Rust, CodeT5 hf-local)
+
+Threshold: 0.50
+
+| Stage | Signals | Classified | Inward | Outward | Ambiguous | Noise |
+|-------|---------|-----------|--------|---------|-----------|-------|
+| Before (1 Warp pattern, no `*_item`) | 2 | 1 | 0 | 0 | 1 | 1 |
+| After Warp expansion only (no `*_item`) | 44 | 6 | 0 | 1 | 1 | 38 |
+| After both fixes | 44 | 17 (38.6%) | 9 | 7 | 1 | 27 |
+
+### AST Context Quality
+
+The `*_item` fix produces meaningful AST contexts that capture the full Warp filter chain:
+
+| Signal | AST Node Type | AST Context |
+|--------|--------------|-------------|
+| `warp::path!("games")` (route def) | `function_item` | Full `games_list(db: Db)` function with `.and()` / `.and_then()` chain |
+| `warp::test::request()` (test) | `let_declaration` | Full `let res = warp::test::request().method("GET").path(...).reply(&filter).await;` |
+| `warp::serve(routes)` (server start) | `expression_statement` | `warp::serve(routes).run(([127, 0, 0, 1], 8080)).await;` |
+| `warp::body::json()` (filter) | `function_item` | Full `json_body()` function |
+
+### Direction Misclassification: `db: Db` Parameter Pollution
+
+An interesting misclassification: 5 of the 7 outward signals are actually Warp route definitions (lines 24-28 of `routes.rs`) that *should* be `http_rest/inward`, but are classified as `database/outward` (score 0.501). The root cause is that the `function_item` AST context includes the function signature `pub fn games_list(db: Db) -> impl Filter<...>`, and the `Db` parameter in the signature pulls the embedding toward database descriptions. The nearest match is "Database results are queried and fetched" from jOOQ.
+
+This reveals a fundamental tension in statement-level context extraction: wider context (full function) captures the filter chain structure needed for route detection, but also includes parameters that can dominate the embedding. A potential mitigation would be to extract only the function *body* (the block inside the function) without the signature, but as documented above, adding `block` as a statement node introduces its own problems with control-flow constructs.
+
+### Score Distribution
+
+| Signal Category | Score Range | Nearest Source |
+|----------------|------------|----------------|
+| `warp::serve` (server start) | 0.576 | Warp |
+| `let routes = api.with(warp::log(...))` | 0.638 | Rails |
+| `warp::test::request()` (test assertions) | 0.493 - 0.528 | Warp |
+| Route definitions (`function_item` context) | 0.475 - 0.501 | Play, jOOQ, ServiceStack |
+| `warp::body::json()` (filter) | 0.547 | Rust |
+
+The highest-scoring signal (0.638) is `let routes = api.with(warp::log("restful_rust"))` matching "RESTful endpoints are exposed via Rails routing" — the word "routes" in the variable name and "RESTful" in the log string strongly align with the Rails description despite being Warp code.
+
+### Verdict
+
+The combined Warp expansion + Rust AST walker fix transforms detection from nearly blind (1/2 classified) to broadly functional (17/44 classified). The remaining challenges are:
+
+1. **Score compression**: CodeT5 scores cluster in the 0.47-0.53 range, making threshold selection fragile. Many genuine route signals sit just above/below the 0.50 threshold.
+2. **Signature pollution**: Function-level AST context includes parameter types that can override the embedding's code-structure signal, causing route definitions with database parameters to misclassify as `database/outward`.
+3. **Cross-framework matching**: Signals often match descriptions from unrelated frameworks (Rails, jOOQ, Play) rather than Warp, because CodeT5 captures domain semantics ("routes", "database") rather than framework-specific API structure.
