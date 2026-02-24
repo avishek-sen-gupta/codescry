@@ -30,6 +30,15 @@ class _DefinitionNodes:
             "variable_declaration",
             "field_declaration",
             "property_declaration",
+            # Rust tree-sitter uses *_item suffix for top-level definitions
+            "function_item",
+            "struct_item",
+            "enum_item",
+            "impl_item",
+            "trait_item",
+            "mod_item",
+            "const_item",
+            "static_item",
         }
     )
 
