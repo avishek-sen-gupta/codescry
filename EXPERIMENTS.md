@@ -1,5 +1,43 @@
 # Experiments
 
+## Summary
+
+These experiments investigate embedding-based signal concretisation using the pattern-embedding pipeline, progressively improving classification quality through description rewriting, pattern expansion, and AST context extraction fixes.
+
+### 1. CodeT5p-110m-embedding as Local Backend
+
+Added `Salesforce/codet5p-110m-embedding` (256-dim, 512-token limit) as a fourth embedding backend running locally via `transformers`. On smojol-api (22 Java signals), CodeT5 classified 50% of signals vs Gemini's 91%. On the full smojol repo (758 signals), only 7.1% were classified. CodeT5 produces compressed similarity scores (0.31-0.66) with a narrow signal/noise gap, making it unsuitable as a Gemini replacement but viable as a fast local pre-filter. [Details](#huggingface-local-embedding-client-codet5p-110m-embedding)
+
+### 2. Writing Effective Pattern Descriptions
+
+Through iterative experimentation on code fragments, discovered that subject-first passive-voice descriptions ("Text is created by reading all source file", score 0.773) consistently outperform verbose active-voice descriptions ("Ingests a file from disk, producing a text representation", score 0.448) and even literal transliterations (score 0.688) in the CodeT5 embedding space. Derived 7 rules for writing embedding-optimised descriptions, culminating in the template: `[Result noun] is [verb past participle] [preposition] [key parameters]`. [Details](#writing-effective-pattern-descriptions-for-codet5-embeddings)
+
+### 3. Bulk Description Rewrite
+
+Applied the 7 description rules to all 3,430 pattern descriptions (3,017 unique) across 77 files using an LLM rewrite script. On the full smojol repo with CodeT5: ambiguous signals dropped 71% (34 → 10), inward signals increased 40% (10 → 14), and overall classification quality improved despite a lower raw classification rate (7.1% → 4.4%). The rewrite traded noisy ambiguous matches for sharper directional ones. [Details](#bulk-description-rewrite-passive-voice-template)
+
+### 4. Warp Pattern Expansion & Rust AST Walker Fix
+
+Running on `restful-rust` (a Warp REST API) exposed two compounding issues: sparse Warp patterns (1 pattern) and broken Rust AST walk-up (`*_item` suffix not recognised as definitions). Expanding Warp to 25 patterns increased signal detection from 2 to 44. Adding Rust `*_item` definition nodes to the AST walker improved classification from 6 to 17 signals (9 inward, 7 outward). Discovered that function-level AST context can cause direction misclassification when signatures contain database parameters (`db: Db`), pulling route definitions toward `database/outward`. [Details](#warp-pattern-expansion--rust-ast-walker-fix)
+
+### Key Metrics Across Experiments
+
+| Experiment | Repo | Backend | Signals | Classified | Inward | Outward | Ambiguous |
+|-----------|------|---------|---------|-----------|--------|---------|-----------|
+| CodeT5 baseline | smojol-api | hf-local | 22 | 11 (50%) | 10 | 1 | 0 |
+| Gemini baseline | smojol-api | gemini | 22 | 20 (91%) | 17 | 3 | 0 |
+| CodeT5 full repo (pre-rewrite) | smojol | hf-local | 758 | 54 (7.1%) | 10 | 10 | 34 |
+| CodeT5 full repo (post-rewrite) | smojol | hf-local | 758 | 33 (4.4%) | 14 | 9 | 10 |
+| Warp + AST fix | restful-rust | hf-local | 44 | 17 (38.6%) | 9 | 7 | 1 |
+
+### Open Challenges
+
+1. **CodeT5 score compression**: Scores cluster in a narrow band (0.47-0.53), making threshold selection fragile and leaving many genuine signals borderline.
+2. **Signature pollution**: Function-level AST context includes parameter types that can dominate the embedding, causing misclassification (e.g., route functions with `Db` parameters classified as `database/outward`).
+3. **Cross-framework matching**: CodeT5 captures domain semantics ("routes", "database") rather than framework-specific API structure, so signals match descriptions from unrelated frameworks (Rails, jOOQ) instead of the correct one (Warp).
+
+---
+
 ## HuggingFace Local Embedding Client: CodeT5p-110m-embedding
 
 ### Background
