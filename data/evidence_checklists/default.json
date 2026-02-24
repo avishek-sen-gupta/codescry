@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "default_predicates": [
+    {
+      "predicate": "IN_STRING_CONTEXT",
+      "weight": -0.30,
+      "pattern_arg": ""
+    },
+    {
+      "predicate": "IN_TEST_FILE",
+      "weight": -0.15,
+      "pattern_arg": ""
+    },
+    {
+      "predicate": "IN_LOG_STATEMENT",
+      "weight": -0.25,
+      "pattern_arg": ""
+    },
+    {
+      "predicate": "IN_ASSERTION",
+      "weight": -0.20,
+      "pattern_arg": ""
+    },
+    {
+      "predicate": "IN_CONSTANT_DECL",
+      "weight": -0.20,
+      "pattern_arg": ""
+    },
+    {
+      "predicate": "IN_VENDOR_DIR",
+      "weight": -0.25,
+      "pattern_arg": ""
+    },
+    {
+      "predicate": "IN_CONFIG_DIR",
+      "weight": -0.10,
+      "pattern_arg": ""
+    },
+    {
+      "predicate": "IN_GENERATED_FILE",
+      "weight": -0.30,
+      "pattern_arg": ""
+    }
+  ],
+  "pattern_overrides": {}
+}
