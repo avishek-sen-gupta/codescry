@@ -15,11 +15,15 @@ Embedding-based signal concretisation experiments, investigating which embedding
 
 **Core finding**: General-purpose text embedding models trained for semantic similarity (BGE, Gemini) outperform code-specific models trained for retrieval (CodeT5, CodeRankEmbed) on our description-to-code classification task. MTEB leaderboard scores do not predict performance on this task. See [Experiment 6](#6-sota-model-comparison) and [Analysis](#why-general-purpose-models-outperform-code-models).
 
+**Three-way comparison** (Experiment 7): An independent rule-based classifier (Claude GT) applied to all 758 smojol signals shows that the three approaches (Gemini LLM, BGE embedding, Claude rules) agree on 63.5% of signals. Claude achieves 95.5% precision against Gemini but only 46.7% recall — it is the most conservative classifier (88 integration vs Gemini's 180 and BGE's 231). The biggest source of Gemini false positives (per Claude's rules) are COBOL string literals in Java test code (219 signals) and ANTLR-generated parser code (111 signals). See [Experiment 7](#7-three-way-classification-comparison).
+
 ## Open Challenges
 
 1. **Signature pollution**: Function-level AST context includes parameter types that can dominate the embedding, causing misclassification (e.g., route functions with `Db` parameters classified as `database/outward`).
 2. **Cross-framework matching**: Signals sometimes match descriptions from unrelated frameworks (Rails, jOOQ) instead of the correct one (Warp), because the model captures domain semantics ("routes", "database") rather than framework-specific API structure.
 3. **Threshold sensitivity at scale**: At threshold 0.50 on the full smojol repo, BGE classifies 100% of signals but 47% land as ambiguous. At 0.70, classification drops to 30.5% but directional quality improves sharply. The optimal threshold likely varies per repo.
+4. **String-literal false positives dominate at scale**: 219/758 smojol signals (29%) are COBOL string literals embedded in Java test code. All three classifiers struggle with these differently — Gemini calls many of them integration (COBOL `OPEN INPUT` in a Java string), BGE matches them to file I/O descriptions, and only rule-based heuristics reliably filter them. This suggests pattern-matching pre-filters or AST-aware string-literal detection could significantly improve all approaches.
+5. **Low three-way agreement on file_io**: The `file_io` integration type has the lowest three-way agreement (60.8%) across 530 signals. The broad `(?i)\bfile\b` common pattern fires on file metadata operations, path manipulation, and string constants that mention files — none of which are actual I/O boundaries. Tightening this pattern or adding a file-metadata exclusion list would reduce noise across all classifiers.
 
 ---
 
@@ -301,6 +305,18 @@ Our task — matching natural-language pattern descriptions to code fragments �
 
 BGE treats code as "text with meaning" rather than "code with syntax", which paradoxically makes it better at understanding what code *does* than models trained specifically on code.
 
+### Three-Way Classifier Characteristics
+
+The three classifiers occupy distinct points in the precision-recall space:
+
+| Classifier | Integration count | Precision (vs Gemini) | Recall (vs Gemini) | F1 | Character |
+|-----------|-------------------|----------------------|--------------------|----|-----------|
+| **Claude rules** | 88 | 95.5% | 46.7% | 0.627 | Conservative — high precision, low recall |
+| **Gemini LLM** | 180 | (reference) | (reference) | — | Moderate — balanced but influenced by string content |
+| **BGE embeddings** | 231 | 35.5% | 45.6% | 0.399 | Aggressive — low precision, moderate recall |
+
+Claude's rule-based approach demotes 96 Gemini integration signals (mostly COBOL string literals and file metadata) while promoting only 4 (actual file I/O that Gemini marked as noise). The 149 BGE-only integration signals (N-I-N pattern) are almost entirely false positives from the embedding model matching `file_io` descriptions against file-metadata operations and string constants.
+
 ### Score Distributions Compared
 
 | Backend | Dim | Score range | Mean | Signal/noise gap |
@@ -309,3 +325,108 @@ BGE treats code as "text with meaning" rather than "code with syntax", which par
 | Gemini | 768 | 0.59–0.74 | — | Wide |
 | CodeT5 | 256 | 0.31–0.66 | — | Narrow |
 | CodeRankEmbed | 768 | 0.26–0.57 | — | Nonexistent |
+
+---
+
+### 7. Three-Way Classification Comparison
+
+**Goal**: Produce an independent ground truth using rule-based heuristics derived from manual code review, then compare all three classification approaches (Gemini LLM, BGE embedding, Claude rules) on the full 758-signal smojol dataset.
+
+#### Method
+
+`data/build_claude_ground_truth.py` applies a 12-rule priority classifier to each signal. Rules are ordered so that NOT_INTEGRATION exclusions fire before INTEGRATION inclusions:
+
+| Priority | Rule | Fires on | Classification |
+|----------|------|----------|---------------|
+| 1 | Generated parser code | Db2SqlParser.java, ANTLR `match()/case` | NOT_INTEGRATION |
+| 2 | COBOL string literals | `+ "` lines with COBOL keywords (FILE-CONTROL, FD, SELECT...ASSIGN) | NOT_INTEGRATION |
+| 3 | String/name-only references | Logging, assertions, NodeSymbolType constants | NOT_INTEGRATION |
+| 4 | DI/config binding | `bindConstant()`, `@Named`, `@Inject` | NOT_INTEGRATION |
+| 5 | Boolean download field | `boolean download` declarations | NOT_INTEGRATION |
+| 6 | File metadata operations | `file.isDirectory()`, `Paths.get()`, `URI.create()` | NOT_INTEGRATION |
+| 7 | Socket operations | `ServerSocket`, `.accept()` | INTEGRATION |
+| 8 | HTTP/REST endpoints | Javalin routes, `ctx.json()`, `ctx.result()` | INTEGRATION |
+| 9 | Database operations | `DriverManager.getConnection`, `DSL.using`, `.execute()` | INTEGRATION |
+| 10 | Actual file I/O | `Files.readAllBytes`, `FileInputStream`, `BufferedReader` | INTEGRATION |
+| 11 | Cache operations | `CacheBuilder`, `cache.get()` | AMBIGUOUS |
+| 12 | Gemini tiebreaker | Falls through to Gemini's original classification | varies |
+
+#### Results: Classification Distribution
+
+| Classifier | Integration | Not Integration | Total |
+|-----------|-------------|-----------------|-------|
+| Gemini LLM | 180 (23.7%) | 578 (76.3%) | 758 |
+| BGE embeddings (0.50) | 231 (30.5%) | 527 (69.5%) | 758 |
+| Claude rules | 88 (11.6%) | 670 (88.4%) | 758 |
+
+Rule hit distribution for Claude:
+
+| Rule | Count | % |
+|------|-------|---|
+| COBOL string literal in Java code | 219 | 28.9% |
+| Gemini tiebreaker: classified as NOISE | 200 | 26.4% |
+| Generated parser code (ANTLR/Db2SqlParser) | 111 | 14.6% |
+| File metadata operation | 80 | 10.6% |
+| String/name-only reference | 43 | 5.7% |
+| Actual file I/O | 22 | 2.9% |
+| Gemini tiebreaker: outward | 22 | 2.9% |
+| HTTP/REST endpoint | 16 | 2.1% |
+| DI/config binding | 14 | 1.8% |
+| Cache operation (ambiguous) | 11 | 1.5% |
+| Database operation | 8 | 1.1% |
+| Other (Gemini tiebreaker, download field, socket) | 12 | 1.6% |
+
+#### Results: Pairwise Comparison
+
+| Pair | Agreement | Precision | Recall | F1 |
+|------|-----------|-----------|--------|----|
+| Gemini vs BGE | 67.4% | 35.5% | 45.6% | 0.399 |
+| Gemini vs Claude | 86.8% | 95.5% | 46.7% | 0.627 |
+| BGE vs Claude | 72.7% | 63.6% | 24.2% | 0.351 |
+
+#### Results: Three-Way Agreement
+
+| Pattern (Gemini-BGE-Claude) | Count | Meaning |
+|-----------------------------|-------|---------|
+| N-N-N | 425 | All agree: Not Integration |
+| N-I-N | 149 | Only BGE says Integration |
+| I-N-N | 70 | Only Gemini says Integration |
+| I-I-I | 56 | All agree: Integration |
+| I-N-I | 28 | Gemini + Claude agree, BGE misses |
+| I-I-N | 26 | Gemini + BGE agree, Claude demotes |
+| N-N-I | 4 | Only Claude says Integration |
+
+**63.5% three-way agreement** (481/758). The 56 unanimous integration signals are high-confidence true positives. The 425 unanimous not-integration signals are high-confidence true negatives.
+
+#### Results: Per-Integration-Type Agreement
+
+| Integration Type | Signals | Three-way agreement |
+|-----------------|---------|-------------------|
+| http_rest | 34 | 85.3% |
+| scheduling | 2 | 100% |
+| socket | 1 | 100% |
+| caching | 95 | 67.4% |
+| database | 93 | 66.7% |
+| **file_io** | **530** | **60.8%** |
+
+`file_io` dominates the dataset (70% of signals) and has the lowest agreement rate, driven by the broad `(?i)\bfile\b` common pattern matching COBOL string literals, file metadata operations, and path manipulation — none of which are actual I/O boundaries.
+
+#### Key Observations
+
+1. **Claude's conservatism is deliberate**: The rule-based classifier is designed to avoid false positives. It only classifies something as integration when it sees actual I/O API calls (e.g., `Files.readAllBytes`, `ServerSocket`, `DriverManager.getConnection`). This yields 95.5% precision but misses signals where integration is expressed through higher-level abstractions.
+
+2. **The 96 Claude demotions are defensible**: Gemini classified these as integration, but they include file metadata checks (`file.isDirectory()`), COBOL string constants in Java test code (`+ "000490 FILE-CONTROL.\n"`), and test assertion references. These are not runtime I/O boundaries.
+
+3. **The 4 Claude promotions reveal Gemini blind spots**: `CobolDocumentModel.java:116` (`BufferedReader reader = new BufferedReader(new StringReader(text))`) — Gemini classified as not_integration but this is actual stream-based I/O. Similarly, `Cli.java:77` and `CliCFAST.java:78` contain real file operations that Gemini missed.
+
+4. **BGE's 149 false positives (N-I-N)** are almost entirely file_io and database descriptions matching against file-metadata operations and string constants. The embedding model cannot distinguish `file.isDirectory()` (metadata) from `Files.readAllBytes()` (I/O) because both contain "file" in a similar syntactic context.
+
+5. **The 26 Gemini+BGE agree but Claude disagrees (I-I-N)** are the most interesting signals for review — they suggest places where Claude's rules may be too aggressive. Full signal-level data is in `data/three_way_comparison.tsv`.
+
+#### Data Files
+
+| File | Contents |
+|------|----------|
+| `data/survey_output_claude_gt/*.jsonl` | Claude's signal-level classifications (758 signals) |
+| `data/three_way_comparison_report.txt` | Full comparison report |
+| `data/three_way_comparison.tsv` | All 758 signals with all three classifications for manual inspection |

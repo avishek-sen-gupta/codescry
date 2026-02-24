@@ -1,0 +1,171 @@
+========================================================================
+THREE-WAY SIGNAL CLASSIFICATION COMPARISON
+Gemini LLM vs BGE Embeddings vs Claude Rule-Based
+========================================================================
+
+Gemini:   180 integration,  578 not_integration,  758 total
+BGE:      231 integration,  527 not_integration,  758 total
+Claude:    88 integration,  670 not_integration,  758 total
+Common:   758 signals in all three
+Union:    758 signals total
+
+========================================================================
+PAIRWISE: Gemini vs BGE (758 overlapping signals)
+========================================================================
+
+                             BGE: Integration   BGE: Not Integration
+  Gemini: Integration           82 (TP)              98 (FN)
+  Gemini: Not Integration      149 (FP)             429 (TN)
+
+  Accuracy:   67.4%  (511/758)
+  Precision:  35.5%  (82/231)
+  Recall:     45.6%  (82/180)
+  F1 Score:   0.399
+
+  Agreement rate: 67.4% (511/758)
+
+========================================================================
+PAIRWISE: Gemini vs Claude (758 overlapping signals)
+========================================================================
+
+                          Claude: Integration   Claude: Not Integration
+  Gemini: Integration           84 (TP)              96 (FN)
+  Gemini: Not Integration        4 (FP)             574 (TN)
+
+  Accuracy:   86.8%  (658/758)
+  Precision:  95.5%  (84/88)
+  Recall:     46.7%  (84/180)
+  F1 Score:   0.627
+
+  Agreement rate: 86.8% (658/758)
+
+========================================================================
+PAIRWISE: BGE vs Claude (758 overlapping signals)
+========================================================================
+
+                          Claude: Integration   Claude: Not Integration
+  BGE: Integration           56 (TP)             175 (FN)
+  BGE: Not Integration       32 (FP)             495 (TN)
+
+  Accuracy:   72.7%  (551/758)
+  Precision:  63.6%  (56/88)
+  Recall:     24.2%  (56/231)
+  F1 Score:   0.351
+
+  Agreement rate: 72.7% (551/758)
+
+========================================================================
+THREE-WAY AGREEMENT (758 signals)
+========================================================================
+
+  All three agree:      481 (63.5%)
+  Two agree, one not:   277 (36.5%)
+
+  Pattern (Gemini-BGE-Claude)  Count
+  ----------------------------------------
+  N-N-N       425  All: Not Integration
+  N-I-N       149  Only BGE=I
+  I-N-N        70  Only Gemini=I
+  I-I-I        56  All: Integration
+  I-N-I        28  Gemini+Claude=I, BGE=N
+  I-I-N        26  Gemini+BGE=I, Claude=N
+  N-N-I         4  Only Claude=I
+
+========================================================================
+PER-INTEGRATION-TYPE BREAKDOWN
+========================================================================
+
+  caching (95 signals, 67.4% agreement):
+    N-N-N: 54
+    N-I-N: 21
+    I-I-I: 10
+    I-N-N: 7
+    I-N-I: 2
+    I-I-N: 1
+  database (93 signals, 66.7% agreement):
+    N-N-N: 57
+    N-I-N: 27
+    I-I-I: 5
+    I-N-I: 4
+  email (1 signals, 100.0% agreement):
+    N-N-N: 1
+  file_io (530 signals, 60.8% agreement):
+    N-N-N: 298
+    N-I-N: 96
+    I-N-N: 63
+    I-I-N: 25
+    I-I-I: 24
+    I-N-I: 20
+    N-N-I: 4
+  http_rest (34 signals, 85.3% agreement):
+    I-I-I: 15
+    N-N-N: 14
+    N-I-N: 3
+    I-N-I: 2
+  scheduling (2 signals, 100.0% agreement):
+    I-I-I: 1
+    N-N-N: 1
+  soap (2 signals, 0.0% agreement):
+    N-I-N: 2
+  socket (1 signals, 100.0% agreement):
+    I-I-I: 1
+
+========================================================================
+NOTABLE DISAGREEMENTS (Claude vs Gemini)
+========================================================================
+
+  Claude reclassified 100 signals differently from Gemini
+
+  Gemini=I, Claude=N (demoted): 96
+    AnalysisConfig.java:79  reason: File metadata operation (not meaningful I/O)
+      line: ImmutableList.of(new DialectRegistryItem("IDMS", URI.create(String.format("file://%s", dialectJarPat
+    WorkspaceFileService.java:50  reason: File metadata operation (not meaningful I/O)
+      line: public boolean fileExists(@Nullable Path file) {
+    WorkspaceFileService.java:51  reason: File metadata operation (not meaningful I/O)
+      line: return file != null && file.toFile().exists();
+    WorkspaceFileService.java:144  reason: File metadata operation (not meaningful I/O)
+      line: .filter(File::isFile)
+    TestOutlineTree.java:95  reason: COBOL string literal in Java code
+      line: + "000490 FILE-CONTROL.\n"
+    TestOutlineTree.java:96  reason: COBOL string literal in Java code
+      line: + "000500     SELECT TRANS-FILE-IN\n"
+    TestOutlineTree.java:99  reason: COBOL string literal in Java code
+      line: + "000530 FILE SECTION.\n"
+    TestOutlineTree.java:100  reason: COBOL string literal in Java code
+      line: + "000540 FD  TRANS-FILE-IN\n"
+    TestOutlineTree.java:105  reason: COBOL string literal in Java code
+      line: + "000590     DATA RECORD IS FILE-RECORD.\n"
+    TestOutlineTree.java:106  reason: COBOL string literal in Java code
+      line: + "000600 01  FILE-RECORD                             PIC X(113).\n"
+    ... and 86 more
+
+  Gemini=N, Claude=I (promoted): 4
+    Cli.java:77  reason: Actual file I/O operation
+      line: Result runAnalysis(File src, CobolLanguageId dialect, Injector diCtx, boolean isAnalysisRequired) th
+    CliCFAST.java:78  reason: Actual file I/O operation
+      line: private void generateCFAST(File file, CFASTBuilder builder, Gson gson, Injector diCtx) {
+    CliCFAST.java:92  reason: Actual file I/O operation
+      line: System.out.println("Error processing file: " + file.getAbsolutePath() + " \n" + e.getMessage());
+    CobolDocumentModel.java:116  reason: Actual file I/O operation
+      line: try (BufferedReader reader = new BufferedReader(new StringReader(text))) {
+
+========================================================================
+CLAUDE CLASSIFICATION REASON DISTRIBUTION
+========================================================================
+
+   219  COBOL string literal in Java code
+   200  Gemini tiebreaker: classified as NOISE
+   111  Generated parser code (ANTLR/Db2SqlParser)
+    80  File metadata operation (not meaningful I/O)
+    43  String/name-only reference (logging, assertion, constant)
+    22  Actual file I/O operation
+    22  Gemini tiebreaker: outward
+    16  HTTP/REST endpoint
+    14  DI/config binding (not runtime I/O)
+    11  Cache operation (ambiguous boundary)
+     8  Database operation
+     5  Gemini tiebreaker: inward
+     3  Boolean field/param named 'download'
+     3  Gemini tiebreaker: ambiguous
+     1  Socket operation
+
