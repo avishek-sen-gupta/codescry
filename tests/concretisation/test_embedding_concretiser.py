@@ -12,6 +12,7 @@ from repo_surveyor.integration_concretiser.ast_walker import (
     extract_invocation_context,
 )
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
+    CodeRankEmbeddingClient,
     EmbeddingClient,
     EmbeddingConcretiser,
     HuggingFaceLocalEmbeddingClient,
@@ -760,3 +761,122 @@ class TestHuggingFaceLocalBatching:
         assert len(result) == num_texts
         assert model.call_count == num_texts
         assert len(tokenizer.encode_calls) == num_texts
+
+
+# ---------------------------------------------------------------------------
+# Helpers for CodeRankEmbeddingClient tests
+# ---------------------------------------------------------------------------
+
+
+class _FakeNumpyArray:
+    """Minimal numpy-array-like object with a ``tolist()`` method."""
+
+    def __init__(self, values: list[float]) -> None:
+        self._values = values
+
+    def tolist(self) -> list[float]:
+        return self._values
+
+
+class _FakeSentenceTransformerModel:
+    """Injectable fake that records ``encode()`` calls and returns fake arrays."""
+
+    def __init__(self, embedding_dim: int = 3) -> None:
+        self._dim = embedding_dim
+        self.encode_calls: list[dict] = []
+
+    def encode(self, texts: list[str], **kwargs) -> list[_FakeNumpyArray]:
+        self.encode_calls.append({"texts": list(texts), "kwargs": kwargs})
+        return [_FakeNumpyArray([float(i + 1)] * self._dim) for i in range(len(texts))]
+
+
+# ---------------------------------------------------------------------------
+# Tests: CodeRankEmbeddingClient
+# ---------------------------------------------------------------------------
+
+
+class TestCodeRankEmbedBatch:
+    """Verify CodeRankEmbeddingClient.embed_batch returns correct embeddings."""
+
+    def test_single_text_returns_embedding(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=4)
+        client = CodeRankEmbeddingClient(model=fake_model)
+
+        result = client.embed_batch(["hello world"])
+
+        assert len(result) == 1
+        assert len(result[0]) == 4
+        assert len(fake_model.encode_calls) == 1
+        assert fake_model.encode_calls[0]["texts"] == ["hello world"]
+
+    def test_multiple_texts_returns_all_embeddings(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
+        client = CodeRankEmbeddingClient(model=fake_model)
+
+        result = client.embed_batch(["foo", "bar", "baz"])
+
+        assert len(result) == 3
+        assert len(fake_model.encode_calls) == 1
+        assert fake_model.encode_calls[0]["texts"] == ["foo", "bar", "baz"]
+
+    def test_empty_input_returns_empty(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
+        client = CodeRankEmbeddingClient(model=fake_model)
+
+        result = client.embed_batch([])
+
+        assert result == []
+        assert len(fake_model.encode_calls) == 0
+
+    def test_query_prefix_prepended(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
+        prefix = "Represent this query for searching relevant code: "
+        client = CodeRankEmbeddingClient(model=fake_model, query_prefix=prefix)
+
+        client.embed_batch(["find all routes", "database query"])
+
+        texts_sent = fake_model.encode_calls[0]["texts"]
+        assert texts_sent == [
+            f"{prefix}find all routes",
+            f"{prefix}database query",
+        ]
+
+    def test_no_prefix_when_empty(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
+        client = CodeRankEmbeddingClient(model=fake_model, query_prefix="")
+
+        client.embed_batch(["app.get('/users')"])
+
+        texts_sent = fake_model.encode_calls[0]["texts"]
+        assert texts_sent == ["app.get('/users')"]
+
+    def test_normalize_embeddings_passed(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
+        client = CodeRankEmbeddingClient(model=fake_model)
+
+        client.embed_batch(["test"])
+
+        assert fake_model.encode_calls[0]["kwargs"]["normalize_embeddings"] is True
+
+    def test_custom_model_name_stored(self):
+        fake_model = _FakeSentenceTransformerModel()
+        client = CodeRankEmbeddingClient(model_name="custom/model", model=fake_model)
+
+        assert client._model_name == "custom/model"
+
+
+class TestCodeRankBatching:
+    """Verify batching splits texts into chunks of _BATCH_SIZE."""
+
+    def test_texts_split_into_correct_batches(self):
+        num_texts = _BATCH_SIZE + 10
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=2)
+        client = CodeRankEmbeddingClient(model=fake_model)
+
+        texts = [f"text_{i}" for i in range(num_texts)]
+        result = client.embed_batch(texts)
+
+        assert len(result) == num_texts
+        assert len(fake_model.encode_calls) == 2
+        assert len(fake_model.encode_calls[0]["texts"]) == _BATCH_SIZE
+        assert len(fake_model.encode_calls[1]["texts"]) == 10

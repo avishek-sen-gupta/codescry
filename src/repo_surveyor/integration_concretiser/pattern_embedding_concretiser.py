@@ -63,8 +63,19 @@ _DEFAULT_THRESHOLD = 0.62
 _EMPTY_PATH = Path()
 
 
-def _default_cache_path(backend: str) -> Path:
-    """Return the conventional cache file path for a given backend."""
+def _default_cache_path(backend: str, model: str = "") -> Path:
+    """Return the conventional cache file path for a given backend.
+
+    When *model* is provided, the sanitised model name (``/`` replaced with
+    ``--``) is appended to distinguish caches from different models within the
+    same backend.  When *model* is empty, the filename is unchanged for
+    backwards compatibility with backends that don't expose a model choice.
+    """
+    if model:
+        sanitised = model.replace("/", "--")
+        return Path(
+            f"data/embeddings/pattern_description_embeddings_{backend}_{sanitised}.json"
+        )
     return Path(f"data/embeddings/pattern_description_embeddings_{backend}.json")
 
 

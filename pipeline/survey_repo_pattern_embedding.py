@@ -5,7 +5,7 @@ per-pattern descriptions attached to every regex pattern.  A nearest-neighbor
 lookup against these pre-embedded descriptions classifies each signal,
 capturing framework-specific semantics.
 
-Supports four embedding backends via --backend:
+Supports five embedding backends via --backend:
   - huggingface (default): nomic-embed-code via HuggingFace Inference Endpoint
     Requires HUGGING_FACE_URL and HUGGING_FACE_API_TOKEN env vars.
   - gemini: gemini-embedding-001 via Google Gemini API
@@ -14,12 +14,15 @@ Supports four embedding backends via --backend:
     No API key required.  Use --model and --ollama-url to customise.
   - hf-local: Salesforce/codet5p-110m-embedding via local HuggingFace transformers
     No API server needed.  Use --model to customise.
+  - coderank: nomic-ai/CodeRankEmbed via local sentence-transformers
+    No API server needed.  768-dim, 8192-token context.  Use --model to customise.
 
 Usage:
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend gemini
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend ollama
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend hf-local
+    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend coderank
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --languages Java
 """
 
@@ -34,10 +37,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from repo_surveyor import survey
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
+    CodeRankEmbeddingClient,
     EmbeddingClient,
     GeminiEmbeddingClient,
     HuggingFaceLocalEmbeddingClient,
     OllamaEmbeddingClient,
+    _CODERANK_DEFAULT_MODEL,
 )
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
     PatternEmbeddingConcretiser,
@@ -50,6 +55,19 @@ from repo_surveyor.training.signal_classifier import NullSignalClassifier
 
 logger = logging.getLogger(__name__)
 
+_BACKEND_DEFAULT_MODELS: dict[str, str] = {
+    "ollama": "unclemusclez/jina-embeddings-v2-base-code",
+    "hf-local": "Salesforce/codet5p-110m-embedding",
+    "coderank": _CODERANK_DEFAULT_MODEL,
+}
+
+
+def _resolve_model(args: argparse.Namespace) -> str:
+    """Return the effective model name, applying per-backend defaults."""
+    if args.model:
+        return args.model
+    return _BACKEND_DEFAULT_MODELS.get(args.backend, "")
+
 
 def _create_client(
     args: argparse.Namespace,
@@ -58,12 +76,16 @@ def _create_client(
     | GeminiEmbeddingClient
     | OllamaEmbeddingClient
     | HuggingFaceLocalEmbeddingClient
+    | CodeRankEmbeddingClient
 ):
     """Create the appropriate embedding client based on the backend choice."""
+    model = _resolve_model(args)
+    if args.backend == "coderank":
+        return CodeRankEmbeddingClient(model_name=model)
     if args.backend == "hf-local":
-        return HuggingFaceLocalEmbeddingClient(model_name=args.model)
+        return HuggingFaceLocalEmbeddingClient(model_name=model)
     if args.backend == "ollama":
-        return OllamaEmbeddingClient(model=args.model, base_url=args.ollama_url)
+        return OllamaEmbeddingClient(model=model, base_url=args.ollama_url)
     if args.backend == "gemini":
         api_key = os.environ["GEMINI_001_EMBEDDING_API_KEY"]
         return GeminiEmbeddingClient(api_key=api_key)
@@ -107,24 +129,27 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--backend",
-        choices=["huggingface", "gemini", "ollama", "hf-local"],
+        choices=["huggingface", "gemini", "ollama", "hf-local", "coderank"],
         default="huggingface",
         help=(
             "Embedding backend: huggingface (nomic-embed-code), "
             "gemini (gemini-embedding-001), "
-            "ollama (local, default model jina/jina-embeddings-v2-base-code), or "
+            "ollama (local, default model jina/jina-embeddings-v2-base-code), "
             "hf-local (local HuggingFace transformers, default model "
-            "Salesforce/codet5p-110m-embedding). "
+            "Salesforce/codet5p-110m-embedding), or "
+            "coderank (local sentence-transformers, default model "
+            "nomic-ai/CodeRankEmbed). "
             "Default: huggingface."
         ),
     )
     parser.add_argument(
         "--model",
-        default="unclemusclez/jina-embeddings-v2-base-code",
+        default="",
         help=(
-            "Model name (used with --backend ollama or --backend hf-local). "
-            "Default: unclemusclez/jina-embeddings-v2-base-code for ollama, "
-            "Salesforce/codet5p-110m-embedding for hf-local."
+            "Model name (used with --backend ollama, hf-local, or coderank). "
+            "Defaults: unclemusclez/jina-embeddings-v2-base-code for ollama, "
+            "Salesforce/codet5p-110m-embedding for hf-local, "
+            "nomic-ai/CodeRankEmbed for coderank."
         ),
     )
     parser.add_argument(
@@ -188,7 +213,8 @@ def main() -> None:
     # --- Phase 2: Pattern-embedding concretisation ---
     logger.info("--- Phase 2: Pattern-embedding concretisation ---")
     client = _create_client(args)
-    cache_path = _default_cache_path(args.backend)
+    model = _resolve_model(args)
+    cache_path = _default_cache_path(args.backend, model=model)
     logger.info("Embedding cache path: %s", cache_path)
     concretiser = PatternEmbeddingConcretiser(
         client, threshold=args.threshold, cache_path=cache_path

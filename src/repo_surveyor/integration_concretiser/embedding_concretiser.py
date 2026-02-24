@@ -5,11 +5,12 @@ DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE by computing cosine
 similarity against 26 directional description embeddings (13 integration
 types x 2 directions).
 
-Supports four embedding backends:
+Supports five embedding backends:
   - HuggingFace Inference Endpoint (nomic-embed-code) via ``EmbeddingClient``
   - Google Gemini (gemini-embedding-001) via ``GeminiEmbeddingClient``
   - Local Ollama (unclemusclez/jina-embeddings-v2-base-code) via ``OllamaEmbeddingClient``
   - Local HuggingFace transformers (Salesforce/codet5p-110m-embedding) via ``HuggingFaceLocalEmbeddingClient``
+  - Local sentence-transformers (nomic-ai/CodeRankEmbed) via ``CodeRankEmbeddingClient``
 
 All implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
 is backend-agnostic.
@@ -20,6 +21,7 @@ Usage:
         GeminiEmbeddingClient,
         OllamaEmbeddingClient,
         HuggingFaceLocalEmbeddingClient,
+        CodeRankEmbeddingClient,
         EmbeddingConcretiser,
     )
     # HuggingFace Inference Endpoint backend
@@ -30,6 +32,8 @@ Usage:
     client = OllamaEmbeddingClient()
     # -- or HuggingFace local backend (no API server needed) --
     client = HuggingFaceLocalEmbeddingClient()
+    # -- or CodeRankEmbed backend (local, asymmetric embedding) --
+    client = CodeRankEmbeddingClient()
     concretiser = EmbeddingConcretiser(client)
     result, metadata = concretiser.concretise(detector_result, file_reader)
 """
@@ -500,6 +504,99 @@ class HuggingFaceLocalEmbeddingClient:
             inputs = inputs.to(self._device)
         output = self._model(inputs)[0]
         return output.detach().cpu().tolist()
+
+
+_CODERANK_DEFAULT_MODEL = "nomic-ai/CodeRankEmbed"
+_CODERANK_QUERY_PREFIX = "Represent this query for searching relevant code: "
+
+
+class CodeRankEmbeddingClient:
+    """Embedding client using sentence-transformers with CodeRankEmbed.
+
+    Uses ``sentence_transformers.SentenceTransformer`` to load a code embedding
+    model locally.  Default model: ``nomic-ai/CodeRankEmbed`` (768-dim, 8192-token
+    context, asymmetric embedding).
+
+    The ``query_prefix`` parameter supports CodeRankEmbed's asymmetric embedding:
+    natural-language queries should be prefixed with
+    ``"Represent this query for searching relevant code: "``, while code documents
+    are embedded as-is (empty prefix).
+    """
+
+    def __init__(
+        self,
+        model_name: str = _CODERANK_DEFAULT_MODEL,
+        device: str = "cpu",
+        query_prefix: str = "",
+        model: object = None,
+    ) -> None:
+        self._model_name = model_name
+        self._device = device
+        self._query_prefix = query_prefix
+
+        if model is not None:
+            self._model = model
+        else:
+            from sentence_transformers import SentenceTransformer
+
+            logger.info(
+                "[CodeRank] Loading model: %s (device=%s)",
+                model_name,
+                device,
+            )
+            self._model = SentenceTransformer(
+                model_name, trust_remote_code=True, device=device
+            )
+            logger.info("[CodeRank] Model loaded successfully")
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed a list of texts using the sentence-transformers model."""
+        import time
+
+        prefixed_texts = (
+            [f"{self._query_prefix}{t}" for t in texts] if self._query_prefix else texts
+        )
+
+        total_texts = len(prefixed_texts)
+        total_batches = math.ceil(total_texts / _BATCH_SIZE) if total_texts else 0
+        logger.info(
+            "[CodeRank] Embedding %d texts in %d batches (batch_size=%d, model=%s)",
+            total_texts,
+            total_batches,
+            _BATCH_SIZE,
+            self._model_name,
+        )
+
+        all_embeddings: list[list[float]] = []
+        for batch_idx, chunk in enumerate(
+            batched(prefixed_texts, _BATCH_SIZE), start=1
+        ):
+            chunk_list = list(chunk)
+            logger.info(
+                "[CodeRank] Batch %d/%d: embedding %d texts",
+                batch_idx,
+                total_batches,
+                len(chunk_list),
+            )
+            t0 = time.monotonic()
+            result = self._model.encode(chunk_list, normalize_embeddings=True)
+            batch_embeddings = [vec.tolist() for vec in result]
+            elapsed = time.monotonic() - t0
+            dim = len(batch_embeddings[0]) if batch_embeddings else 0
+            logger.info(
+                "[CodeRank] Batch %d/%d: produced %d embeddings (dim=%d) in %.2fs",
+                batch_idx,
+                total_batches,
+                len(batch_embeddings),
+                dim,
+                elapsed,
+            )
+            all_embeddings.extend(batch_embeddings)
+
+        logger.info(
+            "[CodeRank] Embedding complete: %d total embeddings", len(all_embeddings)
+        )
+        return all_embeddings
 
 
 _OLLAMA_DEFAULT_MODEL = "unclemusclez/jina-embeddings-v2-base-code"

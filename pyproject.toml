@@ -25,6 +25,11 @@ hf-local = [
     "transformers (>=4.30.0)",
     "torch (>=2.0.0)",
 ]
+coderank = [
+    "sentence-transformers (>=3.0.0)",
+    "torch (>=2.0.0)",
+    "einops (>=0.7.0)",
+]
 
 [tool.poetry]
 packages = [{include = "repo_surveyor", from = "src"}]

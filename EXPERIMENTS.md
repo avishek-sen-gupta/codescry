@@ -20,6 +20,10 @@ Applied the 7 description rules to all 3,430 pattern descriptions (3,017 unique)
 
 Running on `restful-rust` (a Warp REST API) exposed two compounding issues: sparse Warp patterns (1 pattern) and broken Rust AST walk-up (`*_item` suffix not recognised as definitions). Expanding Warp to 25 patterns increased signal detection from 2 to 44. Adding Rust `*_item` definition nodes to the AST walker improved classification from 6 to 17 signals (9 inward, 7 outward). Discovered that function-level AST context can cause direction misclassification when signatures contain database parameters (`db: Db`), pulling route definitions toward `database/outward`. [Details](#warp-pattern-expansion--rust-ast-walker-fix)
 
+### 5. CodeRankEmbed as Local Backend (Negative Result)
+
+Added `nomic-ai/CodeRankEmbed` (768-dim, 8192-token context, 137M params) as a fifth embedding backend via `sentence-transformers`. On smojol-api (22 Java signals), CodeRankEmbed classified only 1 signal (4.5%) at threshold 0.50 — worse than both CodeT5 (50%) and Gemini (91%). Targeted probing revealed that CodeRankEmbed performs **learned sparse retrieval** (lexical matching in embedding space), not semantic classification: pasting code tokens as a "description" scores higher than semantically correct descriptions, and semantically wrong descriptions with lexical overlap outscore semantically perfect ones without it. The model is unsuitable for our description-to-code classification task. [Details](#coderankembed-as-local-backend-negative-result)
+
 ### Key Metrics Across Experiments
 
 | Experiment | Repo | Backend | Signals | Classified | Inward | Outward | Ambiguous |
@@ -29,12 +33,14 @@ Running on `restful-rust` (a Warp REST API) exposed two compounding issues: spar
 | CodeT5 full repo (pre-rewrite) | smojol | hf-local | 758 | 54 (7.1%) | 10 | 10 | 34 |
 | CodeT5 full repo (post-rewrite) | smojol | hf-local | 758 | 33 (4.4%) | 14 | 9 | 10 |
 | Warp + AST fix | restful-rust | hf-local | 44 | 17 (38.6%) | 9 | 7 | 1 |
+| **CodeRankEmbed** | **smojol-api** | **coderank** | **22** | **1 (4.5%)** | **1** | **0** | **0** |
 
 ### Open Challenges
 
 1. **CodeT5 score compression**: Scores cluster in a narrow band (0.47-0.53), making threshold selection fragile and leaving many genuine signals borderline.
 2. **Signature pollution**: Function-level AST context includes parameter types that can dominate the embedding, causing misclassification (e.g., route functions with `Db` parameters classified as `database/outward`).
 3. **Cross-framework matching**: CodeT5 captures domain semantics ("routes", "database") rather than framework-specific API structure, so signals match descriptions from unrelated frameworks (Rails, jOOQ) instead of the correct one (Warp).
+4. **Local embedding models are retrieval-oriented**: Both CodeT5 and CodeRankEmbed are trained for code search/retrieval, not semantic classification. They reward lexical overlap between query and document rather than abstract semantic equivalence, which is what our description-to-code classification task requires.
 
 ---
 
@@ -340,3 +346,99 @@ The combined Warp expansion + Rust AST walker fix transforms detection from near
 1. **Score compression**: CodeT5 scores cluster in the 0.47-0.53 range, making threshold selection fragile. Many genuine route signals sit just above/below the 0.50 threshold.
 2. **Signature pollution**: Function-level AST context includes parameter types that can override the embedding's code-structure signal, causing route definitions with database parameters to misclassify as `database/outward`.
 3. **Cross-framework matching**: Signals often match descriptions from unrelated frameworks (Rails, jOOQ, Play) rather than Warp, because CodeT5 captures domain semantics ("routes", "database") rather than framework-specific API structure.
+
+---
+
+## CodeRankEmbed as Local Backend (Negative Result)
+
+### Background
+
+Previous experiments showed CodeT5 (256-dim, 512-token limit) produces compressed similarity scores unsuitable as a Gemini replacement. `nomic-ai/CodeRankEmbed` is a 137M-parameter code embedding model with 768-dim vectors and 8192-token context — matching Gemini's dimensionality with 16x the context window of CodeT5, and running locally with no API costs via `sentence-transformers`.
+
+CodeRankEmbed uses **asymmetric embedding**: natural-language queries must be prefixed with `"Represent this query for searching relevant code: "`, while code documents are embedded as-is. Our pipeline handles this by applying the prefix only when pre-building the description cache (build step), while the survey pipeline embeds code signals without the prefix.
+
+### Implementation
+
+Added as a fifth embedding backend (`--backend coderank`):
+
+- `CodeRankEmbeddingClient` in `embedding_concretiser.py` using `sentence_transformers.SentenceTransformer`
+- `query_prefix` parameter for asymmetric embedding (prefix applied in cache builder, not in survey)
+- `normalize_embeddings=True` for L2-normalised output
+- Optional dependencies: `sentence-transformers>=3.0.0`, `torch>=2.0.0`, `einops>=0.7.0` (install with `poetry install -E coderank`)
+- Model-aware cache naming: `pattern_description_embeddings_coderank_nomic-ai--CodeRankEmbed.json`
+
+### Results: smojol-api (22 signals, Java)
+
+Threshold: 0.50
+
+| Backend | Classified | Inward | Outward | Ambiguous | Noise |
+|---------|-----------|--------|---------|-----------|-------|
+| **CodeRankEmbed** | 1 / 22 (4.5%) | 1 | 0 | 0 | 21 |
+| CodeT5 (0.58 threshold) | 11 / 22 (50%) | 10 | 1 | 0 | 11 |
+| Gemini (0.62 threshold) | 20 / 22 (91%) | 17 | 3 | 0 | 2 |
+
+The single classified signal was `config.requestLogger.http(...)` at score 0.572, matching "HTTP request logging is enabled for server" (Warp). All 10 Javalin `.get(...)` route registrations scored 0.393 — well below threshold. The `DriverManager.getConnection` line (the strongest signal for other backends) scored only 0.436.
+
+Score distribution: 0.258 – 0.572, with 20 of 22 signals below 0.44. Directions were qualitatively correct (Javalin routes → `http_rest/inward`, database lines → `database/outward`), but scores are too compressed for any threshold to cleanly separate signal from noise.
+
+### Diagnostic Probing: Lexical vs Semantic Sensitivity
+
+To understand *why* scores are so low, we embedded the full Javalin code block (the chained `Javalin.create(config -> {...}).get(...).get(...).start(port)` spanning ~40 lines) against a controlled set of descriptions varying along two axes: **lexical overlap** (shared tokens with the code) and **semantic correctness** (whether the description accurately describes what the code does).
+
+#### Declarative descriptions (our registry style)
+
+| Score | Description | Notes |
+|-------|-------------|-------|
+| 0.442 | Javalin web server with GET route handlers | Best: has "Javalin", "GET", "route", "handlers" |
+| 0.421 | Javalin .get() route registration with lambda handler | Framework-specific |
+| 0.222 | REST endpoint is exposed for inbound requests | Our registry style |
+| 0.111 | GET route is registered for HTTP endpoint | Our registry style |
+| 0.111 | HTTP communication is indicated | Our registry style |
+
+Our existing pattern descriptions ("GET route is registered for HTTP endpoint") score near the bottom. The model strongly rewards descriptions containing tokens that appear literally in the code ("Javalin", "get", "json", "ctx").
+
+#### Query-like descriptions
+
+Rewording as natural-language search queries (e.g., "how to define REST API routes in Java") did **not** improve scores. Top score dropped from 0.442 to 0.409. The query prefix helps (~0.10 boost over no prefix), but the model doesn't reward query phrasing over declarative phrasing — it rewards lexical overlap.
+
+#### Controlled lexical vs semantic experiment
+
+| Group | Score Range | Example |
+|-------|-----------|---------|
+| **Extreme lexical overlap** (code tokens pasted as description) | 0.18 – **0.50** | "Javalin.create config jsonMapper get api ctx json" (0.497) |
+| **Semantically wrong + lexical match** | 0.14 – **0.34** | "Javalin.create DELETE route that removes data" (0.340) |
+| **Semantically perfect + zero lexical overlap** | 0.14 – 0.25 | "web framework route registration" (0.220) |
+| **Semantically perfect + some overlap** | 0.15 – **0.43** | "Javalin route registration" (0.433) |
+| **Unrelated + same tokens** | 0.10 – **0.30** | "get the path of the static flowchart" (0.302) |
+| **Truly unrelated** | 0.06 – 0.11 | "quicksort algorithm implementation" (0.061) |
+
+The smoking gun: **"Javalin.create DELETE route that removes data"** (0.340, semantically wrong) scores higher than **"HTTP endpoint handler definition"** (0.223, semantically correct) and **"web framework route registration"** (0.220, semantically correct). Pasting raw code tokens as a "description" reaches **0.497** — the highest score in the entire experiment — while abstract semantic descriptions max out at 0.25.
+
+### Analysis
+
+CodeRankEmbed is performing **learned sparse retrieval in embedding space** — functionally closer to BM25 than to semantic similarity. The model was trained for code search ("given a natural language query containing keywords, find the code that matches"), not for semantic classification ("does this code implement concept X regardless of which tokens appear").
+
+This explains:
+1. **Why lexical overlap dominates**: The training objective rewards matching query tokens to code tokens, not understanding abstract relationships.
+2. **Why the query prefix doesn't help**: The prefix shifts the embedding toward the query distribution, but the similarity function is still driven by token co-occurrence.
+3. **Why scores are compressed**: Our descriptions share very few tokens with arbitrary code, so the model's retrieval mechanism has nothing to latch onto. Similarity scores cluster near zero for any description that doesn't contain framework-specific identifiers.
+4. **Why non-HTTP types separate cleanly**: This is the one thing the model *can* do — database/messaging/socket code uses completely different vocabulary from HTTP code, so lexical separation works even without semantic understanding.
+
+### Comparison with CodeT5
+
+| Property | CodeT5 | CodeRankEmbed |
+|----------|--------|---------------|
+| Embedding dim | 256 | 768 |
+| Context window | 512 tokens | 8192 tokens |
+| Score range (smojol-api) | 0.31 – 0.66 | 0.26 – 0.57 |
+| Classification rate | 50% (0.58 threshold) | 4.5% (0.50 threshold) |
+| Similarity mechanism | Semantic (weak) | Lexical (strong) |
+| Description style sensitivity | Moderate (passive voice helps) | Extreme (needs code tokens) |
+
+CodeT5 at least demonstrates weak semantic understanding — passive-voice descriptions improve scores, and the model can match "database connection" to `DriverManager.getConnection` without shared tokens. CodeRankEmbed shows no such semantic transfer; it is strictly a lexical matching model.
+
+### Verdict
+
+CodeRankEmbed is **unsuitable for description-to-code classification**. Despite superior specs (768-dim, 8192-token context), the model's retrieval-oriented training objective makes it fundamentally incompatible with our pipeline, which requires abstract semantic similarity between natural-language pattern descriptions and arbitrary framework code. The model would only work if descriptions were rewritten to contain the exact API tokens of every framework variant — which defeats the purpose of a framework-agnostic classification system.
+
+The broader lesson: **code embedding models trained for code search (query → code retrieval) are not interchangeable with models trained for code understanding (semantic similarity)**. Our pipeline needs the latter. Among the backends tested so far, only Gemini (a general-purpose embedding model) achieves the semantic abstraction required for reliable classification.
