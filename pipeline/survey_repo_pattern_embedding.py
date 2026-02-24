@@ -5,7 +5,7 @@ per-pattern descriptions attached to every regex pattern.  A nearest-neighbor
 lookup against these pre-embedded descriptions classifies each signal,
 capturing framework-specific semantics.
 
-Supports five embedding backends via --backend:
+Supports six embedding backends via --backend:
   - huggingface (default): nomic-embed-code via HuggingFace Inference Endpoint
     Requires HUGGING_FACE_URL and HUGGING_FACE_API_TOKEN env vars.
   - gemini: gemini-embedding-001 via Google Gemini API
@@ -16,6 +16,9 @@ Supports five embedding backends via --backend:
     No API server needed.  Use --model to customise.
   - coderank: nomic-ai/CodeRankEmbed via local sentence-transformers
     No API server needed.  768-dim, 8192-token context.  Use --model to customise.
+  - bge: BAAI/bge-base-en-v1.5 via local sentence-transformers
+    No API server needed.  768-dim, general-purpose semantic embedding.
+    Use --model to customise.
 
 Usage:
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo
@@ -23,6 +26,7 @@ Usage:
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend ollama
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend hf-local
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend coderank
+    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend bge
     poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --languages Java
 """
 
@@ -37,11 +41,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from repo_surveyor import survey
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
+    BGEEmbeddingClient,
     CodeRankEmbeddingClient,
     EmbeddingClient,
     GeminiEmbeddingClient,
     HuggingFaceLocalEmbeddingClient,
     OllamaEmbeddingClient,
+    _BGE_DEFAULT_MODEL,
     _CODERANK_DEFAULT_MODEL,
 )
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
@@ -59,6 +65,7 @@ _BACKEND_DEFAULT_MODELS: dict[str, str] = {
     "ollama": "unclemusclez/jina-embeddings-v2-base-code",
     "hf-local": "Salesforce/codet5p-110m-embedding",
     "coderank": _CODERANK_DEFAULT_MODEL,
+    "bge": _BGE_DEFAULT_MODEL,
 }
 
 
@@ -76,10 +83,11 @@ def _create_client(
     | GeminiEmbeddingClient
     | OllamaEmbeddingClient
     | HuggingFaceLocalEmbeddingClient
-    | CodeRankEmbeddingClient
 ):
     """Create the appropriate embedding client based on the backend choice."""
     model = _resolve_model(args)
+    if args.backend == "bge":
+        return BGEEmbeddingClient(model_name=model)
     if args.backend == "coderank":
         return CodeRankEmbeddingClient(model_name=model)
     if args.backend == "hf-local":
@@ -129,16 +137,18 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--backend",
-        choices=["huggingface", "gemini", "ollama", "hf-local", "coderank"],
+        choices=["huggingface", "gemini", "ollama", "hf-local", "coderank", "bge"],
         default="huggingface",
         help=(
             "Embedding backend: huggingface (nomic-embed-code), "
             "gemini (gemini-embedding-001), "
             "ollama (local, default model jina/jina-embeddings-v2-base-code), "
             "hf-local (local HuggingFace transformers, default model "
-            "Salesforce/codet5p-110m-embedding), or "
+            "Salesforce/codet5p-110m-embedding), "
             "coderank (local sentence-transformers, default model "
-            "nomic-ai/CodeRankEmbed). "
+            "nomic-ai/CodeRankEmbed), or "
+            "bge (local sentence-transformers, default model "
+            "BAAI/bge-base-en-v1.5). "
             "Default: huggingface."
         ),
     )
@@ -146,10 +156,11 @@ def _parse_args() -> argparse.Namespace:
         "--model",
         default="",
         help=(
-            "Model name (used with --backend ollama, hf-local, or coderank). "
+            "Model name (used with --backend ollama, hf-local, coderank, or bge). "
             "Defaults: unclemusclez/jina-embeddings-v2-base-code for ollama, "
             "Salesforce/codet5p-110m-embedding for hf-local, "
-            "nomic-ai/CodeRankEmbed for coderank."
+            "nomic-ai/CodeRankEmbed for coderank, "
+            "BAAI/bge-base-en-v1.5 for bge."
         ),
     )
     parser.add_argument(

@@ -5,12 +5,13 @@ DEFINITE_INWARD, DEFINITE_OUTWARD, or NOT_DEFINITE by computing cosine
 similarity against 26 directional description embeddings (13 integration
 types x 2 directions).
 
-Supports five embedding backends:
+Supports six embedding backends:
   - HuggingFace Inference Endpoint (nomic-embed-code) via ``EmbeddingClient``
   - Google Gemini (gemini-embedding-001) via ``GeminiEmbeddingClient``
   - Local Ollama (unclemusclez/jina-embeddings-v2-base-code) via ``OllamaEmbeddingClient``
   - Local HuggingFace transformers (Salesforce/codet5p-110m-embedding) via ``HuggingFaceLocalEmbeddingClient``
   - Local sentence-transformers (nomic-ai/CodeRankEmbed) via ``CodeRankEmbeddingClient``
+  - Local sentence-transformers (BAAI/bge-base-en-v1.5) via ``BGEEmbeddingClient``
 
 All implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
 is backend-agnostic.
@@ -22,6 +23,7 @@ Usage:
         OllamaEmbeddingClient,
         HuggingFaceLocalEmbeddingClient,
         CodeRankEmbeddingClient,
+        BGEEmbeddingClient,
         EmbeddingConcretiser,
     )
     # HuggingFace Inference Endpoint backend
@@ -34,6 +36,8 @@ Usage:
     client = HuggingFaceLocalEmbeddingClient()
     # -- or CodeRankEmbed backend (local, asymmetric embedding) --
     client = CodeRankEmbeddingClient()
+    # -- or BGE backend (local, general-purpose semantic embedding) --
+    client = BGEEmbeddingClient()
     concretiser = EmbeddingConcretiser(client)
     result, metadata = concretiser.concretise(detector_result, file_reader)
 """
@@ -508,19 +512,25 @@ class HuggingFaceLocalEmbeddingClient:
 
 _CODERANK_DEFAULT_MODEL = "nomic-ai/CodeRankEmbed"
 _CODERANK_QUERY_PREFIX = "Represent this query for searching relevant code: "
+_BGE_DEFAULT_MODEL = "BAAI/bge-base-en-v1.5"
 
 
-class CodeRankEmbeddingClient:
-    """Embedding client using sentence-transformers with CodeRankEmbed.
+class SentenceTransformerEmbeddingClient:
+    """Embedding client using sentence-transformers.
 
-    Uses ``sentence_transformers.SentenceTransformer`` to load a code embedding
-    model locally.  Default model: ``nomic-ai/CodeRankEmbed`` (768-dim, 8192-token
-    context, asymmetric embedding).
+    Uses ``sentence_transformers.SentenceTransformer`` to load any compatible
+    embedding model locally.  Works with both code-specific models like
+    ``nomic-ai/CodeRankEmbed`` (768-dim, 8192-token, asymmetric) and
+    general-purpose models like ``BAAI/bge-base-en-v1.5`` (768-dim).
 
-    The ``query_prefix`` parameter supports CodeRankEmbed's asymmetric embedding:
-    natural-language queries should be prefixed with
-    ``"Represent this query for searching relevant code: "``, while code documents
-    are embedded as-is (empty prefix).
+    The ``query_prefix`` parameter supports asymmetric embedding models:
+    natural-language queries can be prefixed (e.g. CodeRankEmbed requires
+    ``"Represent this query for searching relevant code: "``), while code
+    documents are embedded as-is (empty prefix).
+
+    Set ``trust_remote_code=True`` for models that ship custom code
+    (e.g. CodeRankEmbed).  Standard HuggingFace models (e.g. BGE) do not
+    need this.
     """
 
     def __init__(
@@ -528,6 +538,7 @@ class CodeRankEmbeddingClient:
         model_name: str = _CODERANK_DEFAULT_MODEL,
         device: str = "cpu",
         query_prefix: str = "",
+        trust_remote_code: bool = False,
         model: object = None,
     ) -> None:
         self._model_name = model_name
@@ -540,14 +551,15 @@ class CodeRankEmbeddingClient:
             from sentence_transformers import SentenceTransformer
 
             logger.info(
-                "[CodeRank] Loading model: %s (device=%s)",
+                "[SentenceTransformer] Loading model: %s (device=%s, trust_remote_code=%s)",
                 model_name,
                 device,
+                trust_remote_code,
             )
             self._model = SentenceTransformer(
-                model_name, trust_remote_code=True, device=device
+                model_name, trust_remote_code=trust_remote_code, device=device
             )
-            logger.info("[CodeRank] Model loaded successfully")
+            logger.info("[SentenceTransformer] Model loaded successfully")
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Embed a list of texts using the sentence-transformers model."""
@@ -560,7 +572,7 @@ class CodeRankEmbeddingClient:
         total_texts = len(prefixed_texts)
         total_batches = math.ceil(total_texts / _BATCH_SIZE) if total_texts else 0
         logger.info(
-            "[CodeRank] Embedding %d texts in %d batches (batch_size=%d, model=%s)",
+            "[ST] Embedding %d texts in %d batches (batch_size=%d, model=%s)",
             total_texts,
             total_batches,
             _BATCH_SIZE,
@@ -573,7 +585,7 @@ class CodeRankEmbeddingClient:
         ):
             chunk_list = list(chunk)
             logger.info(
-                "[CodeRank] Batch %d/%d: embedding %d texts",
+                "[ST] Batch %d/%d: embedding %d texts",
                 batch_idx,
                 total_batches,
                 len(chunk_list),
@@ -584,7 +596,7 @@ class CodeRankEmbeddingClient:
             elapsed = time.monotonic() - t0
             dim = len(batch_embeddings[0]) if batch_embeddings else 0
             logger.info(
-                "[CodeRank] Batch %d/%d: produced %d embeddings (dim=%d) in %.2fs",
+                "[ST] Batch %d/%d: produced %d embeddings (dim=%d) in %.2fs",
                 batch_idx,
                 total_batches,
                 len(batch_embeddings),
@@ -593,10 +605,39 @@ class CodeRankEmbeddingClient:
             )
             all_embeddings.extend(batch_embeddings)
 
-        logger.info(
-            "[CodeRank] Embedding complete: %d total embeddings", len(all_embeddings)
-        )
+        logger.info("[ST] Embedding complete: %d total embeddings", len(all_embeddings))
         return all_embeddings
+
+
+def CodeRankEmbeddingClient(
+    model_name: str = _CODERANK_DEFAULT_MODEL,
+    device: str = "cpu",
+    query_prefix: str = "",
+    model: object = None,
+) -> SentenceTransformerEmbeddingClient:
+    """Create a SentenceTransformerEmbeddingClient configured for CodeRankEmbed."""
+    return SentenceTransformerEmbeddingClient(
+        model_name=model_name,
+        device=device,
+        query_prefix=query_prefix,
+        trust_remote_code=True,
+        model=model,
+    )
+
+
+def BGEEmbeddingClient(
+    model_name: str = _BGE_DEFAULT_MODEL,
+    device: str = "cpu",
+    model: object = None,
+) -> SentenceTransformerEmbeddingClient:
+    """Create a SentenceTransformerEmbeddingClient configured for BGE models."""
+    return SentenceTransformerEmbeddingClient(
+        model_name=model_name,
+        device=device,
+        query_prefix="",
+        trust_remote_code=False,
+        model=model,
+    )
 
 
 _OLLAMA_DEFAULT_MODEL = "unclemusclez/jina-embeddings-v2-base-code"

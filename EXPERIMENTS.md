@@ -24,6 +24,10 @@ Running on `restful-rust` (a Warp REST API) exposed two compounding issues: spar
 
 Added `nomic-ai/CodeRankEmbed` (768-dim, 8192-token context, 137M params) as a fifth embedding backend via `sentence-transformers`. On smojol-api (22 Java signals), CodeRankEmbed classified only 1 signal (4.5%) at threshold 0.50 — worse than both CodeT5 (50%) and Gemini (91%). Targeted probing revealed that CodeRankEmbed performs **learned sparse retrieval** (lexical matching in embedding space), not semantic classification: pasting code tokens as a "description" scores higher than semantically correct descriptions, and semantically wrong descriptions with lexical overlap outscore semantically perfect ones without it. The model is unsuitable for our description-to-code classification task. [Details](#coderankembed-as-local-backend-negative-result)
 
+### 6. BGE-base-en-v1.5 as Local Backend (Positive Result)
+
+Added `BAAI/bge-base-en-v1.5` (768-dim, 110M params, general-purpose) as a sixth embedding backend via `sentence-transformers`. On smojol-api (22 Java signals), BGE classified **22/22 (100%)** at threshold 0.50 — surpassing Gemini's 91%. On restful-rust (44 Rust signals), BGE classified **44/44 (100%)**. On the full smojol repo (758 signals), BGE at threshold 0.50 classified **758/758 (100%)** (69 inward, 336 outward, 353 ambiguous); raising the threshold to 0.70 classified **231/758 (30.5%)** (33 inward, 85 outward, 113 ambiguous) — still far above CodeT5's 7.1% and with a much stronger directional signal. Score distribution across the full repo: min 0.57, max 0.84, mean 0.69, median 0.68. BGE is a general-purpose text embedding model trained for semantic similarity, which turns out to be exactly what our description-to-code classification task requires. A follow-up comparison against 5 SOTA models (BGE-large, Snowflake Arctic, Nomic Embed v1.5, all-mpnet-base-v2, CodeCSE) confirmed that BGE-base is the optimal local model — newer/larger models offer no improvement and some are worse, because MTEB retrieval scores do not predict cross-modal description-to-code classification quality. [Details](#bge-base-en-v15-as-local-backend)
+
 ### Key Metrics Across Experiments
 
 | Experiment | Repo | Backend | Signals | Classified | Inward | Outward | Ambiguous |
@@ -34,13 +38,17 @@ Added `nomic-ai/CodeRankEmbed` (768-dim, 8192-token context, 137M params) as a f
 | CodeT5 full repo (post-rewrite) | smojol | hf-local | 758 | 33 (4.4%) | 14 | 9 | 10 |
 | Warp + AST fix | restful-rust | hf-local | 44 | 17 (38.6%) | 9 | 7 | 1 |
 | **CodeRankEmbed** | **smojol-api** | **coderank** | **22** | **1 (4.5%)** | **1** | **0** | **0** |
+| **BGE-base** | **smojol-api** | **bge** | **22** | **22 (100%)** | **17** | **2** | **3** |
+| **BGE-base** | **restful-rust** | **bge** | **44** | **44 (100%)** | **30** | **14** | **0** |
+| **BGE-base (0.50)** | **smojol** | **bge** | **758** | **758 (100%)** | **69** | **336** | **353** |
+| **BGE-base (0.70)** | **smojol** | **bge** | **758** | **231 (30.5%)** | **33** | **85** | **113** |
 
 ### Open Challenges
 
 1. **CodeT5 score compression**: Scores cluster in a narrow band (0.47-0.53), making threshold selection fragile and leaving many genuine signals borderline.
 2. **Signature pollution**: Function-level AST context includes parameter types that can dominate the embedding, causing misclassification (e.g., route functions with `Db` parameters classified as `database/outward`).
 3. **Cross-framework matching**: CodeT5 captures domain semantics ("routes", "database") rather than framework-specific API structure, so signals match descriptions from unrelated frameworks (Rails, jOOQ) instead of the correct one (Warp).
-4. **Local embedding models are retrieval-oriented**: Both CodeT5 and CodeRankEmbed are trained for code search/retrieval, not semantic classification. They reward lexical overlap between query and document rather than abstract semantic equivalence, which is what our description-to-code classification task requires.
+4. **~~Local embedding models are retrieval-oriented~~** (Resolved by BGE): CodeT5 and CodeRankEmbed are code-specific models trained for retrieval, but BGE-base-en-v1.5 (a general-purpose text embedding model) achieves 100% classification on both test repos, surpassing even Gemini. General-purpose semantic similarity models outperform code-specific retrieval models for our description-to-code classification task.
 
 ---
 
@@ -441,4 +449,150 @@ CodeT5 at least demonstrates weak semantic understanding — passive-voice descr
 
 CodeRankEmbed is **unsuitable for description-to-code classification**. Despite superior specs (768-dim, 8192-token context), the model's retrieval-oriented training objective makes it fundamentally incompatible with our pipeline, which requires abstract semantic similarity between natural-language pattern descriptions and arbitrary framework code. The model would only work if descriptions were rewritten to contain the exact API tokens of every framework variant — which defeats the purpose of a framework-agnostic classification system.
 
-The broader lesson: **code embedding models trained for code search (query → code retrieval) are not interchangeable with models trained for code understanding (semantic similarity)**. Our pipeline needs the latter. Among the backends tested so far, only Gemini (a general-purpose embedding model) achieves the semantic abstraction required for reliable classification.
+The broader lesson: **code embedding models trained for code search (query → code retrieval) are not interchangeable with models trained for code understanding (semantic similarity)**. Our pipeline needs the latter. This lesson was confirmed by the BGE experiment (see [below](#bge-base-en-v15-as-local-backend)), where a general-purpose text embedding model (BGE-base-en-v1.5) achieved 100% classification — surpassing even Gemini.
+
+---
+
+## BGE-base-en-v1.5 as Local Backend
+
+### Background
+
+After CodeRankEmbed's failure (4.5% classification) and failed attempts to load CodeSage v2 and gte-Qwen2-1.5B (both broken by `transformers` v5.x removing APIs used by `trust_remote_code=True` models), we searched for embedding models that:
+
+1. Use standard architectures (no `trust_remote_code` needed)
+2. Produce semantic (not lexical) similarity scores
+3. Have sufficient dimensionality for our pattern descriptions
+
+`BAAI/bge-base-en-v1.5` emerged as the best candidate: a 110M-parameter BERT-based general-purpose text embedding model with 768-dim output, trained for semantic similarity via contrastive learning on large-scale text pairs.
+
+### Model Selection
+
+Tested three compatible models on the same Javalin code fragment:
+
+```
+config.requestLogger.http((ctx, ms) -> LOGGER.info("Got a request: " + ctx.path()));
+```
+
+| Model | Dim | Top score | Correct ranking | Score spread |
+|-------|-----|-----------|----------------|-------------|
+| **BGE-base-en-v1.5** | 768 | 0.74 | Yes | 0.52–0.74 |
+| UniXcoder-base | 768 | 0.49 | Yes | -0.03–0.49 |
+| Jina code embed | — | Failed | — | `transformers` v5.x |
+| CodeSage v2 | — | Failed | — | `transformers` v5.x |
+
+BGE showed the widest score separation between semantically relevant descriptions (HTTP: 0.74, REST: 0.65) and irrelevant ones (database: 0.56, MQ: 0.52), with all scores in a practical threshold range.
+
+### Results: smojol-api (22 signals, Java)
+
+| Backend | Classified | Inward | Outward | Ambiguous | Noise |
+|---------|-----------|--------|---------|-----------|-------|
+| **BGE-base** (0.50 threshold) | 22 / 22 (100%) | 17 | 2 | 3 | 0 |
+| Gemini (0.62 threshold) | 20 / 22 (91%) | 17 | 3 | 0 | 2 |
+| CodeT5 (0.58 threshold) | 11 / 22 (50%) | 10 | 1 | 0 | 11 |
+| CodeRankEmbed (0.50 threshold) | 1 / 22 (4.5%) | 1 | 0 | 0 | 21 |
+
+Score distribution (BGE on smojol-api): min 0.638, max 0.767, mean 0.730. All 22 signals above 0.62 — meaning BGE would still classify 100% even at Gemini's threshold.
+
+Sample classifications:
+
+| Score | Direction | File | Nearest Description |
+|-------|-----------|------|-------------------|
+| 0.767 | inward | ApiServer.java:89 | HTTP request context is represented by Ctx |
+| 0.751 | inward | ApiServer.java:45 | HTTP server is instantiated with Javalin |
+| 0.743 | outward | DbContext.java:27 | SQLite connection is typed for database access |
+| 0.671 | ambiguous | ApiServer.java:97 | Cache pattern is annotated as cacheable |
+| 0.638 | ambiguous | ApiServer.java:142 | Scheduled task is defined by annotation |
+
+### Results: restful-rust (44 signals, Rust)
+
+| Backend | Classified | Inward | Outward | Ambiguous | Noise |
+|---------|-----------|--------|---------|-----------|-------|
+| **BGE-base** (0.50 threshold) | 44 / 44 (100%) | 30 | 14 | 0 | 0 |
+| CodeT5 (0.58 threshold) | 17 / 44 (38.6%) | 9 | 7 | 1 | 27 |
+
+### Results: full smojol repo (758 signals, Java)
+
+| Backend | Threshold | Classified | Inward | Outward | Ambiguous | Noise |
+|---------|-----------|-----------|--------|---------|-----------|-------|
+| **BGE-base** | 0.50 | 758 / 758 (100%) | 69 | 336 | 353 | 0 |
+| **BGE-base** | 0.70 | 231 / 758 (30.5%) | 33 | 85 | 113 | 527 |
+| CodeT5 (pre-rewrite) | 0.58 | 54 / 758 (7.1%) | 10 | 10 | 34 | 704 |
+| CodeT5 (post-rewrite) | 0.58 | 33 / 758 (4.4%) | 14 | 9 | 10 | 725 |
+
+Score distribution (BGE on full smojol, 758 signals):
+
+| Metric | Value |
+|--------|-------|
+| Min | 0.5685 |
+| Max | 0.8399 |
+| Mean | 0.6856 |
+| Median | 0.6815 |
+| >= 0.62 | 735 (97.0%) |
+| >= 0.65 | 600 (79.2%) |
+| >= 0.70 | 231 (30.5%) |
+| >= 0.75 | 70 (9.2%) |
+
+At threshold 0.50, BGE classifies every signal but nearly half (353) land as ambiguous, suggesting a 0.50 threshold is too permissive for a large repo. At threshold 0.70, the ambiguous count drops to 113 and the directional split sharpens (33 inward, 85 outward) — still far above CodeT5's best (54 classified at 0.58). The outward-heavy distribution (85 outward vs 33 inward) reflects smojol's architecture: a COBOL analysis tool that heavily consumes external systems (Neo4j, ANTLR, file I/O) while exposing relatively few inward integration points.
+
+### Why BGE Succeeds Where Code Models Fail
+
+The key insight is that our task — matching natural-language pattern descriptions to code fragments — is fundamentally a **semantic similarity** task, not a **code retrieval** task:
+
+1. **Code retrieval models** (CodeT5, CodeRankEmbed) are trained to find code that answers a natural-language query. They learn associations between query patterns and code patterns, rewarding lexical overlap and API-specific syntax. When given our abstract descriptions ("HTTP request context is represented by Ctx") they fail because the descriptions don't look like search queries.
+
+2. **General-purpose semantic models** (BGE, Gemini) are trained to measure semantic similarity between arbitrary text pairs. They learn abstract semantic concepts like "HTTP server", "database connection", "request handling" and can match these concepts across different surface forms — exactly what our pipeline needs.
+
+BGE-base-en-v1.5 is trained on large-scale text pairs using contrastive learning (RetroMAE pre-training + in-batch negatives fine-tuning), which gives it strong cross-domain transfer. It treats code as "text with meaning" rather than "code with syntax", which paradoxically makes it better at understanding what code *does* than models trained specifically on code.
+
+### Comparison Against SOTA Embedding Models
+
+Given BGE-base's strong results, we tested whether newer or larger general-purpose embedding models would perform even better. Five models were compared on smojol-api (22 Java signals), each with **freshly embedded description vectors** (3,478 descriptions re-embedded per model — no shared caches):
+
+| Model | Params | Classified | Inward | Outward | Ambig | Noise | Score range | Mean |
+|-------|--------|-----------|--------|---------|-------|-------|-------------|------|
+| **BGE-large-en-v1.5** | 335M | 22/22 (100%) | 17 | 2 | 3 | 0 | 0.64–0.79 | 0.734 |
+| **BGE-base-en-v1.5** | 110M | 22/22 (100%) | 17 | 2 | 3 | 0 | 0.64–0.77 | 0.730 |
+| Nomic Embed v1.5 | 137M | 22/22 (100%) | 16 | 5 | 1 | 0 | 0.57–0.72 | 0.627 |
+| Snowflake Arctic-m v1.5 | 109M | 22/22 (100%) | 13 | 4 | 5 | 0 | 0.51–0.80 | 0.680 |
+| all-mpnet-base-v2 | 110M | 4/22 (18%) | 3 | 1 | 0 | 18 | 0.27–0.61 | 0.436 |
+| CodeCSE (RoBERTa load) | ~125M | 22/22 (100%) | 2 | 8 | 12 | 0 | 0.36–0.67 | 0.502 |
+| Gemini (cloud) | — | 20/22 (91%) | 17 | 3 | 0 | 2 | — | — |
+
+#### Model-specific observations
+
+- **BGE-large-en-v1.5**: Identical classification distribution to BGE-base (17 inward, 2 outward, 3 ambiguous) with marginally higher scores (+0.004 mean). The 3x model size does not justify the negligible improvement.
+- **Nomic Embed v1.5**: Misclassifies 3 signals as outward that BGE gets as inward/ambiguous — scheduled tasks and GraphQL matched to database descriptions ("Database table is annotated for mapping").
+- **Snowflake Arctic-m v1.5**: Worst direction accuracy among successful models. Top match is "JSON request is extracted from HTTP" as **ambiguous** for a Javalin `ctx.result()` call. Only 13 inward vs BGE's 17.
+- **all-mpnet-base-v2**: Too old/weak — scores compressed below 0.50 threshold for 18/22 signals.
+- **CodeCSE** (code-specific contrastive model, loaded as plain RoBERTa without CL head): Only 2 inward signals — Javalin HTTP routes matched to **Sanic** (wrong framework) as ambiguous, `ctx.path()` handlers classified as outward (MongoDB, graph database). Even a code-specific model trained for NL↔code similarity underperforms general-purpose BGE.
+
+#### Diagnostic: fragment-level scoring
+
+All models were also tested on a single Javalin code fragment against 8 descriptions (4 relevant, 4 irrelevant):
+
+```
+config.requestLogger.http((ctx, ms) -> LOGGER.info("Got a request: " + ctx.path()));
+```
+
+| Model | Top score | Spread (top − bottom) | Correct ranking |
+|-------|-----------|----------------------|----------------|
+| BGE-large-en-v1.5 | 0.786 | 0.249 | Yes |
+| Snowflake Arctic-m v1.5 | 0.771 | 0.191 | Yes |
+| BGE-base-en-v1.5 | 0.741 | 0.224 | Yes |
+| Nomic Embed v1.5 | 0.725 | 0.290 | Yes |
+| Snowflake Arctic-l v2.0 | 0.617 | 0.357 | Yes |
+| all-mpnet-base-v2 | 0.611 | 0.514 | Yes |
+
+All models rank correctly on isolated fragments, but the pipeline results diverge because nearest-neighbor lookup across 3,478 descriptions amplifies small biases — Snowflake and Nomic match irrelevant descriptions that happen to score slightly higher than the correct ones.
+
+#### Conclusion
+
+**BGE-base-en-v1.5 is the optimal local model for this task.** Higher MTEB scores do not predict better performance on our cross-modal description-to-code classification task. MTEB primarily benchmarks retrieval and STS tasks; our task requires matching abstract natural-language descriptions to framework-specific code patterns — a niche that BGE-base handles well due to its contrastive training on diverse text pairs. Newer and larger models offer no improvement and some are worse, likely because their training data and objectives optimise for different similarity notions.
+
+### Practical Implications
+
+- **No API costs**: BGE runs locally, ~400MB model size, no API key needed
+- **Fast inference**: ~10s for 3,478 description embeddings, ~8s for 22 signal embeddings (CPU)
+- **No `trust_remote_code`**: Standard BERT architecture, compatible with `transformers` v5.x
+- **Drop-in replacement**: Same 768-dim as CodeRankEmbed and Gemini, uses `SentenceTransformer.encode()` API
+- **Recommended default**: BGE matches or exceeds Gemini's classification quality with zero API dependency

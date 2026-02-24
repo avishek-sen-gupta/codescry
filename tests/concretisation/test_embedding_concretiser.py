@@ -12,12 +12,14 @@ from repo_surveyor.integration_concretiser.ast_walker import (
     extract_invocation_context,
 )
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
+    BGEEmbeddingClient,
     CodeRankEmbeddingClient,
     EmbeddingClient,
     EmbeddingConcretiser,
     HuggingFaceLocalEmbeddingClient,
     OllamaEmbeddingClient,
     _BATCH_SIZE,
+    _BGE_DEFAULT_MODEL,
     _DIRECTIONAL_DESCRIPTIONS,
     _MAX_RETRIES,
     cosine,
@@ -880,3 +882,64 @@ class TestCodeRankBatching:
         assert len(fake_model.encode_calls) == 2
         assert len(fake_model.encode_calls[0]["texts"]) == _BATCH_SIZE
         assert len(fake_model.encode_calls[1]["texts"]) == 10
+
+
+# ---------------------------------------------------------------------------
+# Tests: BGEEmbeddingClient
+# ---------------------------------------------------------------------------
+
+
+class TestBGEEmbedBatch:
+    """Verify BGEEmbeddingClient.embed_batch returns correct embeddings."""
+
+    def test_single_text_returns_embedding(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=4)
+        client = BGEEmbeddingClient(model=fake_model)
+
+        result = client.embed_batch(["hello world"])
+
+        assert len(result) == 1
+        assert len(result[0]) == 4
+        assert len(fake_model.encode_calls) == 1
+        assert fake_model.encode_calls[0]["texts"] == ["hello world"]
+
+    def test_no_prefix_applied(self):
+        """BGE does not use query prefixes — texts must be embedded as-is."""
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
+        client = BGEEmbeddingClient(model=fake_model)
+
+        client.embed_batch(["import java.net.http.HttpClient;"])
+
+        texts_sent = fake_model.encode_calls[0]["texts"]
+        assert texts_sent == ["import java.net.http.HttpClient;"]
+
+    def test_normalize_embeddings_passed(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
+        client = BGEEmbeddingClient(model=fake_model)
+
+        client.embed_batch(["test"])
+
+        assert fake_model.encode_calls[0]["kwargs"]["normalize_embeddings"] is True
+
+    def test_default_model_name(self):
+        fake_model = _FakeSentenceTransformerModel()
+        client = BGEEmbeddingClient(model=fake_model)
+
+        assert client._model_name == _BGE_DEFAULT_MODEL
+
+    def test_custom_model_name(self):
+        fake_model = _FakeSentenceTransformerModel()
+        client = BGEEmbeddingClient(
+            model_name="BAAI/bge-large-en-v1.5", model=fake_model
+        )
+
+        assert client._model_name == "BAAI/bge-large-en-v1.5"
+
+    def test_empty_input_returns_empty(self):
+        fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
+        client = BGEEmbeddingClient(model=fake_model)
+
+        result = client.embed_batch([])
+
+        assert result == []
+        assert len(fake_model.encode_calls) == 0
