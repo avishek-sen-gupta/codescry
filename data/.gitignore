@@ -1,4 +1,5 @@
-# Ignore all survey output directories; only data/training/ is tracked.
+# Ignore all survey output directories; only data/training/ and data/embeddings/ are tracked.
 */
 !training/
 !github_harvest/
+!embeddings/

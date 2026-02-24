@@ -44,3 +44,13 @@ fileignoreconfig:
 - filename: poetry.lock
   ignore_detectors:
     - filecontent
+- filename: data/embeddings/pattern_description_embeddings_hf-local_Salesforce--codet5p-110m-embedding.json
+  checksum: d7d31d40ea1962f9b8525b56f1e2d55941d308af823f96a81bcd38ae500a5d65
+- filename: data/embeddings/pattern_description_embeddings_ollama.json
+  checksum: eeb346df23f5bd190f758688b199fc5b8228a83acfaa14712ee74602a2214630
+- filename: data/embeddings/pattern_description_embeddings_gemini.json
+  checksum: 27c251094a10cd6dc8d51311ad01aa66b0f050ab8cc2f19c76827157f38b5693
+- filename: data/embeddings/pattern_description_embeddings_bge_BAAI--bge-base-en-v1.5.json
+  checksum: 5400e6281947b0eb8dfc1964835c6cf3cfbdfd68cff054529f25e8d64e4df190
+- filename: data/embeddings/pattern_description_embeddings_coderank_nomic-ai--CodeRankEmbed.json
+  checksum: e732757ad3ab12a707e492962f3cc7a15fc2f0fe45e3afe58027c094ec605b7c
