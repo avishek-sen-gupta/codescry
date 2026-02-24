@@ -1,598 +1,311 @@
 # Experiments
 
-## Summary
+Embedding-based signal concretisation experiments, investigating which embedding models and description styles best classify integration signals via nearest-neighbor pattern matching.
 
-These experiments investigate embedding-based signal concretisation using the pattern-embedding pipeline, progressively improving classification quality through description rewriting, pattern expansion, and AST context extraction fixes.
+## Key Results
+
+| Backend | Type | Params | Dim | smojol-api (22) | restful-rust (44) | smojol (758) |
+|---------|------|--------|-----|-----------------|-------------------|-------------|
+| **BGE-base-en-v1.5** | General-purpose | 110M | 768 | **22 (100%)** | **44 (100%)** | **758 (100%)** / 231 (30.5%) |
+| Gemini | Cloud API | — | 768 | 20 (91%) | — | — |
+| CodeT5p-110m | Code-specific | 110M | 256 | 11 (50%) | 17 (38.6%) | 54 (7.1%) |
+| CodeRankEmbed | Code-specific | 137M | 768 | 1 (4.5%) | — | — |
+
+**Recommendation**: BGE-base-en-v1.5 is the optimal embedding backend. It runs locally with no API costs, matches or exceeds Gemini's classification quality, and uses a standard BERT architecture compatible with `transformers` v5.x. See [Experiment 5](#5-bge-base-en-v15-as-local-backend) for details.
+
+**Core finding**: General-purpose text embedding models trained for semantic similarity (BGE, Gemini) outperform code-specific models trained for retrieval (CodeT5, CodeRankEmbed) on our description-to-code classification task. MTEB leaderboard scores do not predict performance on this task. See [Experiment 6](#6-sota-model-comparison) and [Analysis](#why-general-purpose-models-outperform-code-models).
+
+## Open Challenges
+
+1. **Signature pollution**: Function-level AST context includes parameter types that can dominate the embedding, causing misclassification (e.g., route functions with `Db` parameters classified as `database/outward`).
+2. **Cross-framework matching**: Signals sometimes match descriptions from unrelated frameworks (Rails, jOOQ) instead of the correct one (Warp), because the model captures domain semantics ("routes", "database") rather than framework-specific API structure.
+3. **Threshold sensitivity at scale**: At threshold 0.50 on the full smojol repo, BGE classifies 100% of signals but 47% land as ambiguous. At 0.70, classification drops to 30.5% but directional quality improves sharply. The optimal threshold likely varies per repo.
+
+---
+
+## Experiments
 
 ### 1. CodeT5p-110m-embedding as Local Backend
 
-Added `Salesforce/codet5p-110m-embedding` (256-dim, 512-token limit) as a fourth embedding backend running locally via `transformers`. On smojol-api (22 Java signals), CodeT5 classified 50% of signals vs Gemini's 91%. On the full smojol repo (758 signals), only 7.1% were classified. CodeT5 produces compressed similarity scores (0.31-0.66) with a narrow signal/noise gap, making it unsuitable as a Gemini replacement but viable as a fast local pre-filter. [Details](#huggingface-local-embedding-client-codet5p-110m-embedding)
+**Goal**: Evaluate a local code embedding model as a Gemini replacement.
+
+**Model**: `Salesforce/codet5p-110m-embedding` (110M params, 256-dim, 512-token limit), running locally via `transformers`.
+
+#### Results
+
+| Repo | Threshold | Classified | Inward | Outward | Ambiguous | Noise |
+|------|-----------|-----------|--------|---------|-----------|-------|
+| smojol-api (22) | 0.58 | 11 (50%) | 10 | 1 | 0 | 11 |
+| smojol (758) | 0.58 | 54 (7.1%) | 10 | 10 | 34 | 704 |
+
+Score distribution on smojol-api: 0.31–0.66 (CodeT5) vs 0.59–0.74 (Gemini). CodeT5 produces compressed similarity scores with a narrow signal/noise gap.
+
+#### Key Observations
+
+- The 10 inward signals are Javalin `.get(...)` route registrations (score 0.594 each). The single outward signal is `DriverManager.getConnection` (score 0.656).
+- The model demonstrates semantic understanding — Javalin routes match `http_rest/inward`, database connections match `database/outward` — but scores cluster too tightly for reliable thresholding.
+- 512-token limit required `truncation=True, max_length=512` to prevent OOM on long AST contexts.
+- Requires `transformers<5.0.0` (v5.x breaks the custom `CodeT5pEmbeddingConfig`).
+
+**Verdict**: Not competitive with Gemini. Viable as a fast local pre-filter but unsuitable as a primary backend.
+
+---
 
 ### 2. Writing Effective Pattern Descriptions
 
-Through iterative experimentation on code fragments, discovered that subject-first passive-voice descriptions ("Text is created by reading all source file", score 0.773) consistently outperform verbose active-voice descriptions ("Ingests a file from disk, producing a text representation", score 0.448) and even literal transliterations (score 0.688) in the CodeT5 embedding space. Derived 7 rules for writing embedding-optimised descriptions, culminating in the template: `[Result noun] is [verb past participle] [preposition] [key parameters]`. [Details](#writing-effective-pattern-descriptions-for-codet5-embeddings)
+**Goal**: Discover description styles that maximise cosine similarity in the CodeT5 embedding space.
 
-### 3. Bulk Description Rewrite
+#### Method
 
-Applied the 7 description rules to all 3,430 pattern descriptions (3,017 unique) across 77 files using an LLM rewrite script. On the full smojol repo with CodeT5: ambiguous signals dropped 71% (34 → 10), inward signals increased 40% (10 → 14), and overall classification quality improved despite a lower raw classification rate (7.1% → 4.4%). The rewrite traded noisy ambiguous matches for sharper directional ones. [Details](#bulk-description-rewrite-passive-voice-template)
+Iteratively tested natural-language descriptions against a code fragment, measuring cosine similarity:
 
-### 4. Warp Pattern Expansion & Rust AST Walker Fix
-
-Running on `restful-rust` (a Warp REST API) exposed two compounding issues: sparse Warp patterns (1 pattern) and broken Rust AST walk-up (`*_item` suffix not recognised as definitions). Expanding Warp to 25 patterns increased signal detection from 2 to 44. Adding Rust `*_item` definition nodes to the AST walker improved classification from 6 to 17 signals (9 inward, 7 outward). Discovered that function-level AST context can cause direction misclassification when signatures contain database parameters (`db: Db`), pulling route definitions toward `database/outward`. [Details](#warp-pattern-expansion--rust-ast-walker-fix)
-
-### 5. CodeRankEmbed as Local Backend (Negative Result)
-
-Added `nomic-ai/CodeRankEmbed` (768-dim, 8192-token context, 137M params) as a fifth embedding backend via `sentence-transformers`. On smojol-api (22 Java signals), CodeRankEmbed classified only 1 signal (4.5%) at threshold 0.50 — worse than both CodeT5 (50%) and Gemini (91%). Targeted probing revealed that CodeRankEmbed performs **learned sparse retrieval** (lexical matching in embedding space), not semantic classification: pasting code tokens as a "description" scores higher than semantically correct descriptions, and semantically wrong descriptions with lexical overlap outscore semantically perfect ones without it. The model is unsuitable for our description-to-code classification task. [Details](#coderankembed-as-local-backend-negative-result)
-
-### 6. BGE-base-en-v1.5 as Local Backend (Positive Result)
-
-Added `BAAI/bge-base-en-v1.5` (768-dim, 110M params, general-purpose) as a sixth embedding backend via `sentence-transformers`. On smojol-api (22 Java signals), BGE classified **22/22 (100%)** at threshold 0.50 — surpassing Gemini's 91%. On restful-rust (44 Rust signals), BGE classified **44/44 (100%)**. On the full smojol repo (758 signals), BGE at threshold 0.50 classified **758/758 (100%)** (69 inward, 336 outward, 353 ambiguous); raising the threshold to 0.70 classified **231/758 (30.5%)** (33 inward, 85 outward, 113 ambiguous) — still far above CodeT5's 7.1% and with a much stronger directional signal. Score distribution across the full repo: min 0.57, max 0.84, mean 0.69, median 0.68. BGE is a general-purpose text embedding model trained for semantic similarity, which turns out to be exactly what our description-to-code classification task requires. A follow-up comparison against 5 SOTA models (BGE-large, Snowflake Arctic, Nomic Embed v1.5, all-mpnet-base-v2, CodeCSE) confirmed that BGE-base is the optimal local model — newer/larger models offer no improvement and some are worse, because MTEB retrieval scores do not predict cross-modal description-to-code classification quality. [Details](#bge-base-en-v15-as-local-backend)
-
-### Key Metrics Across Experiments
-
-| Experiment | Repo | Backend | Signals | Classified | Inward | Outward | Ambiguous |
-|-----------|------|---------|---------|-----------|--------|---------|-----------|
-| CodeT5 baseline | smojol-api | hf-local | 22 | 11 (50%) | 10 | 1 | 0 |
-| Gemini baseline | smojol-api | gemini | 22 | 20 (91%) | 17 | 3 | 0 |
-| CodeT5 full repo (pre-rewrite) | smojol | hf-local | 758 | 54 (7.1%) | 10 | 10 | 34 |
-| CodeT5 full repo (post-rewrite) | smojol | hf-local | 758 | 33 (4.4%) | 14 | 9 | 10 |
-| Warp + AST fix | restful-rust | hf-local | 44 | 17 (38.6%) | 9 | 7 | 1 |
-| **CodeRankEmbed** | **smojol-api** | **coderank** | **22** | **1 (4.5%)** | **1** | **0** | **0** |
-| **BGE-base** | **smojol-api** | **bge** | **22** | **22 (100%)** | **17** | **2** | **3** |
-| **BGE-base** | **restful-rust** | **bge** | **44** | **44 (100%)** | **30** | **14** | **0** |
-| **BGE-base (0.50)** | **smojol** | **bge** | **758** | **758 (100%)** | **69** | **336** | **353** |
-| **BGE-base (0.70)** | **smojol** | **bge** | **758** | **231 (30.5%)** | **33** | **85** | **113** |
-
-### Open Challenges
-
-1. **CodeT5 score compression**: Scores cluster in a narrow band (0.47-0.53), making threshold selection fragile and leaving many genuine signals borderline.
-2. **Signature pollution**: Function-level AST context includes parameter types that can dominate the embedding, causing misclassification (e.g., route functions with `Db` parameters classified as `database/outward`).
-3. **Cross-framework matching**: CodeT5 captures domain semantics ("routes", "database") rather than framework-specific API structure, so signals match descriptions from unrelated frameworks (Rails, jOOQ) instead of the correct one (Warp).
-4. **~~Local embedding models are retrieval-oriented~~** (Resolved by BGE): CodeT5 and CodeRankEmbed are code-specific models trained for retrieval, but BGE-base-en-v1.5 (a general-purpose text embedding model) achieves 100% classification on both test repos, surpassing even Gemini. General-purpose semantic similarity models outperform code-specific retrieval models for our description-to-code classification task.
-
----
-
-## HuggingFace Local Embedding Client: CodeT5p-110m-embedding
-
-### Background
-
-We added a fourth embedding backend (`--backend hf-local`) using `Salesforce/codet5p-110m-embedding`, a 110M-parameter code embedding model that produces 256-dimensional L2-normalised vectors. Unlike the other backends (HuggingFace Inference Endpoint, Gemini, Ollama), this runs locally via the `transformers` library with no API server.
-
-### Compatibility
-
-The model's custom code requires `transformers<5.0.0`. Version 5.x introduces a breaking change in the T5 config (`is_decoder` attribute missing from `CodeT5pEmbeddingConfig`). Pin to `transformers>=4.30.0,<5.0.0`.
-
-### Token Length Limit
-
-The model has a 512-token maximum sequence length. On the full smojol repo (758 Java signals), some AST statement contexts exceeded this limit, causing quadratic memory growth and OOM kills. Fix: pass `truncation=True, max_length=512` to the tokenizer. This truncates long inputs but may degrade embedding quality for large code blocks.
-
-### Results: smojol-api (22 signals, Java)
-
-Threshold: 0.58
-
-| Backend | Classified | Inward | Outward | Ambiguous | Noise |
-|---------|-----------|--------|---------|-----------|-------|
-| **hf-local (CodeT5)** | 11 / 22 (50%) | 10 | 1 | 0 | 11 |
-| **Gemini** (0.62 threshold) | 20 / 22 (91%) | 17 | 3 | 0 | 2 |
-
-The 10 inward signals are the Javalin `.get(...)` route registrations (score 0.594 each). The single outward signal is `DriverManager.getConnection` (score 0.656). The `ctx.json()` callback lines (0.486-0.490) and database result-fetching lines (0.419-0.436) fall below threshold.
-
-### Results: full smojol repo (758 signals, Java only)
-
-Threshold: 0.58
-
-| Label | Count |
-|-------|-------|
-| Inward | 10 |
-| Outward | 10 |
-| Ambiguous | 34 |
-| Noise | 704 |
-| **Total** | **758** |
-
-Classification rate: 54 / 758 (7.1%). The model gates 92.9% of signals as noise at this threshold.
-
-### Score Distribution Comparison
-
-| Metric | hf-local (CodeT5) | Gemini |
-|--------|-------------------|--------|
-| Score range | 0.31 - 0.66 | 0.59 - 0.74 |
-| Embedding dim | 256 | 768 |
-| Embedding time (3,430 descs) | ~100s (CPU) | ~5s (API) |
-| Signal embedding (22 texts) | ~2.8s | ~1.2s |
-
-CodeT5 produces compressed similarity scores with a narrower signal/noise gap, making thresholding fragile.
-
-### Verdict
-
-CodeT5p-110m-embedding is **not competitive with Gemini at equivalent thresholds**. The model does demonstrate semantic understanding of code (Javalin routes match `http_rest/inward`, database connections match `database/outward`), but the compressed score range and 512-token limit make it unsuitable as a drop-in replacement. It could serve as a fast local pre-filter or be used with a substantially lower threshold (0.45-0.50) at the cost of more false positives.
-
----
-
-## Writing Effective Pattern Descriptions for CodeT5 Embeddings
-
-### Experiment Design
-
-Given a code fragment, we iteratively invented natural-language descriptions and measured cosine similarity in the CodeT5 embedding space, seeking the description closest to the code without explicitly mirroring the API names or code structure.
-
-### Case Study: Iterative Convergence
-
-Code: `String text = new String(Files.readAllBytes(src.toPath()));`
+**Code**: `String text = new String(Files.readAllBytes(src.toPath()));`
 
 | Round | Score | Description | Insight |
 |-------|-------|-------------|---------|
 | 1 | 0.448 | "Ingests a file from disk, producing a text representation of its contents" | Verbose, generic |
-| 2 | 0.541 | "Reads a file from a given source and converts its full content into text" | "source" maps to `src` |
-| 4 | 0.626 | "Reads from the given source, converting file content into text" | Shorter is better |
 | 7 | 0.651 | "Reads file content from source, creating text" | "creating" maps to `new String()` |
-| 8 | 0.673 | "Reads source file, creating text" | Compound noun "source file" |
-| 10 | 0.684 | "Reads all source file, creating text" | "all" maps to `readAllBytes` |
 | 12 | 0.707 | "Text created from reading all source file" | Noun-first structure |
-| 13 | 0.730 | "Text created by reading all source file" | "by" beats "from" |
-| 18 | 0.757 | "Text is created by reading all file content from source" | Full passive with "is" |
-| **20** | **0.773** | **"Text is created by reading all source file"** | Brevity + passive |
+| **20** | **0.773** | **"Text is created by reading all source file"** | **Brevity + passive** |
 
-For comparison, the literal transliteration "String text equals new String of Files readAllBytes of source toPath" scored 0.688 — the semantic description at 0.773 **surpassed** the literal one.
+The literal transliteration "String text equals new String of Files readAllBytes of source toPath" scored 0.688 — the semantic description at 0.773 surpassed it.
 
-### Noise Signal Recovery
+#### Rules Derived
 
-We selected 7 genuine I/O operations from the 704 noise signals (full smojol repo run) and wrote optimised descriptions:
+1. **Subject-first passive voice**: `"X is Y-ed by Z"` — the subject is the result/primary object
+2. **Domain concepts, not API classes**: "database" not `DriverManager`, "cache" not `CacheBuilder`
+3. **Bare noun parameters**: "...with user and password" (semantic role, not variable names)
+4. **Brevity**: Every word must earn its place; no articles, qualifiers, or elaboration
+5. **Match the action verb**: `new X()` → "is created", `.getConnection()` → "is opened"
+6. **Describe outcomes for builders**: Long chains are better described by what they produce
+7. **Template**: `[Result noun] is [action verb past participle] [preposition] [key parameters]`
 
-| Case | Score | Best Description |
-|------|-------|------------------|
+#### Noise Signal Recovery
+
+7 genuine I/O signals from the 704 noise bucket were recovered by writing optimised descriptions:
+
+| Case | Score | Description |
+|------|-------|-------------|
 | BufferedReader from stream | 0.695 | "Buffered reader is created over input stream with charset for text" |
 | CacheBuilder | 0.684 | "Cache is created by building with expiry size and loader" |
 | writeToGraphML | 0.668 | "Graph export is written to file at output path" |
-| File.createTempFile | 0.660 | "Temp file is created for source input configuration" |
-| getCanonicalFile + analysis | 0.649 | "Analysis is run on canonical file with language context" |
-| JDBC connection | 0.621 | "Database is accessed by opening connection with user and password" |
 | ServerSocket | 0.584 | "Server is started by creating socket on port" |
 
-All 7 descriptions achieved scores above the 0.58 threshold, meaning these signals would be correctly classified with the right description in the pattern registry.
-
-### Rules for Writing CodeT5-Effective Descriptions
-
-**1. Use subject-first passive voice: "X is Y-ed by Z"**
-
-The subject noun should be the *result* or *primary object* of the code operation. This mirrors assignment semantics (`result = operation(...)`) which is how most code is structured.
-
-- Good: "Database is accessed by opening connection with credentials"
-- Bad: "Opens a connection to access the database with credentials"
-
-**2. Name the primary domain concept, not the API class**
-
-Use the concept-level noun that the code is *about*, not the specific class name. The model understands that `DriverManager.getConnection` is about "database", `CacheBuilder.newBuilder()` is about "cache", and `new BufferedReader(new InputStreamReader(...))` is about "buffered reader".
-
-- Good: "Cache is built with expiry and size"
-- Bad: "CacheBuilder.newBuilder is called with expireAfterWrite and maximumSize"
-
-**3. Include key operational parameters as bare nouns**
-
-Echo the *semantic role* of the code's parameters without naming the variables. These parameter echoes are the strongest score boosters after the subject noun.
-
-- Good: "...with user and password" (from `url, user, password`)
-- Good: "...with charset for text" (from `charset` parameter)
-- Good: "...with expiry size and loader" (from `.expireAfterWrite`, `.maximumSize`, `CacheLoader`)
-
-**4. Brevity is critical**
-
-Every word must earn its place. Articles ("a", "the"), qualifiers ("specific", "designated"), and elaboration ("in order to", "which allows") consistently reduce scores.
-
-- Good: "Temp file is created for source input" (0.660)
-- Bad: "A temporary file is allocated on the local disk for intermediate storage" (0.411)
-
-**5. Match the code's action verb semantics**
-
-Use the verb that maps to the code's actual operation, not a synonym:
-
-| Code pattern | Best verb |
-|-------------|-----------|
-| `new X()` | "is created" |
-| `.getConnection()` | "is accessed" / "is opened" |
-| `write*()` | "is written" |
-| Builder pattern | "is built" |
-| `run*()` | "is run" |
-
-Generic verbs like "performed", "executed", "utilised" score poorly.
-
-**6. The model struggles with multi-step builder chains**
-
-Long chained method calls (`.endpoint().credential().buildClient()`) are hard to capture in a single description. The model works best with clear single-action-with-parameters structures. Builder patterns may need to be described by their *outcome* rather than their *steps*.
-
-**7. Description template**
-
-> `[Primary result noun] is [action verb past participle] [preposition] [key parameters]`
-
-Examples following the template:
-- "Connection is opened to database with credentials"
-- "Cache is built with expiry duration and size"
-- "File is written with exported data at output path"
-- "Text is created by reading all source file"
-- "Server is started by creating socket on port"
+All 7 achieved scores above the 0.58 threshold with properly written descriptions.
 
 ---
 
-## Bulk Description Rewrite: Passive-Voice Template
+### 3. Bulk Description Rewrite
 
-### Motivation
+**Goal**: Apply the 7 description rules to all 3,430 pattern descriptions across 77 files.
 
-The experiments above showed that subject-first passive-voice descriptions ("HTTP route is registered with path handler") produce significantly higher cosine similarity scores than verbose active-voice descriptions ("Flask @app.route decorator defining an inbound HTTP REST endpoint") in the CodeT5 embedding space. The pattern registry contained 3,430 descriptions across 78 files, all written in the old verbose style. Rewriting them universally should improve classification quality across all embedding backends.
+#### Method
 
-### Method
+LLM rewrite script (`scripts/rewrite_pattern_descriptions.py`) sent 3,017 unique descriptions to Claude (Sonnet) in batches of 60 with the 7 rules as system prompt.
 
-We built a one-off LLM rewrite script (`scripts/rewrite_pattern_descriptions.py`) that:
+**Example rewrites**:
 
-1. Extracted all 3,017 unique description strings from 77 pattern files via regex
-2. Sent them to Claude (Sonnet) in batches of 60 with the 7 rewriting rules as system prompt
-3. Performed exact string replacement in each source file
-4. Verified the description count remained at 3,430 and all 1,351 tests passed
-
-The LLM system prompt encoded the template `[Result noun] is [verb past participle] [preposition] [key parameters]` with before/after examples drawn from the experiments above.
-
-### Example Rewrites
-
-| Before (verbose active voice) | After (passive-voice template) |
-|-------------------------------|-------------------------------|
+| Before | After |
+|--------|-------|
 | Flask @app.route decorator defining an inbound HTTP REST endpoint | HTTP route is registered with path handler |
-| This code uses Javalin to handle incoming HTTP GET requests | HTTP GET requests are handled for inbound requests |
 | JDBC DriverManager.getConnection for connecting to a relational database | Database connection is opened with credentials |
-| Spring @RestController annotation defining a REST API controller | REST controller is annotated for inbound API |
-| Generic HTTP keyword indicating web communication | HTTP communication is indicated |
 | PL/I CICS WRITEQ TD command for transient data queue writing | Transient data queue is written by WRITEQ TD |
-| Go grpc package import providing core gRPC client and server primitives | gRPC primitives are imported |
 
-### Results: full smojol repo (758 signals, Java only, CodeT5 hf-local)
+#### Results (full smojol, 758 signals, CodeT5)
 
-Threshold: 0.58
-
-| Metric | Before rewrite | After rewrite | Change |
-|--------|---------------|---------------|--------|
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
 | Classified | 54 (7.1%) | 33 (4.4%) | -21 |
 | Inward | 10 | 14 | +4 |
 | Outward | 10 | 9 | -1 |
-| Ambiguous | 34 | 10 | **-24** |
+| **Ambiguous** | **34** | **10** | **-24 (71%)** |
 | Noise | 704 | 725 | +21 |
 
-### Analysis
-
-The rewrite produced a qualitative shift in classification behaviour:
-
-1. **Ambiguous signals dropped 71%** (34 → 10). The clearer, more specific descriptions produce more decisive nearest-neighbor matches — signals now land firmly on either a directional description or fall below threshold entirely, rather than matching multiple descriptions at similar scores.
-
-2. **Inward signals increased 40%** (10 → 14). The passive-voice descriptions for route handlers and endpoint registrations ("GET route is registered for HTTP requests") are closer in the embedding space to actual route registration code than the old verbose descriptions were.
-
-3. **Outward signals held steady** (10 → 9). Database connections, HTTP clients, and other outbound patterns remain well-matched.
-
-4. **Total classified decreased** (54 → 33). This is expected and desirable: the 24 formerly-ambiguous signals were borderline matches that produced low-confidence, uninformative classifications. They now correctly fall into noise rather than polluting the ambiguous bucket. The remaining 33 classified signals are higher-quality, more directionally specific matches.
-
-5. **Classification rate vs quality trade-off**: The raw classification rate dropped from 7.1% to 4.4%, but the *useful* classification rate (signals with a definite direction) improved from 20/758 (2.6%) to 23/758 (3.0%). The rewrite traded away noisy ambiguous matches for sharper directional ones.
-
-### Verdict
-
-The bulk description rewrite validates the findings from the hand-crafted experiments: passive-voice, domain-concept descriptions consistently produce better embedding matches than verbose, API-name-heavy descriptions. The improvement is most visible in the dramatic reduction of ambiguous classifications, confirming that the template forces descriptions into a semantic space that aligns better with code semantics. The CodeT5 backend remains significantly less capable than Gemini (4.4% vs ~91% classification rate), but the rewrite narrows the quality gap for signals that *are* classified.
+**Verdict**: The rewrite traded noisy ambiguous matches for sharper directional ones. Ambiguous signals dropped 71%, inward increased 40%. Raw classification rate decreased but useful (directional) classification rate improved from 2.6% to 3.0%.
 
 ---
 
-## Warp Pattern Expansion & Rust AST Walker Fix
+### 4. Warp Pattern Expansion & Rust AST Walker Fix
 
-### Background
+**Goal**: Improve detection and classification on `restful-rust` (a Warp-based Rust REST API).
 
-Running the pattern-embedding pipeline on `restful-rust` (a Warp-based REST API) initially detected only 2 signals, with 1 classified. Investigation revealed two compounding issues:
+#### Problems Found
 
-1. **Sparse Warp patterns**: The Warp framework module had only 1 pattern (`warp::path!`), missing all HTTP method filters, filter composition, JSON body handling, SSE, and WebSocket patterns.
-2. **Broken Rust AST walk-up**: Rust's tree-sitter grammar uses `*_item` suffix for top-level definitions (`function_item`, `struct_item`, `impl_item`, etc.) instead of the `*_definition`/`*_declaration` convention used by most other languages. The AST walker's suffix heuristics missed these entirely, so signals inside Warp method chains (`.and(warp::get())`) resolved to the raw `arguments` node with text `()` — a meaningless context that produced near-random embedding matches.
+1. **Sparse Warp patterns**: Only 1 pattern (`warp::path!`) — missing HTTP method filters, filter composition, JSON body handling, SSE, and WebSocket patterns.
+2. **Broken Rust AST walk-up**: Rust uses `*_item` suffix for top-level definitions (`function_item`, `struct_item`, etc.) instead of `*_definition`/`*_declaration`. The walker missed these entirely, resolving signals to meaningless `arguments` nodes with text `()`.
 
-### Fix 1: Warp Pattern Expansion
+#### Fixes
 
-Expanded from 1 to 25 patterns (50 descriptions) across three integration types:
+- **Warp expansion**: 1 → 25 patterns (50 descriptions) across `http_rest`, `sse_streaming`, and `socket`.
+- **Rust `*_item` nodes**: Added 8 node types (`function_item`, `struct_item`, `enum_item`, `impl_item`, `trait_item`, `mod_item`, `const_item`, `static_item`) to the AST walker.
 
-| Integration Type | Patterns Added |
-|------------------|---------------|
-| `http_rest` | `warp::serve`, `warp::path!`, `warp::path(`, `warp::get()` through `warp::head()`, `.and(`, `.or(`, `.and_then(`, `warp::body::json()`, `warp::body::content_length_limit(`, `warp::query::`, `warp::reply::json`, `warp::reply::with_status`, `warp::log(`, `warp::any()`, `warp::Filter`, `warp::test::request()` |
-| `sse_streaming` | `warp::sse` |
-| `socket` | `warp::ws()`, `warp::ws::Ws` |
+#### Results (CodeT5, threshold 0.50)
 
-Signal detection jumped from 2 to 44.
+| Stage | Signals | Classified | Inward | Outward |
+|-------|---------|-----------|--------|---------|
+| Before (1 pattern, no `*_item`) | 2 | 1 | 0 | 0 |
+| After Warp expansion only | 44 | 6 | 0 | 1 |
+| **After both fixes** | **44** | **17 (38.6%)** | **9** | **7** |
 
-### Fix 2: Rust `*_item` Definition Nodes
+#### Direction Misclassification: Signature Pollution
 
-Added 8 Rust-specific node types to `_DefinitionNodes.EXACT` in the AST walker:
-
-```
-function_item, struct_item, enum_item, impl_item,
-trait_item, mod_item, const_item, static_item
-```
-
-This lets the walk-up algorithm correctly resolve Warp chain lines to their enclosing `function_item` or `let_declaration`, providing meaningful AST context for embeddings.
-
-#### Failed intermediate approach: `block` as statement node
-
-We first tried adding `block` to Rust's `_LanguageStatementNodes` to capture function bodies without signatures. This broke the test `test_if_expression_detected_as_statement`: on a line like `if req.is_valid() {`, the if body's `block` node starts on the same line as the `{`, and since tree-sitter's depth-first traversal visits the block *after* the condition nodes, the `block` becomes the deepest named node — which the walker immediately returned instead of the more meaningful `if_expression`. Removing `block` and relying solely on `*_item` definition nodes resolved the issue: `let_declaration` (via suffix) and `expression_statement` (via suffix) already catch all Rust statement-level constructs, so `block` is unnecessary.
-
-### Results: restful-rust (44 signals, Rust, CodeT5 hf-local)
-
-Threshold: 0.50
-
-| Stage | Signals | Classified | Inward | Outward | Ambiguous | Noise |
-|-------|---------|-----------|--------|---------|-----------|-------|
-| Before (1 Warp pattern, no `*_item`) | 2 | 1 | 0 | 0 | 1 | 1 |
-| After Warp expansion only (no `*_item`) | 44 | 6 | 0 | 1 | 1 | 38 |
-| After both fixes | 44 | 17 (38.6%) | 9 | 7 | 1 | 27 |
-
-### AST Context Quality
-
-The `*_item` fix produces meaningful AST contexts that capture the full Warp filter chain:
-
-| Signal | AST Node Type | AST Context |
-|--------|--------------|-------------|
-| `warp::path!("games")` (route def) | `function_item` | Full `games_list(db: Db)` function with `.and()` / `.and_then()` chain |
-| `warp::test::request()` (test) | `let_declaration` | Full `let res = warp::test::request().method("GET").path(...).reply(&filter).await;` |
-| `warp::serve(routes)` (server start) | `expression_statement` | `warp::serve(routes).run(([127, 0, 0, 1], 8080)).await;` |
-| `warp::body::json()` (filter) | `function_item` | Full `json_body()` function |
-
-### Direction Misclassification: `db: Db` Parameter Pollution
-
-An interesting misclassification: 5 of the 7 outward signals are actually Warp route definitions (lines 24-28 of `routes.rs`) that *should* be `http_rest/inward`, but are classified as `database/outward` (score 0.501). The root cause is that the `function_item` AST context includes the function signature `pub fn games_list(db: Db) -> impl Filter<...>`, and the `Db` parameter in the signature pulls the embedding toward database descriptions. The nearest match is "Database results are queried and fetched" from jOOQ.
-
-This reveals a fundamental tension in statement-level context extraction: wider context (full function) captures the filter chain structure needed for route detection, but also includes parameters that can dominate the embedding. A potential mitigation would be to extract only the function *body* (the block inside the function) without the signature, but as documented above, adding `block` as a statement node introduces its own problems with control-flow constructs.
-
-### Score Distribution
-
-| Signal Category | Score Range | Nearest Source |
-|----------------|------------|----------------|
-| `warp::serve` (server start) | 0.576 | Warp |
-| `let routes = api.with(warp::log(...))` | 0.638 | Rails |
-| `warp::test::request()` (test assertions) | 0.493 - 0.528 | Warp |
-| Route definitions (`function_item` context) | 0.475 - 0.501 | Play, jOOQ, ServiceStack |
-| `warp::body::json()` (filter) | 0.547 | Rust |
-
-The highest-scoring signal (0.638) is `let routes = api.with(warp::log("restful_rust"))` matching "RESTful endpoints are exposed via Rails routing" — the word "routes" in the variable name and "RESTful" in the log string strongly align with the Rails description despite being Warp code.
-
-### Verdict
-
-The combined Warp expansion + Rust AST walker fix transforms detection from nearly blind (1/2 classified) to broadly functional (17/44 classified). The remaining challenges are:
-
-1. **Score compression**: CodeT5 scores cluster in the 0.47-0.53 range, making threshold selection fragile. Many genuine route signals sit just above/below the 0.50 threshold.
-2. **Signature pollution**: Function-level AST context includes parameter types that can override the embedding's code-structure signal, causing route definitions with database parameters to misclassify as `database/outward`.
-3. **Cross-framework matching**: Signals often match descriptions from unrelated frameworks (Rails, jOOQ, Play) rather than Warp, because CodeT5 captures domain semantics ("routes", "database") rather than framework-specific API structure.
+5 of 7 outward signals are actually Warp route definitions that should be `http_rest/inward`, but the `function_item` AST context includes `pub fn games_list(db: Db)` — the `Db` parameter pulls the embedding toward "Database results are queried and fetched" (jOOQ). This reveals a tension between wider AST context (captures structure) and parameter noise (dominates embedding).
 
 ---
 
-## CodeRankEmbed as Local Backend (Negative Result)
+### 5. BGE-base-en-v1.5 as Local Backend
 
-### Background
+**Goal**: Find a local embedding model that matches Gemini's classification quality.
 
-Previous experiments showed CodeT5 (256-dim, 512-token limit) produces compressed similarity scores unsuitable as a Gemini replacement. `nomic-ai/CodeRankEmbed` is a 137M-parameter code embedding model with 768-dim vectors and 8192-token context — matching Gemini's dimensionality with 16x the context window of CodeT5, and running locally with no API costs via `sentence-transformers`.
+#### Background
 
-CodeRankEmbed uses **asymmetric embedding**: natural-language queries must be prefixed with `"Represent this query for searching relevant code: "`, while code documents are embedded as-is. Our pipeline handles this by applying the prefix only when pre-building the description cache (build step), while the survey pipeline embeds code signals without the prefix.
+After CodeRankEmbed's failure ([Experiment 4b](#4b-coderankembed-as-local-backend-negative-result)) and failed loading attempts with CodeSage v2 and gte-Qwen2-1.5B (both broken by `transformers` v5.x), we searched for models that: (1) use standard architectures (no `trust_remote_code`), (2) produce semantic similarity scores, (3) have 768+ dim.
 
-### Implementation
+#### Model Selection
 
-Added as a fifth embedding backend (`--backend coderank`):
+Tested on a Javalin code fragment against 8 descriptions (4 relevant, 4 irrelevant):
 
-- `CodeRankEmbeddingClient` in `embedding_concretiser.py` using `sentence_transformers.SentenceTransformer`
-- `query_prefix` parameter for asymmetric embedding (prefix applied in cache builder, not in survey)
-- `normalize_embeddings=True` for L2-normalised output
-- Optional dependencies: `sentence-transformers>=3.0.0`, `torch>=2.0.0`, `einops>=0.7.0` (install with `poetry install -E coderank`)
-- Model-aware cache naming: `pattern_description_embeddings_coderank_nomic-ai--CodeRankEmbed.json`
+| Model | Dim | Top score | Spread | Loads on v5.x |
+|-------|-----|-----------|--------|---------------|
+| **BGE-base-en-v1.5** | 768 | 0.74 | 0.22 | Yes |
+| UniXcoder-base | 768 | 0.49 | 0.52 | Yes |
+| Jina code embed | — | — | — | No |
+| CodeSage v2 | — | — | — | No |
 
-### Results: smojol-api (22 signals, Java)
+#### Results
 
-Threshold: 0.50
+**smojol-api (22 signals, Java)**:
 
-| Backend | Classified | Inward | Outward | Ambiguous | Noise |
-|---------|-----------|--------|---------|-----------|-------|
-| **CodeRankEmbed** | 1 / 22 (4.5%) | 1 | 0 | 0 | 21 |
-| CodeT5 (0.58 threshold) | 11 / 22 (50%) | 10 | 1 | 0 | 11 |
-| Gemini (0.62 threshold) | 20 / 22 (91%) | 17 | 3 | 0 | 2 |
-
-The single classified signal was `config.requestLogger.http(...)` at score 0.572, matching "HTTP request logging is enabled for server" (Warp). All 10 Javalin `.get(...)` route registrations scored 0.393 — well below threshold. The `DriverManager.getConnection` line (the strongest signal for other backends) scored only 0.436.
-
-Score distribution: 0.258 – 0.572, with 20 of 22 signals below 0.44. Directions were qualitatively correct (Javalin routes → `http_rest/inward`, database lines → `database/outward`), but scores are too compressed for any threshold to cleanly separate signal from noise.
-
-### Diagnostic Probing: Lexical vs Semantic Sensitivity
-
-To understand *why* scores are so low, we embedded the full Javalin code block (the chained `Javalin.create(config -> {...}).get(...).get(...).start(port)` spanning ~40 lines) against a controlled set of descriptions varying along two axes: **lexical overlap** (shared tokens with the code) and **semantic correctness** (whether the description accurately describes what the code does).
-
-#### Declarative descriptions (our registry style)
-
-| Score | Description | Notes |
-|-------|-------------|-------|
-| 0.442 | Javalin web server with GET route handlers | Best: has "Javalin", "GET", "route", "handlers" |
-| 0.421 | Javalin .get() route registration with lambda handler | Framework-specific |
-| 0.222 | REST endpoint is exposed for inbound requests | Our registry style |
-| 0.111 | GET route is registered for HTTP endpoint | Our registry style |
-| 0.111 | HTTP communication is indicated | Our registry style |
-
-Our existing pattern descriptions ("GET route is registered for HTTP endpoint") score near the bottom. The model strongly rewards descriptions containing tokens that appear literally in the code ("Javalin", "get", "json", "ctx").
-
-#### Query-like descriptions
-
-Rewording as natural-language search queries (e.g., "how to define REST API routes in Java") did **not** improve scores. Top score dropped from 0.442 to 0.409. The query prefix helps (~0.10 boost over no prefix), but the model doesn't reward query phrasing over declarative phrasing — it rewards lexical overlap.
-
-#### Controlled lexical vs semantic experiment
-
-| Group | Score Range | Example |
-|-------|-----------|---------|
-| **Extreme lexical overlap** (code tokens pasted as description) | 0.18 – **0.50** | "Javalin.create config jsonMapper get api ctx json" (0.497) |
-| **Semantically wrong + lexical match** | 0.14 – **0.34** | "Javalin.create DELETE route that removes data" (0.340) |
-| **Semantically perfect + zero lexical overlap** | 0.14 – 0.25 | "web framework route registration" (0.220) |
-| **Semantically perfect + some overlap** | 0.15 – **0.43** | "Javalin route registration" (0.433) |
-| **Unrelated + same tokens** | 0.10 – **0.30** | "get the path of the static flowchart" (0.302) |
-| **Truly unrelated** | 0.06 – 0.11 | "quicksort algorithm implementation" (0.061) |
-
-The smoking gun: **"Javalin.create DELETE route that removes data"** (0.340, semantically wrong) scores higher than **"HTTP endpoint handler definition"** (0.223, semantically correct) and **"web framework route registration"** (0.220, semantically correct). Pasting raw code tokens as a "description" reaches **0.497** — the highest score in the entire experiment — while abstract semantic descriptions max out at 0.25.
-
-### Analysis
-
-CodeRankEmbed is performing **learned sparse retrieval in embedding space** — functionally closer to BM25 than to semantic similarity. The model was trained for code search ("given a natural language query containing keywords, find the code that matches"), not for semantic classification ("does this code implement concept X regardless of which tokens appear").
-
-This explains:
-1. **Why lexical overlap dominates**: The training objective rewards matching query tokens to code tokens, not understanding abstract relationships.
-2. **Why the query prefix doesn't help**: The prefix shifts the embedding toward the query distribution, but the similarity function is still driven by token co-occurrence.
-3. **Why scores are compressed**: Our descriptions share very few tokens with arbitrary code, so the model's retrieval mechanism has nothing to latch onto. Similarity scores cluster near zero for any description that doesn't contain framework-specific identifiers.
-4. **Why non-HTTP types separate cleanly**: This is the one thing the model *can* do — database/messaging/socket code uses completely different vocabulary from HTTP code, so lexical separation works even without semantic understanding.
-
-### Comparison with CodeT5
-
-| Property | CodeT5 | CodeRankEmbed |
-|----------|--------|---------------|
-| Embedding dim | 256 | 768 |
-| Context window | 512 tokens | 8192 tokens |
-| Score range (smojol-api) | 0.31 – 0.66 | 0.26 – 0.57 |
-| Classification rate | 50% (0.58 threshold) | 4.5% (0.50 threshold) |
-| Similarity mechanism | Semantic (weak) | Lexical (strong) |
-| Description style sensitivity | Moderate (passive voice helps) | Extreme (needs code tokens) |
-
-CodeT5 at least demonstrates weak semantic understanding — passive-voice descriptions improve scores, and the model can match "database connection" to `DriverManager.getConnection` without shared tokens. CodeRankEmbed shows no such semantic transfer; it is strictly a lexical matching model.
-
-### Verdict
-
-CodeRankEmbed is **unsuitable for description-to-code classification**. Despite superior specs (768-dim, 8192-token context), the model's retrieval-oriented training objective makes it fundamentally incompatible with our pipeline, which requires abstract semantic similarity between natural-language pattern descriptions and arbitrary framework code. The model would only work if descriptions were rewritten to contain the exact API tokens of every framework variant — which defeats the purpose of a framework-agnostic classification system.
-
-The broader lesson: **code embedding models trained for code search (query → code retrieval) are not interchangeable with models trained for code understanding (semantic similarity)**. Our pipeline needs the latter. This lesson was confirmed by the BGE experiment (see [below](#bge-base-en-v15-as-local-backend)), where a general-purpose text embedding model (BGE-base-en-v1.5) achieved 100% classification — surpassing even Gemini.
-
----
-
-## BGE-base-en-v1.5 as Local Backend
-
-### Background
-
-After CodeRankEmbed's failure (4.5% classification) and failed attempts to load CodeSage v2 and gte-Qwen2-1.5B (both broken by `transformers` v5.x removing APIs used by `trust_remote_code=True` models), we searched for embedding models that:
-
-1. Use standard architectures (no `trust_remote_code` needed)
-2. Produce semantic (not lexical) similarity scores
-3. Have sufficient dimensionality for our pattern descriptions
-
-`BAAI/bge-base-en-v1.5` emerged as the best candidate: a 110M-parameter BERT-based general-purpose text embedding model with 768-dim output, trained for semantic similarity via contrastive learning on large-scale text pairs.
-
-### Model Selection
-
-Tested three compatible models on the same Javalin code fragment:
-
-```
-config.requestLogger.http((ctx, ms) -> LOGGER.info("Got a request: " + ctx.path()));
-```
-
-| Model | Dim | Top score | Correct ranking | Score spread |
-|-------|-----|-----------|----------------|-------------|
-| **BGE-base-en-v1.5** | 768 | 0.74 | Yes | 0.52–0.74 |
-| UniXcoder-base | 768 | 0.49 | Yes | -0.03–0.49 |
-| Jina code embed | — | Failed | — | `transformers` v5.x |
-| CodeSage v2 | — | Failed | — | `transformers` v5.x |
-
-BGE showed the widest score separation between semantically relevant descriptions (HTTP: 0.74, REST: 0.65) and irrelevant ones (database: 0.56, MQ: 0.52), with all scores in a practical threshold range.
-
-### Results: smojol-api (22 signals, Java)
-
-| Backend | Classified | Inward | Outward | Ambiguous | Noise |
-|---------|-----------|--------|---------|-----------|-------|
-| **BGE-base** (0.50 threshold) | 22 / 22 (100%) | 17 | 2 | 3 | 0 |
-| Gemini (0.62 threshold) | 20 / 22 (91%) | 17 | 3 | 0 | 2 |
-| CodeT5 (0.58 threshold) | 11 / 22 (50%) | 10 | 1 | 0 | 11 |
-| CodeRankEmbed (0.50 threshold) | 1 / 22 (4.5%) | 1 | 0 | 0 | 21 |
-
-Score distribution (BGE on smojol-api): min 0.638, max 0.767, mean 0.730. All 22 signals above 0.62 — meaning BGE would still classify 100% even at Gemini's threshold.
+| Backend | Classified | Inward | Outward | Ambiguous | Noise | Score range |
+|---------|-----------|--------|---------|-----------|-------|-------------|
+| **BGE-base** (0.50) | 22 (100%) | 17 | 2 | 3 | 0 | 0.64–0.77 |
+| Gemini (0.62) | 20 (91%) | 17 | 3 | 0 | 2 | 0.59–0.74 |
 
 Sample classifications:
 
-| Score | Direction | File | Nearest Description |
-|-------|-----------|------|-------------------|
+| Score | Direction | Location | Nearest Description |
+|-------|-----------|----------|-------------------|
 | 0.767 | inward | ApiServer.java:89 | HTTP request context is represented by Ctx |
 | 0.751 | inward | ApiServer.java:45 | HTTP server is instantiated with Javalin |
 | 0.743 | outward | DbContext.java:27 | SQLite connection is typed for database access |
-| 0.671 | ambiguous | ApiServer.java:97 | Cache pattern is annotated as cacheable |
 | 0.638 | ambiguous | ApiServer.java:142 | Scheduled task is defined by annotation |
 
-### Results: restful-rust (44 signals, Rust)
+**restful-rust (44 signals, Rust)**:
 
-| Backend | Classified | Inward | Outward | Ambiguous | Noise |
-|---------|-----------|--------|---------|-----------|-------|
-| **BGE-base** (0.50 threshold) | 44 / 44 (100%) | 30 | 14 | 0 | 0 |
-| CodeT5 (0.58 threshold) | 17 / 44 (38.6%) | 9 | 7 | 1 | 27 |
+| Backend | Classified | Inward | Outward |
+|---------|-----------|--------|---------|
+| **BGE-base** (0.50) | 44 (100%) | 30 | 14 |
+| CodeT5 (0.58) | 17 (38.6%) | 9 | 7 |
 
-### Results: full smojol repo (758 signals, Java)
+**Full smojol repo (758 signals, Java)**:
 
-| Backend | Threshold | Classified | Inward | Outward | Ambiguous | Noise |
-|---------|-----------|-----------|--------|---------|-----------|-------|
-| **BGE-base** | 0.50 | 758 / 758 (100%) | 69 | 336 | 353 | 0 |
-| **BGE-base** | 0.70 | 231 / 758 (30.5%) | 33 | 85 | 113 | 527 |
-| CodeT5 (pre-rewrite) | 0.58 | 54 / 758 (7.1%) | 10 | 10 | 34 | 704 |
-| CodeT5 (post-rewrite) | 0.58 | 33 / 758 (4.4%) | 14 | 9 | 10 | 725 |
+| Threshold | Classified | Inward | Outward | Ambiguous | Noise |
+|-----------|-----------|--------|---------|-----------|-------|
+| 0.50 | 758 (100%) | 69 | 336 | 353 | 0 |
+| 0.70 | 231 (30.5%) | 33 | 85 | 113 | 527 |
 
-Score distribution (BGE on full smojol, 758 signals):
+Score distribution: min 0.57, max 0.84, mean 0.69, median 0.68. At threshold 0.62 (Gemini-equivalent), 735/758 (97%) would still be classified.
 
-| Metric | Value |
-|--------|-------|
-| Min | 0.5685 |
-| Max | 0.8399 |
-| Mean | 0.6856 |
-| Median | 0.6815 |
-| >= 0.62 | 735 (97.0%) |
-| >= 0.65 | 600 (79.2%) |
-| >= 0.70 | 231 (30.5%) |
-| >= 0.75 | 70 (9.2%) |
+The outward-heavy distribution (336 outward vs 69 inward at 0.50) reflects smojol's architecture: a COBOL analysis tool that heavily consumes external systems (Neo4j, ANTLR, file I/O) while exposing few inward integration points.
 
-At threshold 0.50, BGE classifies every signal but nearly half (353) land as ambiguous, suggesting a 0.50 threshold is too permissive for a large repo. At threshold 0.70, the ambiguous count drops to 113 and the directional split sharpens (33 inward, 85 outward) — still far above CodeT5's best (54 classified at 0.58). The outward-heavy distribution (85 outward vs 33 inward) reflects smojol's architecture: a COBOL analysis tool that heavily consumes external systems (Neo4j, ANTLR, file I/O) while exposing relatively few inward integration points.
+#### Practical Implications
 
-### Why BGE Succeeds Where Code Models Fail
+- **No API costs**: Runs locally, ~400MB model size
+- **Fast inference**: ~10s for 3,478 descriptions, ~8s for 22 signals (CPU)
+- **No `trust_remote_code`**: Standard BERT architecture, compatible with `transformers` v5.x
+- **Drop-in replacement**: 768-dim, `SentenceTransformer.encode()` API
 
-The key insight is that our task — matching natural-language pattern descriptions to code fragments — is fundamentally a **semantic similarity** task, not a **code retrieval** task:
+---
 
-1. **Code retrieval models** (CodeT5, CodeRankEmbed) are trained to find code that answers a natural-language query. They learn associations between query patterns and code patterns, rewarding lexical overlap and API-specific syntax. When given our abstract descriptions ("HTTP request context is represented by Ctx") they fail because the descriptions don't look like search queries.
+### 6. SOTA Model Comparison
 
-2. **General-purpose semantic models** (BGE, Gemini) are trained to measure semantic similarity between arbitrary text pairs. They learn abstract semantic concepts like "HTTP server", "database connection", "request handling" and can match these concepts across different surface forms — exactly what our pipeline needs.
+**Goal**: Test whether newer or larger embedding models outperform BGE-base on our task.
 
-BGE-base-en-v1.5 is trained on large-scale text pairs using contrastive learning (RetroMAE pre-training + in-batch negatives fine-tuning), which gives it strong cross-domain transfer. It treats code as "text with meaning" rather than "code with syntax", which paradoxically makes it better at understanding what code *does* than models trained specifically on code.
+#### Method
 
-### Comparison Against SOTA Embedding Models
+Five models compared on smojol-api (22 Java signals), each with **freshly embedded description vectors** (3,478 descriptions re-embedded per model — no shared caches):
 
-Given BGE-base's strong results, we tested whether newer or larger general-purpose embedding models would perform even better. Five models were compared on smojol-api (22 Java signals), each with **freshly embedded description vectors** (3,478 descriptions re-embedded per model — no shared caches):
+| Model | Params | Classified | Inward | Outward | Ambig | Noise | Mean |
+|-------|--------|-----------|--------|---------|-------|-------|------|
+| **BGE-large-en-v1.5** | 335M | 22 (100%) | 17 | 2 | 3 | 0 | 0.734 |
+| **BGE-base-en-v1.5** | 110M | 22 (100%) | 17 | 2 | 3 | 0 | 0.730 |
+| Nomic Embed v1.5 | 137M | 22 (100%) | 16 | 5 | 1 | 0 | 0.627 |
+| Snowflake Arctic-m v1.5 | 109M | 22 (100%) | 13 | 4 | 5 | 0 | 0.680 |
+| all-mpnet-base-v2 | 110M | 4 (18%) | 3 | 1 | 0 | 18 | 0.436 |
+| CodeCSE (RoBERTa load) | ~125M | 22 (100%) | 2 | 8 | 12 | 0 | 0.502 |
+| Gemini (cloud) | — | 20 (91%) | 17 | 3 | 0 | 2 | — |
 
-| Model | Params | Classified | Inward | Outward | Ambig | Noise | Score range | Mean |
-|-------|--------|-----------|--------|---------|-------|-------|-------------|------|
-| **BGE-large-en-v1.5** | 335M | 22/22 (100%) | 17 | 2 | 3 | 0 | 0.64–0.79 | 0.734 |
-| **BGE-base-en-v1.5** | 110M | 22/22 (100%) | 17 | 2 | 3 | 0 | 0.64–0.77 | 0.730 |
-| Nomic Embed v1.5 | 137M | 22/22 (100%) | 16 | 5 | 1 | 0 | 0.57–0.72 | 0.627 |
-| Snowflake Arctic-m v1.5 | 109M | 22/22 (100%) | 13 | 4 | 5 | 0 | 0.51–0.80 | 0.680 |
-| all-mpnet-base-v2 | 110M | 4/22 (18%) | 3 | 1 | 0 | 18 | 0.27–0.61 | 0.436 |
-| CodeCSE (RoBERTa load) | ~125M | 22/22 (100%) | 2 | 8 | 12 | 0 | 0.36–0.67 | 0.502 |
-| Gemini (cloud) | — | 20/22 (91%) | 17 | 3 | 0 | 2 | — | — |
+#### Model-Specific Observations
 
-#### Model-specific observations
+- **BGE-large-en-v1.5**: Identical distribution to BGE-base (17/2/3) with +0.004 mean score. 3x model size, negligible improvement.
+- **Nomic Embed v1.5**: Misclassifies 3 signals — scheduled tasks and GraphQL matched to database descriptions ("Database table is annotated for mapping").
+- **Snowflake Arctic-m v1.5**: Worst direction accuracy. Top match is "JSON request is extracted from HTTP" as **ambiguous** for a Javalin `ctx.result()` call. Only 13 inward vs BGE's 17.
+- **all-mpnet-base-v2**: Too old — scores compressed below 0.50 for 18/22 signals.
+- **CodeCSE**: Only 2 inward. Javalin routes matched to **Sanic** (wrong framework) as ambiguous. `ctx.path()` handlers classified as outward (MongoDB, graph database).
 
-- **BGE-large-en-v1.5**: Identical classification distribution to BGE-base (17 inward, 2 outward, 3 ambiguous) with marginally higher scores (+0.004 mean). The 3x model size does not justify the negligible improvement.
-- **Nomic Embed v1.5**: Misclassifies 3 signals as outward that BGE gets as inward/ambiguous — scheduled tasks and GraphQL matched to database descriptions ("Database table is annotated for mapping").
-- **Snowflake Arctic-m v1.5**: Worst direction accuracy among successful models. Top match is "JSON request is extracted from HTTP" as **ambiguous** for a Javalin `ctx.result()` call. Only 13 inward vs BGE's 17.
-- **all-mpnet-base-v2**: Too old/weak — scores compressed below 0.50 threshold for 18/22 signals.
-- **CodeCSE** (code-specific contrastive model, loaded as plain RoBERTa without CL head): Only 2 inward signals — Javalin HTTP routes matched to **Sanic** (wrong framework) as ambiguous, `ctx.path()` handlers classified as outward (MongoDB, graph database). Even a code-specific model trained for NL↔code similarity underperforms general-purpose BGE.
+#### Fragment-Level Scoring
 
-#### Diagnostic: fragment-level scoring
+All models rank correctly on isolated fragments but diverge in the pipeline because nearest-neighbor lookup across 3,478 descriptions amplifies small biases:
 
-All models were also tested on a single Javalin code fragment against 8 descriptions (4 relevant, 4 irrelevant):
-
-```
-config.requestLogger.http((ctx, ms) -> LOGGER.info("Got a request: " + ctx.path()));
-```
-
-| Model | Top score | Spread (top − bottom) | Correct ranking |
-|-------|-----------|----------------------|----------------|
+| Model | Top score | Spread | Correct ranking |
+|-------|-----------|--------|----------------|
 | BGE-large-en-v1.5 | 0.786 | 0.249 | Yes |
 | Snowflake Arctic-m v1.5 | 0.771 | 0.191 | Yes |
 | BGE-base-en-v1.5 | 0.741 | 0.224 | Yes |
 | Nomic Embed v1.5 | 0.725 | 0.290 | Yes |
-| Snowflake Arctic-l v2.0 | 0.617 | 0.357 | Yes |
 | all-mpnet-base-v2 | 0.611 | 0.514 | Yes |
 
-All models rank correctly on isolated fragments, but the pipeline results diverge because nearest-neighbor lookup across 3,478 descriptions amplifies small biases — Snowflake and Nomic match irrelevant descriptions that happen to score slightly higher than the correct ones.
+**Verdict**: BGE-base-en-v1.5 is optimal. Higher MTEB scores do not predict better performance on cross-modal description-to-code classification.
 
-#### Conclusion
+---
 
-**BGE-base-en-v1.5 is the optimal local model for this task.** Higher MTEB scores do not predict better performance on our cross-modal description-to-code classification task. MTEB primarily benchmarks retrieval and STS tasks; our task requires matching abstract natural-language descriptions to framework-specific code patterns — a niche that BGE-base handles well due to its contrastive training on diverse text pairs. Newer and larger models offer no improvement and some are worse, likely because their training data and objectives optimise for different similarity notions.
+### 4b. CodeRankEmbed as Local Backend (Negative Result)
 
-### Practical Implications
+**Goal**: Test whether `nomic-ai/CodeRankEmbed` (768-dim, 8192-token context, 137M params) could replace Gemini.
 
-- **No API costs**: BGE runs locally, ~400MB model size, no API key needed
-- **Fast inference**: ~10s for 3,478 description embeddings, ~8s for 22 signal embeddings (CPU)
-- **No `trust_remote_code`**: Standard BERT architecture, compatible with `transformers` v5.x
-- **Drop-in replacement**: Same 768-dim as CodeRankEmbed and Gemini, uses `SentenceTransformer.encode()` API
-- **Recommended default**: BGE matches or exceeds Gemini's classification quality with zero API dependency
+**Result**: 1/22 classified (4.5%) — worse than every other backend.
+
+#### Diagnostic: Lexical vs Semantic Sensitivity
+
+Controlled experiment varying lexical overlap and semantic correctness:
+
+| Group | Score range | Example |
+|-------|-----------|---------|
+| **Code tokens as description** | 0.18–**0.50** | "Javalin.create config jsonMapper get api ctx json" (0.497) |
+| **Semantically wrong + lexical match** | 0.14–**0.34** | "Javalin.create DELETE route that removes data" (0.340) |
+| **Semantically perfect + zero overlap** | 0.14–0.25 | "web framework route registration" (0.220) |
+| **Truly unrelated** | 0.06–0.11 | "quicksort algorithm implementation" (0.061) |
+
+The smoking gun: pasting raw code tokens as a "description" (0.497) outscores every semantically correct description (max 0.25 with no shared tokens). Semantically wrong descriptions with lexical overlap outscore semantically perfect descriptions without it.
+
+**Verdict**: CodeRankEmbed performs **learned sparse retrieval** (lexical matching in embedding space), not semantic similarity. Unsuitable for description-to-code classification.
+
+---
+
+## Analysis
+
+### Why General-Purpose Models Outperform Code Models
+
+Our task — matching natural-language pattern descriptions to code fragments — is fundamentally a **semantic similarity** task, not a **code retrieval** task:
+
+| Aspect | Code retrieval (CodeT5, CodeRankEmbed) | Semantic similarity (BGE, Gemini) |
+|--------|---------------------------------------|----------------------------------|
+| Training objective | Find code that answers a query | Measure whether two texts mean the same thing |
+| Similarity signal | Token co-occurrence, API patterns | Abstract concept matching |
+| Our descriptions | Don't look like search queries | Match as natural-language semantics |
+| Result | Low/compressed scores | High, well-separated scores |
+
+**Code retrieval models** learn that queries containing `"sort"` should match code containing `sort()`. They don't understand that `"HTTP server is instantiated"` and `Javalin.create()` refer to the same concept because they share no tokens.
+
+**General-purpose semantic models** are trained on diverse text pairs via contrastive learning. They learn abstract concepts — "create" ~ "instantiate", "Javalin" ~ "HTTP server" — because they've seen documentation, tutorials, and Q&A that naturally pair these concepts.
+
+BGE treats code as "text with meaning" rather than "code with syntax", which paradoxically makes it better at understanding what code *does* than models trained specifically on code.
+
+### Score Distributions Compared
+
+| Backend | Dim | Score range | Mean | Signal/noise gap |
+|---------|-----|------------|------|-----------------|
+| BGE-base | 768 | 0.64–0.77 | 0.730 | Wide |
+| Gemini | 768 | 0.59–0.74 | — | Wide |
+| CodeT5 | 256 | 0.31–0.66 | — | Narrow |
+| CodeRankEmbed | 768 | 0.26–0.57 | — | Nonexistent |
