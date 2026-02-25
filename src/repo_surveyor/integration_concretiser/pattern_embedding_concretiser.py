@@ -44,7 +44,6 @@ from repo_surveyor.integration_concretiser.embedding_concretiser import (
     _read_file_bytes,
 )
 from repo_surveyor.integration_concretiser.evidence import (
-    UNIVERSAL_CHECKS,
     EvidenceCheck,
     EvidenceContext,
     evaluate_evidence,
@@ -388,8 +387,7 @@ class PatternEmbeddingConcretiser:
             )
 
             framework_checks = self._framework_evidence.get(best_desc.source, ())
-            all_checks = UNIVERSAL_CHECKS + framework_checks
-            verdict = evaluate_evidence(evidence_ctx, all_checks, best_score)
+            verdict = evaluate_evidence(evidence_ctx, framework_checks, best_score)
             adjusted_score = verdict.adjusted_score
 
             if adjusted_score < self._threshold:
