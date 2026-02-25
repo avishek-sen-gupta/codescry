@@ -22,7 +22,7 @@ Embedding-based signal concretisation experiments, investigating which embedding
 1. **Signature pollution**: Function-level AST context includes parameter types that can dominate the embedding, causing misclassification (e.g., route functions with `Db` parameters classified as `database/outward`).
 2. **Cross-framework matching**: Signals sometimes match descriptions from unrelated frameworks (Rails, jOOQ) instead of the correct one (Warp), because the model captures domain semantics ("routes", "database") rather than framework-specific API structure.
 3. **Threshold sensitivity at scale**: At threshold 0.50 on the full smojol repo, BGE classifies 100% of signals but 47% land as ambiguous. At 0.70, classification drops to 30.5% but directional quality improves sharply. The optimal threshold likely varies per repo.
-4. **String-literal false positives dominate at scale**: 219/758 smojol signals (29%) are COBOL string literals embedded in Java test code. All three classifiers struggle with these differently — Gemini calls many of them integration (COBOL `OPEN INPUT` in a Java string), BGE matches them to file I/O descriptions, and only rule-based heuristics reliably filter them. **Partially addressed** by [Experiment 8](#8-evidence-predicate-verification): the `IN_STRING_CONTEXT` predicate checks tree-sitter ancestor node types for string literals, applying a -0.30 score penalty. Combined with `IN_GENERATED_FILE` (-0.30 for ANTLR parser code), these two predicates target the two largest false positive sources (219 + 111 = 330/758 signals).
+4. **String-literal false positives dominate at scale**: 219/758 smojol signals (29%) are COBOL string literals embedded in Java test code. All three classifiers struggle with these differently — Gemini calls many of them integration (COBOL `OPEN INPUT` in a Java string), BGE matches them to file I/O descriptions, and only rule-based heuristics reliably filter them. This suggests pattern-matching pre-filters or AST-aware string-literal detection could significantly improve all approaches.
 5. **Low three-way agreement on file_io**: The `file_io` integration type has the lowest three-way agreement (60.8%) across 530 signals. The broad `(?i)\bfile\b` common pattern fires on file metadata operations, path manipulation, and string constants that mention files — none of which are actual I/O boundaries. Tightening this pattern or adding a file-metadata exclusion list would reduce noise across all classifiers.
 
 ---
@@ -430,70 +430,3 @@ Rule hit distribution for Claude:
 | `data/survey_output_claude_gt/*.jsonl` | Claude's signal-level classifications (758 signals) |
 | `data/three_way_comparison_report.txt` | Full comparison report |
 | `data/three_way_comparison.tsv` | All 758 signals with all three classifications for manual inspection |
-
----
-
-### 8. Evidence Predicate Verification
-
-**Goal**: Address the false positive problem identified in Experiment 7 — 149 N-I-N signals (BGE says integration, Gemini and Claude disagree) are mostly file metadata and string constants matching `file_io` descriptions. A post-embedding evidence verification stage can confirm or reject embedding proposals using structural checks, with no LLM calls.
-
-#### Approach
-
-Define a vocabulary of universal predicates across three categories:
-
-| Category | Predicates | Evidence source |
-|----------|-----------|----------------|
-| **Structural (AST)** | `IN_STRING_CONTEXT`, `IN_CONSTANT_DECL`, `IN_ASSERTION` | tree-sitter ancestor node types, enclosing node text |
-| **File/path** | `IN_TEST_FILE`, `IN_VENDOR_DIR`, `IN_CONFIG_DIR`, `IN_GENERATED_FILE`, `PATH_MATCHES` | file path regex, directory conventions, header comments |
-| **Textual** | `IN_LOG_STATEMENT`, `ENCLOSING_FUNCTION_CALLS`, `SIBLING_LINE_MATCHES`, `LINE_MATCHES` | regex on enclosing node text, surrounding lines |
-
-Each predicate is a pure function `(PredicateContext, pattern_arg) -> bool`. A JSON checklist maps predicates to weights and is looked up per signal's `source:matched_pattern` with fallback to defaults.
-
-The adjusted score is computed as: `clamp(raw_score + sum(matched_weights), 0.0, 1.0)`.
-
-#### Default Checklist Weights
-
-| Predicate | Weight | Rationale |
-|-----------|--------|-----------|
-| `IN_STRING_CONTEXT` | -0.30 | COBOL string literals in Java are the largest false positive source (219/758 signals) |
-| `IN_LOG_STATEMENT` | -0.25 | Logging calls referencing URLs/files are not integration boundaries |
-| `IN_VENDOR_DIR` | -0.25 | Third-party/generated code should not be flagged |
-| `IN_GENERATED_FILE` | -0.30 | ANTLR-generated parser code (111 signals) is the second largest false positive source |
-| `IN_ASSERTION` | -0.20 | Test assertions referencing integration APIs are not runtime boundaries |
-| `IN_CONSTANT_DECL` | -0.20 | Static constants defining URLs/paths are declarations, not I/O |
-| `IN_TEST_FILE` | -0.15 | Test files contain mock/stub integration references |
-| `IN_CONFIG_DIR` | -0.10 | Config files defining connection strings are not I/O boundaries |
-
-Conservative negative weights only — suppress false positives without promoting anything. Per-pattern overrides can be added to `data/evidence_checklists/default.json` as needed.
-
-#### Architecture
-
-```
-raw cosine score (from _find_nearest)
-    |
-    v
-[EvidenceEvaluator]
-    ├── ChecklistRegistry.get_checklist(source, pattern)
-    ├── For each ChecklistEntry:
-    │   └── PREDICATE_DISPATCH[predicate](PredicateContext, pattern_arg)
-    ├── Sum matched weights → score_adjustment
-    └── clamp(raw + adjustment, 0.0, 1.0) → adjusted_score
-    |
-    v
-threshold comparison (on adjusted_score)
-```
-
-`PredicateContext` is constructed per-signal reusing the file cache already maintained by `_extract_contexts`, avoiding redundant file reads. Ancestor node types are collected via one additional tree-sitter parse per (file, language) pair.
-
-#### Implementation
-
-| File | Purpose |
-|------|---------|
-| `evidence_predicates.py` | `PredicateName` enum, `ChecklistEntry`, `PredicateResult`, `EvidenceVerdict` data model |
-| `predicates.py` | 12 pure predicate functions + `PREDICATE_DISPATCH` table |
-| `predicate_context_builder.py` | `PredicateContext` dataclass, batch construction reusing file cache |
-| `checklist_registry.py` | JSON loading, `source:pattern` lookup with default fallback |
-| `evidence_evaluator.py` | `EvidenceEvaluator` orchestration with single and batch evaluation |
-| `data/evidence_checklists/default.json` | Default checklist with conservative negative weights |
-
-Wired into `PatternEmbeddingConcretiser` via optional `checklist_path` parameter. When not provided (default), the evaluator is `None` and behaviour is identical to before — zero regression risk.

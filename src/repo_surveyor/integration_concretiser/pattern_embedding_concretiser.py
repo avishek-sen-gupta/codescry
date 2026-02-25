@@ -43,19 +43,6 @@ from repo_surveyor.integration_concretiser.embedding_concretiser import (
     cosine,
     _read_file_bytes,
 )
-from repo_surveyor.integration_concretiser.checklist_registry import (
-    ChecklistRegistry,
-)
-from repo_surveyor.integration_concretiser.evidence_evaluator import (
-    EvidenceEvaluator,
-)
-from repo_surveyor.integration_concretiser.evidence_predicates import (
-    EvidenceVerdict,
-)
-from repo_surveyor.integration_concretiser.predicate_context_builder import (
-    PredicateContext,
-    batch_build_predicate_contexts,
-)
 from repo_surveyor.integration_concretiser.types import (
     ASTContext,
     ConcretisationResult,
@@ -191,13 +178,11 @@ class PatternEmbeddingConcretiser:
         client: EmbeddingClientProtocol,
         threshold: float = _DEFAULT_THRESHOLD,
         cache_path: Path = _EMPTY_PATH,
-        checklist_path: Path = _EMPTY_PATH,
     ) -> None:
         self._client = client
         self._threshold = threshold
         self._descriptions = get_all_pattern_descriptions()
         self._desc_embeddings = self._load_or_embed(cache_path)
-        self._evaluator = self._build_evaluator(checklist_path)
 
     def _load_or_embed(self, cache_path: Path) -> list[list[float]]:
         """Load cached description embeddings or embed via client and save."""
@@ -226,14 +211,6 @@ class PatternEmbeddingConcretiser:
 
         return embeddings
 
-    def _build_evaluator(self, checklist_path: Path) -> EvidenceEvaluator | None:
-        """Build an evidence evaluator from the checklist path, or None if disabled."""
-        if checklist_path == _EMPTY_PATH:
-            return None
-        registry = ChecklistRegistry(checklist_path)
-        logger.info("Evidence evaluation enabled via %s", checklist_path)
-        return EvidenceEvaluator(registry)
-
     def concretise(
         self,
         detector_result: IntegrationDetectorResult,
@@ -261,9 +238,7 @@ class PatternEmbeddingConcretiser:
             len(file_content_signals),
         )
 
-        signal_contexts, predicate_contexts = self._extract_contexts(
-            file_content_signals, file_reader
-        )
+        signal_contexts = self._extract_contexts(file_content_signals, file_reader)
         embed_texts = [
             ctx.node_text if ctx.node_text else sig.match.line_content.strip()
             for sig, ctx in zip(file_content_signals, signal_contexts)
@@ -273,10 +248,7 @@ class PatternEmbeddingConcretiser:
         signal_embeddings = self._client.embed_batch(embed_texts) if embed_texts else []
 
         concretised, metadata = self._classify_signals(
-            file_content_signals,
-            signal_contexts,
-            signal_embeddings,
-            predicate_contexts,
+            file_content_signals, signal_contexts, signal_embeddings
         )
 
         classified = sum(1 for s in concretised if s.is_integration)
@@ -301,18 +273,12 @@ class PatternEmbeddingConcretiser:
         self,
         signals: list[SignalLike],
         file_reader: Callable[[str], bytes],
-    ) -> tuple[list[ASTContext], list[PredicateContext]]:
-        """Extract statement-level AST context and predicate context for each signal.
+    ) -> list[ASTContext]:
+        """Extract statement-level AST context for each signal.
 
         Groups signals by file and language, then calls
         batch_extract_statement_contexts once per (file, language) pair
-        to avoid redundant parses and AST walks.  When evidence evaluation
-        is enabled, additionally builds PredicateContext objects reusing
-        the same file cache.
-
-        Returns:
-            Tuple of (ast_contexts, predicate_contexts).  When evidence
-            evaluation is disabled, predicate_contexts is an empty list.
+        to avoid redundant parses and AST walks.
         """
         logger.info("Extracting AST contexts for %d signals...", len(signals))
         file_cache: dict[str, bytes] = {}
@@ -350,46 +316,30 @@ class PatternEmbeddingConcretiser:
             for idx in indices:
                 context_by_index[idx] = contexts_by_line[signals[idx].match.line_number]
 
-        ast_contexts = [context_by_index[i] for i in range(len(signals))]
+        contexts = [context_by_index[i] for i in range(len(signals))]
         fallback_count = len(fallback_indices)
         logger.info(
             "AST context extraction complete: %d contexts from %d unique files "
             "(%d fallbacks)",
-            len(ast_contexts),
+            len(contexts),
             len(file_cache),
             fallback_count,
         )
-
-        # Build predicate contexts only when evidence evaluation is enabled
-        predicate_contexts: list[PredicateContext] = (
-            batch_build_predicate_contexts(signals, ast_contexts, file_cache)
-            if self._evaluator is not None
-            else []
-        )
-
-        return ast_contexts, predicate_contexts
+        return contexts
 
     def _classify_signals(
         self,
         signals: list[SignalLike],
         contexts: list[ASTContext],
         embeddings: list[list[float]],
-        predicate_contexts: list[PredicateContext] = (),
     ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
-        """Classify each signal by nearest-neighbor description lookup.
-
-        When an evidence evaluator is configured, the raw cosine similarity
-        score is adjusted by predicate weights before comparing against the
-        threshold.  Evidence data is included in the metadata dict under
-        an ``"evidence"`` key.
-        """
+        """Classify each signal by nearest-neighbor description lookup."""
         logger.info(
             "Classifying %d signals against %d pattern descriptions "
-            "(threshold=%.3f, evidence=%s)",
+            "(threshold=%.3f)",
             len(signals),
             len(self._descriptions),
             self._threshold,
-            "enabled" if self._evaluator is not None else "disabled",
         )
         concretised: list[ConcretisedSignal] = []
         metadata: dict[tuple[str, int], dict] = {}
@@ -399,18 +349,9 @@ class PatternEmbeddingConcretiser:
         progress_interval = max(1, total // 10)
 
         for idx, (sig, ctx, emb) in enumerate(zip(signals, contexts, embeddings)):
-            best_desc, raw_score = self._find_nearest(emb)
+            best_desc, best_score = self._find_nearest(emb)
 
-            # Apply evidence evaluation when enabled
-            verdict: EvidenceVerdict | None = None
-            effective_score = raw_score
-            if self._evaluator is not None and predicate_contexts:
-                verdict = self._evaluator.evaluate(
-                    sig, predicate_contexts[idx], raw_score
-                )
-                effective_score = verdict.adjusted_score
-
-            if effective_score < self._threshold:
+            if best_score < self._threshold:
                 validity = SignalValidity.NOISE
                 direction = SignalDirection.AMBIGUOUS
             else:
@@ -421,37 +362,21 @@ class PatternEmbeddingConcretiser:
             label_counts[tag] = label_counts.get(tag, 0) + 1
 
             key = (sig.match.file_path, sig.match.line_number)
-            meta: dict = {
+            metadata[key] = {
                 "nearest_description": best_desc.text,
                 "nearest_type": best_desc.integration_type.value,
                 "nearest_direction": best_desc.direction.value,
                 "nearest_source": best_desc.source,
-                "score": effective_score,
+                "score": best_score,
             }
-            if verdict is not None:
-                meta["evidence"] = {
-                    "raw_score": verdict.original_score,
-                    "adjustment": verdict.score_adjustment,
-                    "predicates_fired": [
-                        r.predicate_name.value
-                        for r in verdict.predicate_results
-                        if r.matched
-                    ],
-                }
-            metadata[key] = meta
 
             logger.debug(
-                "  [%d/%d] %s:%d  score=%.3f%s  type=%s  dir=%s  src=%s",
+                "  [%d/%d] %s:%d  score=%.3f  type=%s  dir=%s  src=%s",
                 idx + 1,
                 total,
                 sig.match.file_path,
                 sig.match.line_number,
-                effective_score,
-                (
-                    f" (raw={raw_score:.3f} adj={verdict.score_adjustment:+.3f})"
-                    if verdict is not None
-                    else ""
-                ),
+                best_score,
                 best_desc.integration_type.value,
                 best_desc.direction.value,
                 best_desc.source,
