@@ -25,6 +25,22 @@ Embedding-based signal concretisation experiments, investigating which embedding
 4. **String-literal false positives dominate at scale**: 219/758 smojol signals (29%) are COBOL string literals embedded in Java test code. All three classifiers struggle with these differently — Gemini calls many of them integration (COBOL `OPEN INPUT` in a Java string), BGE matches them to file I/O descriptions, and only rule-based heuristics reliably filter them. This suggests pattern-matching pre-filters or AST-aware string-literal detection could significantly improve all approaches.
 5. **Low three-way agreement on file_io**: The `file_io` integration type has the lowest three-way agreement (60.8%) across 530 signals. The broad `(?i)\bfile\b` common pattern fires on file metadata operations, path manipulation, and string constants that mention files — none of which are actual I/O boundaries. Tightening this pattern or adding a file-metadata exclusion list would reduce noise across all classifiers.
 
+### Evidence Check Infrastructure (Mitigation)
+
+An **evidence check system** (`evidence.py`) addresses challenges 4 and 5 by applying contextual suppression and boost weights to the raw cosine score before threshold comparison. Seven universal suppression checks target the dominant noise sources identified above:
+
+| Check | Weight | Targets |
+|-------|--------|---------|
+| `in_test_file` | -0.15 | Test directories and file naming conventions |
+| `in_vendor_dir` | -0.25 | `vendor/`, `node_modules/`, `third_party/`, etc. |
+| `in_generated_file` | -0.30 | Generated file paths or "auto-generated" header comments |
+| `in_config_dir` | -0.10 | Config directories and file extensions (`.yaml`, `.json`, `.cfg`, etc.) |
+| `in_string_literal` | -0.30 | Lines dominated by string literals (addresses challenge 4) |
+| `in_log_statement` | -0.25 | Logging calls (`logger.info(...)`, `console.log(...)`) |
+| `in_constant_decl` | -0.20 | Constant declarations (`API_URL = "..."`, `const MAX_RETRIES = ...`) |
+
+The framework accepts an extensible `framework_evidence` parameter keyed by pattern source name, enabling pattern-source-specific boost/suppress checks (e.g., framework-specific I/O confirmation) in follow-up work.
+
 ---
 
 ## Experiments

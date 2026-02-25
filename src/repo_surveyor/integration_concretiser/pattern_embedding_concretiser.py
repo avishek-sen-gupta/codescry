@@ -43,6 +43,12 @@ from repo_surveyor.integration_concretiser.embedding_concretiser import (
     cosine,
     _read_file_bytes,
 )
+from repo_surveyor.integration_concretiser.evidence import (
+    UNIVERSAL_CHECKS,
+    EvidenceCheck,
+    EvidenceContext,
+    evaluate_evidence,
+)
 from repo_surveyor.integration_concretiser.types import (
     ASTContext,
     ConcretisationResult,
@@ -178,11 +184,13 @@ class PatternEmbeddingConcretiser:
         client: EmbeddingClientProtocol,
         threshold: float = _DEFAULT_THRESHOLD,
         cache_path: Path = _EMPTY_PATH,
+        framework_evidence: dict[str, tuple[EvidenceCheck, ...]] = {},
     ) -> None:
         self._client = client
         self._threshold = threshold
         self._descriptions = get_all_pattern_descriptions()
         self._desc_embeddings = self._load_or_embed(cache_path)
+        self._framework_evidence = framework_evidence
 
     def _load_or_embed(self, cache_path: Path) -> list[list[float]]:
         """Load cached description embeddings or embed via client and save."""
@@ -238,7 +246,9 @@ class PatternEmbeddingConcretiser:
             len(file_content_signals),
         )
 
-        signal_contexts = self._extract_contexts(file_content_signals, file_reader)
+        signal_contexts, file_cache = self._extract_contexts(
+            file_content_signals, file_reader
+        )
         embed_texts = [
             ctx.node_text if ctx.node_text else sig.match.line_content.strip()
             for sig, ctx in zip(file_content_signals, signal_contexts)
@@ -248,7 +258,7 @@ class PatternEmbeddingConcretiser:
         signal_embeddings = self._client.embed_batch(embed_texts) if embed_texts else []
 
         concretised, metadata = self._classify_signals(
-            file_content_signals, signal_contexts, signal_embeddings
+            file_content_signals, signal_contexts, signal_embeddings, file_cache
         )
 
         classified = sum(1 for s in concretised if s.is_integration)
@@ -273,12 +283,15 @@ class PatternEmbeddingConcretiser:
         self,
         signals: list[SignalLike],
         file_reader: Callable[[str], bytes],
-    ) -> list[ASTContext]:
+    ) -> tuple[list[ASTContext], dict[str, bytes]]:
         """Extract statement-level AST context for each signal.
 
         Groups signals by file and language, then calls
         batch_extract_statement_contexts once per (file, language) pair
         to avoid redundant parses and AST walks.
+
+        Returns:
+            Tuple of (AST contexts per signal, file bytes cache).
         """
         logger.info("Extracting AST contexts for %d signals...", len(signals))
         file_cache: dict[str, bytes] = {}
@@ -325,15 +338,20 @@ class PatternEmbeddingConcretiser:
             len(file_cache),
             fallback_count,
         )
-        return contexts
+        return contexts, file_cache
 
     def _classify_signals(
         self,
         signals: list[SignalLike],
         contexts: list[ASTContext],
         embeddings: list[list[float]],
+        file_cache: dict[str, bytes] = {},
     ) -> tuple[list[ConcretisedSignal], dict[tuple[str, int], dict]]:
-        """Classify each signal by nearest-neighbor description lookup."""
+        """Classify each signal by nearest-neighbor description lookup.
+
+        Applies evidence checks (universal + framework-specific) to adjust
+        the raw cosine score before comparing against the threshold.
+        """
         logger.info(
             "Classifying %d signals against %d pattern descriptions "
             "(threshold=%.3f)",
@@ -348,10 +366,33 @@ class PatternEmbeddingConcretiser:
         t0_classify = time.monotonic()
         progress_interval = max(1, total // 10)
 
+        # Pre-decode file bytes into line tuples for evidence context
+        source_lines_cache: dict[str, tuple[str, ...]] = {}
+
         for idx, (sig, ctx, emb) in enumerate(zip(signals, contexts, embeddings)):
             best_desc, best_score = self._find_nearest(emb)
 
-            if best_score < self._threshold:
+            # Build evidence context and evaluate checks
+            fp = sig.match.file_path
+            if fp not in source_lines_cache:
+                raw = file_cache.get(fp, b"")
+                source_lines_cache[fp] = tuple(
+                    raw.decode("utf-8", errors="replace").splitlines()
+                )
+
+            evidence_ctx = EvidenceContext(
+                file_path=fp,
+                line_number=sig.match.line_number,
+                line_content=sig.match.line_content.strip(),
+                source_lines=source_lines_cache[fp],
+            )
+
+            framework_checks = self._framework_evidence.get(best_desc.source, ())
+            all_checks = UNIVERSAL_CHECKS + framework_checks
+            verdict = evaluate_evidence(evidence_ctx, all_checks, best_score)
+            adjusted_score = verdict.adjusted_score
+
+            if adjusted_score < self._threshold:
                 validity = SignalValidity.NOISE
                 direction = SignalDirection.AMBIGUOUS
             else:
@@ -362,24 +403,29 @@ class PatternEmbeddingConcretiser:
             label_counts[tag] = label_counts.get(tag, 0) + 1
 
             key = (sig.match.file_path, sig.match.line_number)
+            fired_checks = [r.name for r in verdict.results if r.fired]
             metadata[key] = {
                 "nearest_description": best_desc.text,
                 "nearest_type": best_desc.integration_type.value,
                 "nearest_direction": best_desc.direction.value,
                 "nearest_source": best_desc.source,
                 "score": best_score,
+                "adjusted_score": adjusted_score,
+                "score_adjustment": verdict.score_adjustment,
+                "evidence_fired": fired_checks,
             }
 
             logger.debug(
-                "  [%d/%d] %s:%d  score=%.3f  type=%s  dir=%s  src=%s",
+                "  [%d/%d] %s:%d  raw=%.3f  adj=%.3f  type=%s  dir=%s  " "evidence=%s",
                 idx + 1,
                 total,
                 sig.match.file_path,
                 sig.match.line_number,
                 best_score,
+                adjusted_score,
                 best_desc.integration_type.value,
                 best_desc.direction.value,
-                best_desc.source,
+                fired_checks,
             )
 
             if (idx + 1) % progress_interval == 0 or idx + 1 == total:
