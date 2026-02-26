@@ -4,6 +4,8 @@
 
 <p align="center">
   <a href="https://github.com/avishek-sen-gupta/codescry/actions/workflows/ci.yml"><img src="https://github.com/avishek-sen-gupta/codescry/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="presentation/index.html"><img src="https://img.shields.io/badge/Presentation-Reveal.js-blue" alt="Presentation"></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT"></a>
 </p>
 
 Codescry is a Python library for analysing technology stacks and code structure across a bunch of programming languages.
