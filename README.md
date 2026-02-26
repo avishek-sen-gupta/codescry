@@ -157,6 +157,11 @@ poetry run python scripts/generate_diagrams.py
 | [Testing & CI](docs/testing.md) | Running tests, coverage, local-repo tests, and CI pipeline |
 | [Presentation](presentation/index.html) | Reveal.js slide deck covering the pipeline, techniques, and architecture |
 
+## See Also
+
+- **[Red Dragon](https://github.com/avishek-sen-gupta/red-dragon)** — Multi-language symbolic code analysis toolkit (IR lowering, CFG generation, dataflow analysis, symbolic execution)
+- **[Rev-Eng TUI](https://github.com/avishek-sen-gupta/reddragon-codescry-tui)** — Terminal UI that integrates Codescry and Red Dragon for interactive top-down reverse engineering of codebases
+
 ## License
 
 This project is licensed under the MIT License — see [LICENSE.md](LICENSE.md) for details.
