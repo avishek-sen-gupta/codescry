@@ -17,8 +17,8 @@
 
 ## Build
 
-- When asked to commit and push, always ask which branch to push to unless it's already clear from context. Never assume 'main' branch.
-- Before committing anything, update the README based on the diffs. I should not have to repeat this in my instructions.
+- When asked to commit and push, always push to 'main' branch, unless otherwise instructed.
+- Before committing anything, update the README based on the diffs.
 - Before committing anything, run `poetry run black` on every Python file touched in the change. The CI pipeline enforces Black formatting and will fail if this is skipped.
 - Before committing anything, run all tests, fixing them if necessary. If test assertions are being removed, ask me to review them.
 
@@ -28,6 +28,8 @@
 - Do not patch with `unittest.mock.patch`. Use proper dependency injection, and then inject mock objects.
 - Use `tmp_path` fixture for filesystem tests
 - Tests requiring external repos (mojo-lsp, smojol) are integration tests
+- When fixing tests, do not blindly change test assertions to make the test pass. Only modify assertions once you are sure that the actual code output is actually valid according to the context.
+- Always start from writing unit tests for the smallest feasible units of code. True unit tests (which do not exercise true I/O) should be in a `unit` directory under the test directory. Tests which exercise I/O (call LLMs, touch databases) should be in the `integration` directory under the test directory.
 
 ## Programming Patterns
 
@@ -43,6 +45,8 @@
 - Prefer small, composable functions. Do not write massive functions.
 - Do not use static methods. EVER.
 - Add copious helpful logs to track progress of tasks, especially long-running ones, or ones which involve loops.
+- Use a ports-and-adapter type architecture in your design decisions. Adhere to the tenet of "Functional Core, Imperative Shell".
+- When importing, use fully qualified module names. Do not use relative imports.
 
 ## Code Review Patterns
 
