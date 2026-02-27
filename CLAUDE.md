@@ -41,6 +41,7 @@
 
 - Use proper dependency injection for interfaces to external systems like Neo4J, OS, and File I/O. Do not hardcode importing the concrete modules in these cases. This applies especially to I/O or nondeterministic modules (eg: clock libraries, GUID libraries, etc.).
 - Minimise and/or avoid mutation.
+- STOP USING FOR LOOPS WITH MUTATIONS IN THEM. JUST STOP.
 - Write your code aggressively in the Functional Programming style, but balance it with readability. Avoid for loops where list comprehensions, map, filter, reduce, etc. can be used.
 - Minimise magic strings and numbers by refactoring them into constants
 - Don't expose raw global variables in files indiscriminately; wrap them as constants in classes, etc.
