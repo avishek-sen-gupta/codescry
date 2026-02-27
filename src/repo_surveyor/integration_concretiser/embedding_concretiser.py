@@ -10,8 +10,8 @@ Supports six embedding backends:
   - Google Gemini (gemini-embedding-001) via ``GeminiEmbeddingClient``
   - Local Ollama (unclemusclez/jina-embeddings-v2-base-code) via ``OllamaEmbeddingClient``
   - Local HuggingFace transformers (Salesforce/codet5p-110m-embedding) via ``HuggingFaceLocalEmbeddingClient``
-  - Local sentence-transformers (nomic-ai/CodeRankEmbed) via ``CodeRankEmbeddingClient``
-  - Local sentence-transformers (BAAI/bge-base-en-v1.5) via ``BGEEmbeddingClient``
+  - Local sentence-transformers (nomic-ai/CodeRankEmbed) via ``create_coderank_embedding_client``
+  - Local sentence-transformers (BAAI/bge-base-en-v1.5) via ``create_bge_embedding_client``
 
 All implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
 is backend-agnostic.
@@ -22,8 +22,8 @@ Usage:
         GeminiEmbeddingClient,
         OllamaEmbeddingClient,
         HuggingFaceLocalEmbeddingClient,
-        CodeRankEmbeddingClient,
-        BGEEmbeddingClient,
+        create_coderank_embedding_client,
+        create_bge_embedding_client,
         EmbeddingConcretiser,
     )
     # HuggingFace Inference Endpoint backend
@@ -35,9 +35,9 @@ Usage:
     # -- or HuggingFace local backend (no API server needed) --
     client = HuggingFaceLocalEmbeddingClient()
     # -- or CodeRankEmbed backend (local, asymmetric embedding) --
-    client = CodeRankEmbeddingClient()
+    client = create_coderank_embedding_client()
     # -- or BGE backend (local, general-purpose semantic embedding) --
-    client = BGEEmbeddingClient()
+    client = create_bge_embedding_client()
     concretiser = EmbeddingConcretiser(client)
     result, metadata = concretiser.concretise(detector_result, file_reader)
 """
@@ -609,7 +609,7 @@ class SentenceTransformerEmbeddingClient:
         return all_embeddings
 
 
-def CodeRankEmbeddingClient(
+def create_coderank_embedding_client(
     model_name: str = _CODERANK_DEFAULT_MODEL,
     device: str = "cpu",
     query_prefix: str = "",
@@ -625,7 +625,7 @@ def CodeRankEmbeddingClient(
     )
 
 
-def BGEEmbeddingClient(
+def create_bge_embedding_client(
     model_name: str = _BGE_DEFAULT_MODEL,
     device: str = "cpu",
     model: object = None,

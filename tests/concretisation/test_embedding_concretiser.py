@@ -12,8 +12,8 @@ from repo_surveyor.integration_concretiser.ast_walker import (
     extract_invocation_context,
 )
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
-    BGEEmbeddingClient,
-    CodeRankEmbeddingClient,
+    create_bge_embedding_client,
+    create_coderank_embedding_client,
     EmbeddingClient,
     EmbeddingConcretiser,
     HuggingFaceLocalEmbeddingClient,
@@ -766,7 +766,7 @@ class TestHuggingFaceLocalBatching:
 
 
 # ---------------------------------------------------------------------------
-# Helpers for CodeRankEmbeddingClient tests
+# Helpers for create_coderank_embedding_client tests
 # ---------------------------------------------------------------------------
 
 
@@ -793,16 +793,16 @@ class _FakeSentenceTransformerModel:
 
 
 # ---------------------------------------------------------------------------
-# Tests: CodeRankEmbeddingClient
+# Tests: create_coderank_embedding_client
 # ---------------------------------------------------------------------------
 
 
 class TestCodeRankEmbedBatch:
-    """Verify CodeRankEmbeddingClient.embed_batch returns correct embeddings."""
+    """Verify create_coderank_embedding_client.embed_batch returns correct embeddings."""
 
     def test_single_text_returns_embedding(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=4)
-        client = CodeRankEmbeddingClient(model=fake_model)
+        client = create_coderank_embedding_client(model=fake_model)
 
         result = client.embed_batch(["hello world"])
 
@@ -813,7 +813,7 @@ class TestCodeRankEmbedBatch:
 
     def test_multiple_texts_returns_all_embeddings(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
-        client = CodeRankEmbeddingClient(model=fake_model)
+        client = create_coderank_embedding_client(model=fake_model)
 
         result = client.embed_batch(["foo", "bar", "baz"])
 
@@ -823,7 +823,7 @@ class TestCodeRankEmbedBatch:
 
     def test_empty_input_returns_empty(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
-        client = CodeRankEmbeddingClient(model=fake_model)
+        client = create_coderank_embedding_client(model=fake_model)
 
         result = client.embed_batch([])
 
@@ -833,7 +833,7 @@ class TestCodeRankEmbedBatch:
     def test_query_prefix_prepended(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
         prefix = "Represent this query for searching relevant code: "
-        client = CodeRankEmbeddingClient(model=fake_model, query_prefix=prefix)
+        client = create_coderank_embedding_client(model=fake_model, query_prefix=prefix)
 
         client.embed_batch(["find all routes", "database query"])
 
@@ -845,7 +845,7 @@ class TestCodeRankEmbedBatch:
 
     def test_no_prefix_when_empty(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
-        client = CodeRankEmbeddingClient(model=fake_model, query_prefix="")
+        client = create_coderank_embedding_client(model=fake_model, query_prefix="")
 
         client.embed_batch(["app.get('/users')"])
 
@@ -854,7 +854,7 @@ class TestCodeRankEmbedBatch:
 
     def test_normalize_embeddings_passed(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
-        client = CodeRankEmbeddingClient(model=fake_model)
+        client = create_coderank_embedding_client(model=fake_model)
 
         client.embed_batch(["test"])
 
@@ -862,7 +862,9 @@ class TestCodeRankEmbedBatch:
 
     def test_custom_model_name_stored(self):
         fake_model = _FakeSentenceTransformerModel()
-        client = CodeRankEmbeddingClient(model_name="custom/model", model=fake_model)
+        client = create_coderank_embedding_client(
+            model_name="custom/model", model=fake_model
+        )
 
         assert client._model_name == "custom/model"
 
@@ -873,7 +875,7 @@ class TestCodeRankBatching:
     def test_texts_split_into_correct_batches(self):
         num_texts = _BATCH_SIZE + 10
         fake_model = _FakeSentenceTransformerModel(embedding_dim=2)
-        client = CodeRankEmbeddingClient(model=fake_model)
+        client = create_coderank_embedding_client(model=fake_model)
 
         texts = [f"text_{i}" for i in range(num_texts)]
         result = client.embed_batch(texts)
@@ -885,16 +887,16 @@ class TestCodeRankBatching:
 
 
 # ---------------------------------------------------------------------------
-# Tests: BGEEmbeddingClient
+# Tests: create_bge_embedding_client
 # ---------------------------------------------------------------------------
 
 
 class TestBGEEmbedBatch:
-    """Verify BGEEmbeddingClient.embed_batch returns correct embeddings."""
+    """Verify create_bge_embedding_client.embed_batch returns correct embeddings."""
 
     def test_single_text_returns_embedding(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=4)
-        client = BGEEmbeddingClient(model=fake_model)
+        client = create_bge_embedding_client(model=fake_model)
 
         result = client.embed_batch(["hello world"])
 
@@ -906,7 +908,7 @@ class TestBGEEmbedBatch:
     def test_no_prefix_applied(self):
         """BGE does not use query prefixes — texts must be embedded as-is."""
         fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
-        client = BGEEmbeddingClient(model=fake_model)
+        client = create_bge_embedding_client(model=fake_model)
 
         client.embed_batch(["import java.net.http.HttpClient;"])
 
@@ -915,7 +917,7 @@ class TestBGEEmbedBatch:
 
     def test_normalize_embeddings_passed(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
-        client = BGEEmbeddingClient(model=fake_model)
+        client = create_bge_embedding_client(model=fake_model)
 
         client.embed_batch(["test"])
 
@@ -923,13 +925,13 @@ class TestBGEEmbedBatch:
 
     def test_default_model_name(self):
         fake_model = _FakeSentenceTransformerModel()
-        client = BGEEmbeddingClient(model=fake_model)
+        client = create_bge_embedding_client(model=fake_model)
 
         assert client._model_name == _BGE_DEFAULT_MODEL
 
     def test_custom_model_name(self):
         fake_model = _FakeSentenceTransformerModel()
-        client = BGEEmbeddingClient(
+        client = create_bge_embedding_client(
             model_name="BAAI/bge-large-en-v1.5", model=fake_model
         )
 
@@ -937,7 +939,7 @@ class TestBGEEmbedBatch:
 
     def test_empty_input_returns_empty(self):
         fake_model = _FakeSentenceTransformerModel(embedding_dim=3)
-        client = BGEEmbeddingClient(model=fake_model)
+        client = create_bge_embedding_client(model=fake_model)
 
         result = client.embed_batch([])
 

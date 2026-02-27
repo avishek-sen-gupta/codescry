@@ -42,8 +42,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from repo_surveyor import survey
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
-    BGEEmbeddingClient,
-    CodeRankEmbeddingClient,
+    create_bge_embedding_client,
+    create_coderank_embedding_client,
     EmbeddingClient,
     GeminiEmbeddingClient,
     HuggingFaceLocalEmbeddingClient,
@@ -88,9 +88,9 @@ def _create_client(
     """Create the appropriate embedding client based on the backend choice."""
     model = _resolve_model(args)
     if args.backend == "bge":
-        return BGEEmbeddingClient(model_name=model)
+        return create_bge_embedding_client(model_name=model)
     if args.backend == "coderank":
-        return CodeRankEmbeddingClient(model_name=model)
+        return create_coderank_embedding_client(model_name=model)
     if args.backend == "hf-local":
         return HuggingFaceLocalEmbeddingClient(model_name=model)
     if args.backend == "ollama":
