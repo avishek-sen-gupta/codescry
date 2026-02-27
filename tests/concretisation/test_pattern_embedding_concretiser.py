@@ -729,3 +729,104 @@ class TestKNNClassification:
         meta = metadata[("client.py", 5)]
         assert meta["k"] == 5
         assert len(meta["neighbours"]) == 5
+
+
+# ---------------------------------------------------------------------------
+# Tests: Batch KNN vs per-signal KNN equivalence
+# ---------------------------------------------------------------------------
+
+
+class TestBatchKNNEquivalence:
+    """Verify _find_all_k_nearest_batch matches per-signal _find_k_nearest."""
+
+    def test_batch_matches_per_signal(self):
+        """Batch method returns identical descriptions and scores as per-signal."""
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+
+        # Several diverse signal embeddings
+        signal_embeddings = [
+            _unit_vector(dim, 0),
+            _unit_vector(dim, 7),
+            [0.01] * dim,
+            [float(i) / dim for i in range(dim)],
+        ]
+
+        mock_client = _MockEmbeddingClient(embeddings_by_call=[desc_embeddings])
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40, k=5
+        )
+
+        batch_results = concretiser._find_all_k_nearest_batch(signal_embeddings)
+        per_signal_results = [
+            concretiser._find_k_nearest(emb) for emb in signal_embeddings
+        ]
+
+        assert len(batch_results) == len(per_signal_results)
+
+        for sig_idx, (batch, single) in enumerate(
+            zip(batch_results, per_signal_results)
+        ):
+            assert len(batch) == len(single), (
+                f"Signal {sig_idx}: batch returned {len(batch)} neighbours, "
+                f"per-signal returned {len(single)}"
+            )
+            for k_idx, ((b_desc, b_score), (s_desc, s_score)) in enumerate(
+                zip(batch, single)
+            ):
+                assert b_desc.text == s_desc.text, (
+                    f"Signal {sig_idx}, neighbour {k_idx}: "
+                    f"batch desc={b_desc.text!r}, single desc={s_desc.text!r}"
+                )
+                assert abs(b_score - s_score) < 1e-9, (
+                    f"Signal {sig_idx}, neighbour {k_idx}: "
+                    f"batch score={b_score}, single score={s_score}"
+                )
+
+    def test_batch_with_empty_input(self):
+        """Batch method handles empty signal list gracefully."""
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+
+        mock_client = _MockEmbeddingClient(embeddings_by_call=[desc_embeddings])
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40, k=5
+        )
+
+        batch_results = concretiser._find_all_k_nearest_batch([])
+        assert batch_results == []
+
+    def test_batch_with_k_exceeding_descriptions(self):
+        """Batch method works when k > number of descriptions."""
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+        k = num_descs + 100
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        signal_embeddings = [_unit_vector(dim, 0)]
+
+        mock_client = _MockEmbeddingClient(embeddings_by_call=[desc_embeddings])
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40, k=k
+        )
+
+        batch_results = concretiser._find_all_k_nearest_batch(signal_embeddings)
+        per_signal_results = [
+            concretiser._find_k_nearest(emb) for emb in signal_embeddings
+        ]
+
+        assert len(batch_results[0]) == num_descs
+        assert len(batch_results[0]) == len(per_signal_results[0])
+
+        for (b_desc, b_score), (s_desc, s_score) in zip(
+            batch_results[0], per_signal_results[0]
+        ):
+            assert b_desc.text == s_desc.text
+            assert abs(b_score - s_score) < 1e-9

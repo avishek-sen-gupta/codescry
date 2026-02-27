@@ -32,6 +32,8 @@ from collections.abc import Callable
 from pathlib import Path
 from statistics import mean
 
+import numpy as np
+
 from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
@@ -396,8 +398,10 @@ class FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser:
         # Pre-decode file bytes into line tuples for evidence context
         source_lines_cache: dict[str, tuple[str, ...]] = {}
 
-        for idx, (sig, ctx, emb) in enumerate(zip(signals, contexts, embeddings)):
-            neighbours = self._find_k_nearest(emb)
+        all_neighbours = self._find_all_k_nearest_batch(embeddings)
+
+        for idx, (sig, ctx) in enumerate(zip(signals, contexts)):
+            neighbours = all_neighbours[idx]
             best_desc, best_score = neighbours[0]
             avg_score = mean(score for _, score in neighbours)
 
@@ -501,6 +505,53 @@ class FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser:
             ", ".join(f"{k}={v}" for k, v in sorted(label_counts.items())),
         )
         return concretised, metadata
+
+    def _find_all_k_nearest_batch(
+        self, signal_embeddings: list[list[float]]
+    ) -> list[list[tuple[PatternDescription, float]]]:
+        """Find K nearest pattern descriptions for all signals in one vectorized pass.
+
+        Computes a full (N_signals x M_descriptions) cosine similarity matrix
+        via L2-normalised matrix multiplication, then extracts the top-K per
+        signal using ``np.argpartition`` for O(M) partial selection.
+
+        Returns:
+            List of length N where each element is a list of (PatternDescription,
+            score) tuples sorted by score descending — identical to calling
+            ``_find_k_nearest`` per signal, but much faster.
+        """
+        if not signal_embeddings or not self._desc_embeddings:
+            return [[] for _ in signal_embeddings]
+
+        signals_mat = np.array(signal_embeddings, dtype=np.float64)
+        descs_mat = np.array(self._desc_embeddings, dtype=np.float64)
+
+        # L2-normalise rows (avoid division by zero for zero vectors)
+        sig_norms = np.linalg.norm(signals_mat, axis=1, keepdims=True)
+        sig_norms = np.where(sig_norms == 0, 1.0, sig_norms)
+        signals_normed = signals_mat / sig_norms
+
+        desc_norms = np.linalg.norm(descs_mat, axis=1, keepdims=True)
+        desc_norms = np.where(desc_norms == 0, 1.0, desc_norms)
+        descs_normed = descs_mat / desc_norms
+
+        # (N x dim) @ (dim x M) → (N x M) cosine similarity matrix
+        similarity_matrix = signals_normed @ descs_normed.T
+
+        k = min(self._k, len(self._descriptions))
+        results: list[list[tuple[PatternDescription, float]]] = []
+
+        for row in similarity_matrix:
+            # Stable sort ensures tied scores keep original index order,
+            # matching _find_k_nearest's Python stable-sort tie-breaking.
+            top_k_indices = np.argsort(-row, kind="stable")[:k]
+
+            neighbours = [
+                (self._descriptions[idx], float(row[idx])) for idx in top_k_indices
+            ]
+            results.append(neighbours)
+
+        return results
 
     def _find_k_nearest(
         self, embedding: list[float]

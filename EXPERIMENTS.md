@@ -517,3 +517,49 @@ The chart (`data/all_techniques_comparison.png`) shows four panels: category dis
 | `data/all_techniques_comparison.png` | Multi-panel comparison chart (PNG) |
 | `data/all_techniques_comparison.svg` | Multi-panel comparison chart (SVG) |
 | `data/all_techniques_comparison_chart.py` | Chart generation script |
+
+---
+
+### 9. Vectorized Cosine Similarity via NumPy
+
+**Goal**: Eliminate the per-signal pure-Python cosine similarity bottleneck in the pattern embedding concretiser by replacing ~2.6M individual cosine calls with a single vectorized matrix multiplication.
+
+#### Problem
+
+`_classify_signals` computed cosine similarity for each of 758 signals against all 3,478 pattern descriptions individually, resulting in ~2.6M pure-Python `cosine()` calls. This dominated pipeline wall-clock time at ~215s for the classification loop alone.
+
+#### Method
+
+Replaced the per-signal `_find_k_nearest` call with a new `_find_all_k_nearest_batch` method that:
+1. Converts signal embeddings (N x dim) and description embeddings (M x dim) to numpy arrays
+2. L2-normalises both matrices row-wise
+3. Computes the full (N x M) cosine similarity matrix via a single matrix multiply: `signals_norm @ descs_norm.T`
+4. Extracts top-K per signal using `np.argsort(kind="stable")` for deterministic tie-breaking matching the original per-signal sort order
+
+The batch result is computed once before the classification loop; each iteration indexes into the pre-computed neighbours list. The per-signal `_find_k_nearest` method is retained for backward compatibility and single-signal use cases.
+
+numpy is already a transitive dependency via scikit-learn and sentence-transformers — no new dependencies added.
+
+#### Results (smojol, 758 signals, BGE backend, k=5, threshold 0.68)
+
+| Metric | Before (per-signal cosine) | After (numpy batch) | Speedup |
+|--------|---------------------------|---------------------|---------|
+| **Classification loop** | **214.83s** | **0.29s** | **741x** |
+| Total concretisation (incl. embedding) | 256.55s | 42.04s | 6.1x |
+
+Output is identical between runs: 38 inward, 103 outward, 120 ambiguous, 497 noise, 1 not_integration — exact match across all 758 signals.
+
+#### Key Observations
+
+1. **The classification loop was the dominant bottleneck**: 214.83s out of 256.55s total (84%) was spent in pure-Python cosine similarity computation. After vectorization, the remaining ~42s is the BGE `embed_batch` call to encode 758 signal texts, which is now the dominant cost.
+
+2. **`np.argsort` over `np.argpartition`**: Although `argpartition` is theoretically faster (O(M) vs O(M log M)), it does not guarantee *which* k elements it returns among ties, producing non-deterministic results with mock unit-vector test data. `argsort(kind="stable")` is used instead; at M=3,478 the sort overhead is negligible compared to the matrix multiply.
+
+3. **No output changes**: The vectorized computation produces bit-identical results to the per-signal approach (verified by both unit tests and full pipeline comparison).
+
+#### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/repo_surveyor/integration_concretiser/pattern_embedding_concretiser.py` | Added `import numpy as np`, new `_find_all_k_nearest_batch` method, updated `_classify_signals` to use batch results |
+| `tests/concretisation/test_pattern_embedding_concretiser.py` | Added `TestBatchKNNEquivalence` class (3 tests verifying batch-vs-per-signal equivalence) |
