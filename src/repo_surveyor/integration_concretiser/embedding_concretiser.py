@@ -562,51 +562,41 @@ class SentenceTransformerEmbeddingClient:
             logger.info("[SentenceTransformer] Model loaded successfully")
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
-        """Embed a list of texts using the sentence-transformers model."""
+        """Embed a list of texts using the sentence-transformers model.
+
+        Passes all texts in a single ``encode()`` call and lets
+        sentence-transformers handle internal batching (default 32).
+        """
         import time
+
+        if not texts:
+            return []
 
         prefixed_texts = (
             [f"{self._query_prefix}{t}" for t in texts] if self._query_prefix else texts
         )
 
-        total_texts = len(prefixed_texts)
-        total_batches = math.ceil(total_texts / _BATCH_SIZE) if total_texts else 0
         logger.info(
-            "[ST] Embedding %d texts in %d batches (batch_size=%d, model=%s)",
-            total_texts,
-            total_batches,
-            _BATCH_SIZE,
+            "[ST] Embedding %d texts (model=%s)",
+            len(prefixed_texts),
             self._model_name,
         )
 
-        all_embeddings: list[list[float]] = []
-        for batch_idx, chunk in enumerate(
-            batched(prefixed_texts, _BATCH_SIZE), start=1
-        ):
-            chunk_list = list(chunk)
-            logger.info(
-                "[ST] Batch %d/%d: embedding %d texts",
-                batch_idx,
-                total_batches,
-                len(chunk_list),
-            )
-            t0 = time.monotonic()
-            result = self._model.encode(chunk_list, normalize_embeddings=True)
-            batch_embeddings = [vec.tolist() for vec in result]
-            elapsed = time.monotonic() - t0
-            dim = len(batch_embeddings[0]) if batch_embeddings else 0
-            logger.info(
-                "[ST] Batch %d/%d: produced %d embeddings (dim=%d) in %.2fs",
-                batch_idx,
-                total_batches,
-                len(batch_embeddings),
-                dim,
-                elapsed,
-            )
-            all_embeddings.extend(batch_embeddings)
+        t0 = time.monotonic()
+        result = self._model.encode(
+            prefixed_texts, normalize_embeddings=True, show_progress_bar=True
+        )
+        embeddings = [vec.tolist() for vec in result]
+        elapsed = time.monotonic() - t0
+        dim = len(embeddings[0]) if embeddings else 0
 
-        logger.info("[ST] Embedding complete: %d total embeddings", len(all_embeddings))
-        return all_embeddings
+        logger.info(
+            "[ST] Embedding complete: %d embeddings (dim=%d) in %.2fs",
+            len(embeddings),
+            dim,
+            elapsed,
+        )
+        return embeddings
 
 
 def create_coderank_embedding_client(

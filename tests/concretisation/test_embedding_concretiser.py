@@ -887,23 +887,6 @@ class TestCodeRankEmbedBatch:
         assert client._model_name == "custom/model"
 
 
-class TestCodeRankBatching:
-    """Verify batching splits texts into chunks of _BATCH_SIZE."""
-
-    def test_texts_split_into_correct_batches(self):
-        num_texts = _BATCH_SIZE + 10
-        fake_model = _FakeSentenceTransformerModel(embedding_dim=2)
-        client = create_coderank_embedding_client(model=fake_model)
-
-        texts = [f"text_{i}" for i in range(num_texts)]
-        result = client.embed_batch(texts)
-
-        assert len(result) == num_texts
-        assert len(fake_model.encode_calls) == 2
-        assert len(fake_model.encode_calls[0]["texts"]) == _BATCH_SIZE
-        assert len(fake_model.encode_calls[1]["texts"]) == 10
-
-
 # ---------------------------------------------------------------------------
 # Tests: create_bge_embedding_client
 # ---------------------------------------------------------------------------
