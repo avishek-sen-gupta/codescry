@@ -827,13 +827,13 @@ class Fragment:
 <!-- ============================================================ -->
 <section class="section-divider">
   <h2>Concretisation Experiments</h2>
-  <h3>Six approaches to the same classification problem</h3>
+  <h3>Seven approaches to the same classification problem</h3>
 </section>
 
 <!-- EXPERIMENT LANDSCAPE -->
 <section>
   <h2>The Experiment Landscape</h2>
-  <p>All six pipelines share stages 1&ndash;5. They differ only in <strong>Stage 6: Concretisation</strong> &mdash; how to classify each signal's validity and direction.</p>
+  <p>All seven pipelines share stages 1&ndash;5. They differ only in <strong>Stage 6: Concretisation</strong> &mdash; how to classify each signal's validity and direction.</p>
   <!-- 2x3 positioning diagram -->
   <div style="display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 0; margin-top: 18px; font-size: 0.55em; text-align: center;">
     <!-- header row -->
@@ -863,17 +863,20 @@ class Fragment:
       <span class="dim">Cloud LLM<br>Multi-file batching</span>
     </div>
     <div class="card" style="margin: 4px; padding: 10px; border-color: #fbbf24;">
-      <span class="accent-amber">Hybrid</span><br>
-      <span class="dim">Embedding gate +<br>Gemini direction</span>
+      <span class="accent-amber">Hybrid (Generic)</span><br>
+      <span class="dim">26-desc gate +<br>Gemini direction</span>
     </div>
-    <!-- row: cloud cached -->
+    <!-- row: cached -->
     <div style="padding: 10px 12px; color: #94a3b8; font-weight: 600; text-align: right;">Cached</div>
     <div class="card" style="margin: 4px; padding: 10px;">
       <span class="accent-pink">Pattern Embedding</span><br>
       <span class="dim">~3,430 descriptions<br>SHA-256 cache</span>
     </div>
     <div style="margin: 4px;"></div>
-    <div style="margin: 4px;"></div>
+    <div class="card" style="margin: 4px; padding: 10px; border-color: #f472b6; box-shadow: 0 0 10px rgba(244, 114, 182, 0.2);">
+      <span class="accent-pink">FW-Specific Hybrid</span><br>
+      <span class="dim">~3,430 gate +<br>Gemini direction<br><strong>84.7% exact match</strong></span>
+    </div>
   </div>
 </section>
 
@@ -1510,10 +1513,73 @@ class Fragment:
   </div>
 </section>
 
+<!-- EXPERIMENT 7: FW-SPECIFIC HYBRID -->
+<section>
+  <h2>Experiment 7: FW-Specific Hybrid</h2>
+  <h3>Pattern embedding gate + Gemini Flash direction</h3>
+  <p style="font-size: 0.65em; margin-top: 10px;">Upgrade the gate: replace 26 generic descriptions with <strong>~3,430 framework-specific pattern descriptions</strong> (KNN). Keep Gemini for direction.</p>
+  <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: start; gap: 8px; margin-top: 16px; font-size: 0.5em;">
+    <div>
+      <div class="pipeline-box" style="border-color: #f472b6;">
+        <strong class="accent-pink">Phase 2a: FW-Specific Gate</strong>
+      </div>
+      <div style="padding: 8px; margin-top: 4px;">
+        <span class="dim">All 758 signals &rarr; FrameworkSpecific&shy;EmbeddingConcretiser</span><br>
+        <span class="dim" style="font-size: 0.85em;">BGE + ~3,430 descriptions + KNN</span><br><br>
+        <span class="pill pill-green" style="font-size: 0.9em;">SIGNAL k=5: 261 &middot; k=1: 390</span><br>
+        <span class="pill pill-blue" style="font-size: 0.9em;">NOISE k=5: 497 &middot; k=1: 368</span>
+      </div>
+    </div>
+    <div style="font-size: 2em; color: #475569; margin-top: 20px;">&rarr;</div>
+    <div>
+      <div class="pipeline-box" style="border-color: #4ade80;">
+        <strong class="accent-green">Phase 2b: Gemini Direction</strong>
+      </div>
+      <div style="padding: 8px; margin-top: 4px;">
+        <span class="dim">Only SIGNALs &rarr; Gemini Flash</span><br><br>
+        <span class="dim" style="font-size: 0.85em;">k=1 results:</span><br>
+        <span class="pill pill-green" style="font-size: 0.9em;">INWARD (29)</span><br>
+        <span class="pill pill-amber" style="font-size: 0.9em;">OUTWARD (66)</span><br>
+        <span class="pill pill-blue" style="font-size: 0.9em;">AMBIGUOUS (1)</span><br>
+        <span class="pill pill-pink" style="font-size: 0.9em;">NOT_INT (294)</span>
+      </div>
+    </div>
+    <div style="font-size: 2em; color: #475569; margin-top: 20px;">&rarr;</div>
+    <div>
+      <div class="pipeline-box" style="border-color: #fbbf24;">
+        <strong class="accent-amber">Results (vs Gemini GT)</strong>
+      </div>
+      <div style="padding: 8px; margin-top: 4px;">
+        <table style="font-size: 0.85em; width: 100%;">
+          <tr><th></th><th>k=5</th><th>k=1</th></tr>
+          <tr><td>Exact Match</td><td>81.3%</td><td class="accent-green"><strong>84.7%</strong></td></tr>
+          <tr><td>Precision</td><td>69.2%</td><td class="accent-green"><strong>82.3%</strong></td></tr>
+          <tr><td>Recall</td><td>47.6%</td><td>46.5%</td></tr>
+          <tr><td>F1</td><td>56.4%</td><td>59.4%</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; font-size: 0.5em;">
+    <div class="card" style="padding: 8px;">
+      <h3 class="accent-green" style="font-size: 1em;">Best Exact Match</h3>
+      <p>k=1 achieves <strong>84.7%</strong> &mdash; surpasses standalone Gemini Flash (83.2%)</p>
+    </div>
+    <div class="card" style="padding: 8px;">
+      <h3 class="accent-green" style="font-size: 1em;">Best Precision</h3>
+      <p>k=1 achieves <strong>82.3%</strong> &mdash; fewer false positives than any other technique</p>
+    </div>
+    <div class="card" style="padding: 8px;">
+      <h3 class="accent-amber" style="font-size: 1em;">Precision&ndash;Recall Trade-off</h3>
+      <p>Aggressive gating sacrifices recall (46.5%) for precision &mdash; conservative but reliable</p>
+    </div>
+  </div>
+</section>
+
 <!-- COMPARISON TABLE -->
 <section>
   <h2>Experiment Comparison</h2>
-  <table style="font-size: 0.52em;">
+  <table style="font-size: 0.45em;">
     <tr>
       <th></th>
       <th>ML Classifier</th>
@@ -1522,6 +1588,7 @@ class Fragment:
       <th>Ollama</th>
       <th>Gemini Flash</th>
       <th>Hybrid</th>
+      <th style="border-left: 2px solid #fbbf24;">FW-Specific Hybrid</th>
     </tr>
     <tr>
       <td style="font-weight: 600;">Inference</td>
@@ -1531,6 +1598,7 @@ class Fragment:
       <td>Local HTTP</td>
       <td>Cloud HTTP</td>
       <td>API + Cloud</td>
+      <td style="border-left: 2px solid #fbbf24;">Cached + Cloud</td>
     </tr>
     <tr>
       <td style="font-weight: 600;">Targets</td>
@@ -1540,6 +1608,7 @@ class Fragment:
       <td>Full file context</td>
       <td>Full file context</td>
       <td>26 + full file</td>
+      <td class="accent-green" style="border-left: 2px solid #fbbf24;">~3,430 + full file</td>
     </tr>
     <tr>
       <td style="font-weight: 600;">Direction</td>
@@ -1549,6 +1618,7 @@ class Fragment:
       <td class="accent-green">LLM reasoning</td>
       <td class="accent-green">LLM reasoning</td>
       <td class="accent-green">LLM reasoning</td>
+      <td class="accent-green" style="border-left: 2px solid #fbbf24;">LLM reasoning</td>
     </tr>
     <tr>
       <td style="font-weight: 600;">Speed</td>
@@ -1558,6 +1628,7 @@ class Fragment:
       <td class="accent-pink">Slow</td>
       <td class="accent-amber">Medium</td>
       <td class="accent-amber">Medium</td>
+      <td class="accent-amber" style="border-left: 2px solid #fbbf24;">Medium</td>
     </tr>
     <tr>
       <td style="font-weight: 600;">Cost</td>
@@ -1567,6 +1638,7 @@ class Fragment:
       <td class="accent-green">Free</td>
       <td class="accent-amber">Medium</td>
       <td class="accent-green">Low&ndash;Med</td>
+      <td class="accent-green" style="border-left: 2px solid #fbbf24;">Low&ndash;Med</td>
     </tr>
     <tr>
       <td style="font-weight: 600;">Batching</td>
@@ -1576,6 +1648,7 @@ class Fragment:
       <td>Per-file</td>
       <td class="accent-green">Multi-file (80K)</td>
       <td>32 + multi-file</td>
+      <td style="border-left: 2px solid #fbbf24;">Cached + multi-file</td>
     </tr>
     <tr>
       <td style="font-weight: 600;">Context</td>
@@ -1585,6 +1658,7 @@ class Fragment:
       <td class="accent-green">Full file</td>
       <td class="accent-green">Full file</td>
       <td class="accent-green">Line + file</td>
+      <td class="accent-green" style="border-left: 2px solid #fbbf24;">Statement + file</td>
     </tr>
     <tr>
       <td style="font-weight: 600;">Caching</td>
@@ -1594,9 +1668,41 @@ class Fragment:
       <td>&mdash;</td>
       <td>&mdash;</td>
       <td>&mdash;</td>
+      <td class="accent-green" style="border-left: 2px solid #fbbf24;">SHA-256 JSON</td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Exact Match</td>
+      <td>75.3%</td>
+      <td>17.7%</td>
+      <td>10.6%</td>
+      <td class="dim">&mdash;</td>
+      <td class="accent-green">83.2%</td>
+      <td>72.8%</td>
+      <td class="accent-green" style="border-left: 2px solid #fbbf24;"><strong>84.7%</strong></td>
+    </tr>
+    <tr>
+      <td style="font-weight: 600;">Precision</td>
+      <td>39.6%</td>
+      <td>22.7%</td>
+      <td>22.5%</td>
+      <td class="dim">&mdash;</td>
+      <td>65.6%</td>
+      <td>43.2%</td>
+      <td class="accent-green" style="border-left: 2px solid #fbbf24;"><strong>82.3%</strong></td>
     </tr>
   </table>
   <p class="small" style="margin-top: 12px;">All pipelines output identical <code>ConcretisationResult</code> objects &mdash; consumers are agnostic to the classification method.</p>
+</section>
+
+<!-- ALL TECHNIQUES COMPARISON CHART -->
+<section>
+  <h2>All Techniques: Full Comparison</h2>
+  <h3>Category distribution, proportions, binary metrics, and exact-match accuracy</h3>
+  <div style="margin-top: 12px;">
+    <img src="all_techniques_comparison.png" alt="All Techniques Comparison Chart"
+         style="max-width: 95%; max-height: 70vh; border-radius: 8px; border: 1px solid #334155;" />
+  </div>
+  <p class="small" style="margin-top: 8px;">Six techniques compared against Gemini GT (758 smojol signals). FW-Gate+Gemini k=1 achieves the highest exact-match accuracy (84.7%) and precision (82.3%).</p>
 </section>
 
 <!-- SPEED vs ACCURACY SCATTER PLOT -->
@@ -1692,38 +1798,50 @@ class Fragment:
       <g transform="translate(310, 72)">
         <rect x="0" y="-13" width="122" height="32" rx="6" fill="#1e293b" stroke="#4ade80" stroke-width="1"/>
         <text x="61" y="0" font-size="10" fill="#4ade80" text-anchor="middle" font-weight="600">Gemini Flash</text>
-        <text x="61" y="12" font-size="8" fill="#94a3b8" text-anchor="middle">Best accuracy, costly</text>
+        <text x="61" y="12" font-size="8" fill="#94a3b8" text-anchor="middle">High accuracy, costly</text>
       </g>
       <line x1="432" y1="88" x2="432" y2="92" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
     </g>
 
     <!-- 6. Hybrid: medium speed, high accuracy -->
     <g class="fragment" data-fragment-index="5">
-      <circle cx="520" cy="100" r="14" fill="#fbbf24" stroke="#4ade80" stroke-width="3" opacity="0.95"/>
-      <text x="520" y="105" font-size="11" fill="#0f172a" text-anchor="middle" font-weight="700">6</text>
-      <g transform="translate(540, 82)">
-        <rect x="0" y="-13" width="170" height="44" rx="6" fill="#1e293b" stroke="#fbbf24" stroke-width="1.5"/>
-        <text x="85" y="1" font-size="10" fill="#fbbf24" text-anchor="middle" font-weight="700">Hybrid (Emb + Gemini)</text>
-        <text x="85" y="14" font-size="8" fill="#94a3b8" text-anchor="middle">79% fewer LLM calls</text>
-        <text x="85" y="25" font-size="8" fill="#94a3b8" text-anchor="middle">Best cost/accuracy balance</text>
+      <circle cx="520" cy="120" r="12" fill="#fbbf24" stroke="#4ade80" stroke-width="2" opacity="0.8"/>
+      <text x="520" y="125" font-size="11" fill="#0f172a" text-anchor="middle" font-weight="700">6</text>
+      <g transform="translate(540, 108)">
+        <rect x="0" y="-13" width="140" height="32" rx="6" fill="#1e293b" stroke="#fbbf24" stroke-width="1"/>
+        <text x="70" y="0" font-size="10" fill="#fbbf24" text-anchor="middle" font-weight="600">Hybrid (Generic)</text>
+        <text x="70" y="12" font-size="8" fill="#94a3b8" text-anchor="middle">26 desc gate + Gemini</text>
       </g>
-      <line x1="540" y1="100" x2="534" y2="100" stroke="#fbbf24" stroke-width="0.8" opacity="0.5"/>
+      <line x1="540" y1="118" x2="534" y2="118" stroke="#fbbf24" stroke-width="0.8" opacity="0.5"/>
+    </g>
+
+    <!-- 7. FW-Specific Hybrid: medium speed, highest accuracy -->
+    <g class="fragment" data-fragment-index="6">
+      <circle cx="500" cy="75" r="15" fill="#f472b6" stroke="#4ade80" stroke-width="3" opacity="0.95"/>
+      <text x="500" y="80" font-size="11" fill="#0f172a" text-anchor="middle" font-weight="700">7</text>
+      <g transform="translate(520, 55)">
+        <rect x="0" y="-13" width="200" height="44" rx="6" fill="#1e293b" stroke="#f472b6" stroke-width="1.5"/>
+        <text x="100" y="1" font-size="10" fill="#f472b6" text-anchor="middle" font-weight="700">FW-Specific Hybrid (k=1)</text>
+        <text x="100" y="14" font-size="8" fill="#94a3b8" text-anchor="middle">84.7% exact match, 82.3% precision</text>
+        <text x="100" y="25" font-size="8" fill="#94a3b8" text-anchor="middle">Best accuracy &amp; precision overall</text>
+      </g>
+      <line x1="520" y1="72" x2="515" y2="74" stroke="#f472b6" stroke-width="0.8" opacity="0.5"/>
     </g>
 
     <!-- ====== PARETO FRONTIER (dashed curve) ====== -->
-    <g class="fragment" data-fragment-index="6">
-      <path d="M 440,90 C 500,88 550,95 680,160 Q 720,190 700,240 Q 710,280 790,330"
+    <g class="fragment" data-fragment-index="7">
+      <path d="M 440,90 Q 470,78 500,75 C 550,80 600,120 680,160 Q 720,190 700,240 Q 710,280 790,330"
             fill="none" stroke="#fde68a" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
-      <text x="620" y="82" font-size="10" fill="#fde68a" opacity="0.7" font-style="italic">Pareto frontier</text>
+      <text x="620" y="72" font-size="10" fill="#fde68a" opacity="0.7" font-style="italic">Pareto frontier</text>
     </g>
 
     <!-- ====== ANNOTATION: ideal corner ====== -->
-    <g class="fragment" data-fragment-index="6">
+    <g class="fragment" data-fragment-index="7">
       <text x="830" y="75" font-size="22" fill="#334155" text-anchor="end" font-weight="700" opacity="0.4">&#x2606;</text>
       <text x="826" y="92" font-size="9" fill="#475569" text-anchor="end" font-style="italic">ideal</text>
     </g>
   </svg>
-  <p class="small" style="margin-top: 2px;">Speed reflects wall-clock throughput for a typical 200-signal repo. Accuracy reflects combined gate + direction quality from smojol-api ground truth (22 signals).</p>
+  <p class="small" style="margin-top: 2px;">Speed reflects wall-clock throughput for a typical 200-signal repo. Accuracy from smojol ground truth (758 signals, Gemini GT baseline). FW-Specific Hybrid k=1 achieves the highest exact-match accuracy (84.7%) and precision (82.3%).</p>
 </section>
 
 <!-- PIPELINE EVOLUTION DIAGRAM -->
@@ -1762,9 +1880,14 @@ class Fragment:
       </div>
       <div style="text-align: center;">
         <div style="color: #475569; margin-bottom: 4px;">&darr; <span class="dim">Can we get LLM accuracy cheaply?</span></div>
-        <div class="pipeline-box" style="border-color: #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);">
-          <strong class="accent-amber">Hybrid</strong><br>
-          <span class="dim">Embedding gate (cheap) filters noise,<br>Gemini (expensive) on SIGNALs only<br><strong>Best of both worlds</strong></span>
+        <div class="pipeline-box" style="border-color: #fbbf24;">
+          <strong class="accent-amber">Hybrid (Generic)</strong><br>
+          <span class="dim">26-desc gate filters noise,<br>Gemini on SIGNALs only</span>
+        </div>
+        <div style="color: #475569; margin-top: 4px;">&darr; <span class="dim">Richer gate?</span></div>
+        <div class="pipeline-box" style="border-color: #f472b6; box-shadow: 0 0 15px rgba(244, 114, 182, 0.3);">
+          <strong class="accent-pink">FW-Specific Hybrid</strong><br>
+          <span class="dim">~3,430 pattern descriptions gate,<br>Gemini on SIGNALs only<br><strong>84.7% exact match &middot; 82.3% precision</strong></span>
         </div>
       </div>
     </div>

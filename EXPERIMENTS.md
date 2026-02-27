@@ -17,6 +17,8 @@ Embedding-based signal concretisation experiments, investigating which embedding
 
 **Three-way comparison** (Experiment 7): An independent rule-based classifier (Claude GT) applied to all 758 smojol signals shows that the three approaches (Gemini LLM, BGE embedding, Claude rules) agree on 63.5% of signals. Claude achieves 95.5% precision against Gemini but only 46.7% recall — it is the most conservative classifier (88 integration vs Gemini's 180 and BGE's 231). The biggest source of Gemini false positives (per Claude's rules) are COBOL string literals in Java test code (219 signals) and ANTLR-generated parser code (111 signals). See [Experiment 7](#7-three-way-classification-comparison).
 
+**Hybrid pipeline** (Experiment 8): Combining the FrameworkSpecific pattern embedding concretiser (3,430 descriptions, BGE, KNN) for SIGNAL/NOISE gating with Gemini Flash for direction classification achieves the **highest exact-match accuracy (84.7%)** and **highest precision (82.3%)** of all techniques tested (k=1 variant). This surpasses standalone Gemini Flash (83.2% exact match, 65.6% precision) by filtering aggressively at the embedding gate before sending only high-confidence signals to the LLM. See [Experiment 8](#8-framework-specific-pattern-embedding-gate--gemini-flash-hybrid).
+
 ## Open Challenges
 
 1. **Signature pollution**: Function-level AST context includes parameter types that can dominate the embedding, causing misclassification (e.g., route functions with `Db` parameters classified as `database/outward`).
@@ -446,3 +448,72 @@ Rule hit distribution for Claude:
 | `data/survey_output_claude_gt/*.jsonl` | Claude's signal-level classifications (758 signals) |
 | `data/three_way_comparison_report.txt` | Full comparison report |
 | `data/three_way_comparison.tsv` | All 758 signals with all three classifications for manual inspection |
+
+---
+
+### 8. Framework-Specific Pattern Embedding Gate + Gemini Flash Hybrid
+
+**Goal**: Test whether using the FrameworkSpecific concretiser (~3,430 per-pattern descriptions with distance-weighted KNN) for SIGNAL/NOISE gating, combined with Gemini Flash for direction classification, improves on both standalone approaches.
+
+#### Motivation
+
+The existing hybrid pipeline (`survey_classify_by_embedding_gate_nearest_neighbour_gemini_flash.py`) uses the **Generic** concretiser (26 directional descriptions) for gating. The pattern embedding concretiser has richer semantic coverage (3,430 descriptions capturing framework-specific API semantics) but poor direction resolution. Combining the pattern embedding's richer gating with Gemini's superior direction accuracy should yield better overall classification.
+
+#### Method
+
+Pipeline (`survey_classify_by_framework_specific_pattern_embedding_gate_gemini_flash.py`):
+1. Phase 1: Pre-concretisation pipeline (758 signals from smojol)
+2. Phase 2a: `FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser` with BGE backend, threshold 0.68
+3. Phase 2b: Filter SIGNALs → `concretise_with_gemini()` for direction
+4. Phase 2c: Merge — embedding validity is authoritative, Gemini direction is authoritative
+
+Two runs: k=5 (distance-weighted KNN) and k=1 (nearest neighbour).
+
+#### Results: Category Distribution (758 signals)
+
+| Technique | INWARD | OUTWARD | AMBIGUOUS | NOT_INTEGRATION | Total |
+|-----------|--------|---------|-----------|-----------------|-------|
+| **Gemini (GT)** | **23** | **124** | **23** | **588** | **758** |
+| Gemini Flash | 27 | 110 | 43 | 578 | 758 |
+| Claude GT | 18 | 53 | 17 | 670 | 758 |
+| Pat-Emb BGE | 33 | 85 | 113 | 527 | 758 |
+| **FW-Gate+Gemini k5** | 25 | 69 | 23 | 641 | 758 |
+| **FW-Gate+Gemini k1** | 29 | 66 | 1 | 662 | 758 |
+
+#### Results: Binary & Exact-Match Metrics (vs Gemini GT)
+
+| Technique | Precision | Recall | F1 | Accuracy | Exact Match |
+|-----------|-----------|--------|----|----------|-------------|
+| Gemini Flash | 65.6% | 69.4% | 67.4% | 85.0% | 83.2% |
+| Claude GT | 63.6% | 32.9% | 43.4% | 80.7% | 77.4% |
+| Pat-Emb BGE | 36.4% | 49.4% | 41.9% | 69.3% | 64.2% |
+| **FW-Gate+Gemini k5** | 69.2% | 47.6% | 56.4% | 83.5% | 81.3% |
+| **FW-Gate+Gemini k1** | **82.3%** | 46.5% | 59.4% | **85.8%** | **84.7%** |
+
+#### Key Observations
+
+1. **FW-Gate+Gemini k1 achieves the highest exact-match accuracy (84.7%)** and highest precision (82.3%) of all techniques tested, surpassing even standalone Gemini Flash (83.2%). The stricter nearest-neighbour gating (k=1) filters more aggressively, producing fewer false positives.
+
+2. **Precision vs recall trade-off**: Both FW-Gate hybrids sacrifice recall (46-48%) for precision (69-82%). They pass fewer signals to Gemini (261 at k=5, 390 at k=1) compared to standalone Gemini Flash which classifies all 758 signals. The k=1 variant is more permissive at the gate (390 vs 261 signals passed) but achieves higher precision because single-nearest-neighbour matching avoids KNN's tendency to average in noise from distant neighbours.
+
+3. **k=1 nearly eliminates AMBIGUOUS**: Only 1 ambiguous signal at k=1 (vs 23 at k=5). The single nearest-neighbour match produces more decisive gating — signals either clearly match a pattern description or they don't.
+
+4. **NOT_INTEGRATION count increases with the hybrid**: FW-Gate+Gemini k1 assigns 662 NOT_INTEGRATION (vs 588 for Gemini GT). This is because signals that pass the embedding gate but Gemini classifies as NOT_INTEGRATION get merged as SIGNAL+NOT_INTEGRATION, while signals that fail the gate go to NOISE. The net effect is more conservative integration classification.
+
+5. **The framework-specific gate outperforms the generic gate**: Compared to the original hybrid (Generic gate + Gemini, 72.8% exact match from the earlier comparison report), the FW-specific gate hybrids achieve 81.3% (k=5) and 84.7% (k=1) exact match — a 9-12 percentage point improvement from richer semantic gating.
+
+#### Comparison Chart
+
+![All Techniques Comparison](data/all_techniques_comparison.png)
+
+The chart (`data/all_techniques_comparison.png`) shows four panels: category distribution, category proportions, binary classification metrics, and 4-category exact-match accuracy across all six techniques.
+
+#### Data Files
+
+| File | Contents |
+|------|----------|
+| `data/survey_output/fw_pattern_gate_gemini_flash_bge_..._k5_.../*.jsonl` | FW-Gate+Gemini k=5 output (758 signals) |
+| `data/survey_output/fw_pattern_gate_gemini_flash_bge_..._k1_.../*.jsonl` | FW-Gate+Gemini k=1 output (758 signals) |
+| `data/all_techniques_comparison.png` | Multi-panel comparison chart (PNG) |
+| `data/all_techniques_comparison.svg` | Multi-panel comparison chart (SVG) |
+| `data/all_techniques_comparison_chart.py` | Chart generation script |
