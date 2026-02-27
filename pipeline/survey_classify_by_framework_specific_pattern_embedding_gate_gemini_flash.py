@@ -425,10 +425,10 @@ def main() -> None:
         print(f"  {r.stage:<50s} {r.duration_seconds:>8.2f} s")
 
     # --- Phase 3: write output files ---
+    logger.info("--- Phase 3: writing output files ---")
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
-    print()
     for filename, validity, direction in _OUTPUT_GROUPS:
         signals = [
             s
@@ -442,7 +442,9 @@ def main() -> None:
             + "\n",
             encoding="utf-8",
         )
-        print(f"  {filename}: {len(signals):4d} signals -> {path}")
+        logger.info("  %s: %4d signals -> %s", filename, len(signals), path)
+
+    logger.info("Output written to %s", out.resolve())
 
 
 if __name__ == "__main__":
