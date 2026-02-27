@@ -117,6 +117,8 @@ def _signal_to_dict(s, label_map: dict) -> dict:
         "nearest_direction": emb_meta.get("nearest_direction"),
         "nearest_source": emb_meta.get("nearest_source"),
         "nearest_score": emb_meta.get("score"),
+        "nearest_k": emb_meta.get("k"),
+        "nearest_k_avg_score": emb_meta.get("avg_score"),
         **base,
         "ast_node_type": s.ast_context.node_type,
         "ast_start_line": s.ast_context.start_line,
@@ -178,6 +180,12 @@ def _parse_args() -> argparse.Namespace:
         help="Cosine similarity threshold for signal vs noise (default: 0.62).",
     )
     parser.add_argument(
+        "--k",
+        type=int,
+        default=5,
+        help="Number of nearest neighbours for classification (default: 5).",
+    )
+    parser.add_argument(
         "--output-dir",
         default="data/survey_output_pattern_embedding",
         metavar="DIR",
@@ -203,6 +211,7 @@ def main() -> None:
     logger.info("Languages:  %s", args.languages or "all")
     logger.info("Backend:    %s", args.backend)
     logger.info("Threshold:  %.3f", args.threshold)
+    logger.info("K (neighbours): %d", args.k)
     logger.info("Output dir: %s", args.output_dir)
 
     # --- Phase 1: run the pre-concretisation pipeline ---
@@ -228,7 +237,7 @@ def main() -> None:
     cache_path = _default_cache_path(args.backend, model=model)
     logger.info("Embedding cache path: %s", cache_path)
     concretiser = PatternEmbeddingConcretiser(
-        client, threshold=args.threshold, cache_path=cache_path
+        client, threshold=args.threshold, cache_path=cache_path, k=args.k
     )
     concretisation, embedding_metadata = concretiser.concretise(integration)
 

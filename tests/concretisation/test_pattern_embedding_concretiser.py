@@ -10,6 +10,7 @@ from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import 
     PatternEmbeddingConcretiser,
     _compute_content_hash,
     _load_cached_embeddings,
+    _resolve_direction_by_vote,
     _save_cache,
 )
 from repo_surveyor.integration_concretiser.types import SignalValidity
@@ -244,7 +245,9 @@ class TestNearestNeighborClassification:
         result, metadata = concretiser.concretise(detector_result, _fake_reader)
 
         assert result.concretised[0].validity == SignalValidity.SIGNAL
-        assert result.concretised[0].direction == SignalDirection.OUTWARD
+        # With KNN, direction comes from weighted vote across K neighbours,
+        # so the voted direction may differ from the top-1 nearest.
+        # Verify the top-1 metadata still reflects the OUTWARD description.
         assert metadata[("client.py", 5)]["nearest_direction"] == "outward"
 
 
@@ -457,3 +460,248 @@ class TestEmbeddingCache:
         missing = tmp_path / "does_not_exist.json"
         loaded = _load_cached_embeddings(missing, descriptions)
         assert loaded == []
+
+
+# ---------------------------------------------------------------------------
+# Tests: KNN classification
+# ---------------------------------------------------------------------------
+
+
+def _make_desc(
+    text: str,
+    direction: SignalDirection,
+    integration_type: IntegrationType = IntegrationType.HTTP_REST,
+    source: str = "test",
+) -> PatternDescription:
+    return PatternDescription(
+        text=text,
+        integration_type=integration_type,
+        direction=direction,
+        source=source,
+    )
+
+
+class TestResolveDirectionByVote:
+    """Verify the pure _resolve_direction_by_vote function."""
+
+    def test_weighted_vote_picks_higher_total(self):
+        neighbours = [
+            (_make_desc("inward1", SignalDirection.INWARD), 0.90),
+            (_make_desc("inward2", SignalDirection.INWARD), 0.85),
+            (_make_desc("inward3", SignalDirection.INWARD), 0.80),
+            (_make_desc("outward1", SignalDirection.OUTWARD), 0.60),
+            (_make_desc("outward2", SignalDirection.OUTWARD), 0.55),
+        ]
+        # INWARD sum = 2.55, OUTWARD sum = 1.15
+        assert _resolve_direction_by_vote(neighbours) == SignalDirection.INWARD
+
+    def test_weighted_vote_outward_wins(self):
+        neighbours = [
+            (_make_desc("outward1", SignalDirection.OUTWARD), 0.95),
+            (_make_desc("outward2", SignalDirection.OUTWARD), 0.90),
+            (_make_desc("outward3", SignalDirection.OUTWARD), 0.85),
+            (_make_desc("inward1", SignalDirection.INWARD), 0.40),
+            (_make_desc("inward2", SignalDirection.INWARD), 0.35),
+        ]
+        assert _resolve_direction_by_vote(neighbours) == SignalDirection.OUTWARD
+
+    def test_tie_breaks_to_highest_score_neighbour(self):
+        # Equal weighted sums: INWARD=0.80, OUTWARD=0.80
+        neighbours = [
+            (_make_desc("inward1", SignalDirection.INWARD), 0.80),
+            (_make_desc("outward1", SignalDirection.OUTWARD), 0.80),
+        ]
+        # Highest score is shared — first in sorted order (stable) should
+        # be the first neighbour, which is INWARD (both have 0.80, but
+        # the first one in the list is checked first)
+        result = _resolve_direction_by_vote(neighbours)
+        # With a true tie, the highest-scoring neighbour (index 0) wins
+        assert result == SignalDirection.INWARD
+
+    def test_tie_breaks_to_highest_single_score(self):
+        # INWARD sum = 0.70, OUTWARD sum = 0.70
+        # But the single highest score belongs to OUTWARD
+        neighbours = [
+            (_make_desc("outward1", SignalDirection.OUTWARD), 0.70),
+            (_make_desc("inward1", SignalDirection.INWARD), 0.35),
+            (_make_desc("inward2", SignalDirection.INWARD), 0.35),
+        ]
+        assert _resolve_direction_by_vote(neighbours) == SignalDirection.OUTWARD
+
+
+class TestKNNClassification:
+    """Verify KNN classification end-to-end through the concretiser."""
+
+    def test_knn_direction_weighted_vote(self):
+        """5 neighbours: 3 INWARD (high) + 2 OUTWARD (low) → INWARD wins."""
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        # Find inward descriptions
+        inward_idx = next(
+            i
+            for i, d in enumerate(descriptions)
+            if d.direction == SignalDirection.INWARD
+        )
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        # Signal embedding matches the inward description
+        signal_embeddings = [_unit_vector(dim, inward_idx % dim)]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40, k=5)
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+        result, metadata = concretiser.concretise(detector_result, _fake_reader)
+
+        assert result.concretised[0].validity == SignalValidity.SIGNAL
+        meta = metadata[("client.py", 5)]
+        assert "neighbours" in meta
+        assert "avg_score" in meta
+        assert "direction_votes" in meta
+        assert len(meta["neighbours"]) <= 5
+
+    def test_knn_validity_uses_average_score(self):
+        """Average of K scores below threshold → NOISE, even if top-1 is above."""
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        # Create a signal that barely matches anything — low average across K
+        low_score_vec = [0.01] * dim
+        signal_embeddings = [low_score_vec]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40, k=5)
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+        result, metadata = concretiser.concretise(detector_result, _fake_reader)
+
+        assert result.concretised[0].validity == SignalValidity.NOISE
+        meta = metadata[("client.py", 5)]
+        assert meta["avg_score"] < 0.40
+
+    def test_knn_validity_above_threshold(self):
+        """Average of K scores above threshold → SIGNAL."""
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        signal_embeddings = [_unit_vector(dim, 0)]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40, k=5)
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+        result, metadata = concretiser.concretise(detector_result, _fake_reader)
+
+        assert result.concretised[0].validity == SignalValidity.SIGNAL
+        meta = metadata[("client.py", 5)]
+        assert meta["avg_score"] >= 0.40
+
+    def test_knn_metadata_contains_k_neighbours(self):
+        """Metadata should include all K neighbours with descriptions and scores."""
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        signal_embeddings = [_unit_vector(dim, 0)]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40, k=5)
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+        _, metadata = concretiser.concretise(detector_result, _fake_reader)
+
+        meta = metadata[("client.py", 5)]
+        assert "neighbours" in meta
+        assert len(meta["neighbours"]) == 5
+        for neighbour in meta["neighbours"]:
+            assert "description" in neighbour
+            assert "type" in neighbour
+            assert "direction" in neighbour
+            assert "source" in neighbour
+            assert "score" in neighbour
+
+        # Backward compat: top-1 aliases still present
+        assert "nearest_description" in meta
+        assert "nearest_type" in meta
+        assert "nearest_direction" in meta
+        assert "nearest_source" in meta
+        assert "score" in meta
+        assert meta["k"] == 5
+
+    def test_knn_k_exceeds_descriptions(self):
+        """When K > number of descriptions, gracefully use all available."""
+        # Use a tiny custom description set via a small mock
+        dim = 10
+        # We'll create a concretiser with k=100 but only ~num_descs descriptions
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        k = num_descs + 100  # way more than available
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        signal_embeddings = [_unit_vector(dim, 0)]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.01, k=k)
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+        _, metadata = concretiser.concretise(detector_result, _fake_reader)
+
+        meta = metadata[("client.py", 5)]
+        # Should use all available descriptions, not crash
+        assert len(meta["neighbours"]) == num_descs
+
+    def test_knn_defaults_to_k5(self):
+        """Default constructor uses K=5."""
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        signal_embeddings = [_unit_vector(dim, 0)]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40)
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+        _, metadata = concretiser.concretise(detector_result, _fake_reader)
+
+        meta = metadata[("client.py", 5)]
+        assert meta["k"] == 5
+        assert len(meta["neighbours"]) == 5

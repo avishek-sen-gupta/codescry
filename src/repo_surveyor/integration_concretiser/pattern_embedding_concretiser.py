@@ -27,8 +27,10 @@ import hashlib
 import json
 import logging
 import time
+from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
+from statistics import mean
 
 from repo_surveyor.detection.integration_detector import (
     EntityType,
@@ -64,8 +66,32 @@ from repo_surveyor.integration_patterns import (
 logger = logging.getLogger(__name__)
 
 _DEFAULT_THRESHOLD = 0.62
+_DEFAULT_K = 5
 
 _EMPTY_PATH = Path()
+
+
+def _resolve_direction_by_vote(
+    neighbours: list[tuple[PatternDescription, float]],
+) -> SignalDirection:
+    """Return the winning direction via distance-weighted voting.
+
+    Sums cosine scores per direction.  On a tie the direction of the
+    single highest-scoring neighbour wins.
+    """
+    vote_sums: dict[SignalDirection, float] = defaultdict(float)
+    for desc, score in neighbours:
+        vote_sums[desc.direction] += score
+
+    max_vote = max(vote_sums.values())
+    winners = [d for d, v in vote_sums.items() if v == max_vote]
+
+    if len(winners) == 1:
+        return winners[0]
+
+    # Tie-break: direction of the highest-scoring individual neighbour
+    best_desc, _ = neighbours[0]  # already sorted descending by score
+    return best_desc.direction
 
 
 def _default_cache_path(backend: str, model: str = "") -> Path:
@@ -184,12 +210,14 @@ class PatternEmbeddingConcretiser:
         threshold: float = _DEFAULT_THRESHOLD,
         cache_path: Path = _EMPTY_PATH,
         framework_evidence: dict[str, tuple[EvidenceCheck, ...]] = {},
+        k: int = _DEFAULT_K,
     ) -> None:
         self._client = client
         self._threshold = threshold
         self._descriptions = get_all_pattern_descriptions()
         self._desc_embeddings = self._load_or_embed(cache_path)
         self._framework_evidence = framework_evidence
+        self._k = k
 
     def _load_or_embed(self, cache_path: Path) -> list[list[float]]:
         """Load cached description embeddings or embed via client and save."""
@@ -369,7 +397,9 @@ class PatternEmbeddingConcretiser:
         source_lines_cache: dict[str, tuple[str, ...]] = {}
 
         for idx, (sig, ctx, emb) in enumerate(zip(signals, contexts, embeddings)):
-            best_desc, best_score = self._find_nearest(emb)
+            neighbours = self._find_k_nearest(emb)
+            best_desc, best_score = neighbours[0]
+            avg_score = mean(score for _, score in neighbours)
 
             # Build evidence context and evaluate checks
             fp = sig.match.file_path
@@ -387,42 +417,65 @@ class PatternEmbeddingConcretiser:
             )
 
             framework_checks = self._framework_evidence.get(best_desc.source, ())
-            verdict = evaluate_evidence(evidence_ctx, framework_checks, best_score)
-            adjusted_score = verdict.adjusted_score
+            verdict = evaluate_evidence(evidence_ctx, framework_checks, avg_score)
+            adjusted_avg = verdict.adjusted_score
 
-            if adjusted_score < self._threshold:
+            if adjusted_avg < self._threshold:
                 validity = SignalValidity.NOISE
                 direction = SignalDirection.AMBIGUOUS
             else:
                 validity = SignalValidity.SIGNAL
-                direction = best_desc.direction
+                direction = _resolve_direction_by_vote(neighbours)
 
             tag = f"{validity.value}:{direction.value}"
             label_counts[tag] = label_counts.get(tag, 0) + 1
 
             key = (sig.match.file_path, sig.match.line_number)
             fired_checks = [r.name for r in verdict.results if r.fired]
+
+            # Per-direction weighted vote sums
+            direction_votes: dict[str, float] = defaultdict(float)
+            for desc, sc in neighbours:
+                direction_votes[desc.direction.value] += sc
+
             metadata[key] = {
+                # Backward-compatible top-1 aliases
                 "nearest_description": best_desc.text,
                 "nearest_type": best_desc.integration_type.value,
                 "nearest_direction": best_desc.direction.value,
                 "nearest_source": best_desc.source,
                 "score": best_score,
-                "adjusted_score": adjusted_score,
+                # KNN fields
+                "k": len(neighbours),
+                "avg_score": avg_score,
+                "adjusted_avg_score": adjusted_avg,
+                "neighbours": [
+                    {
+                        "description": desc.text,
+                        "type": desc.integration_type.value,
+                        "direction": desc.direction.value,
+                        "source": desc.source,
+                        "score": sc,
+                    }
+                    for desc, sc in neighbours
+                ],
+                "direction_votes": dict(direction_votes),
                 "score_adjustment": verdict.score_adjustment,
                 "evidence_fired": fired_checks,
             }
 
             logger.debug(
-                "  [%d/%d] %s:%d  raw=%.3f  adj=%.3f  type=%s  dir=%s  " "evidence=%s",
+                "  [%d/%d] %s:%d  avg=%.3f  adj_avg=%.3f  top1=%.3f  "
+                "type=%s  dir=%s  evidence=%s",
                 idx + 1,
                 total,
                 sig.match.file_path,
                 sig.match.line_number,
+                avg_score,
+                adjusted_avg,
                 best_score,
-                adjusted_score,
                 best_desc.integration_type.value,
-                best_desc.direction.value,
+                direction.value,
                 fired_checks,
             )
 
@@ -449,20 +502,17 @@ class PatternEmbeddingConcretiser:
         )
         return concretised, metadata
 
-    def _find_nearest(self, embedding: list[float]) -> tuple[PatternDescription, float]:
-        """Find the nearest pattern description by cosine similarity.
+    def _find_k_nearest(
+        self, embedding: list[float]
+    ) -> list[tuple[PatternDescription, float]]:
+        """Find the K nearest pattern descriptions by cosine similarity.
 
-        Args:
-            embedding: The signal's embedding vector.
-
-        Returns:
-            Tuple of (best matching PatternDescription, similarity score).
+        Returns list of (description, score) tuples sorted by score descending.
+        When fewer than K descriptions exist, returns all of them.
         """
-        best_idx = 0
-        best_score = -1.0
-        for i, desc_emb in enumerate(self._desc_embeddings):
-            score = cosine(embedding, desc_emb)
-            if score > best_score:
-                best_score = score
-                best_idx = i
-        return self._descriptions[best_idx], best_score
+        scored = [
+            (self._descriptions[i], cosine(embedding, desc_emb))
+            for i, desc_emb in enumerate(self._desc_embeddings)
+        ]
+        scored.sort(key=lambda pair: pair[1], reverse=True)
+        return scored[: self._k]
