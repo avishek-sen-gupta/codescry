@@ -5,9 +5,13 @@ from pathlib import Path
 
 import pytest
 
+from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.integration_concretiser.embedding_concretiser import cosine
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
     FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser,
+    STAGE_AST_EXTRACTION,
+    STAGE_SIGNAL_EMBEDDING,
+    STAGE_SIMILARITY_CALCULATION,
     _compute_content_hash,
     _load_cached_embeddings,
     _resolve_direction_by_vote,
@@ -830,3 +834,89 @@ class TestBatchKNNEquivalence:
         ):
             assert b_desc.text == s_desc.text
             assert abs(b_score - s_score) < 1e-9
+
+
+# ---------------------------------------------------------------------------
+# Tests: Timer instrumentation
+# ---------------------------------------------------------------------------
+
+
+class TestTimerInstrumentation:
+    """Verify that concretise() records substage timings when a timer is provided."""
+
+    def test_concretise_records_three_substages(self):
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        signal_embeddings = [_unit_vector(dim, 0)]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+
+        timer = PipelineTimingObserver()
+        concretiser.concretise(detector_result, _fake_reader, timer=timer)
+
+        recorded_stages = [r.stage for r in timer.completed]
+        assert STAGE_AST_EXTRACTION in recorded_stages
+        assert STAGE_SIGNAL_EMBEDDING in recorded_stages
+        assert STAGE_SIMILARITY_CALCULATION in recorded_stages
+
+    def test_concretise_substage_durations_are_non_negative(self):
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        signal_embeddings = [_unit_vector(dim, 0)]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+
+        timer = PipelineTimingObserver()
+        concretiser.concretise(detector_result, _fake_reader, timer=timer)
+
+        for record in timer.completed:
+            assert record.duration_seconds >= 0.0
+
+    def test_concretise_without_timer_still_works(self):
+        descriptions = _CACHED_DESCRIPTIONS
+        num_descs = len(descriptions)
+        dim = _MOCK_DIM
+
+        desc_embeddings = [_unit_vector(dim, i % dim) for i in range(num_descs)]
+        signal_embeddings = [_unit_vector(dim, 0)]
+
+        mock_client = _MockEmbeddingClient(
+            embeddings_by_call=[desc_embeddings, signal_embeddings]
+        )
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
+
+        signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
+        detector_result = IntegrationDetectorResult(
+            integration_points=[signal], files_scanned=1
+        )
+
+        result, metadata = concretiser.concretise(detector_result, _fake_reader)
+        assert result.signals_submitted == 1

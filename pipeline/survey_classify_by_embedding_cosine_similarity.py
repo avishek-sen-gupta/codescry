@@ -133,7 +133,9 @@ def main() -> None:
     client = _create_client(args.backend)
     concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(client)
     timer.stage_started(_STAGE_GENERIC_EMBEDDING_CONCRETISATION)
-    concretisation, embedding_metadata = concretiser.concretise(integration)
+    concretisation, embedding_metadata = concretiser.concretise(
+        integration, timer=timer
+    )
     timer.stage_completed(_STAGE_GENERIC_EMBEDDING_CONCRETISATION)
 
     # Print summary

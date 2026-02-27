@@ -334,7 +334,9 @@ def main() -> None:
         embedding_client, threshold=args.threshold
     )
     timer.stage_started(_STAGE_EMBEDDING_GATE)
-    embedding_result, embedding_metadata = concretiser.concretise(integration)
+    embedding_result, embedding_metadata = concretiser.concretise(
+        integration, timer=timer
+    )
     timer.stage_completed(_STAGE_EMBEDDING_GATE)
 
     signal_count = sum(

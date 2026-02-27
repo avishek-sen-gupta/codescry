@@ -261,7 +261,9 @@ def main() -> None:
         client, threshold=args.threshold, cache_path=cache_path, k=args.k
     )
     timer.stage_started(_STAGE_PATTERN_EMBEDDING_CONCRETISATION)
-    concretisation, embedding_metadata = concretiser.concretise(integration)
+    concretisation, embedding_metadata = concretiser.concretise(
+        integration, timer=timer
+    )
     timer.stage_completed(_STAGE_PATTERN_EMBEDDING_CONCRETISATION)
 
     # Print summary

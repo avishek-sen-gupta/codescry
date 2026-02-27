@@ -49,6 +49,7 @@ from collections.abc import Callable
 from itertools import batched
 from typing import Protocol, runtime_checkable
 
+from repo_surveyor.core.pipeline_timer import NullPipelineTimer, PipelineTimer
 from repo_surveyor.detection.integration_detector import (
     EntityType,
     IntegrationDetectorResult,
@@ -188,6 +189,10 @@ _DIRECTION_STR_TO_ENUM: dict[str, SignalDirection] = {
 }
 
 _AMBIGUITY_RATIO = 1.2
+
+STAGE_AST_EXTRACTION = "generic_embedding_concretisation.ast_extraction"
+STAGE_SIGNAL_EMBEDDING = "generic_embedding_concretisation.signal_embedding"
+STAGE_SIMILARITY_CALCULATION = "generic_embedding_concretisation.similarity_calculation"
 
 
 def cosine(a: list[float], b: list[float]) -> float:
@@ -766,12 +771,14 @@ class GenericIntegrationDescriptionEmbeddingConcretiser:
         self,
         detector_result: IntegrationDetectorResult,
         file_reader: Callable[[str], bytes] = _read_file_bytes,
+        timer: PipelineTimer = NullPipelineTimer(),
     ) -> tuple[ConcretisationResult, dict[tuple[str, int], dict]]:
         """Concretise FILE_CONTENT signals using embedding similarity.
 
         Args:
             detector_result: Output from the integration detector.
             file_reader: Callable that reads a file path to bytes.
+            timer: Pipeline timer for recording substage durations.
 
         Returns:
             Tuple of (ConcretisationResult, metadata) where metadata maps
@@ -789,15 +796,22 @@ class GenericIntegrationDescriptionEmbeddingConcretiser:
             len(file_content_signals),
         )
 
+        timer.stage_started(STAGE_AST_EXTRACTION)
         signal_contexts = self._extract_contexts(file_content_signals, file_reader)
+        timer.stage_completed(STAGE_AST_EXTRACTION)
+
         line_texts = [sig.match.line_content.strip() for sig in file_content_signals]
 
+        timer.stage_started(STAGE_SIGNAL_EMBEDDING)
         logger.info("Embedding %d signal line texts...", len(line_texts))
         signal_embeddings = self._client.embed_batch(line_texts) if line_texts else []
+        timer.stage_completed(STAGE_SIGNAL_EMBEDDING)
 
+        timer.stage_started(STAGE_SIMILARITY_CALCULATION)
         concretised, metadata = self._classify_signals(
             file_content_signals, signal_contexts, signal_embeddings
         )
+        timer.stage_completed(STAGE_SIMILARITY_CALCULATION)
 
         classified = sum(1 for s in concretised if s.is_integration)
         result = ConcretisationResult(

@@ -42,6 +42,7 @@ from repo_surveyor.integration_concretiser.ast_walker import (
     FALLBACK_AST_CONTEXT,
     batch_extract_statement_contexts,
 )
+from repo_surveyor.core.pipeline_timer import NullPipelineTimer, PipelineTimer
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClientProtocol,
     cosine,
@@ -71,6 +72,10 @@ _DEFAULT_THRESHOLD = 0.68
 _DEFAULT_K = 5
 
 _EMPTY_PATH = Path()
+
+STAGE_AST_EXTRACTION = "pattern_embedding_concretisation.ast_extraction"
+STAGE_SIGNAL_EMBEDDING = "pattern_embedding_concretisation.signal_embedding"
+STAGE_SIMILARITY_CALCULATION = "pattern_embedding_concretisation.similarity_calculation"
 
 
 def _resolve_direction_by_vote(
@@ -252,12 +257,14 @@ class FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser:
         self,
         detector_result: IntegrationDetectorResult,
         file_reader: Callable[[str], bytes] = _read_file_bytes,
+        timer: PipelineTimer = NullPipelineTimer(),
     ) -> tuple[ConcretisationResult, dict[tuple[str, int], dict]]:
         """Concretise FILE_CONTENT signals using nearest pattern description.
 
         Args:
             detector_result: Output from the integration detector.
             file_reader: Callable that reads a file path to bytes.
+            timer: Pipeline timer for recording substage durations.
 
         Returns:
             Tuple of (ConcretisationResult, metadata) where metadata maps
@@ -275,20 +282,27 @@ class FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser:
             len(file_content_signals),
         )
 
+        timer.stage_started(STAGE_AST_EXTRACTION)
         signal_contexts, file_cache = self._extract_contexts(
             file_content_signals, file_reader
         )
+        timer.stage_completed(STAGE_AST_EXTRACTION)
+
         embed_texts = [
             ctx.node_text if ctx.node_text else sig.match.line_content.strip()
             for sig, ctx in zip(file_content_signals, signal_contexts)
         ]
 
+        timer.stage_started(STAGE_SIGNAL_EMBEDDING)
         logger.info("Embedding %d signal texts (with AST context)...", len(embed_texts))
         signal_embeddings = self._client.embed_batch(embed_texts) if embed_texts else []
+        timer.stage_completed(STAGE_SIGNAL_EMBEDDING)
 
+        timer.stage_started(STAGE_SIMILARITY_CALCULATION)
         concretised, metadata = self._classify_signals(
             file_content_signals, signal_contexts, signal_embeddings, file_cache
         )
+        timer.stage_completed(STAGE_SIMILARITY_CALCULATION)
 
         classified = sum(1 for s in concretised if s.is_integration)
         result = ConcretisationResult(
