@@ -380,6 +380,10 @@ def main() -> None:
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
+    timings_path = out / "timings.json"
+    timings_path.write_text(timer.to_json(), encoding="utf-8")
+    logger.info("Timings written to %s", timings_path)
+
     print()
     for filename, validity, direction in _OUTPUT_GROUPS:
         signals = [

@@ -1791,16 +1791,16 @@ class Fragment:
       <line x1="190" y1="180" x2="182" y2="180" stroke="#a78bfa" stroke-width="0.8" opacity="0.5"/>
     </g>
 
-    <!-- 5. Gemini Flash: medium speed, high accuracy -->
+    <!-- 5. Gemini Flash: medium speed, highest accuracy -->
     <g class="fragment" data-fragment-index="4">
-      <circle cx="440" cy="90" r="12" fill="#4ade80" opacity="0.9"/>
-      <text x="440" y="95" font-size="11" fill="#0f172a" text-anchor="middle" font-weight="700">5</text>
-      <g transform="translate(310, 72)">
-        <rect x="0" y="-13" width="122" height="32" rx="6" fill="#1e293b" stroke="#4ade80" stroke-width="1"/>
-        <text x="61" y="0" font-size="10" fill="#4ade80" text-anchor="middle" font-weight="600">Gemini Flash</text>
-        <text x="61" y="12" font-size="8" fill="#94a3b8" text-anchor="middle">High accuracy, costly</text>
+      <circle cx="440" cy="68" r="12" fill="#4ade80" opacity="0.9"/>
+      <text x="440" y="73" font-size="11" fill="#0f172a" text-anchor="middle" font-weight="700">5</text>
+      <g transform="translate(290, 56)">
+        <rect x="0" y="-13" width="140" height="32" rx="6" fill="#1e293b" stroke="#4ade80" stroke-width="1"/>
+        <text x="70" y="0" font-size="10" fill="#4ade80" text-anchor="middle" font-weight="600">Gemini Flash (only)</text>
+        <text x="70" y="12" font-size="8" fill="#94a3b8" text-anchor="middle">Best F1 (67.4%), costly</text>
       </g>
-      <line x1="432" y1="88" x2="432" y2="92" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
+      <line x1="430" y1="66" x2="430" y2="70" stroke="#4ade80" stroke-width="0.8" opacity="0.5"/>
     </g>
 
     <!-- 6. Hybrid: medium speed, high accuracy -->
@@ -1815,22 +1815,22 @@ class Fragment:
       <line x1="540" y1="118" x2="534" y2="118" stroke="#fbbf24" stroke-width="0.8" opacity="0.5"/>
     </g>
 
-    <!-- 7. FW-Specific Hybrid: medium speed, highest accuracy -->
+    <!-- 7. FW-Specific Hybrid: medium speed, best exact-match & precision -->
     <g class="fragment" data-fragment-index="6">
-      <circle cx="500" cy="75" r="15" fill="#f472b6" stroke="#4ade80" stroke-width="3" opacity="0.95"/>
-      <text x="500" y="80" font-size="11" fill="#0f172a" text-anchor="middle" font-weight="700">7</text>
-      <g transform="translate(520, 55)">
+      <circle cx="500" cy="82" r="15" fill="#f472b6" stroke="#4ade80" stroke-width="3" opacity="0.95"/>
+      <text x="500" y="87" font-size="11" fill="#0f172a" text-anchor="middle" font-weight="700">7</text>
+      <g transform="translate(520, 68)">
         <rect x="0" y="-13" width="200" height="44" rx="6" fill="#1e293b" stroke="#f472b6" stroke-width="1.5"/>
         <text x="100" y="1" font-size="10" fill="#f472b6" text-anchor="middle" font-weight="700">FW-Specific Hybrid (k=1)</text>
         <text x="100" y="14" font-size="8" fill="#94a3b8" text-anchor="middle">84.7% exact match, 82.3% precision</text>
-        <text x="100" y="25" font-size="8" fill="#94a3b8" text-anchor="middle">Best accuracy &amp; precision overall</text>
+        <text x="100" y="25" font-size="8" fill="#94a3b8" text-anchor="middle">Best precision &amp; exact match</text>
       </g>
-      <line x1="520" y1="72" x2="515" y2="74" stroke="#f472b6" stroke-width="0.8" opacity="0.5"/>
+      <line x1="520" y1="80" x2="515" y2="81" stroke="#f472b6" stroke-width="0.8" opacity="0.5"/>
     </g>
 
     <!-- ====== PARETO FRONTIER (dashed curve) ====== -->
     <g class="fragment" data-fragment-index="7">
-      <path d="M 440,90 Q 470,78 500,75 C 550,80 600,120 680,160 Q 720,190 700,240 Q 710,280 790,330"
+      <path d="M 440,68 Q 470,72 500,82 C 550,100 600,130 680,160 Q 720,190 700,240 Q 710,280 790,330"
             fill="none" stroke="#fde68a" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
       <text x="620" y="72" font-size="10" fill="#fde68a" opacity="0.7" font-style="italic">Pareto frontier</text>
     </g>
