@@ -62,6 +62,8 @@ from repo_surveyor.training.signal_classifier import NullSignalClassifier
 
 logger = logging.getLogger(__name__)
 
+_STAGE_PATTERN_EMBEDDING_CONCRETISATION = "pattern_embedding_concretisation"
+
 _BACKEND_DEFAULT_MODELS: dict[str, str] = {
     "ollama": "unclemusclez/jina-embeddings-v2-base-code",
     "hf-local": "Salesforce/codet5p-110m-embedding",
@@ -258,7 +260,9 @@ def main() -> None:
     concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
         client, threshold=args.threshold, cache_path=cache_path, k=args.k
     )
+    timer.stage_started(_STAGE_PATTERN_EMBEDDING_CONCRETISATION)
     concretisation, embedding_metadata = concretiser.concretise(integration)
+    timer.stage_completed(_STAGE_PATTERN_EMBEDDING_CONCRETISATION)
 
     # Print summary
     print(f"\nFiles scanned:  {integration.files_scanned}")

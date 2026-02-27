@@ -39,6 +39,8 @@ from repo_surveyor.training.signal_classifier import NullSignalClassifier
 
 logger = logging.getLogger(__name__)
 
+_STAGE_GENERIC_EMBEDDING_CONCRETISATION = "generic_embedding_concretisation"
+
 
 def _create_client(backend: str) -> EmbeddingClient | GeminiEmbeddingClient:
     """Create the appropriate embedding client based on the backend choice."""
@@ -130,7 +132,9 @@ def main() -> None:
     logger.info("--- Phase 2: Embedding-based concretisation ---")
     client = _create_client(args.backend)
     concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(client)
+    timer.stage_started(_STAGE_GENERIC_EMBEDDING_CONCRETISATION)
     concretisation, embedding_metadata = concretiser.concretise(integration)
+    timer.stage_completed(_STAGE_GENERIC_EMBEDDING_CONCRETISATION)
 
     # Print summary
     print(f"\nFiles scanned:  {integration.files_scanned}")

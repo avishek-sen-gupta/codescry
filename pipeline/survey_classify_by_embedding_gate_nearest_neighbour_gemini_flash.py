@@ -75,6 +75,10 @@ logger = logging.getLogger(__name__)
 
 _ENV_VAR_GEMINI_API_KEY = "GEMINI_001_EMBEDDING_API_KEY"
 
+_STAGE_EMBEDDING_GATE = "embedding_gate"
+_STAGE_GEMINI_DIRECTION = "gemini_direction"
+_STAGE_MERGE = "merge"
+
 
 _BACKEND_DEFAULT_MODELS: dict[str, str] = {
     "ollama": "unclemusclez/jina-embeddings-v2-base-code",
@@ -329,7 +333,9 @@ def main() -> None:
     concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
         embedding_client, threshold=args.threshold
     )
+    timer.stage_started(_STAGE_EMBEDDING_GATE)
     embedding_result, embedding_metadata = concretiser.concretise(integration)
+    timer.stage_completed(_STAGE_EMBEDDING_GATE)
 
     signal_count = sum(
         1 for cs in embedding_result.concretised if cs.validity == SignalValidity.SIGNAL
@@ -354,16 +360,20 @@ def main() -> None:
         integration_points=signal_originals,
         files_scanned=integration.files_scanned,
     )
+    timer.stage_started(_STAGE_GEMINI_DIRECTION)
     gemini_result, gemini_metadata = concretise_with_gemini(
         filtered_detector,
         api_key=gemini_api_key,
     )
+    timer.stage_completed(_STAGE_GEMINI_DIRECTION)
 
     # --- Phase 2c: merge results ---
     logger.info("--- Phase 2c: Merging embedding validity + Gemini direction ---")
+    timer.stage_started(_STAGE_MERGE)
     final_result, final_metadata = merge_results(
         embedding_result, gemini_result, embedding_metadata, gemini_metadata
     )
+    timer.stage_completed(_STAGE_MERGE)
 
     # Print summary
     print(f"\nFiles scanned:  {integration.files_scanned}")

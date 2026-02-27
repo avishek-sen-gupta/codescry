@@ -35,6 +35,8 @@ from repo_surveyor.training.signal_classifier import NullSignalClassifier
 
 logger = logging.getLogger(__name__)
 
+_STAGE_OLLAMA_CONCRETISATION = "ollama_concretisation"
+
 
 def _signal_to_dict(s, label_map: dict) -> dict:
     """Serialise a ConcretisedSignal to a JSON-friendly dict."""
@@ -120,11 +122,13 @@ def main() -> None:
 
     # --- Phase 2: Ollama-based concretisation ---
     logger.info("--- Phase 2: Ollama-based concretisation ---")
+    timer.stage_started(_STAGE_OLLAMA_CONCRETISATION)
     concretisation, ollama_metadata = concretise_with_ollama(
         integration,
         model=args.model,
         base_url=args.ollama_url,
     )
+    timer.stage_completed(_STAGE_OLLAMA_CONCRETISATION)
 
     # Print summary
     print(f"\nFiles scanned:  {integration.files_scanned}")

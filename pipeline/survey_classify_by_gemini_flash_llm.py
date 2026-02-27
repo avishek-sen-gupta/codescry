@@ -31,6 +31,7 @@ from repo_surveyor.training.signal_classifier import NullSignalClassifier
 
 logger = logging.getLogger(__name__)
 
+_STAGE_GEMINI_FLASH_CONCRETISATION = "gemini_flash_concretisation"
 _ENV_VAR_API_KEY = "GEMINI_001_EMBEDDING_API_KEY"
 
 
@@ -119,11 +120,13 @@ def main() -> None:
 
     # --- Phase 2: Gemini-based concretisation ---
     logger.info("--- Phase 2: Gemini Flash concretisation ---")
+    timer.stage_started(_STAGE_GEMINI_FLASH_CONCRETISATION)
     concretisation, gemini_metadata = concretise_with_gemini(
         integration,
         api_key=api_key,
         model=args.model,
     )
+    timer.stage_completed(_STAGE_GEMINI_FLASH_CONCRETISATION)
 
     print(f"\nFiles scanned:  {integration.files_scanned}")
     print(f"Signals found:  {len(integration.integration_points)}")
