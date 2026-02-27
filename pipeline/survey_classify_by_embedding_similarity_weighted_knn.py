@@ -21,13 +21,13 @@ Supports six embedding backends via --backend:
     Use --model to customise.
 
 Usage:
-    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo
-    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend gemini
-    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend ollama
-    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend hf-local
-    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend coderank
-    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --backend bge
-    poetry run python pipeline/survey_repo_pattern_embedding.py /path/to/repo --languages Java
+    poetry run python pipeline/survey_classify_by_embedding_similarity_weighted_knn.py /path/to/repo
+    poetry run python pipeline/survey_classify_by_embedding_similarity_weighted_knn.py /path/to/repo --backend gemini
+    poetry run python pipeline/survey_classify_by_embedding_similarity_weighted_knn.py /path/to/repo --backend ollama
+    poetry run python pipeline/survey_classify_by_embedding_similarity_weighted_knn.py /path/to/repo --backend hf-local
+    poetry run python pipeline/survey_classify_by_embedding_similarity_weighted_knn.py /path/to/repo --backend coderank
+    poetry run python pipeline/survey_classify_by_embedding_similarity_weighted_knn.py /path/to/repo --backend bge
+    poetry run python pipeline/survey_classify_by_embedding_similarity_weighted_knn.py /path/to/repo --languages Java
 """
 
 import argparse
@@ -35,6 +35,7 @@ import json
 import logging
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -176,8 +177,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--threshold",
         type=float,
-        default=0.62,
-        help="Cosine similarity threshold for signal vs noise (default: 0.62).",
+        default=0.68,
+        help="Cosine similarity threshold for signal vs noise (default: 0.68).",
     )
     parser.add_argument(
         "--k",
@@ -187,14 +188,30 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default="data/survey_output_pattern_embedding",
+        default="",
         metavar="DIR",
         help=(
-            "Directory to write per-label JSONL files "
-            "(default: data/survey_output_pattern_embedding)."
+            "Directory to write per-label JSONL files. "
+            "Default: auto-generated with timestamp and technique, e.g. "
+            "data/survey_output/pattern_embedding_bge_k5_20260227T103400."
         ),
     )
     return parser.parse_args()
+
+
+def _build_output_dir(args: argparse.Namespace) -> str:
+    """Build a timestamped output directory name encoding the technique used."""
+    if args.output_dir:
+        return args.output_dir
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    model = _resolve_model(args).replace("/", "--") if _resolve_model(args) else ""
+    parts = ["pattern_embedding", args.backend]
+    if model:
+        parts.append(model)
+    parts.append(f"k{args.k}")
+    parts.append(f"t{args.threshold}")
+    parts.append(timestamp)
+    return str(Path("data") / "survey_output" / "_".join(parts))
 
 
 def main() -> None:
@@ -206,13 +223,15 @@ def main() -> None:
         stream=sys.stdout,
     )
 
+    output_dir = _build_output_dir(args)
+
     logger.info("=== Pattern-Embedding Survey Pipeline ===")
     logger.info("Repo:       %s", args.repo_path)
     logger.info("Languages:  %s", args.languages or "all")
     logger.info("Backend:    %s", args.backend)
     logger.info("Threshold:  %.3f", args.threshold)
     logger.info("K (neighbours): %d", args.k)
-    logger.info("Output dir: %s", args.output_dir)
+    logger.info("Output dir: %s", output_dir)
 
     # --- Phase 1: run the pre-concretisation pipeline ---
     logger.info("--- Phase 1: running pre-concretisation pipeline ---")
@@ -253,7 +272,7 @@ def main() -> None:
         print(f"  {r.stage:<50s} {r.duration_seconds:>8.2f} s")
 
     # --- Phase 3: write output files ---
-    out = Path(args.output_dir)
+    out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
     _OUTPUT_GROUPS = [

@@ -27,7 +27,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "pipeline"))
-from survey_repo_hybrid import merge_results
+from survey_classify_by_embedding_gate_nearest_neighbour_gemini_flash import (
+    merge_results,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -5,12 +5,12 @@ JSON cache file.  Subsequent runs of the pattern-embedding survey pipeline
 will load these cached embeddings instead of re-calling the embedding API.
 
 Usage:
-    poetry run python pipeline/build_pattern_embeddings.py --backend gemini
-    poetry run python pipeline/build_pattern_embeddings.py --backend huggingface
-    poetry run python pipeline/build_pattern_embeddings.py --backend ollama
-    poetry run python pipeline/build_pattern_embeddings.py --backend hf-local
-    poetry run python pipeline/build_pattern_embeddings.py --backend coderank
-    poetry run python pipeline/build_pattern_embeddings.py --backend bge
+    poetry run python pipeline/survey_build_pattern_embedding_cache.py --backend gemini
+    poetry run python pipeline/survey_build_pattern_embedding_cache.py --backend huggingface
+    poetry run python pipeline/survey_build_pattern_embedding_cache.py --backend ollama
+    poetry run python pipeline/survey_build_pattern_embedding_cache.py --backend hf-local
+    poetry run python pipeline/survey_build_pattern_embedding_cache.py --backend coderank
+    poetry run python pipeline/survey_build_pattern_embedding_cache.py --backend bge
 """
 
 import argparse
