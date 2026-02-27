@@ -280,7 +280,7 @@ class TestMetadataMerging:
         # Embedding-only key preserved
         assert merged_meta[("B.java", 20)]["best_type"] == "database"
 
-    def test_gemini_metadata_overwrites_embedding_for_same_key(self):
+    def test_gemini_metadata_merges_with_embedding_for_same_key(self):
         sig = _make_signal("X.java", 5)
         emb_cs = _make_concretised(
             sig, SignalValidity.SIGNAL, SignalDirection.AMBIGUOUS
@@ -299,8 +299,9 @@ class TestMetadataMerging:
             gemini_metadata,
         )
 
-        # Gemini overwrites
+        # Both embedding and Gemini fields present
         assert merged_meta[("X.java", 5)] == {
+            "score": 0.8,
             "confidence": 0.9,
             "reason": "outbound",
         }

@@ -2,7 +2,7 @@
 
 Classifies each FILE_CONTENT integration signal by nearest-neighbor lookup
 against pre-embedded per-pattern descriptions.  Unlike the generic
-``EmbeddingConcretiser`` which uses 26 directional descriptions, this
+``GenericIntegrationDescriptionEmbeddingConcretiser`` which uses 26 directional descriptions, this
 concretiser builds embedding targets from the description strings attached
 to every individual regex pattern, yielding much richer semantic targets.
 
@@ -13,13 +13,13 @@ patterns change.
 
 Usage:
     from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
-        PatternEmbeddingConcretiser,
+        FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser,
     )
     from repo_surveyor.integration_concretiser.embedding_concretiser import (
         GeminiEmbeddingClient,
     )
     client = GeminiEmbeddingClient(api_key=...)
-    concretiser = PatternEmbeddingConcretiser(client, threshold=0.62, cache_path=Path("data/embeddings/cache.json"))
+    concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(client, threshold=0.62, cache_path=Path("data/embeddings/cache.json"))
     result, metadata = concretiser.concretise(detector_result)
 """
 
@@ -65,7 +65,7 @@ from repo_surveyor.integration_patterns import (
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_THRESHOLD = 0.62
+_DEFAULT_THRESHOLD = 0.68
 _DEFAULT_K = 5
 
 _EMPTY_PATH = Path()
@@ -201,7 +201,7 @@ def _save_cache(
     logger.info("Saved embedding cache to %s", cache_path)
 
 
-class PatternEmbeddingConcretiser:
+class FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser:
     """Classify integration signals via nearest-neighbor pattern descriptions."""
 
     def __init__(

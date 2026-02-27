@@ -7,7 +7,7 @@ import pytest
 
 from repo_surveyor.integration_concretiser.embedding_concretiser import cosine
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
-    PatternEmbeddingConcretiser,
+    FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser,
     _compute_content_hash,
     _load_cached_embeddings,
     _resolve_direction_by_vote,
@@ -174,7 +174,9 @@ class TestNearestNeighborClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -199,7 +201,9 @@ class TestNearestNeighborClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -235,7 +239,9 @@ class TestNearestNeighborClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -287,7 +293,9 @@ class TestEndToEnd:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_vecs]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signals = [
             _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON),
@@ -320,7 +328,9 @@ class TestEndToEnd:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_vecs]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         file_signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         dir_signal = _make_signal(
@@ -349,7 +359,9 @@ class TestEndToEnd:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_vecs]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -420,7 +432,7 @@ class TestEmbeddingCache:
         )
 
         cache_file = tmp_path / "nonexistent_cache.json"
-        concretiser = PatternEmbeddingConcretiser(
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
             mock_client, threshold=0.40, cache_path=cache_file
         )
 
@@ -441,7 +453,7 @@ class TestEmbeddingCache:
         _save_cache(cache_file, descriptions, embeddings, backend="test")
 
         mock_client = _MockEmbeddingClient(embeddings_by_call=[])
-        concretiser = PatternEmbeddingConcretiser(
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
             mock_client, threshold=0.40, cache_path=cache_file
         )
 
@@ -552,7 +564,9 @@ class TestKNNClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40, k=5)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40, k=5
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -581,7 +595,9 @@ class TestKNNClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40, k=5)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40, k=5
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -605,7 +621,9 @@ class TestKNNClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40, k=5)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40, k=5
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -629,7 +647,9 @@ class TestKNNClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40, k=5)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40, k=5
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -670,7 +690,9 @@ class TestKNNClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.01, k=k)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.01, k=k
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -694,7 +716,9 @@ class TestKNNClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = PatternEmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(

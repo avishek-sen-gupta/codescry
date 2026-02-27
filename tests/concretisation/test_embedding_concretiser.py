@@ -15,7 +15,7 @@ from repo_surveyor.integration_concretiser.embedding_concretiser import (
     create_bge_embedding_client,
     create_coderank_embedding_client,
     EmbeddingClient,
-    EmbeddingConcretiser,
+    GenericIntegrationDescriptionEmbeddingConcretiser,
     HuggingFaceLocalEmbeddingClient,
     OllamaEmbeddingClient,
     _BATCH_SIZE,
@@ -208,7 +208,7 @@ class TestCosine:
 
 
 # ---------------------------------------------------------------------------
-# Tests: EmbeddingConcretiser threshold logic
+# Tests: GenericIntegrationDescriptionEmbeddingConcretiser threshold logic
 # ---------------------------------------------------------------------------
 
 
@@ -224,7 +224,9 @@ class TestThresholdLogic:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -247,7 +249,9 @@ class TestThresholdLogic:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_embeddings]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -277,7 +281,9 @@ class TestDirectionClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, [signal_vec]]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -300,7 +306,9 @@ class TestDirectionClassification:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, [signal_vec]]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -330,7 +338,9 @@ class TestBatching:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_vecs]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signals = [
             _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON),
@@ -363,7 +373,9 @@ class TestMetadata:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_vecs]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         detector_result = IntegrationDetectorResult(
@@ -396,7 +408,9 @@ class TestFallbackLanguage:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, [low_vec]]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signal = _make_signal("program.pli", 1, "CALL PLITDLI", Language.PLI)
         _FAKE_FILES["program.pli"] = b"CALL PLITDLI;\n"
@@ -429,7 +443,9 @@ class TestFilterDirectorySignals:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_vecs]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         file_signal = _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON)
         dir_signal = _make_signal(
@@ -477,7 +493,9 @@ class TestEndToEnd:
         mock_client = _MockEmbeddingClient(
             embeddings_by_call=[desc_embeddings, signal_vecs]
         )
-        concretiser = EmbeddingConcretiser(mock_client, threshold=0.40)
+        concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+            mock_client, threshold=0.40
+        )
 
         signals = [
             _make_signal("client.py", 5, "requests.get(url)", Language.PYTHON),

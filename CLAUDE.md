@@ -2,7 +2,7 @@
 
 ## Workflow Rules
 
-- The workflow is Brainstorm -> Discuss Trade-offs of different designs -> Plan -> Implement -> Test
+- The workflow is Brainstorm -> Discuss Trade-offs of different designs -> Plan -> Write unit tests -> Implement -> Fix Tests -> Commit -> Refactor.
 - When brainstorming / planning, consider the follow parameters:
     - Whether there are any open source projects which perform similar functionality, so that you don't have to write new code for the task
     - The complexity of the implementation matters. Think of a good balance between absolute correctness and "good enough". If in doubt, prompt me for guidance.
@@ -12,6 +12,7 @@
 ## Project Context
 - Primary languages: Python (main codebase), TypeScript/JavaScript (tooling/web), Markdown (docs).
 - When editing Python, always run `black` formatting before committing. When test counts are mentioned (e.g., 'all 625 tests passing'), verify that count hasn't regressed.
+- When you are generating a new run, for every output directory, please attach time stamp and the technique used
 
 ## Common Mistakes to Avoid
 - When the user asks to run detection/analysis on a specific subdirectory or module (e.g., 'smojol-api'), scope the operation precisely to that directory. Do not run on the parent repo or broader scope unless explicitly asked.

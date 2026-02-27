@@ -13,7 +13,7 @@ Supports six embedding backends:
   - Local sentence-transformers (nomic-ai/CodeRankEmbed) via ``create_coderank_embedding_client``
   - Local sentence-transformers (BAAI/bge-base-en-v1.5) via ``create_bge_embedding_client``
 
-All implement the same ``embed_batch`` interface so ``EmbeddingConcretiser``
+All implement the same ``embed_batch`` interface so ``GenericIntegrationDescriptionEmbeddingConcretiser``
 is backend-agnostic.
 
 Usage:
@@ -24,7 +24,7 @@ Usage:
         HuggingFaceLocalEmbeddingClient,
         create_coderank_embedding_client,
         create_bge_embedding_client,
-        EmbeddingConcretiser,
+        GenericIntegrationDescriptionEmbeddingConcretiser,
     )
     # HuggingFace Inference Endpoint backend
     client = EmbeddingClient(endpoint_url=..., token=...)
@@ -38,7 +38,7 @@ Usage:
     client = create_coderank_embedding_client()
     # -- or BGE backend (local, general-purpose semantic embedding) --
     client = create_bge_embedding_client()
-    concretiser = EmbeddingConcretiser(client)
+    concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(client)
     result, metadata = concretiser.concretise(detector_result, file_reader)
 """
 
@@ -757,7 +757,7 @@ class OllamaEmbeddingClient:
         )
 
 
-class EmbeddingConcretiser:
+class GenericIntegrationDescriptionEmbeddingConcretiser:
     """Classify integration signals using embedding similarity."""
 
     def __init__(

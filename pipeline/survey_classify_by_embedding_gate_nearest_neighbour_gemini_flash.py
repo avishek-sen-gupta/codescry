@@ -7,21 +7,30 @@ expensive (LLM API calls).
 
 This hybrid pipeline:
   1. Runs the pre-concretisation pipeline (stages 1-5)
-  2. Runs EmbeddingConcretiser for SIGNAL/NOISE gating
+  2. Runs GenericIntegrationDescriptionEmbeddingConcretiser for SIGNAL/NOISE gating
   3. Sends only the SIGNALs to Gemini Flash for direction classification
   4. Merges: embedding's validity is authoritative, Gemini's direction is
      authoritative for SIGNALs
 
-Supports two embedding backends via --backend:
+Supports six embedding backends via --backend:
   - huggingface (default): nomic-embed-code via HuggingFace Inference Endpoint
     Requires HUGGING_FACE_URL and HUGGING_FACE_API_TOKEN env vars.
   - gemini: gemini-embedding-001 via Google Gemini API
     Requires GEMINI_001_EMBEDDING_API_KEY env var.
+  - ollama: jina/jina-embeddings-v2-base-code via local Ollama server
+    No API key required.  Use --model and --ollama-url to customise.
+  - hf-local: Salesforce/codet5p-110m-embedding via local HuggingFace transformers
+    No API server needed.  Use --model to customise.
+  - coderank: nomic-ai/CodeRankEmbed via local sentence-transformers
+    No API server needed.  Use --model to customise.
+  - bge: BAAI/bge-base-en-v1.5 via local sentence-transformers
+    No API server needed.  Use --model to customise.
 
-Requires GEMINI_001_EMBEDDING_API_KEY env var for both Gemini embedding and Flash.
+Requires GEMINI_001_EMBEDDING_API_KEY env var for Gemini Flash direction classification.
 
 Usage:
     poetry run python pipeline/survey_classify_by_embedding_gate_nearest_neighbour_gemini_flash.py /path/to/repo
+    poetry run python pipeline/survey_classify_by_embedding_gate_nearest_neighbour_gemini_flash.py /path/to/repo --backend bge
     poetry run python pipeline/survey_classify_by_embedding_gate_nearest_neighbour_gemini_flash.py /path/to/repo --backend gemini
     poetry run python pipeline/survey_classify_by_embedding_gate_nearest_neighbour_gemini_flash.py /path/to/repo --languages Java
 """
@@ -40,8 +49,16 @@ from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
 from repo_surveyor.detection.integration_detector import IntegrationDetectorResult
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
-    EmbeddingConcretiser,
+    GenericIntegrationDescriptionEmbeddingConcretiser,
     GeminiEmbeddingClient,
+    OllamaEmbeddingClient,
+    HuggingFaceLocalEmbeddingClient,
+    SentenceTransformerEmbeddingClient,
+    create_coderank_embedding_client,
+    create_bge_embedding_client,
+    _CODERANK_DEFAULT_MODEL,
+    _CODERANK_QUERY_PREFIX,
+    _BGE_DEFAULT_MODEL,
 )
 from repo_surveyor.integration_concretiser.gemini_concretiser import (
     concretise_with_gemini,
@@ -59,11 +76,36 @@ logger = logging.getLogger(__name__)
 _ENV_VAR_GEMINI_API_KEY = "GEMINI_001_EMBEDDING_API_KEY"
 
 
+_BACKEND_DEFAULT_MODELS: dict[str, str] = {
+    "ollama": "unclemusclez/jina-embeddings-v2-base-code",
+    "hf-local": "Salesforce/codet5p-110m-embedding",
+    "coderank": _CODERANK_DEFAULT_MODEL,
+    "bge": _BGE_DEFAULT_MODEL,
+}
+
+
 def _create_embedding_client(
-    backend: str,
-) -> EmbeddingClient | GeminiEmbeddingClient:
+    args: argparse.Namespace,
+) -> (
+    EmbeddingClient
+    | GeminiEmbeddingClient
+    | OllamaEmbeddingClient
+    | HuggingFaceLocalEmbeddingClient
+    | SentenceTransformerEmbeddingClient
+):
     """Create the appropriate embedding client based on the backend choice."""
-    if backend == "gemini":
+    model = args.model if args.model else _BACKEND_DEFAULT_MODELS.get(args.backend, "")
+    if args.backend == "bge":
+        return create_bge_embedding_client(model_name=model)
+    if args.backend == "coderank":
+        return create_coderank_embedding_client(
+            model_name=model, query_prefix=_CODERANK_QUERY_PREFIX
+        )
+    if args.backend == "hf-local":
+        return HuggingFaceLocalEmbeddingClient(model_name=model)
+    if args.backend == "ollama":
+        return OllamaEmbeddingClient(model=model, base_url=args.ollama_url)
+    if args.backend == "gemini":
         api_key = os.environ[_ENV_VAR_GEMINI_API_KEY]
         return GeminiEmbeddingClient(api_key=api_key)
     endpoint_url = os.environ["HUGGING_FACE_URL"]
@@ -105,7 +147,10 @@ def merge_results(
     ]
 
     classified = sum(1 for s in merged if s.is_integration)
-    merged_metadata = {**embedding_metadata, **gemini_metadata}
+    merged_metadata = {
+        key: {**embedding_metadata.get(key, {}), **gemini_metadata.get(key, {})}
+        for key in set(embedding_metadata) | set(gemini_metadata)
+    }
 
     return (
         ConcretisationResult(
@@ -185,10 +230,33 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--backend",
-        choices=["huggingface", "gemini"],
+        choices=["huggingface", "gemini", "ollama", "hf-local", "coderank", "bge"],
         default="huggingface",
-        help="Embedding backend: huggingface (nomic-embed-code) or gemini "
-        "(gemini-embedding-001). Default: huggingface.",
+        help=(
+            "Embedding backend: huggingface (nomic-embed-code), "
+            "gemini (gemini-embedding-001), "
+            "ollama (local, default model unclemusclez/jina-embeddings-v2-base-code), "
+            "hf-local (local HuggingFace transformers), "
+            "coderank (local sentence-transformers, nomic-ai/CodeRankEmbed), or "
+            "bge (local sentence-transformers, BAAI/bge-base-en-v1.5). "
+            "Default: huggingface."
+        ),
+    )
+    parser.add_argument(
+        "--model",
+        default="",
+        help=(
+            "Model name (used with --backend ollama, hf-local, coderank, or bge). "
+            "Each backend has a sensible default."
+        ),
+    )
+    parser.add_argument(
+        "--ollama-url",
+        default="http://localhost:11434",
+        help=(
+            "Ollama server base URL (only used with --backend ollama). "
+            "Default: http://localhost:11434."
+        ),
     )
     parser.add_argument(
         "--threshold",
@@ -257,8 +325,10 @@ def main() -> None:
 
     # --- Phase 2a: embedding gate ---
     logger.info("--- Phase 2a: Embedding-based SIGNAL/NOISE gate ---")
-    embedding_client = _create_embedding_client(args.backend)
-    concretiser = EmbeddingConcretiser(embedding_client, threshold=args.threshold)
+    embedding_client = _create_embedding_client(args)
+    concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(
+        embedding_client, threshold=args.threshold
+    )
     embedding_result, embedding_metadata = concretiser.concretise(integration)
 
     signal_count = sum(

@@ -52,7 +52,7 @@ from repo_surveyor.integration_concretiser.embedding_concretiser import (
     _CODERANK_DEFAULT_MODEL,
 )
 from repo_surveyor.integration_concretiser.pattern_embedding_concretiser import (
-    PatternEmbeddingConcretiser,
+    FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser,
     _default_cache_path,
 )
 from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
@@ -255,7 +255,7 @@ def main() -> None:
     model = _resolve_model(args)
     cache_path = _default_cache_path(args.backend, model=model)
     logger.info("Embedding cache path: %s", cache_path)
-    concretiser = PatternEmbeddingConcretiser(
+    concretiser = FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser(
         client, threshold=args.threshold, cache_path=cache_path, k=args.k
     )
     concretisation, embedding_metadata = concretiser.concretise(integration)

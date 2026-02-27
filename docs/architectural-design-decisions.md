@@ -200,8 +200,8 @@ Each pattern is a tuple of `(regex, Confidence)`. `FrameworkPatternSpec` carries
 **Decision:** Support multiple pluggable concretisation backends:
 
 - **ML-based:** TF-IDF + Logistic Regression (`SignalClassifier`) — fast, no API dependency
-- **Embedding-based:** Cosine similarity against directional descriptions (`EmbeddingConcretiser`) — captures semantic meaning
-- **Pattern-embedding:** Per-pattern description nearest-neighbor (`PatternEmbeddingConcretiser`) — framework-specific semantics
+- **Embedding-based:** Cosine similarity against directional descriptions (`GenericIntegrationDescriptionEmbeddingConcretiser`) — captures semantic meaning
+- **Pattern-embedding:** Per-pattern description nearest-neighbor (`FrameworkSpecificIntegrationDescriptionEmbeddingConcretiser`) — framework-specific semantics
 - **LLM-based:** Ollama (local) and Gemini Flash (cloud) — highest accuracy, highest cost
 - **Hybrid:** Embedding gate + Gemini Flash direction — balances cost and accuracy
 

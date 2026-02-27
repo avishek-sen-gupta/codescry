@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from repo_surveyor import survey
 from repo_surveyor.integration_concretiser.embedding_concretiser import (
     EmbeddingClient,
-    EmbeddingConcretiser,
+    GenericIntegrationDescriptionEmbeddingConcretiser,
     GeminiEmbeddingClient,
 )
 from repo_surveyor.core.pipeline_timer import PipelineTimingObserver
@@ -129,7 +129,7 @@ def main() -> None:
     # --- Phase 2: Embedding-based concretisation ---
     logger.info("--- Phase 2: Embedding-based concretisation ---")
     client = _create_client(args.backend)
-    concretiser = EmbeddingConcretiser(client)
+    concretiser = GenericIntegrationDescriptionEmbeddingConcretiser(client)
     concretisation, embedding_metadata = concretiser.concretise(integration)
 
     # Print summary
