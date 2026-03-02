@@ -307,6 +307,7 @@ def _get_source_files(
     repo_path: Path,
     languages: list[Language] = [],
     extra_skip_dirs: list[str] = [],
+    exclude_files: list[str] = [],
 ) -> Iterator[Path]:
     """Get source files from a repository.
 
@@ -315,11 +316,14 @@ def _get_source_files(
         languages: List of Language enums to filter by. Empty means all.
         extra_skip_dirs: Additional directory names to skip, appended to
                          DEFAULT_SKIP_DIRS.
+        exclude_files: File names to exclude from scanning (e.g.,
+                       ["nist85.cbl"]).
 
     Yields:
         Paths to source files.
     """
     skip_dirs = DEFAULT_SKIP_DIRS | set(extra_skip_dirs)
+    skip_files = set(exclude_files)
 
     # Get allowed extensions based on languages
     if languages:
@@ -334,6 +338,10 @@ def _get_source_files(
         if path.is_file():
             # Skip files in excluded directories
             if any(skip_dir in path.parts for skip_dir in skip_dirs):
+                continue
+
+            # Skip explicitly excluded files
+            if path.name in skip_files:
                 continue
 
             # Check extension
@@ -392,6 +400,7 @@ def detect_integrations(
     languages: list[Language] = [],
     directory_frameworks: dict[str, list[str]] = {},
     extra_skip_dirs: list[str] = [],
+    exclude_files: list[str] = [],
     timer: PipelineTimer = NullPipelineTimer(),
 ) -> IntegrationDetectorResult:
     """Detect integration points from repository file contents.
@@ -410,6 +419,8 @@ def detect_integrations(
                               directories will be scanned with framework-specific patterns.
         extra_skip_dirs: Additional directory names to skip, appended to
                          DEFAULT_SKIP_DIRS.
+        exclude_files: File names to exclude from scanning (e.g.,
+                       ["nist85.cbl"]).
         timer: Pipeline timing observer for recording sub-stage durations.
 
     Returns:
@@ -428,7 +439,7 @@ def detect_integrations(
     # Build import-gated framework map
     timer.stage_started("integration_detection.import_gating")
     file_frameworks = _build_import_gated_framework_map(
-        _get_source_files(repo_path, languages, extra_skip_dirs),
+        _get_source_files(repo_path, languages, extra_skip_dirs, exclude_files),
         repo_path,
         directory_frameworks,
     )
@@ -437,7 +448,9 @@ def detect_integrations(
     # Scan source files
     files_scanned = 0
     timer.stage_started("integration_detection.file_scanning")
-    for file_path in _get_source_files(repo_path, languages, extra_skip_dirs):
+    for file_path in _get_source_files(
+        repo_path, languages, extra_skip_dirs, exclude_files
+    ):
         files_scanned += 1
         frameworks = file_frameworks.get(file_path, [])
         integration_points.extend(scan_file_for_integrations(file_path, frameworks))

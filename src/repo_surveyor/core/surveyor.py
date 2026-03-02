@@ -233,6 +233,7 @@ def survey(
     repo_path: str,
     languages: list[str | Language] = [],
     extra_skip_dirs: list[str] = [],
+    exclude_files: list[str] = [],
     timer: PipelineTimer = NullPipelineTimer(),
     classifier: SignalClassifier = NullSignalClassifier(),
 ) -> tuple[
@@ -254,6 +255,8 @@ def survey(
                    (e.g., "Java") and/or Language enum members. Defaults to all.
         extra_skip_dirs: Additional directory names to skip during scanning,
                          appended to the default skip list.
+        exclude_files: File names to exclude from scanning (e.g.,
+                       ["nist85.cbl"]).
         timer: Pipeline timing observer for recording stage durations.
         classifier: Trained SignalClassifier for ML-based concretisation.
                     Defaults to NullSignalClassifier (labels all signals NOT_DEFINITE).
@@ -283,6 +286,7 @@ def survey(
         languages=integration_languages,
         directory_frameworks=directory_frameworks,
         extra_skip_dirs=extra_skip_dirs,
+        exclude_files=exclude_files,
         timer=timer,
     )
     timer.stage_completed("integration_detection")
